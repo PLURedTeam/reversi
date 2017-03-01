@@ -1,0 +1,2 @@
+rootProject.name = 'reversi'
+include 'core', 'server', 'client'
