@@ -1,4 +1,4 @@
-image: openjdk:8-jdk
+image: java:8
 
 before_script:
     - chmod +x gradlew
