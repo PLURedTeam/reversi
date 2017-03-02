@@ -10,6 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-swing:7.3.1" level="project" />
+    <orderEntry type="module" module-name="core_main" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-core:7.3.1" level="project" />
     <orderEntry type="library" name="Gradle: com.surelogic:promises:4.4.0" level="project" />
   </component>

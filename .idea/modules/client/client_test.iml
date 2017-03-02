@@ -11,6 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="client_main" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-swing:7.3.1" level="project" />
+    <orderEntry type="module" module-name="core_main" />
     <orderEntry type="library" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-core:7.3.1" level="project" />
     <orderEntry type="library" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
