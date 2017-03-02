@@ -16,9 +16,13 @@ build:
   script:
     - ./gradlew -g /cache/.gradle clean assemble
   allow_failure: false
+  tags:
+    - gradle
 
 # Use the generated build output to run the tests.
 test:
   stage: test
   script:
     - ./gradlew -g /cache/.gradle check
+  tags:
+    - gradle
