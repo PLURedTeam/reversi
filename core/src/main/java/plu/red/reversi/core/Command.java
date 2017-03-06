@@ -9,7 +9,7 @@ package plu.red.reversi.core;
  * Represents a single move on the reversi board
  */
 public class Command {
-    public Player.PlayerRole role;
+    public PlayerRole role;
     public Board.BoardIndex index;
 
 

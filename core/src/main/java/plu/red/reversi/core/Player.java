@@ -36,7 +36,4 @@ public abstract class Player {
     public String getName() { return name; }
     public PlayerRole getRole() { return role; }
 
-    public enum PlayerRole {
-        WHITE, BLACK;
-    }
 }
