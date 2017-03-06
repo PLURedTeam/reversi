@@ -39,3 +39,5 @@ pages:
   only:
     - master
     - dev
+  tags:
+    - gradle
