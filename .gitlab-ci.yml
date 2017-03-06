@@ -26,3 +26,16 @@ test:
     - ./gradlew -g /cache/.gradle check
   tags:
     - gradle
+
+pages:
+  stage: package
+  script:
+    - ./gradlew -g /cache/.gradle javadoc
+  artifacts:
+    paths:
+      - core/build/docs/javadoc
+      - client/build/docs/javadoc
+      - server/build/docs/javadoc
+  only:
+    - master
+    - dev
