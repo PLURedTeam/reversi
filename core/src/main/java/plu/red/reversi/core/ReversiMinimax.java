@@ -11,7 +11,7 @@ package plu.red.reversi.core;
 public class ReversiMinimax implements Runnable {
 
     private Board board;
-    private Player.PlayerRole role;
+    private PlayerRole role;
 
     private Looper.LooperCall<Board.BoardIndex> call;
 
@@ -23,13 +23,13 @@ public class ReversiMinimax implements Runnable {
      * @param board
      * @param role
      */
-    public ReversiMinimax(Board board, Player.PlayerRole role) {
+    public ReversiMinimax(Board board, PlayerRole role) {
         this.board = board;
         this.role = role;
         this.call = call;
     }
 
-    public ReversiMinimax(Board board, Player.PlayerRole role, Looper.LooperCall<Board.BoardIndex> call) {
+    public ReversiMinimax(Board board, PlayerRole role, Looper.LooperCall<Board.BoardIndex> call) {
         this(board, role);
         this.call = call;
     }

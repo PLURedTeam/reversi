@@ -30,7 +30,7 @@ public class Game {
         if(player.getGame() != this)
             throw new UnsupportedOperationException("Attempted to assign game to player but player not assigned to game");
 
-        if(player.getRole() == Player.PlayerRole.WHITE)
+        if(player.getRole() == PlayerRole.WHITE)
             whitePlayer = player;
         else
             blackPlayer = player;

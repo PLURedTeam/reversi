@@ -3,6 +3,7 @@ package plu.red.reversi.client;
 import plu.red.reversi.client.gui.GameWindow;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.Player;
+import plu.red.reversi.core.PlayerRole;
 
 /**
  * Created by daniel on 3/5/17.
