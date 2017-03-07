@@ -13,10 +13,10 @@ public class ReversiMinimax implements Runnable {
     private Board board;
     private PlayerRole role;
 
-    private Looper.LooperCall<Board.BoardIndex> call;
+    private Looper.LooperCall<BoardIndex> call;
 
     // Results (TODO: More stats can go here)
-    private Board.BoardIndex bestPlay;
+    private BoardIndex bestPlay;
 
     /**
      * Constructs a ReversiMinimax problem to solve
@@ -29,7 +29,7 @@ public class ReversiMinimax implements Runnable {
         this.call = call;
     }
 
-    public ReversiMinimax(Board board, PlayerRole role, Looper.LooperCall<Board.BoardIndex> call) {
+    public ReversiMinimax(Board board, PlayerRole role, Looper.LooperCall<BoardIndex> call) {
         this(board, role);
         this.call = call;
     }
