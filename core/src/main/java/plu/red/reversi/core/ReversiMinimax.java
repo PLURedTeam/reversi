@@ -5,13 +5,20 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 /**
- * Using the minimax algorithm, calculate the optimal move for a particular player given the specified board.
+ * Using the minimax algorithm, calculate the optimal move for a particular player given the specified currentState.
  */
 public class ReversiMinimax implements Runnable {
 
-    private Board board;
+    private ReversiNode root;
     private PlayerRole role;
+
+    /// Us if we are first, not us if we are not first
+    private PlayerRole nextPlay;
+
 
     private Looper.LooperCall<BoardIndex> call;
 
@@ -20,17 +27,17 @@ public class ReversiMinimax implements Runnable {
 
     /**
      * Constructs a ReversiMinimax problem to solve
-     * @param board
+     * @param currentState
      * @param role
      */
-    public ReversiMinimax(Board board, PlayerRole role) {
-        this.board = board;
+    public ReversiMinimax(final Board currentState, PlayerRole role, PlayerRole nextPlay) {
         this.role = role;
-        this.call = call;
+        call = null;
+        root = new ReversiNode(currentState, null, nextPlay);
     }
 
-    public ReversiMinimax(Board board, PlayerRole role, Looper.LooperCall<BoardIndex> call) {
-        this(board, role);
+    public ReversiMinimax(final Board currentState, PlayerRole role, PlayerRole nextPlay, Looper.LooperCall<BoardIndex> call) {
+        this(currentState, role, nextPlay);
         this.call = call;
     }
 
@@ -42,12 +49,85 @@ public class ReversiMinimax implements Runnable {
      */
     @Override
     public void run() {
+        LinkedList<ReversiNode> work = new LinkedList<>();
 
-        // calculate the board index of the best tile
-        // along the way, we should also generate helpful statistics
-        // which can be optionally requested from within the class itself after completion
+        work.add(root);
+        while(work.size() > 0) {
+            ReversiNode t = work.poll();
+            t.calculate(work);
+        }
 
         if(call != null)
             call.call(bestPlay);
+    }
+
+
+    private class ReversiNode {
+        public final Board board;
+        public final ReversiNode parent;
+        public LinkedList<ReversiNode> children;
+        public PlayerRole player;
+        public BoardIndex play;
+
+        // added for readability
+        public final int ourScore;
+        public final int theirScore;
+
+
+        /**
+         * Initial constructor used at beginning of the game
+         * @param board
+         * @param parent
+         * @param player
+         */
+        public ReversiNode(final Board board, final ReversiNode parent, PlayerRole player) {
+            this.board = board;
+            this.parent = parent;
+            children = new LinkedList<>();
+            this.player = player;
+            ourScore = board.getScore(role);
+            theirScore = board.getScore(role.invert());
+            play = null;
+        }
+
+        /**
+         * Constructor used when calculating the tree
+         * @param board
+         * @param parent
+         * @param command
+         */
+        private ReversiNode(final Board board, final ReversiNode parent, Command command) {
+            this(board, parent, command.role.invert());
+
+            if(board.getPossibleMoves(command.role.invert()).isEmpty()) {
+                if(board.getPossibleMoves(command.role).isEmpty()) {
+                    //END GAME
+                    player = PlayerRole.NONE;
+                    children = null;
+                }
+                player = command.role;
+            }
+            play = command.index;
+        }
+
+        public void calculate(LinkedList<ReversiNode> work) {
+            if(!children.isEmpty()) {
+                //we alreadly calculated this
+                work.addAll(children);
+                return;
+            }
+
+            //actually calculate
+            ArrayList<BoardIndex> possible = board.getPossibleMoves(player);
+            if(possible.isEmpty()) {
+                //the player cannot move, skip their turn
+
+            }
+            for(BoardIndex i : possible) {
+                Board b = new Board(board);
+                b.apply(new Command(player, i));
+                children.add(new ReversiNode(b, this, player.invert()));
+            }
+        }
     }
 }

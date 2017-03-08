@@ -5,4 +5,12 @@ package plu.red.reversi.core;
  */
 public enum PlayerRole {
     NONE, WHITE, BLACK;
+
+    public PlayerRole invert() {
+        switch(this) {
+            case WHITE: return BLACK;
+            case BLACK: return WHITE;
+            default: return NONE;
+        }
+    }
 }
