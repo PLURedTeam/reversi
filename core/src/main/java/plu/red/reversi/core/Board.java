@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Represents the state of the board at a particular instant in time
  */
 public class Board {
-    private PlayerRole[][] board;
+    private PlayerRole[][] board;//2D array that represents the board
     public final int size;
 
 
@@ -25,6 +25,7 @@ public class Board {
 
     /**
      * Copy constructor creating a copy of
+     * @param b for the board
      */
     public Board(Board b){
         size = b.size;
@@ -74,6 +75,7 @@ public class Board {
             if(isValidMove(role, index, dx, dy))
                 return true;
         }//end loop
+
         return false;
     }
 
@@ -105,19 +107,28 @@ public class Board {
             }
         }
 
-        return false;
+        return false;//if neither condition in try was met
     }
 
 
     /**
-     * Find the different moves that could be made
+     * Find the different moves that could be made and store them into an ArrayList
      * @param role of the player
-     * @return ArrayList list
+     * @return ArrayList moves
      */
     ArrayList getPossibleMoves(PlayerRole role){
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
         return moves;
+
+    }
+
+
+    /**
+     * Applies the move made, updating the board
+     * @param c command made
+     */
+    void apply(Command c){
 
     }
 
