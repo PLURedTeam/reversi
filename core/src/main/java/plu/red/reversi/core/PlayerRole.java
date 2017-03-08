@@ -1,5 +1,6 @@
 package plu.red.reversi.core;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -10,11 +11,54 @@ import java.util.Set;
  * changes outside this file.
  */
 public enum PlayerRole {
-    NONE, WHITE, BLACK;
 
-    private static final PlayerRole[] validPlayerData = new PlayerRole[]{
-            WHITE, BLACK
-    };
+    NONE(false),
+    WHITE(true),
+    BLACK(true),
+
+    ;
+
+    protected final boolean valid;
+    protected PlayerRole next;
+    protected int vOrdinal;
+
+    // Constructor occurs before any static code
+    PlayerRole(boolean valid) {
+        this.valid = valid;
+        this.next = this;
+        this.vOrdinal = -1;
+    }
+
+    static PlayerRole[] validPlayerRoles;
+
+    // Initialize 'Next' Chain
+    static {
+
+        ArrayList<PlayerRole> tempRoles = new ArrayList<PlayerRole>();
+
+        PlayerRole start = null;
+        PlayerRole last = null;
+
+        for(PlayerRole role : values()) {
+            if(role.valid) { // Skip non-valid roles, as they self-reference
+                if(last == null) {
+                    start = role;
+                    last = role;
+                } else {
+                    last.next = role;
+                    last = role;
+                }
+                role.vOrdinal = tempRoles.size();
+                tempRoles.add(role);
+            }
+        }
+
+        // Finish the chain by looping back to the start
+        if(last != null) last.next = start;
+
+        // Set the Valid PlayerRoles array
+        validPlayerRoles = tempRoles.toArray(new PlayerRole[]{});
+    }
 
     /**
      * Retrieves only the PlayerRole enums that are valid players.
@@ -22,7 +66,8 @@ public enum PlayerRole {
      * @return Array of PlayerRole enums that are considered valid PlayerRoles
      */
     public static PlayerRole[] validPlayers() {
-        return validPlayerData;
+        // Arrays are unmodifiable, so no need to return copy
+        return validPlayerRoles;
     }
 
     /**
@@ -31,9 +76,7 @@ public enum PlayerRole {
      * @return true if this PlayerRole is in the list of PlayerRole enums considered valid, false otherwise
      */
     public final boolean isValid() {
-        for(PlayerRole role : validPlayerData)
-            if(role == this) return true; // Enums, so don't need equals()
-        return false;
+        return valid;
     }
 
     /**
@@ -54,9 +97,7 @@ public enum PlayerRole {
      * @return Ordinal number of a valid PlayerRole, or -1 if PlayerRole is not valid.
      */
     public final int validOrdinal() {
-        for(int i = 0; i < validPlayerData.length; i++)
-            if(validPlayerData[i] == this) return i;
-        return -1;
+        return vOrdinal;
     }
 
     /**
@@ -65,12 +106,7 @@ public enum PlayerRole {
      * @return next valid PlayerRole in turn order, or the same PlayerRole enum if the current one is not valid
      */
     public final PlayerRole getNext() {
-        int o = validOrdinal();
-        if(o < 0) return this;
-        else {
-            if(++o >= validPlayerData.length) o = 0;
-            return validPlayerData[o];
-        }
+        return next;
     }
 
     /**
