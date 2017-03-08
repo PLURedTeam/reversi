@@ -10,7 +10,7 @@ package plu.red.reversi.core;
  */
 public class Command {
     public PlayerRole role;
-    public Board.BoardIndex index;
+    public BoardIndex index;
 
 
     /**
@@ -18,7 +18,7 @@ public class Command {
      * @note this will require the ability to see the state of the board at the point of that move for this to work, but it is required to implement this
      * @return a list of indices, which were affected by this move. Order does not matter.
      */
-    public Board.BoardIndex[] getAffectedIndices() {
+    public BoardIndex[] getAffectedIndices() {
         return null;
     }
 }
