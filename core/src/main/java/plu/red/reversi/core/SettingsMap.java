@@ -1,6 +1,10 @@
 package plu.red.reversi.core;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Glory to the Red Team.
@@ -16,6 +20,51 @@ public class SettingsMap {
     public SettingsMap() {
         // Default Constructor doesn't do much, but allows for a non-default constructor to construct
         //  from a Database, as an example
+    }
+
+    public SettingsMap(JSONObject json) {
+        
+        // Get Strings
+        JSONObject stringMap = json.optJSONObject("strings");
+        if(stringMap != null) {
+            Iterator it = stringMap.keys();
+            while(it.hasNext()) {
+                String key = it.next().toString();
+                dataStrings.put(key, stringMap.optString(key));
+            }
+        }
+
+        // Get Numbers
+        JSONObject numberMap = json.optJSONObject("numbers");
+        if(numberMap != null) {
+            Iterator it = numberMap.keys();
+            while(it.hasNext()) {
+                String key = it.next().toString();
+                dataNumbers.put(key, numberMap.optDouble(key));
+            }
+        }
+
+        // Get Booleans
+        JSONObject booleanMap = json.optJSONObject("booleans");
+        if(booleanMap != null) {
+            Iterator it = booleanMap.keys();
+            while(it.hasNext()) {
+                String key = it.next().toString();
+                dataBooleans.put(key, booleanMap.optBoolean(key));
+            }
+        }
+    }
+
+    public JSONObject toJSON() throws RuntimeException {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("strings",  new JSONObject(dataStrings));
+            result.put("numbers",  new JSONObject(dataNumbers));
+            result.put("booleans", new JSONObject(dataBooleans));
+        } catch(JSONException ex) {
+            throw new RuntimeException("Problem when turning settings into a JSON: " + ex.getMessage());
+        }
+        return result;
     }
 
 
