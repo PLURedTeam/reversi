@@ -65,7 +65,7 @@ public class Game {
     }
 
     /**
-     * Retrievs the player stored for the given role.
+     * Retrieves the player stored for the given role.
      *
      * @param role PlayerRole to determine Player with
      * @return Player stored for the given role, or null if no Player is stored or the PlayerRole is invalid
