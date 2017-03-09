@@ -12,6 +12,15 @@ public class Command {
     public PlayerRole role;
     public BoardIndex index;
 
+    public Command() {
+        this.role = PlayerRole.NONE;
+        this.index = new BoardIndex();
+    }
+
+    public Command(PlayerRole role, BoardIndex index) {
+        this.role = role;
+        this.index = index;
+    }
 
     /**
      * Gets a list of all the indexes on the board which have been affected by this move
