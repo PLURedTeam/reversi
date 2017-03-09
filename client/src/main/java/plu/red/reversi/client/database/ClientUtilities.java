@@ -33,14 +33,14 @@ public class ClientUtilities {
     public String openDB() {
         try {
             //Testing to see if db file exists
-            File file = new File("/ClientDB.db");
+            File file = new File("ClientDB.db");
 
             if(file.exists()) {
                 //Connects to the database file
-                conn = DriverManager.getConnection("jdbc:sqlite:/ClientDB.db");
+                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
             } else {
                 //Creates the database file and connects to it
-                conn = DriverManager.getConnection("jdbc:sqlite:/ClientDB.db");
+                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
                 CreateDB db = new CreateDB(conn); //Creates the tables in the database
             }//else
         } catch (SQLException e) {
