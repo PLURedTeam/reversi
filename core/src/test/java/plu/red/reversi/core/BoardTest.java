@@ -17,7 +17,7 @@ public class BoardTest {
     public void setUp() throws Exception {
         SettingsMap map = new SettingsMap();
         board = new Board(8);
-        Game game = new Game(map, board);
+        Game game = new Game(map, 2);
     }
 
     @Test
@@ -44,10 +44,7 @@ public class BoardTest {
     @Test
     public void apply() throws Exception {
         BoardIndex index;
-        Command c = new Command();
-        index = c.index;
-        index.row=1;
-        index.column=1;
+        CommandMove c = new CommandMove(Command.Source.PLAYER, new BoardIndex(1,1), PlayerRole.WHITE);
         board.apply(c);
         Board board2 = new Board(board);
         board2.apply(c);
