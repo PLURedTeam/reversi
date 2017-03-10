@@ -103,10 +103,10 @@ public class Game {
         return players[currentPlayerRole.validOrdinal()];
     }
 
-    public void acceptCommand(Command cmd) {
+    public boolean acceptCommand(Command cmd) {
 
         // Check to see if this Command is ok to apply and/or send to the server
-        if(!cmd.isValid(this)) return;
+        if(!cmd.isValid(this)) return false;
 
         // Propogate the Command to the servere if it came from a player
         if(cmd.source == Command.Source.PLAYER) {
@@ -121,5 +121,6 @@ public class Game {
             // TODO: Send Chat Command wherever it needs to go
         }
 
+        return true;
     }
 }
