@@ -27,16 +27,24 @@ public class Game {
     protected HashSet<PlayerRole> usedPlayers = new HashSet<PlayerRole>();
 
 
+    /**
+     * Constructor. Creates a new Game object with a default Player count of 2.
+     *
+     * @param settings SettingsMap to start Game with
+     */
+    public Game(SettingsMap settings) {
+        this(settings, 2);
+    }
 
     /**
-     * Constructor. Creates a new Game object.
+     * Constructor. Creates a new Game object with a given Player count.
      *
-     * @param settings SettingsMap to create Game with
+     * @param settings SettingsMap to start Game with
      * @param playerCount Number of players to play this Game with
      * @throws IllegalArgumentException if playerCount is less than 2 or more than the maximum valid PlayerRole count
      */
     public Game(SettingsMap settings, int playerCount) throws IllegalArgumentException {
-        if(playerCount < 2 || playerCount >= PlayerRole.validPlayers().length)
+        if(playerCount < 2 || playerCount > PlayerRole.validPlayers().length)
             throw new IllegalArgumentException("Amount of Players for a game must be between 2 and " + PlayerRole.validPlayers().length);
         this.settings = settings;
         this.board = new Board(8);
