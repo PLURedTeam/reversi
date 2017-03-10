@@ -99,6 +99,27 @@ public class Game {
      */
     public Player nextTurn() {
         currentPlayerRole = currentPlayerRole.getNext(usedPlayers);
+        for(Player player : players) player.nextTurn(player.getRole() == currentPlayerRole);
         return players[currentPlayerRole.validOrdinal()];
+    }
+
+    public void acceptCommand(Command cmd) {
+
+        // Check to see if this Command is ok to apply and/or send to the server
+        if(!cmd.isValid(this)) return;
+
+        // Propogate the Command to the servere if it came from a player
+        if(cmd.source == Command.Source.PLAYER) {
+            // TODO: Send Command to Server
+        }
+
+        // Send Move Commands to the Board object
+        if(cmd instanceof CommandMove) board.apply((CommandMove)cmd);
+
+        // Send Chat Commands somewhere
+        if(cmd instanceof CommandChat) {
+            // TODO: Send Chat Command wherever it needs to go
+        }
+
     }
 }

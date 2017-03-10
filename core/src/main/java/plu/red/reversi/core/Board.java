@@ -141,9 +141,9 @@ public class Board {
      * Applies the move made, updating the board
      * @param c command made
      */
-    void apply(Command c){
-        BoardIndex i = c.index;
-        board[i.row][i.column] = c.role;
+    void apply(CommandMove c){
+        BoardIndex i = c.position;
+        board[i.row][i.column] = c.player;
     }
 
 
