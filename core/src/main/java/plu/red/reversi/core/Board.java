@@ -116,7 +116,7 @@ public class Board {
      * @param role of the player
      * @return ArrayList moves
      */
-    ArrayList getPossibleMoves(PlayerRole role ){
+    ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
         //declare an array for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
