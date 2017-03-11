@@ -53,7 +53,7 @@ public class Board {
      * @return role
      * @throws IndexOutOfBoundsException
      */
-    final PlayerRole at(BoardIndex index) throws IndexOutOfBoundsException{
+    public final PlayerRole at(BoardIndex index) throws IndexOutOfBoundsException{
         return board[index.row][index.column];
     }
 
