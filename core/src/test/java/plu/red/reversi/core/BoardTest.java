@@ -14,45 +14,44 @@ public class BoardTest {
     private Board board; //global variabe to be used throughout the tests
 
     @Before
-    public void setUp() throws Exception {
-        SettingsMap map = new SettingsMap();
-        board = new Board(8);
-        Game game = new Game(map, board);
+    public void setUp() {
+        board = new Board(4);
     }
 
     @Test
-    public void getScore() throws Exception {
-        assertEquals(0, board.getScore(PlayerRole.WHITE));
+    public void testGetScore() {
+        assertEquals(2, board.getScore(PlayerRole.WHITE));
+        assertEquals(2, board.getScore(PlayerRole.BLACK));
+        board.apply(new Command(PlayerRole.BLACK, new BoardIndex(0,0)), false);
+        assertEquals(3, board.getScore(PlayerRole.BLACK));
+        assertEquals(2, board.getScore(PlayerRole.WHITE));
     }
 
     @Test
-    public void isValidMove() throws Exception {
-        BoardIndex index = new BoardIndex();
-        index.row = 1;
-        index.column = 1;
-        assertTrue(board.isValidMove(PlayerRole.BLACK,index));
+    public void testIsValidMove() {
+        assertFalse(board.isValidMove(PlayerRole.BLACK, new BoardIndex(0,0)));
+        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(1, 0)));
+        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(0, 1)));
+        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(2, 3)));
+        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(3, 2)));
+
     }
 
     @Test
-    public void getPossibleMoves() throws Exception {
+    public void getPossibleMoves() {
+        Board newBoard = new Board(8);
         ArrayList<BoardIndex> moveList;
-        moveList = board.getPossibleMoves(PlayerRole.BLACK);
-        assertEquals(moveList, board.getPossibleMoves(PlayerRole.WHITE));
+        moveList = newBoard.getPossibleMoves(PlayerRole.BLACK);
+        assertEquals(moveList, newBoard.getPossibleMoves(PlayerRole.WHITE));
 
     }
 
     @Test
-    public void apply() throws Exception {
-        BoardIndex index;
-        Command c = new Command();
-        index = c.index;
-        index.row=1;
-        index.column=1;
+    public void testApply() {
+        Command c = new Command(PlayerRole.BLACK, new BoardIndex(0, 0));
+        c.role=PlayerRole.BLACK;
         board.apply(c);
-        Board board2 = new Board(board);
-        board2.apply(c);
-        assertEquals(board.getScore(PlayerRole.BLACK), board2.getScore(PlayerRole.WHITE));
-
+        assertEquals(PlayerRole.BLACK, board.at(c.index));
     }
 
 }
