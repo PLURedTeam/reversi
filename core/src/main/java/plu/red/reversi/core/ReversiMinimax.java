@@ -96,18 +96,18 @@ public class ReversiMinimax implements Runnable {
          * @param parent
          * @param command
          */
-        private ReversiNode(final Board board, final ReversiNode parent, Command command) {
-            this(board, parent, command.role.invert());
+        private ReversiNode(final Board board, final ReversiNode parent, CommandMove command) {
+            this(board, parent, command.player.invert());
 
-            if(board.getPossibleMoves(command.role.invert()).isEmpty()) {
-                if(board.getPossibleMoves(command.role).isEmpty()) {
+            if(board.getPossibleMoves(command.player.invert()).isEmpty()) {
+                if(board.getPossibleMoves(command.player).isEmpty()) {
                     //END GAME
                     player = PlayerRole.NONE;
                     children = null;
                 }
-                player = command.role;
+                player = command.player;
             }
-            play = command.index;
+            play = command.position;
         }
 
         public void calculate(LinkedList<ReversiNode> work) {
@@ -125,7 +125,7 @@ public class ReversiMinimax implements Runnable {
             }
             for(BoardIndex i : possible) {
                 Board b = new Board(board);
-                b.apply(new Command(player, i));
+                b.apply(new CommandMove(player, i));
                 children.add(new ReversiNode(b, this, player.invert()));
             }
         }

@@ -58,7 +58,7 @@ public class Board {
     }
 
     /**
-     * Checks the board to see if the move is valid
+     * Checks the board to see if the move attempted is valid
      * @param role, color of the player
      * @param index, square of the board move is attempting to be made onto
      */
@@ -72,21 +72,21 @@ public class Board {
             int dx = i < 3 ? -1 : ( i > 4 ? 1 : 0);
             int dy = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
             //checks if the move is valid
-            if(isValidMove(role, index, dx, dy))
+            if(isValidMove(role, dx, dy)) {
                 return true;
+            }
         }//end loop
 
         return false;
     }
 
     /**
-     * Private method isValidMove handles the loop to check
-     * @param i for the BoardIndex
+     * Private method isValidMove handles the loop to check move validity in each direction
      * @param dx change in x
      * @param dy change in y
      * @return if the move is valid
      */
-    private boolean isValidMove(PlayerRole role, BoardIndex i, int dx, int dy){
+    private boolean isValidMove(PlayerRole role, int dx, int dy){
         if(board[dx][dy] == role)
             return false;
 
@@ -116,9 +116,22 @@ public class Board {
      * @param role of the player
      * @return ArrayList moves
      */
-    ArrayList getPossibleMoves(PlayerRole role){
+    ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
+        //declare an array for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
+        //This loop calls the private function isValidMove for each direction
+        for(int i = 0; i < 8; i++){
+            int dx = i < 3 ? -1 : ( i > 4 ? 1 : 0);
+            int dy = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
+            //checks if the move is valid
+            if(isValidMove(role, dx, dy)) {
+                BoardIndex indx = new BoardIndex();
+                indx.row = dx;
+                indx.column = dy;
+                moves.add(indx); //adds the valid move into the array of moves
+            }
+        }//end loop
         return moves;
 
     }
@@ -128,8 +141,9 @@ public class Board {
      * Applies the move made, updating the board
      * @param c command made
      */
-    void apply(Command c){
-
+    void apply(CommandMove c){
+        BoardIndex i = c.position;
+        board[i.row][i.column] = c.player;
     }
 
 
