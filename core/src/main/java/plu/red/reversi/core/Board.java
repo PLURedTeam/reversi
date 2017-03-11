@@ -62,7 +62,7 @@ public class Board {
      * @param role, color of the player
      * @return score, number of instances of the player on the board
      */
-    int getScore(PlayerRole role){
+    public int getScore(PlayerRole role){
         int score=0;
 
         //look for the instances of the role on the board
@@ -146,7 +146,7 @@ public class Board {
      * @param role of the player
      * @return ArrayList moves
      */
-    ArrayList getPossibleMoves(PlayerRole role){
+    public ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
         //declare an array for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
@@ -170,17 +170,31 @@ public class Board {
      * Applies the move made, updating the board
      * @param c command made
      */
-    void apply(Command c, boolean flipTiles) {
+
+    public void apply(CommandMove c, boolean flipTiles) {
         //TODO: Actually flip tile
-        board[c.index.row][c.index.column] = c.role;
+        board[c.position.row][c.position.column] = c.player;
     }
 
     /**
      * Applies a move and flips tiles
      * @param c command made
      */
-    void apply(Command c){
+    public void apply(CommandMove c) {
         apply(c, true);
+    }
+
+    public boolean equals(final Board b){
+        //if the size isn't the same return false
+        if(this.size != b.size)
+            return false;
+
+        for(int r = 0; r < size; r++)
+            for(int c = 0; c < size; c++){
+                if(board[r][c] != b.at(new BoardIndex(r, c)))
+                    return false;
+            }
+        return true;
     }
 
 

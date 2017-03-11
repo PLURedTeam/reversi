@@ -16,6 +16,19 @@ public class BoardIndex {
         this.column = column;
     }
 
+    // Added so we can use BoardIndex as a key in something like a HashMap. Otherwise every BoardIndex object has a
+    // unique hash, even if they have the same contents.
+    @Override
+    public int hashCode() {
+        // Not guaranteed to be unique if a Board size is more than 10000, but really, are we gonna have a Board bigger
+        // than 10000
+        return row + column*10000;
+    }
+
+    public boolean equals(final BoardIndex i){
+        return i.row == row && i.column == column;
+    }
+
     //TODO: Convert to and from character
 
 }

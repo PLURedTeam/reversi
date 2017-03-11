@@ -1,5 +1,6 @@
 package plu.red.reversi.core;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -12,21 +13,23 @@ import java.util.Set;
  */
 public enum PlayerRole {
 
-    NONE(false),
-    WHITE(true),
-    BLACK(true),
+    NONE(false, null),
+    WHITE(true, Color.WHITE),
+    BLACK(true, Color.BLACK),
 
     ;
 
     protected final boolean valid;
     protected PlayerRole next;
     protected int vOrdinal;
+    public final Color color;
 
     // Constructor occurs before any static code
-    PlayerRole(boolean valid) {
+    PlayerRole(boolean valid, Color color) {
         this.valid = valid;
         this.next = this;
         this.vOrdinal = -1;
+        this.color = color;
     }
 
     static PlayerRole[] validPlayerRoles;

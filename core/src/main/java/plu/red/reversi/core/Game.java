@@ -1,5 +1,8 @@
 package plu.red.reversi.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Glory to the Red Team.
  *
@@ -16,25 +19,53 @@ public class Game {
 
     protected SettingsMap settings;
     protected Board board;
+    protected History history;
 
     // Store players as an array of possible roles. More extensible for possibly more than two players in the future.
     //  (I realize this is probably unnecessary, but it results in more extensible code, and is easier to manipulate
     //   as a whole, instead of manipulating individual Player references)
     protected Player[] players = new Player[PlayerRole.validPlayers().length];
-
+    protected PlayerRole currentPlayerRole = PlayerRole.validPlayers()[0];
+    protected final HashSet<PlayerRole> usedPlayers = new HashSet<PlayerRole>();
 
 
     /**
-     * Constructor. Creates a new Game object.
+     * Constructor. Creates a new Game object with a default Player count of 2.
      *
-     * @param settings SettingsMap to create Game with
-     * @param board Board to create Game with
+     * @param settings SettingsMap to start Game with
      */
-    public Game(SettingsMap settings, Board board) {
-        this.settings = settings;
-        this.board = board;
+    public Game(SettingsMap settings) {
+        this(settings, 2);
     }
 
+    /**
+     * Constructor. Creates a new Game object with a given Player count.
+     *
+     * @param settings SettingsMap to start Game with
+     * @param playerCount Number of players to play this Game with
+     * @throws IllegalArgumentException if playerCount is less than 2 or more than the maximum valid PlayerRole count
+     */
+    public Game(SettingsMap settings, int playerCount) throws IllegalArgumentException {
+        if(playerCount < 2 || playerCount > PlayerRole.validPlayers().length)
+            throw new IllegalArgumentException("Amount of Players for a game must be between 2 and " + PlayerRole.validPlayers().length);
+        this.settings = settings;
+        this.board = new Board(8);
+        this.history = new History();
+        for(int i = 0; i < playerCount; i++) usedPlayers.add(PlayerRole.validPlayers()[i]);
+    }
+
+    /**
+     * Loads a predefined History object and optionally applies it to this Game, stepping this Game through History
+     * until the most recent point.
+     *
+     * @param history History object to apply
+     */
+    public void loadHistory(History history, boolean apply) {
+        this.history = history;
+        if(apply) {
+            // TODO: Apply History to this game
+        }
+    }
 
     /**
      * Retrieves the SettingsMap that this Game object is using.
@@ -49,6 +80,27 @@ public class Game {
      * @return this Game's Board
      */
     public Board getBoard() { return board; }
+
+    /**
+     * Retrieves the History that this Game object is using.
+     *
+     * @return this Game's History
+     */
+    public History getHistory() { return history; }
+
+    /**
+     * Retrieves the number of Players playing in this game (Human or otherwise).
+     *
+     * @return this Game's Player count
+     */
+    public int getPlayerCount() { return usedPlayers.size(); }
+
+    /**
+     * Retrieves the Set of used PlayerRoles in this game (Human or otherwise).
+     *
+     * @return this Game's Set of PlayerRoles
+     */
+    public Set<PlayerRole> getUsedPlayers() { return usedPlayers; }
 
     /**
      * Sets the player for a game. Player role is dependant on the player's stored role. Will overwrite any preexisting
@@ -73,5 +125,49 @@ public class Game {
     public Player getPlayer(PlayerRole role) {
         if(role.isValid()) return players[role.validOrdinal()];
         else return null;
+    }
+
+    /**
+     * Retrieves the player whose turn it currently is.
+     *
+     * @return Current Player
+     */
+    public Player getCurrentPlayer() {
+        return players[currentPlayerRole.validOrdinal()];
+    }
+
+    /**
+     * Cycles turns and increments what player is current.
+     *
+     * @return Player whose turn is current after incrementing
+     */
+    public Player nextTurn() {
+        currentPlayerRole = currentPlayerRole.getNext(usedPlayers);
+        for(Player player : players) player.nextTurn(player.getRole() == currentPlayerRole);
+        return players[currentPlayerRole.validOrdinal()];
+    }
+
+    public boolean acceptCommand(Command cmd) {
+
+        // Check to see if this Command is ok to apply and/or send to the server
+        if(!cmd.isValid(this)) return false;
+
+        // Propagate the Command to the servere if it came from a player
+        if(cmd.source == Command.Source.PLAYER) {
+            // TODO: Send Command to Server
+        }
+
+        // Send Move Commands to the Board object
+        if(cmd instanceof CommandMove) board.apply((CommandMove)cmd);
+
+        // Send Chat Commands somewhere
+        if(cmd instanceof CommandChat) {
+            // TODO: Send Chat Command wherever it needs to go
+        }
+
+        // Register the Command in History
+        history.addCommand(cmd);
+
+        return true;
     }
 }

@@ -1,33 +1,32 @@
 package plu.red.reversi.core;
 
 /**
- * Created by daniel on 3/5/17.
  * Glory to the Red Team.
+ *
+ * Abstract representation of a command to be passed around.
  */
+public abstract class Command {
 
-/**
- * Represents a single move on the reversi board
- */
-public class Command {
-    public PlayerRole role;
-    public BoardIndex index;
-
-    public Command() {
-        this.role = PlayerRole.NONE;
-        this.index = new BoardIndex();
+    /**
+     * Represents the source of the command, whether it came from a Player or the Server
+     */
+    public enum Source {
+        PLAYER,
+        SERVER
     }
 
-    public Command(PlayerRole role, BoardIndex index) {
-        this.role = role;
-        this.index = index;
+    public final Source source;
+
+    public Command(Source source) {
+        this.source = source;
     }
 
     /**
-     * Gets a list of all the indexes on the board which have been affected by this move
-     * @note this will require the ability to see the state of the board at the point of that move for this to work, but it is required to implement this
-     * @return a list of indices, which were affected by this move. Order does not matter.
+     * Uses data from the Game object to determine whether or not this Command is valid. IE: Whether a move played by a
+     * player is on a valid position of the board.
+     *
+     * @param game Game object to pull data from
+     * @return true if this Command is valid, false otherwise
      */
-    public BoardIndex[] getAffectedIndices() {
-        return null;
-    }
+    public abstract boolean isValid(Game game);
 }
