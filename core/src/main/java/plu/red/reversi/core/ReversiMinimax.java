@@ -6,38 +6,36 @@ package plu.red.reversi.core;
  */
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 
 /**
- * Using the minimax algorithm, calculate the optimal move for a particular player given the specified currentState.
+ * Using the minimax algorithm, calculate the optimal move for a particular currentPlayer given the specified currentState.
  */
 public class ReversiMinimax implements Runnable {
-
+    private Game game;
     private ReversiNode root;
-    private PlayerRole role;
-
-    /// Us if we are first, not us if we are not first
-    private PlayerRole nextPlay;
+    private PlayerRole aiRole;
 
 
     private Looper.LooperCall<BoardIndex> call;
-
-    // Results (TODO: More stats can go here)
     private BoardIndex bestPlay;
 
     /**
      * Constructs a ReversiMinimax problem to solve
-     * @param currentState
-     * @param role
+     * @param game
+     * @param aiRole
      */
-    public ReversiMinimax(final Board currentState, PlayerRole role, PlayerRole nextPlay) {
-        this.role = role;
+    public ReversiMinimax(final Game game, PlayerRole aiRole, PlayerRole nextPlay) {
+        this.game = game;
+        this.aiRole = aiRole;
         call = null;
-        root = new ReversiNode(currentState, null, nextPlay);
+        root = new ReversiNode(game.getBoard(), null, nextPlay, 0);
+        bestPlay = null;
     }
 
-    public ReversiMinimax(final Board currentState, PlayerRole role, PlayerRole nextPlay, Looper.LooperCall<BoardIndex> call) {
-        this(currentState, role, nextPlay);
+    public ReversiMinimax(final Game game, PlayerRole aiRole, PlayerRole nextPlay, Looper.LooperCall<BoardIndex> call) {
+        this(game, aiRole, nextPlay);
         this.call = call;
     }
 
@@ -49,85 +47,151 @@ public class ReversiMinimax implements Runnable {
      */
     @Override
     public void run() {
-        LinkedList<ReversiNode> work = new LinkedList<>();
+        if(call != null)
+            call.call(getBestPlay());
+    }
 
-        work.add(root);
-        while(work.size() > 0) {
-            ReversiNode t = work.poll();
-            t.calculate(work);
+    public BoardIndex getBestPlay() throws IndexOutOfBoundsException {
+        //check if we are already up to date
+        if(bestPlay != null && root.board.equals(game.getBoard()))
+            return bestPlay;
+
+        //move root forward (may do nothing)
+        root = findCurrentRoot();
+        root.parent = null;
+
+        //now find the best option using recursion
+        ReversiNode i = getBestPlay(root, root.depth + 5);
+
+        if(i == root) //Not sure if this can happen, but just in case
+            throw new IndexOutOfBoundsException("Best play is root, need to regenerate tree from scratch");
+
+        //find the move that needs to be made to get there
+        bestPlay = i.moveMade;
+
+        return bestPlay;
+    }
+
+    private ReversiNode findCurrentRoot() throws IndexOutOfBoundsException {
+        ReversiNode currentRoot = root;
+
+        //any moves which could have happened according to the board state
+        LinkedList<ReversiNode> candidates = new LinkedList<>();
+
+        //breadth-first search to find current root
+        while(!currentRoot.board.equals(game.getBoard())) {
+
+            //board is not equal yet, so check children
+            if(candidates.isEmpty() || currentRoot.children.isEmpty())
+                throw new IndexOutOfBoundsException("Minimax cache exceeded, need to regenerate from scratch");
+
+            //go through all children, consider a candidate any that have moves which were made
+            for(ReversiNode i : currentRoot.children)
+                if(game.getBoard().at(i.moveMade).isValid())
+                    candidates.add(i);
+
+            currentRoot = candidates.poll();
         }
 
-        if(call != null)
-            call.call(bestPlay);
+        return currentRoot;
+    }
+
+    /**
+     * Find the best of the children to choose if our turn, and assume they choose the worst
+     * on their turn.
+     * @param node Current node in the tree.
+     * @return A child of node which is the best state to go to.
+     */
+    private ReversiNode getBestPlay(ReversiNode node, int maxDepth) {
+        if(node.depth >= maxDepth) {
+            node.score = node.getHeuristicScore();
+            return node;
+        }
+        if(node.children.isEmpty()) generateChildren(node);
+
+        ReversiNode choice = null;
+
+        //if it is us, maximize score
+        boolean maximize = node.currentPlayer == aiRole;
+        node.score = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        for(ReversiNode i : node.children) {
+            ReversiNode b = getBestPlay(i, maxDepth);
+            if((maximize && b.score > node.score) || (!maximize && b.score < node.score)) {
+                node.score = b.score;
+                choice = i;
+            }
+        }
+
+        return choice;
+    }
+
+    private void generateChildren(ReversiNode node) {
+        if(!node.children.isEmpty()) return;
+        //need to calculate, i is current game state
+        // start by getting all the possible moves for the next player
+        ArrayList<BoardIndex> possible = node.getPossibleMoves();
+
+        //TODO: Handle no-move condition based on game settings
+        if(possible.isEmpty());
+
+        //go through the locations, and create new nodes for them
+        for(BoardIndex l : possible) {
+            Board state = new Board(game.getBoard());
+            state.apply(new CommandMove(node.currentPlayer, l));
+            node.children.add(new ReversiNode(state, l, node));
+        }
     }
 
 
     private class ReversiNode {
         public final Board board;
-        public final ReversiNode parent;
+        public ReversiNode parent;
         public LinkedList<ReversiNode> children;
-        public PlayerRole player;
-        public BoardIndex play;
+        public PlayerRole currentPlayer;
+        public int depth;
+        public BoardIndex moveMade;
 
-        // added for readability
-        public final int ourScore;
-        public final int theirScore;
+        public int score;
 
 
         /**
          * Initial constructor used at beginning of the game
          * @param board
          * @param parent
-         * @param player
+         * @param currentPlayer
          */
-        public ReversiNode(final Board board, final ReversiNode parent, PlayerRole player) {
+        public ReversiNode(final Board board, ReversiNode parent, PlayerRole currentPlayer, int depth) {
             this.board = board;
             this.parent = parent;
             children = new LinkedList<>();
-            this.player = player;
-            ourScore = board.getScore(role);
-            theirScore = board.getScore(role.invert());
-            play = null;
+            this.currentPlayer = currentPlayer;
+            this.depth = depth;
+            this.moveMade = null;
+            this.score = 0;
         }
 
         /**
          * Constructor used when calculating the tree
          * @param board
          * @param parent
-         * @param command
          */
-        private ReversiNode(final Board board, final ReversiNode parent, CommandMove command) {
-            this(board, parent, command.player.invert());
-
-            if(board.getPossibleMoves(command.player.invert()).isEmpty()) {
-                if(board.getPossibleMoves(command.player).isEmpty()) {
-                    //END GAME
-                    player = PlayerRole.NONE;
-                    children = null;
-                }
-                player = command.player;
-            }
-            play = command.position;
+        private ReversiNode(final Board board, BoardIndex moveMade, final ReversiNode parent) {
+            this(board, parent, parent.currentPlayer.getNext(), parent.depth + 1);
+            this.moveMade = moveMade;
         }
 
-        public void calculate(LinkedList<ReversiNode> work) {
-            if(!children.isEmpty()) {
-                //we alreadly calculated this
-                work.addAll(children);
-                return;
-            }
+        /**
+         * Finds the possible moves for the next player with the current board state.
+         * @return An array list of possible moves for currentPlayer.
+         */
+        public ArrayList<BoardIndex> getPossibleMoves() {
+            return board.getPossibleMoves(currentPlayer);
+        }
 
-            //actually calculate
-            ArrayList<BoardIndex> possible = board.getPossibleMoves(player);
-            if(possible.isEmpty()) {
-                //the player cannot move, skip their turn
-
-            }
-            for(BoardIndex i : possible) {
-                Board b = new Board(board);
-                b.apply(new CommandMove(player, i));
-                children.add(new ReversiNode(b, this, player.invert()));
-            }
+        public int getHeuristicScore() {
+            //TODO: improve by factoring in corners and edges as different weights
+            return board.getScore(aiRole) - board.getScore(aiRole.getNext());
         }
     }
 }
