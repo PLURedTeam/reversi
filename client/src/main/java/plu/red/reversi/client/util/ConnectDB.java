@@ -1,4 +1,4 @@
-package plu.red.reversi.client.database;
+package plu.red.reversi.client.util;
 
 //import statements
 import java.io.File;
@@ -6,7 +6,7 @@ import java.sql.*;
 
 /**
  * Created by Andrew on 3/7/2017.
- * Creates and manages the connection object to the database
+ * Creates and manages the connection object to the util
  */
 public class ConnectDB {
 
@@ -31,15 +31,15 @@ public class ConnectDB {
 
     /**
      * Open a SQLite DB connection
-     *  Since the database is local and does not need a
+     *  Since the util is local and does not need a
      *   username or password none of those parameters
      *   are passed.
      *
-     *  If the database does not exist, one will be created
+     *  If the util does not exist, one will be created
      *   with the name ClientDB.db and the CreateDB class will
      *   be called to create the tables.
      *
-     *  If the connection to the database fails the SQL message
+     *  If the connection to the util fails the SQL message
      *   will be printed to the console.
      *
      * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
@@ -52,24 +52,24 @@ public class ConnectDB {
             File file = new File("ClientDB.db");
 
             if(file.exists()) {
-                //Connects to the database file
+                //Connects to the util file
                 conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
             } else {
-                //Creates the database file and connects to it
+                //Creates the util file and connects to it
                 conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-                CreateDB db = new CreateDB(conn); //Creates the tables in the database
+                CreateDB db = new CreateDB(conn); //Creates the tables in the util
             }//else
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }//catch
         if (conn != null)
-            connStatus = "Successfully connected to database";
+            connStatus = "Successfully connected to util";
         return connStatus;
     }// openDB
 
     /**
      * Close the connection to the DB
-     * @return the status of the database connection
+     * @return the status of the util connection
      */
     public String closeDB() {
         connStatus = null; //Set the status to null
@@ -79,11 +79,11 @@ public class ConnectDB {
             }//if
             conn = null;
         } catch (SQLException e) {
-            connStatus = "Failed to close database connection: " + e;
+            connStatus = "Failed to close util connection: " + e;
         }//catch
 
         if (conn == null) {
-            connStatus = "Successfully disconnected from database";
+            connStatus = "Successfully disconnected from util";
         }
         return connStatus;
     }// closeDB

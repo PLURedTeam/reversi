@@ -1,5 +1,7 @@
 package plu.red.reversi.core;
 
+import plu.red.reversi.core.util.SettingsMap;
+
 import java.util.HashSet;
 import java.util.Set;
 

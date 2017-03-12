@@ -1,4 +1,4 @@
-package plu.red.reversi.client.database;
+package plu.red.reversi.client.util;
 
 //import statements
 import java.sql.*;
@@ -6,25 +6,25 @@ import java.sql.*;
 /**
  * Created by Andrew on 3/8/2017.
  *
- * Creates the tables for the clientside database
+ * Creates the tables for the clientside util
  */
 public class CreateDB {
 
     //fields
-    private Connection conn; //Connection object for the database
+    private Connection conn; //Connection object for the util
 
     /**
      * Constructor for the CreateDB class
      * Checks the connection status and then creates the tables in the
-     *  database.
+     *  util.
      *
-     * @param c The connection object to the database
+     * @param c The connection object to the util
      */
     public CreateDB(Connection c) {
         conn = c;//Set the connection to the open connection in ConnectDB
 
         if(conn == null)
-            System.out.println("Could not connect to the database.");
+            System.out.println("Could not connect to the util.");
         else {
             //Call methods to create tables
             createUserTable();
@@ -35,7 +35,7 @@ public class CreateDB {
     }//constructor
 
     /**
-     * Creates the USER table in the database using SQL commands
+     * Creates the USER table in the util using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -54,7 +54,7 @@ public class CreateDB {
     }//createUserTable
 
     /**
-     * Creates the GAME table in the database using SQL commands
+     * Creates the GAME table in the util using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -79,7 +79,7 @@ public class CreateDB {
     }//createGameTable
 
     /**
-     * Creates the GAME_HISTORY table in the database using SQL commands
+     * Creates the GAME_HISTORY table in the util using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -102,7 +102,7 @@ public class CreateDB {
     }//createGameHistoryTable
 
     /**
-     * Creates the GAME_SETTINGS table in the database using SQL commands
+     * Creates the GAME_SETTINGS table in the util using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */

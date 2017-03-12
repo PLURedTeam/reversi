@@ -5,8 +5,9 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.util.Looper;
+
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.LinkedList;
 
 /**

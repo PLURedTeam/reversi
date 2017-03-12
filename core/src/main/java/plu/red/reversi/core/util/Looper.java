@@ -1,11 +1,10 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.util;
 
 /**
  * Created by daniel on 3/6/17.
  * Glory to the Red Team.
  */
 
-import java.util.HashMap;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

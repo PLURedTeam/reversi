@@ -1,11 +1,9 @@
-package plu.red.reversi.client.database;
+package plu.red.reversi.client.util;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.sql.Connection;
 
 /**
  * Created by Andrew on 3/8/2017.
@@ -28,15 +26,15 @@ public class ConnectDBTest {
     @Test
     public void openDB() throws Exception {
         String conn = util.openDB();
-        Assert.assertEquals("Successfully connected to database", conn);
-        Assert.assertNotEquals("Error connecting to database", conn);
+        Assert.assertEquals("Successfully connected to util", conn);
+        Assert.assertNotEquals("Error connecting to util", conn);
     }//openDB
 
     @Test
     public void closeDB() throws Exception {
         util.openDB(); //Open the DB to test closure
         String conn = util.closeDB();
-        Assert.assertEquals("Successfully disconnected from database", conn);
-        Assert.assertNotEquals("Failed to close database connection: ", conn);
+        Assert.assertEquals("Successfully disconnected from util", conn);
+        Assert.assertNotEquals("Failed to close util connection: ", conn);
     }//closeDB
 }//ConnectDBTest

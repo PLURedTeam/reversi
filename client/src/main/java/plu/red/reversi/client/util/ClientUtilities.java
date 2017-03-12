@@ -1,4 +1,4 @@
-package plu.red.reversi.client.database;
+package plu.red.reversi.client.util;
 
 //import statements
 import java.sql.*;
@@ -14,17 +14,17 @@ public class ClientUtilities {
     /**
      * Constructor for ClientUtilities class
      * Calls the dbConnection class to create a connection
-     *  to the database (One will be created if none exist)
+     *  to the util (One will be created if none exist)
      *  and sets the conn field to the connection
      */
     public ClientUtilities() {
         ConnectDB dbConnection = new ConnectDB(); //Create the connection
         dbConnection.openDB();
-        conn = dbConnection.getConn(); //Set the database connection
+        conn = dbConnection.getConn(); //Set the util connection
     }//constructor
 
     /**
-     * Creates the user in the database
+     * Creates the user in the util
      * @param username username of the user, must be unique
      * @param password the password for the user (Stored using SHA256)
      * @return true if user created, false otherwise
@@ -52,8 +52,8 @@ public class ClientUtilities {
     }//createUser
 
     /**
-     * Returns an array of users that are in the database
-     * @return an array of users in the database
+     * Returns an array of users that are in the util
+     * @return an array of users in the util
      */
     public String[] getUsers() {
         String[] users = null;
@@ -86,7 +86,7 @@ public class ClientUtilities {
     }//getUsers
 
     /**
-     * Deletes a user from the database
+     * Deletes a user from the util
      * @param username username of the user
      * @param password password for the user
      * @return true if deleted, false otherwise
@@ -114,7 +114,7 @@ public class ClientUtilities {
     }//deleteUser
 
     /**
-     * Tests the login information against what is in the database
+     * Tests the login information against what is in the util
      * @param username the username of the user
      * @param password the password of the user
      * @return true if valid login credentials, false otherwise

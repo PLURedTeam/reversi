@@ -5,6 +5,8 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.util.Looper;
+
 /**
  * An instance of a player which the computer can play as (basically an AI)
  * It utilizes the reversi minimax algorithm to compute the best move, and then execute it.

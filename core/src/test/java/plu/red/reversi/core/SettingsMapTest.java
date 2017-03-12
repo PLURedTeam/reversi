@@ -3,6 +3,7 @@ package plu.red.reversi.core;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
+import plu.red.reversi.core.util.SettingsMap;
 
 import static org.junit.Assert.*;
 
