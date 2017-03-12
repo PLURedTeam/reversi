@@ -25,8 +25,10 @@ public class HumanPlayer extends Player {
             // update the GUI to make it show that the user may now input their stuff
             // TODO: Fix the GUI to use this actual input
             window.getPlayerInfoPanel().setActivePlayer(getRole() == PlayerRole.WHITE ? 0 : 1);
+            window.getPlayerInfoPanel().setScore(0, getGame().getBoard().getScore(PlayerRole.WHITE));
 
             // TODO: get previous command and update the board with nice animations
+            getGame().
 
             // TODO: start listening for input
         }
