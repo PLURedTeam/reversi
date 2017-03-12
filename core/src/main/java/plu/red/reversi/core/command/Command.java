@@ -1,4 +1,6 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.command;
+
+import plu.red.reversi.core.Game;
 
 /**
  * Glory to the Red Team.
