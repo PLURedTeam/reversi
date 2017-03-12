@@ -40,3 +40,4 @@ public class HumanPlayer extends Player {
         getGame().acceptCommand(new CommandMove(Command.Source.PLAYER, getRole(), index));
     }
 }
+
