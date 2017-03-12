@@ -1,12 +1,17 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.player;
 
 /**
  * Created by daniel on 3/6/17.
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.Looper;
 
 /**

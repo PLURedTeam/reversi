@@ -3,6 +3,7 @@ package plu.red.reversi.core;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
 import java.util.HashSet;

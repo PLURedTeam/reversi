@@ -1,9 +1,10 @@
-package plu.red.reversi.client;
+package plu.red.reversi.client.player;
 
 import plu.red.reversi.client.gui.GameWindow;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.player.Player;
 
 /**
  * Created by daniel on 3/5/17.

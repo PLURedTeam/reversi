@@ -1,9 +1,12 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.player;
 
 /**
  * Created by daniel on 3/5/17.
  * Glory to the Red Team.
  */
+
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
 
 /**
  * Represents an entity which is capable of acting as a player in the game.
