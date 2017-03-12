@@ -5,6 +5,7 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.Looper;
 
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public class ReversiMinimax implements Runnable {
         //go through the locations, and create new nodes for them
         for(BoardIndex l : possible) {
             Board state = new Board(game.getBoard());
-            state.apply(new CommandMove(node.currentPlayer, l));
+            state.apply(new MoveCommand(node.currentPlayer, l));
             node.children.add(new ReversiNode(state, l, node));
         }
     }

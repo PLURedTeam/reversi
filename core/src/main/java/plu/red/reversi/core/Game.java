@@ -1,5 +1,8 @@
 package plu.red.reversi.core;
 
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.ChatCommand;
+import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.SettingsMap;
 
 import java.util.HashSet;
@@ -160,10 +163,10 @@ public class Game {
         }
 
         // Send Move Commands to the Board object
-        if(cmd instanceof CommandMove) board.apply((CommandMove)cmd);
+        if(cmd instanceof MoveCommand) board.apply((MoveCommand)cmd);
 
         // Send Chat Commands somewhere
-        if(cmd instanceof CommandChat) {
+        if(cmd instanceof ChatCommand) {
             // TODO: Send Chat Command wherever it needs to go
         }
 

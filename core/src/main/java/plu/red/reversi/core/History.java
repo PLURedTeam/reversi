@@ -1,5 +1,7 @@
 package plu.red.reversi.core;
 
+import plu.red.reversi.core.command.Command;
+
 import java.util.ArrayList;
 
 /**

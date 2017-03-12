@@ -5,6 +5,8 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.MoveCommand;
+
 import java.util.ArrayList;
 
 /**
@@ -171,7 +173,7 @@ public class Board {
      * @param c command made
      */
 
-    public void apply(CommandMove c, boolean flipTiles) {
+    public void apply(MoveCommand c, boolean flipTiles) {
         //TODO: Actually flip tile
         board[c.position.row][c.position.column] = c.player;
     }
@@ -180,7 +182,7 @@ public class Board {
      * Applies a move and flips tiles
      * @param c command made
      */
-    public void apply(CommandMove c) {
+    public void apply(MoveCommand c) {
         apply(c, true);
     }
 

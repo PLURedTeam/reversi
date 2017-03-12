@@ -2,6 +2,8 @@ package plu.red.reversi.core;
 
 import org.junit.Before;
 import org.junit.Test;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +22,7 @@ public class BoardTest {
     public void testGetScore() {
         assertEquals(2, board.getScore(PlayerColor.WHITE));
         assertEquals(2, board.getScore(PlayerColor.BLACK));
-        board.apply(new CommandMove(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(0,0)), false);
+        board.apply(new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(0,0)), false);
         assertEquals(3, board.getScore(PlayerColor.BLACK));
         assertEquals(2, board.getScore(PlayerColor.WHITE));
     }
@@ -40,7 +42,7 @@ public class BoardTest {
     @Test
     public void apply() throws Exception {
         BoardIndex index;
-        CommandMove c = new CommandMove(PlayerColor.BLACK, new BoardIndex(1,1));
+        MoveCommand c = new MoveCommand(PlayerColor.BLACK, new BoardIndex(1,1));
         board.apply(c);
 
         assertEquals(PlayerColor.BLACK, board.at(c.position));

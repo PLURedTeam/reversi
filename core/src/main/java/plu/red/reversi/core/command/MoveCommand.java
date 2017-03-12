@@ -1,11 +1,15 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.command;
+
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
 
 /**
  * Glory to the Red Team.
  *
  * Command implementation class for a board move.
  */
-public class CommandMove extends Command {
+public class MoveCommand extends Command {
 
     public final PlayerColor player;
     public final BoardIndex position;
@@ -16,7 +20,7 @@ public class CommandMove extends Command {
      * @param player Player to make the move
      * @param position Location on the board.
      */
-    public CommandMove(PlayerColor player, BoardIndex position) {
+    public MoveCommand(PlayerColor player, BoardIndex position) {
         this(Source.PLAYER, player, position);
     }
 
@@ -26,7 +30,7 @@ public class CommandMove extends Command {
      * @param player Player to make the move.
      * @param position Location on the board.
      */
-    public CommandMove(Source source, PlayerColor player, BoardIndex position) {
+    public MoveCommand(Source source, PlayerColor player, BoardIndex position) {
         super(source);
         this.player = player;
         this.position = position;

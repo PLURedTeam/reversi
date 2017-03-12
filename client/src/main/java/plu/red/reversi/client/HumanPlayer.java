@@ -2,6 +2,8 @@ package plu.red.reversi.client;
 
 import plu.red.reversi.client.gui.GameWindow;
 import plu.red.reversi.core.*;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 
 /**
  * Created by daniel on 3/5/17.
@@ -37,7 +39,7 @@ public class HumanPlayer extends Player {
             throw new IllegalStateException("Cannot play on game when not current player");
         }
 
-        getGame().acceptCommand(new CommandMove(Command.Source.PLAYER, getRole(), index));
+        getGame().acceptCommand(new MoveCommand(Command.Source.PLAYER, getRole(), index));
     }
 }
 

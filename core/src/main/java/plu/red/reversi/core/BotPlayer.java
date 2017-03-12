@@ -5,6 +5,8 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.Looper;
 
 /**
@@ -39,6 +41,6 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
      */
     @Override
     public void onLooperCallback(BoardIndex result) {
-        getGame().acceptCommand(new CommandMove(Command.Source.PLAYER, getRole(), result));
+        getGame().acceptCommand(new MoveCommand(Command.Source.PLAYER, getRole(), result));
     }
 }
