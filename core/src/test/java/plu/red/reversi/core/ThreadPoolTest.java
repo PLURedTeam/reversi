@@ -1,8 +1,9 @@
 package plu.red.reversi.core;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import plu.red.reversi.core.util.Looper;
+import plu.red.reversi.core.util.ThreadPool;
 
 /**
  * Created by daniel on 3/12/17.
@@ -28,10 +29,29 @@ public class ThreadPoolTest {
     public void testChangeSize() {
         ThreadPool pool = new ThreadPool(1);
 
+        Thread origThread = pool.getThreads()[0];
+
+        Assert.assertFalse(origThread.isInterrupted());
+
         pool.changeThreadCount(20);
 
+        Assert.assertEquals(origThread, pool.getThreads()[0]);
+
+        for(Thread t : pool.getThreads()) {
+            Assert.assertFalse(t.isInterrupted());
+        }
+
+
+        Thread quitThread = pool.getThreads()[19];
 
         pool.changeThreadCount(5);
+
+        Assert.assertEquals(origThread, pool.getThreads()[0]);
+        Assert.assertTrue(!quitThread.isAlive() || quitThread.isInterrupted());
+
+        for(Thread t : pool.getThreads()) {
+            Assert.assertFalse(t.isInterrupted());
+        }
     }
 
     private class SampleJob extends ThreadPool.Job<Integer> {
