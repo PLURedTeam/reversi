@@ -74,9 +74,4 @@ public class LooperTest implements Looper.LooperCallback<Integer> {
 
         Assert.assertEquals(5, looper.run());
     }
-
-    @Test
-    public void testLooperCallMultiThread() {
-
-    }
 }
