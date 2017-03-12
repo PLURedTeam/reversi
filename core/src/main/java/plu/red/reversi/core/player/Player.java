@@ -35,7 +35,7 @@ public abstract class Player {
      * Gets the registered game for this player
      * @return The currently registered game
      */
-    protected Game getGame() { return game; }
+    public Game getGame() { return game; }
     public String getName() { return name; }
     public PlayerColor getRole() { return role; }
 
