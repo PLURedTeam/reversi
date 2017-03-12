@@ -127,17 +127,4 @@ public enum PlayerRole {
         while(!usedPlayers.contains(next) && (next != original)) next = next.getNext();
         return next;
     }
-
-
-    /**
-     * @todo REPLACE THIS (NEED A GET NEXT PLAYER IN QUEUE SOMEWHERE)
-     * @return The opposite player
-     */
-    public PlayerRole invert() {
-        switch(this) {
-            case WHITE: return BLACK;
-            case BLACK: return WHITE;
-            default: return NONE;
-        }
-    }
 }
