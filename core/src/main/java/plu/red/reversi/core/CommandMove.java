@@ -7,7 +7,7 @@ package plu.red.reversi.core;
  */
 public class CommandMove extends Command {
 
-    public final PlayerRole player;
+    public final PlayerColor player;
     public final BoardIndex position;
 
     /**
@@ -16,7 +16,7 @@ public class CommandMove extends Command {
      * @param player Player to make the move
      * @param position Location on the board.
      */
-    public CommandMove(PlayerRole player, BoardIndex position) {
+    public CommandMove(PlayerColor player, BoardIndex position) {
         this(Source.PLAYER, player, position);
     }
 
@@ -26,7 +26,7 @@ public class CommandMove extends Command {
      * @param player Player to make the move.
      * @param position Location on the board.
      */
-    public CommandMove(Source source, PlayerRole player, BoardIndex position) {
+    public CommandMove(Source source, PlayerColor player, BoardIndex position) {
         super(source);
         this.player = player;
         this.position = position;

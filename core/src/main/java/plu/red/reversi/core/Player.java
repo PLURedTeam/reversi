@@ -15,9 +15,9 @@ public abstract class Player {
 
     protected String name;
 
-    private PlayerRole role;
+    private PlayerColor role;
 
-    public Player(Game game, PlayerRole role) {
+    public Player(Game game, PlayerColor role) {
         this.game = game;
         this.role = role;
     }
@@ -34,6 +34,6 @@ public abstract class Player {
      */
     protected Game getGame() { return game; }
     public String getName() { return name; }
-    public PlayerRole getRole() { return role; }
+    public PlayerColor getRole() { return role; }
 
 }

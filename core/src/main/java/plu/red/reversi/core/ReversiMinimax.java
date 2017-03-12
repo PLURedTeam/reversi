@@ -16,7 +16,7 @@ import java.util.LinkedList;
 public class ReversiMinimax implements Runnable {
     private Game game;
     private ReversiNode root;
-    private PlayerRole aiRole;
+    private PlayerColor aiRole;
 
 
     private Looper.LooperCall<BoardIndex> call;
@@ -27,7 +27,7 @@ public class ReversiMinimax implements Runnable {
      * @param game
      * @param aiRole
      */
-    public ReversiMinimax(final Game game, PlayerRole aiRole, PlayerRole nextPlay) {
+    public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay) {
         this.game = game;
         this.aiRole = aiRole;
         call = null;
@@ -35,7 +35,7 @@ public class ReversiMinimax implements Runnable {
         bestPlay = null;
     }
 
-    public ReversiMinimax(final Game game, PlayerRole aiRole, PlayerRole nextPlay, Looper.LooperCall<BoardIndex> call) {
+    public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay, Looper.LooperCall<BoardIndex> call) {
         this(game, aiRole, nextPlay);
         this.call = call;
     }
@@ -158,7 +158,7 @@ public class ReversiMinimax implements Runnable {
         public final Board board;
         public ReversiNode parent;
         public LinkedList<ReversiNode> children;
-        public PlayerRole currentPlayer;
+        public PlayerColor currentPlayer;
         public int depth;
         public BoardIndex moveMade;
 
@@ -171,7 +171,7 @@ public class ReversiMinimax implements Runnable {
          * @param parent
          * @param currentPlayer
          */
-        public ReversiNode(final Board board, ReversiNode parent, PlayerRole currentPlayer, int depth) {
+        public ReversiNode(final Board board, ReversiNode parent, PlayerColor currentPlayer, int depth) {
             this.board = board;
             this.parent = parent;
             children = new LinkedList<>();

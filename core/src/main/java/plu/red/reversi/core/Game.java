@@ -26,9 +26,9 @@ public class Game {
     // Store players as an array of possible roles. More extensible for possibly more than two players in the future.
     //  (I realize this is probably unnecessary, but it results in more extensible code, and is easier to manipulate
     //   as a whole, instead of manipulating individual Player references)
-    protected Player[] players = new Player[PlayerRole.validPlayers().length];
-    protected PlayerRole currentPlayerRole = PlayerRole.validPlayers()[0];
-    protected final HashSet<PlayerRole> usedPlayers = new HashSet<PlayerRole>();
+    protected Player[] players = new Player[PlayerColor.validPlayers().length];
+    protected PlayerColor currentPlayerColor = PlayerColor.validPlayers()[0];
+    protected final HashSet<PlayerColor> usedPlayers = new HashSet<PlayerColor>();
 
 
     /**
@@ -45,15 +45,15 @@ public class Game {
      *
      * @param settings SettingsMap to start Game with
      * @param playerCount Number of players to play this Game with
-     * @throws IllegalArgumentException if playerCount is less than 2 or more than the maximum valid PlayerRole count
+     * @throws IllegalArgumentException if playerCount is less than 2 or more than the maximum valid PlayerColor count
      */
     public Game(SettingsMap settings, int playerCount) throws IllegalArgumentException {
-        if(playerCount < 2 || playerCount > PlayerRole.validPlayers().length)
-            throw new IllegalArgumentException("Amount of Players for a game must be between 2 and " + PlayerRole.validPlayers().length);
+        if(playerCount < 2 || playerCount > PlayerColor.validPlayers().length)
+            throw new IllegalArgumentException("Amount of Players for a game must be between 2 and " + PlayerColor.validPlayers().length);
         this.settings = settings;
         this.board = new Board(8);
         this.history = new History();
-        for(int i = 0; i < playerCount; i++) usedPlayers.add(PlayerRole.validPlayers()[i]);
+        for(int i = 0; i < playerCount; i++) usedPlayers.add(PlayerColor.validPlayers()[i]);
     }
 
     /**
@@ -102,7 +102,7 @@ public class Game {
      *
      * @return this Game's Set of PlayerRoles
      */
-    public Set<PlayerRole> getUsedPlayers() { return usedPlayers; }
+    public Set<PlayerColor> getUsedPlayers() { return usedPlayers; }
 
     /**
      * Sets the player for a game. Player role is dependant on the player's stored role. Will overwrite any preexisting
@@ -121,10 +121,10 @@ public class Game {
     /**
      * Retrieves the player stored for the given role.
      *
-     * @param role PlayerRole to determine Player with
-     * @return Player stored for the given role, or null if no Player is stored or the PlayerRole is invalid
+     * @param role PlayerColor to determine Player with
+     * @return Player stored for the given role, or null if no Player is stored or the PlayerColor is invalid
      */
-    public Player getPlayer(PlayerRole role) {
+    public Player getPlayer(PlayerColor role) {
         if(role.isValid()) return players[role.validOrdinal()];
         else return null;
     }
@@ -135,7 +135,7 @@ public class Game {
      * @return Current Player
      */
     public Player getCurrentPlayer() {
-        return players[currentPlayerRole.validOrdinal()];
+        return players[currentPlayerColor.validOrdinal()];
     }
 
     /**
@@ -144,9 +144,9 @@ public class Game {
      * @return Player whose turn is current after incrementing
      */
     public Player nextTurn() {
-        currentPlayerRole = currentPlayerRole.getNext(usedPlayers);
-        for(Player player : players) player.nextTurn(player.getRole() == currentPlayerRole);
-        return players[currentPlayerRole.validOrdinal()];
+        currentPlayerColor = currentPlayerColor.getNext(usedPlayers);
+        for(Player player : players) player.nextTurn(player.getRole() == currentPlayerColor);
+        return players[currentPlayerColor.validOrdinal()];
     }
 
     public boolean acceptCommand(Command cmd) {

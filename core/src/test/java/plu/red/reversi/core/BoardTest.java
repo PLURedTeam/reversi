@@ -3,8 +3,6 @@ package plu.red.reversi.core;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-
 import static org.junit.Assert.*;
 
 /**
@@ -20,20 +18,20 @@ public class BoardTest {
 
     @Test
     public void testGetScore() {
-        assertEquals(2, board.getScore(PlayerRole.WHITE));
-        assertEquals(2, board.getScore(PlayerRole.BLACK));
-        board.apply(new CommandMove(Command.Source.PLAYER, PlayerRole.BLACK, new BoardIndex(0,0)), false);
-        assertEquals(3, board.getScore(PlayerRole.BLACK));
-        assertEquals(2, board.getScore(PlayerRole.WHITE));
+        assertEquals(2, board.getScore(PlayerColor.WHITE));
+        assertEquals(2, board.getScore(PlayerColor.BLACK));
+        board.apply(new CommandMove(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(0,0)), false);
+        assertEquals(3, board.getScore(PlayerColor.BLACK));
+        assertEquals(2, board.getScore(PlayerColor.WHITE));
     }
 
     @Test
     public void testIsValidMove() {
-        assertFalse(board.isValidMove(PlayerRole.BLACK, new BoardIndex(0,0)));
-        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(1, 0)));
-        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(0, 1)));
-        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(2, 3)));
-        assertTrue(board.isValidMove(PlayerRole.BLACK, new BoardIndex(3, 2)));
+        assertFalse(board.isValidMove(PlayerColor.BLACK, new BoardIndex(0,0)));
+        assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(1, 0)));
+        assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(0, 1)));
+        assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(2, 3)));
+        assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(3, 2)));
 
     }
 
@@ -42,10 +40,10 @@ public class BoardTest {
     @Test
     public void apply() throws Exception {
         BoardIndex index;
-        CommandMove c = new CommandMove(PlayerRole.BLACK, new BoardIndex(1,1));
+        CommandMove c = new CommandMove(PlayerColor.BLACK, new BoardIndex(1,1));
         board.apply(c);
 
-        assertEquals(PlayerRole.BLACK, board.at(c.position));
+        assertEquals(PlayerColor.BLACK, board.at(c.position));
     }
 
 }

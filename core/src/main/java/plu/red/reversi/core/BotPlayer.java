@@ -16,7 +16,7 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
     private ReversiMinimax minimax;
     private Looper.LooperCall<BoardIndex> looperCall;
 
-    public BotPlayer(Game game, PlayerRole role) {
+    public BotPlayer(Game game, PlayerColor role) {
         super(game, role);
 
         // for later
