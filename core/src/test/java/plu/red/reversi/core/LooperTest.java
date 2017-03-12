@@ -3,6 +3,7 @@ package plu.red.reversi.core;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import plu.red.reversi.core.util.Looper;
 
 import java.util.ArrayList;
 
@@ -73,10 +74,5 @@ public class LooperTest implements Looper.LooperCallback<Integer> {
         call.call(5);
 
         Assert.assertEquals(5, looper.run());
-    }
-
-    @Test
-    public void testLooperCallMultiThread() {
-
     }
 }

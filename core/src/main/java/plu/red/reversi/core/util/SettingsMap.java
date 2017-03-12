@@ -1,4 +1,4 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.util;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;

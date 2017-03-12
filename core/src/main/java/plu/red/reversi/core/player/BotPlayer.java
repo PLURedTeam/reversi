@@ -1,9 +1,18 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.player;
 
 /**
  * Created by daniel on 3/6/17.
  * Glory to the Red Team.
  */
+
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.ReversiMinimax;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.util.Looper;
 
 /**
  * An instance of a player which the computer can play as (basically an AI)
@@ -14,7 +23,7 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
     private ReversiMinimax minimax;
     private Looper.LooperCall<BoardIndex> looperCall;
 
-    public BotPlayer(Game game, PlayerRole role) {
+    public BotPlayer(Game game, PlayerColor role) {
         super(game, role);
 
         // for later
@@ -26,7 +35,7 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
     public void nextTurn(boolean yours) {
         // TODO: In the future, we should simply update the minimax algorithm with the performed move.
         // for right now the act of reinit will be ok for what we are doing now, however.
-        minimax = new ReversiMinimax(getGame().board, getRole(), looperCall);
+        minimax = new ReversiMinimax(getGame(), getRole(), getRole().getNext(), looperCall);
 
         new Thread(minimax).start();
     }
@@ -37,6 +46,6 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
      */
     @Override
     public void onLooperCallback(BoardIndex result) {
-        getGame().acceptCommand(new CommandMove(Command.Source.PLAYER, getRole(), result));
+        getGame().acceptCommand(new MoveCommand(Command.Source.PLAYER, getRole(), result));
     }
 }

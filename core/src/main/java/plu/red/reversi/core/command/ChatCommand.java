@@ -1,4 +1,6 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.command;
+
+import plu.red.reversi.core.Game;
 
 import java.time.ZonedDateTime;
 
@@ -7,12 +9,12 @@ import java.time.ZonedDateTime;
  *
  * Command implementation class for chatting.
  */
-public class CommandChat extends Command {
+public class ChatCommand extends Command {
 
     public final String message;
     public final ZonedDateTime timestamp;
 
-    public CommandChat(Source source, String message) {
+    public ChatCommand(Source source, String message) {
         super(source);
         this.message = message;
         timestamp = ZonedDateTime.now();

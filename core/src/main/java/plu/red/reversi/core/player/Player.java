@@ -1,9 +1,12 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.player;
 
 /**
  * Created by daniel on 3/5/17.
  * Glory to the Red Team.
  */
+
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
 
 /**
  * Represents an entity which is capable of acting as a player in the game.
@@ -15,9 +18,9 @@ public abstract class Player {
 
     protected String name;
 
-    private PlayerRole role;
+    private PlayerColor role;
 
-    public Player(Game game, PlayerRole role) {
+    public Player(Game game, PlayerColor role) {
         this.game = game;
         this.role = role;
     }
@@ -32,8 +35,8 @@ public abstract class Player {
      * Gets the registered game for this player
      * @return The currently registered game
      */
-    protected Game getGame() { return game; }
+    public Game getGame() { return game; }
     public String getName() { return name; }
-    public PlayerRole getRole() { return role; }
+    public PlayerColor getRole() { return role; }
 
 }
