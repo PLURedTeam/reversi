@@ -85,13 +85,15 @@ public class SettingsMap {
     }
 
     /**
-     * Retrieve a Number setting if it exists, otherwise store setting with a default value of '0' and return newly
-     * stored default value.
+     * Retrieve a Number setting if it exists.
      * 
      * @param key String key to retrieve a setting with
-     * @return Number value stored under requested key
+     * @return Number value stored under requested key, or null if setting doesn't exist
      */
-    public Number getNumber(String key) { return getNumber(key, 0); }
+    public Number getNumber(String key) {
+        if(dataNumbers.containsKey(key)) return dataNumbers.get(key);
+        else return null;
+    }
 
     /**
      * Stores a Number setting.
@@ -130,13 +132,15 @@ public class SettingsMap {
     }
 
     /**
-     * Retrieve a String setting if it exists, otherwise store setting with a default value of "" and return newly
-     * stored default value.
-     * 
+     * Retrieve a String setting if it exists.
+     *
      * @param key String key to retrieve a setting with
-     * @return String value stored under requested key
+     * @return String value stored under requested key, or null if setting doesn't exist
      */
-    public String getString(String key) { return getString(key, ""); }
+    public String getString(String key) {
+        if(dataStrings.containsKey(key)) return dataStrings.get(key);
+        else return null;
+    }
 
     /**
      * Stores a String setting.
@@ -175,13 +179,15 @@ public class SettingsMap {
     }
 
     /**
-     * Retrieve a Boolean setting if it exists, otherwise store setting with a default value of 'false' and return newly
-     * stored default value.
-     * 
+     * Retrieve a Boolean setting if it exists.
+     *
      * @param key String key to retrieve a setting with
-     * @return Boolean value stored under requested key
+     * @return Boolean value stored under requested key, or null if setting doesn't exist
      */
-    public Boolean getBoolean(String key) { return getBoolean(key, false); }
+    public Boolean getBoolean(String key) {
+        if(dataBooleans.containsKey(key)) return dataBooleans.get(key);
+        else return null;
+    }
 
     /**
      * Stores a Boolean setting.
