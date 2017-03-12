@@ -107,13 +107,23 @@ public class ReversiMinimax implements Runnable {
             node.score = node.getHeuristicScore();
             return node;
         }
-        if(node.children.isEmpty()) generateChildren(node);
-
-        ReversiNode choice = null;
 
         //if it is us, maximize score
         boolean maximize = node.currentPlayer == aiRole;
         node.score = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        //check if children need to be generated
+        if(node.children.isEmpty())
+            generateChildren(node);
+        if(node.children.isEmpty()) {
+            //TODO: Handle setting for game not ending on no-move condition
+            int basicScore = node.getBasicScore(); //our pieces - their pieces
+
+            //END GAME CONDITION, weight the score by 2^4
+            node.score = basicScore > 0 ? basicScore << 4 : basicScore >> 4;
+        }
+
+        ReversiNode choice = null;
 
         for(ReversiNode i : node.children) {
             ReversiNode b = getBestPlay(i, maxDepth);
@@ -132,8 +142,7 @@ public class ReversiMinimax implements Runnable {
         // start by getting all the possible moves for the next player
         ArrayList<BoardIndex> possible = node.getPossibleMoves();
 
-        //TODO: Handle no-move condition based on game settings
-        if(possible.isEmpty());
+        if(possible.isEmpty()) return;
 
         //go through the locations, and create new nodes for them
         for(BoardIndex l : possible) {
@@ -191,6 +200,10 @@ public class ReversiMinimax implements Runnable {
 
         public int getHeuristicScore() {
             //TODO: improve by factoring in corners and edges as different weights
+            return getBasicScore();
+        }
+
+        public int getBasicScore() {
             return board.getScore(aiRole) - board.getScore(aiRole.getNext());
         }
     }
