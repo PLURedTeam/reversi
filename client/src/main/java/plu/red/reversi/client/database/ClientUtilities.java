@@ -1,86 +1,190 @@
 package plu.red.reversi.client.database;
 
 //import statements
-import java.io.File;
 import java.sql.*;
 
 /**
- * Created by Andrew on 3/7/2017.
+ * Created by Andrew on 3/9/2017.
  */
 public class ClientUtilities {
 
-    //fields
-    private Connection conn = null; // Connection object
-    private String connStatus = null;
+    //Fields
+    private Connection conn; //Connection Object
 
+    /**
+     * Constructor for ClientUtilities class
+     * Calls the dbConnection class to create a connection
+     *  to the database (One will be created if none exist)
+     *  and sets the conn field to the connection
+     */
     public ClientUtilities() {
-        // Load the SQLiteSQL JDBC driver
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            connStatus = "Unable to load driver.";
-        }//catch
+        ConnectDB dbConnection = new ConnectDB(); //Create the connection
+        dbConnection.openDB();
+        conn = dbConnection.getConn(); //Set the database connection
     }//constructor
 
     /**
-     * Open a SQLite DB connection where url, username, and password are
-     * passed into the method
-     *
-     * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
-     *
-     * @return connection status
+     * Creates the user in the database
+     * @param username username of the user, must be unique
+     * @param password the password for the user (Stored using SHA256)
+     * @return true if user created, false otherwise
      */
-    public String openDB() {
-        try {
-            //Testing to see if db file exists
-            File file = new File("ClientDB.db");
+    public boolean createUser(String username, String password) {
+        int result = 0;
+        String sql = "Insert into USER values(?,?)";
 
-            if(file.exists()) {
-                //Connects to the database file
-                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-            } else {
-                //Creates the database file and connects to it
-                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-                CreateDB db = new CreateDB(conn); //Creates the tables in the database
-            }//else
-        } catch (SQLException e) {
-            connStatus = "Error connecting to database";
-        }//catch
-        if (conn != null)
-            connStatus = "Successfully connected to database";
-        return connStatus;
-    }// openDB
-
-    /**
-     * Close the connection to the DB
-     * @return the status of the database connection
-     */
-    public String closeDB() {
-        connStatus = null;
         try {
-            if (conn != null) {
-                conn.close();
-            }//if
-            conn = null;
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setString(1,username);
+            stmt.setString(2,password);
+
+            result = stmt.executeUpdate();
+
         } catch (SQLException e) {
-            connStatus = "Failed to close database connection: " + e;
+            System.out.println(e.getMessage());
         }//catch
 
-        if (conn == null) {
-            connStatus = "Successfully disconnected from database";
-        }
-        return connStatus;
-    }// closeDB
+        if(result > 0)
+            return true;
+        else
+            return false;
+    }//createUser
 
     /**
-     * Accessor for connection object
-     * @return the connection object
+     * Returns an array of users that are in the database
+     * @return an array of users in the database
      */
-    public Connection getConn() { return conn; }//getConn
+    public String[] getUsers() {
+        String[] users = null;
+        ResultSet rs, rsSize;
+
+        String sql = "select username from USER";
+        String sizeSql = "select count(username) from USER";
+        int size = 0;
+
+        try {
+            Statement stmt = conn.createStatement();
+
+            rsSize = stmt.executeQuery(sizeSql);
+            size = rsSize.getInt(1);
+            users = new String[size];
+
+            rs = stmt.executeQuery(sql);
+
+            int i = 0;
+            while(rs.next()) {
+                users[i] = rs.getString(1);
+                i++;
+            }//while
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }//catch
+
+        return users;
+    }//getUsers
 
     /**
-     * Mutator for connection object
-     * @param conn the connection object
+     * Deletes a user from the database
+     * @param username username of the user
+     * @param password password for the user
+     * @return true if deleted, false otherwise
      */
-    public void setConn(Connection conn) { this.conn = conn; }//setConn
-}//clientUtilites
+    public boolean deleteUser(String username, String password) {
+        int result = 0;
+        String sql = "delete from USER where username=? and password=?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setString(1,username);
+            stmt.setString(2,password);
+
+            result = stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }//catch
+
+        if(result > 0)
+            return true;
+        else
+            return false;
+    }//deleteUser
+
+    /**
+     * Tests the login information against what is in the database
+     * @param username the username of the user
+     * @param password the password of the user
+     * @return true if valid login credentials, false otherwise
+     */
+    public boolean login(String username, String password) {
+        ResultSet result;
+        boolean validLogin = false;
+        String sql = "select username from USER where username=? and password=?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setString(1,username);
+            stmt.setString(2,password);
+
+            result = stmt.executeQuery();
+
+            if(result.next())
+                validLogin = true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }//catch
+
+        return validLogin;
+    }//login
+
+    /**
+     *
+     * @param name
+     * @return
+     */
+    public int createGame(String name) {
+        int gameID = -1;
+
+
+        return gameID;
+    }//createGame
+
+    /**
+     *
+     * @param gameID
+     * @return
+     */
+    public String[] loadGame(int gameID) {
+        String[] gameHistory = null;
+
+
+        return gameHistory;
+    }//loadGame
+
+    public String[] getGames(String username) {
+        String[] games = null;
+
+        return games;
+    }//getGames
+
+    /**
+     *
+     * @param gameID
+     */
+    public void saveGameSettings(int gameID) {
+
+    }//saveGameSettings
+
+    /**
+     *
+     * @param gameID
+     */
+    public void loadGameSettings(int gameID) {
+
+    }//loadGameSettings
+
+}//ClientUtilities

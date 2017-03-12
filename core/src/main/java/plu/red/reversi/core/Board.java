@@ -21,6 +21,16 @@ public class Board {
     public Board(int sz){
         size = sz;
         board = new PlayerRole[sz][sz];
+        for(int i = 0; i < size; i++) {
+            for(int j = 0; j < size; j++) {
+                board[i][j] = PlayerRole.NONE;
+            }
+        }
+        board[(size/2)-1][((size/2)-1)] = PlayerRole.WHITE;
+        board[((size/2)-1)][((size/2)-1)+1] = PlayerRole.BLACK;
+        board[((size/2)-1)+1][((size/2)-1)] = PlayerRole.BLACK;
+        board[((size/2)-1)+1][((size/2)-1)+1] = PlayerRole.WHITE;
+
     }
 
     /**
@@ -29,12 +39,22 @@ public class Board {
      */
     public Board(Board b){
         size = b.size;
-        PlayerRole[][] copyBoard = new PlayerRole[size][size];
+        board = new PlayerRole[size][size];
         for(int r = 0; r < size; r++){
             for(int c = 0; c < size; c++){
-                copyBoard[r][c] = board[r][c];
+                board[r][c] = b.board[r][c];
             }
         }//end loop
+    }
+
+    /**
+     * finds the value at a specific place of the board
+     * @param index
+     * @return role
+     * @throws IndexOutOfBoundsException
+     */
+    public final PlayerRole at(BoardIndex index) throws IndexOutOfBoundsException{
+        return board[index.row][index.column];
     }
 
     /**
@@ -42,7 +62,7 @@ public class Board {
      * @param role, color of the player
      * @return score, number of instances of the player on the board
      */
-    int getScore(PlayerRole role){
+    public int getScore(PlayerRole role){
         int score=0;
 
         //look for the instances of the role on the board
@@ -62,17 +82,21 @@ public class Board {
      * @param role, color of the player
      * @param index, square of the board move is attempting to be made onto
      */
-    boolean isValidMove(PlayerRole role, BoardIndex index){
+    public boolean isValidMove(PlayerRole role, BoardIndex index){
         //check if the index is out of bounds
         if(index.row >= size || index.column >= size)
             return false;
 
+        //check if the index is empty
+        if(board[index.row][index.column] != PlayerRole.NONE)
+            return false;
+
         //This loop calls the private function isValidMove for each direction
         for(int i = 0; i < 8; i++){
-            int dx = i < 3 ? -1 : ( i > 4 ? 1 : 0);
-            int dy = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
+            int dr = i < 3 ? -1 : ( i > 4 ? 1 : 0);
+            int dc = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
             //checks if the move is valid
-            if(isValidMove(role, dx, dy)) {
+            if(isValidMove(role, dr, dc, index)) {
                 return true;
             }
         }//end loop
@@ -82,32 +106,38 @@ public class Board {
 
     /**
      * Private method isValidMove handles the loop to check move validity in each direction
-     * @param dx change in x
-     * @param dy change in y
+     * @param dr change in x
+     * @param dc change in y
      * @return if the move is valid
      */
-    private boolean isValidMove(PlayerRole role, int dx, int dy){
-        if(board[dx][dy] == role)
+    private boolean isValidMove(PlayerRole role, int dr, int dc, BoardIndex i){
+        try {
+            PlayerRole r = board[i.row + dr][i.column + dc];
+            if (r == role || !r.isValid())
+                return false;
+        }
+        catch(IndexOutOfBoundsException e){
             return false;
-
-        for(int j = 1; j<size; j++){
-            try {
-                //if the tile is occupied by a piece of the same color
-                if(board[dx*j][dy*j] == role) {
-                    return true;
-                }
-                //if the tile is occupied by no piece
-                if(board[dx*j][dy*j] == PlayerRole.NONE) {
-                    return false;
-                }
-                //if the tile is occupied by a piece of
-            }
-            catch(IndexOutOfBoundsException e){
-                System.err.println("IndexOutOfBoundsException: " + e.getMessage());
-            }
         }
 
-        return false;//if neither condition in try was met
+        for(int j = 1; j<size; j++){
+            PlayerRole r=PlayerRole.NONE;
+            try {
+                r = board[i.row + dr * j][i.column + dc * j];
+            }
+            catch(IndexOutOfBoundsException e){
+                return false;
+            }
+            //if the tile is occupied by a piece of the same color
+            if(r == role) {
+                return true;
+            }
+            //if the tile is occupied by no piece
+            if(!r.isValid()) {
+                return false;
+            }
+        }
+        return false;
     }
 
 
@@ -116,20 +146,19 @@ public class Board {
      * @param role of the player
      * @return ArrayList moves
      */
-    ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
+    public ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
         //declare an array for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
+        BoardIndex indx = new BoardIndex();
+
         //This loop calls the private function isValidMove for each direction
-        for(int i = 0; i < 8; i++){
-            int dx = i < 3 ? -1 : ( i > 4 ? 1 : 0);
-            int dy = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
-            //checks if the move is valid
-            if(isValidMove(role, dx, dy)) {
-                BoardIndex indx = new BoardIndex();
-                indx.row = dx;
-                indx.column = dy;
-                moves.add(indx); //adds the valid move into the array of moves
+
+        for(indx.row = 0; indx.row < size; indx.row++) {
+            for(indx.column = 0; indx.column < size; indx.column++) {
+                //checks if the move is valid
+                if (isValidMove(role, indx))
+                    moves.add(indx); //adds the valid move into the array of moves
             }
         }//end loop
         return moves;
@@ -141,9 +170,31 @@ public class Board {
      * Applies the move made, updating the board
      * @param c command made
      */
-    void apply(CommandMove c){
-        BoardIndex i = c.position;
-        board[i.row][i.column] = c.player;
+
+    public void apply(CommandMove c, boolean flipTiles) {
+        //TODO: Actually flip tile
+        board[c.position.row][c.position.column] = c.player;
+    }
+
+    /**
+     * Applies a move and flips tiles
+     * @param c command made
+     */
+    public void apply(CommandMove c) {
+        apply(c, true);
+    }
+
+    public boolean equals(final Board b){
+        //if the size isn't the same return false
+        if(this.size != b.size)
+            return false;
+
+        for(int r = 0; r < size; r++)
+            for(int c = 0; c < size; c++){
+                if(board[r][c] != b.at(new BoardIndex(r, c)))
+                    return false;
+            }
+        return true;
     }
 
 

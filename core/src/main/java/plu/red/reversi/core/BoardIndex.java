@@ -25,6 +25,10 @@ public class BoardIndex {
         return row + column*10000;
     }
 
+    public boolean equals(final BoardIndex i){
+        return i.row == row && i.column == column;
+    }
+
     //TODO: Convert to and from character
 
 }
