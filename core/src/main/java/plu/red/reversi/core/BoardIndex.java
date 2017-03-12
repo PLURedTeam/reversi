@@ -16,6 +16,10 @@ public class BoardIndex {
         this.column = column;
     }
 
+    public BoardIndex(BoardIndex i){
+        this(i.row, i.column);
+    }
+
     // Added so we can use BoardIndex as a key in something like a HashMap. Otherwise every BoardIndex object has a
     // unique hash, even if they have the same contents.
     @Override

@@ -147,18 +147,18 @@ public class Board {
      * @return ArrayList moves
      */
     public ArrayList<BoardIndex> getPossibleMoves(PlayerRole role ){
-        //declare an array for possible moves method
+        //declare an array of type BoardIndex for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
         BoardIndex indx = new BoardIndex();
 
-        //This loop calls the private function isValidMove for each direction
-
+        //This loop calls the function isValidMove for each direction
         for(indx.row = 0; indx.row < size; indx.row++) {
             for(indx.column = 0; indx.column < size; indx.column++) {
                 //checks if the move is valid
-                if (isValidMove(role, indx))
-                    moves.add(indx); //adds the valid move into the array of moves
+                if (isValidMove(role, indx)) {
+                    moves.add(new BoardIndex(indx)); //adds the valid move into the array of moves
+                }
             }
         }//end loop
         return moves;
@@ -169,11 +169,36 @@ public class Board {
     /**
      * Applies the move made, updating the board
      * @param c command made
+     * @param flipTiles
      */
-
     public void apply(CommandMove c, boolean flipTiles) {
-        //TODO: Actually flip tile
-        board[c.position.row][c.position.column] = c.player;
+        if (flipTiles) {
+            for(int i = 0; i < 8; i++) {
+                int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
+                int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
+                //Actually flip tile
+                flipTiles(c, dr, dc, 0);
+            }
+        }
+    }
+
+    private boolean flipTiles(CommandMove c, int dr, int dc, int count){
+        PlayerRole tile = null;
+        try{
+            tile = board[dr*count + c.position.row][dc*count + c.position.column];
+        }
+        catch (ArrayIndexOutOfBoundsException e){
+            return false;
+        }
+        if(tile == c.player)
+            return true;
+        if(tile.isValid()){
+            if(flipTiles(c, dr, dc, count + 1)){
+                board[c.position.row][c.position.column] = c.player;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

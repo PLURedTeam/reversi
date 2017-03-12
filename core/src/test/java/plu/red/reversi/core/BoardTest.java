@@ -37,14 +37,24 @@ public class BoardTest {
 
     }
 
-
-
     @Test
-    public void testApply() {
-        CommandMove c = new CommandMove(Command.Source.PLAYER, PlayerRole.BLACK, new BoardIndex(0, 0));
-        board.apply(c);
+    public void getPossibleMoves() {
+        Board newBoard = new Board(4);
+        ArrayList<BoardIndex> moveList;
+        moveList = newBoard.getPossibleMoves(PlayerRole.BLACK);
 
-        assertEquals(PlayerRole.BLACK, board.at(c.position));
+        assertTrue(moveList.get(0).equals(new BoardIndex(0,1)));
+        assertTrue(moveList.get(1).equals(new BoardIndex(1,0)));
+        assertTrue(moveList.get(2).equals(new BoardIndex(2,3)));
+        assertTrue(moveList.get(3).equals(new BoardIndex(3,2)));
+
     }
+
+//    @Test
+//    public void testApply() {
+//        CommandMove c = new CommandMove(Command.Source.PLAYER, PlayerRole.BLACK, new BoardIndex(1, 0));
+//        board.apply(c);
+//        assertEquals(PlayerRole.BLACK, board.at(c.position));
+//    }
 
 }
