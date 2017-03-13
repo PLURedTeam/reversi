@@ -17,7 +17,7 @@ public class SettingsMap {
     /**
      * Internal Wrapper class for Number which optionally has constraints as well.
      */
-    protected final class NumWrapper {
+    public static final class NumWrapper {
         private Number number;
         private Number min;
         private Number max;
@@ -127,6 +127,11 @@ public class SettingsMap {
         }
         return result;
     }
+
+
+    public Map<String, Boolean> getBooleanData() { return dataBooleans; }
+    public Map<String, String> getStringData() { return dataStrings; }
+    public Map<String, NumWrapper> getNumberData() { return dataNumbers; }
 
 
     /**
