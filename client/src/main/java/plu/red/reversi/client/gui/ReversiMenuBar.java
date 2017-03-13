@@ -1,5 +1,9 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.player.Player;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +19,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
     /** Quit item */
     private JMenuItem quitMenuItem;
+    private JMenuItem surrenderMenuItem;
 
     /**
      * Constructs the menu bar
@@ -60,6 +65,16 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         menu.addSeparator();
 
+        surrenderMenuItem = new JMenuItem("Surrender");
+        surrenderMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        surrenderMenuItem.getAccessibleContext().setAccessibleDescription(
+                "Surrender the current game.");
+        surrenderMenuItem.addActionListener(this);
+        menu.add(surrenderMenuItem);
+
+        menu.addSeparator();
+
         quitMenuItem = new JMenuItem("Quit");
         quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_Q, ActionEvent.META_MASK));
@@ -75,6 +90,10 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == quitMenuItem) {
             System.exit(0);
+        } else if(e.getSource() == surrenderMenuItem) {
+            Player player = gui.getGame().getCurrentPlayer();
+            if(player instanceof HumanPlayer)
+                gui.getGame().acceptCommand(new SurrenderCommand(player.getRole()));
         }
     }
 }
