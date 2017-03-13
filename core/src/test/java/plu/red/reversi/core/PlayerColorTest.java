@@ -31,7 +31,7 @@ public class PlayerColorTest {
     @Test
     public void testValidRoleTotals() {
         // Total Count - needs to be changed when more are added
-        assertEquals(2, PlayerColor.validPlayers().length);
+        assertEquals(4, PlayerColor.validPlayers().length);
     }
 
     @Test
@@ -45,7 +45,9 @@ public class PlayerColorTest {
     public void testNext() {
         assertEquals(PlayerColor.NONE, PlayerColor.NONE.getNext());
         assertEquals(PlayerColor.BLACK, PlayerColor.WHITE.getNext());
-        assertEquals(PlayerColor.WHITE, PlayerColor.BLACK.getNext());
+        assertEquals(PlayerColor.RED, PlayerColor.BLACK.getNext());
+        assertEquals(PlayerColor.BLUE, PlayerColor.RED.getNext());
+        assertEquals(PlayerColor.WHITE, PlayerColor.BLUE.getNext());
     }
 
     @Test

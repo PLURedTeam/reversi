@@ -104,6 +104,20 @@ public class Board {
     }
 
     /**
+     * Method to setup the initial board position. Called manually from wherever.
+     *
+     * @param color1 PlayerColor to use for Player 1
+     * @param color2 PlayerColor to use for Player 2
+     */
+    public void setupBoard(PlayerColor color1, PlayerColor color2) {
+        // Set the board up
+        board[(size/2)-1][((size/2)-1)] = color1;
+        board[((size/2)-1)][((size/2)-1)+1] = color2;
+        board[((size/2)-1)+1][((size/2)-1)] = color2;
+        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
+    }
+
+    /**
      * finds the value at a specific place of the board
      * @param index
      * @return role

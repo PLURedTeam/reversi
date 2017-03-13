@@ -16,8 +16,7 @@ public class SettingsMapTest {
     public void testNumbers() {
         SettingsMap settings = new SettingsMap();
         assertEquals(false, settings.containsNumber("TestNumber"));
-        assertEquals(0, settings.getNumber("TestNumber"));
-        assertEquals(true, settings.containsNumber("TestNumber"));
+        assertEquals(null, settings.getNumber("TestNumber"));
         settings.setNumber("TestNumber", 1);
         assertEquals(1, settings.getNumber("TestNumber"));
         assertEquals(-123.456, settings.getNumber("ComplexNumber", -123.456));
@@ -30,8 +29,7 @@ public class SettingsMapTest {
     public void testStrings() {
         SettingsMap settings = new SettingsMap();
         assertEquals(false, settings.containsString("TestString"));
-        assertEquals("", settings.getString("TestString"));
-        assertEquals(true, settings.containsString("TestString"));
+        assertEquals(null, settings.getString("TestString"));
         settings.setString("TestString", "test");
         assertEquals("test", settings.getString("TestString"));
         assertEquals("This is a long string", settings.getString("ComplexString", "This is a long string"));
@@ -44,8 +42,7 @@ public class SettingsMapTest {
     public void testBooleans() {
         SettingsMap settings = new SettingsMap();
         assertEquals(false, settings.containsBoolean("TestBoolean"));
-        assertEquals(false, settings.getBoolean("TestBoolean"));
-        assertEquals(true, settings.containsBoolean("TestBoolean"));
+        assertEquals(null, settings.getBoolean("TestBoolean"));
         settings.setBoolean("TestBoolean", true);
         assertEquals(true, settings.getBoolean("TestBoolean"));
         assertEquals(true, settings.getBoolean("ComplexBoolean", true));
@@ -66,7 +63,7 @@ public class SettingsMapTest {
         settings.setBoolean("Fill", true);
         settings.setBoolean("Fill2", false);
         assertEquals(false, settings.isEmpty());
-        assertEquals(5, settings.size());
+        assertEquals(4, settings.size());
         settings.clear();
         assertEquals(true, settings.isEmpty());
         assertEquals(0, settings.size());
