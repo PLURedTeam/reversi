@@ -17,7 +17,7 @@ import java.awt.event.KeyEvent;
  */
 public class DeveloperMenu extends JMenu implements ActionListener {
 
-    private GameWindow gui;
+    private MainWindow gui;
     private JMenuItem testFlipAnimItem;
     private JMenuItem changePlayer1NameItem;
     private JMenuItem swapActivePlayerItem;
@@ -27,9 +27,9 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     /**
      * Initialize the developer menu
      *
-     * @param gui the main GameWindow object
+     * @param gui the main MainWindow object
      */
-    public DeveloperMenu(GameWindow gui) {
+    public DeveloperMenu(MainWindow gui) {
 
         this.gui = gui;
         this.setText("Developer");
@@ -70,9 +70,9 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void testFlip() {
-        gui.getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(1, 5),
+        gui.getGamePanel().getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(1, 5),
                 PlayerColor.WHITE);
-        gui.getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(5, 6),
+        gui.getGamePanel().getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(5, 6),
                 PlayerColor.WHITE);
     }
 
@@ -82,9 +82,9 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void swapActivePlayer() {
-        gui.getGame().nextTurn();
+        gui.getGamePanel().getGame().nextTurn();
         // Spoof PlayerInfoPanel with a fake command in order to update. Command contents don't matter, as it won't read them.
-        gui.getPlayerInfoPanel().commandApplied(new MoveCommand(Command.Source.PLAYER, PlayerColor.WHITE, new BoardIndex(0,0)));
+        gui.getGamePanel().getPlayerInfoPanel().commandApplied(new MoveCommand(Command.Source.PLAYER, PlayerColor.WHITE, new BoardIndex(0,0)));
     }
 
     private void testServer() {

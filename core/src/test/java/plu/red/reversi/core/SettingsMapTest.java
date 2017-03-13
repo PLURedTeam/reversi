@@ -26,6 +26,25 @@ public class SettingsMapTest {
     }
 
     @Test
+    public void testConstraintNumbers() {
+        SettingsMap settings = new SettingsMap();
+        settings.setNumber("ConstraintTest1", -30.37, 0.0, 10.99);
+        assertEquals(0, settings.getNumber("ConstraintTest1").intValue());
+        settings.setNumber("ConstraintTest1", 5.0);
+        assertEquals(5, settings.getNumber("ConstraintTest1").intValue());
+        settings.setNumber("ConstraintTest1", 30);
+        assertEquals(10.99, settings.getNumber("ConstraintTest1").doubleValue(), 0.00001);
+        settings.setNumber("ConstraintTest2", -30, -15.0, null);
+        assertEquals(-15, settings.getNumber("ConstraintTest2").intValue());
+        settings.setNumber("ConstraintTest2", 42);
+        assertEquals(42.0, settings.getNumber("ConstraintTest2").doubleValue(), 0.00001);
+        settings.setNumber("ConstraintTest3", -42.5, null, -1);
+        assertEquals(-42.5, settings.getNumber("ConstraintTest3").doubleValue(), 0.00001);
+        settings.setNumber("ConstraintTest3", 42);
+        assertEquals(-1, settings.getNumber("ConstraintTest3").intValue());
+    }
+
+    @Test
     public void testStrings() {
         SettingsMap settings = new SettingsMap();
         assertEquals(false, settings.containsString("TestString"));
@@ -87,9 +106,9 @@ public class SettingsMapTest {
             assertEquals("A String",            json.getJSONObject("strings").getString("Val1"));
             assertEquals("Another String",      json.getJSONObject("strings").getString("Val2"));
             assertEquals("Yet Another String",  json.getJSONObject("strings").getString("Val3"));
-            assertEquals(42,    json.getJSONObject("numbers").getInt("Val1"));
-            assertEquals(-12345,    json.getJSONObject("numbers").getInt("Val2"));
-            assertEquals(592.593,   json.getJSONObject("numbers").getDouble("Val3"), 0.00001);
+            assertEquals(42,    json.getJSONObject("numbers").getJSONObject("Val1").getInt("value"));
+            assertEquals(-12345,    json.getJSONObject("numbers").getJSONObject("Val2").getInt("value"));
+            assertEquals(592.593,   json.getJSONObject("numbers").getJSONObject("Val3").getDouble("value"), 0.00001);
         } catch(JSONException ex) {
             fail(ex.getMessage());
         }
@@ -112,6 +131,10 @@ public class SettingsMapTest {
             numberMap.put("Val1", 42);
             numberMap.put("Val2", -12345);
             numberMap.put("Val3", 592.593);
+            JSONObject cNum = new JSONObject();
+            cNum.put("value", 35);
+            cNum.put("min", 100);
+            numberMap.put("Val4", cNum);
             json.put("numbers", numberMap);
         } catch(JSONException ex) {
             fail(ex.getMessage());
@@ -125,6 +148,7 @@ public class SettingsMapTest {
         assertEquals(42, settings.getNumber("Val1").intValue());
         assertEquals(-12345, settings.getNumber("Val2").intValue());
         assertEquals(592.593, settings.getNumber("Val3").doubleValue(), 0.00001);
+        assertEquals(100, settings.getNumber("Val4").intValue());
     }
 
 

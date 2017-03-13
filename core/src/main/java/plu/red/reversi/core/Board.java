@@ -49,12 +49,14 @@ public class Board {
     //  Members
     // *********
 
-    private PlayerColor[][] board;//2D array that represents the board
+    private PlayerColor[][] board; // 2D array that represents the board
     public final int size;
 
 
     /**
      * Constructor for initializing board array
+     *
+     * @param sz for the size of the board
      */
     public Board(int sz){
         size = sz;
@@ -68,6 +70,7 @@ public class Board {
 
     /**
      * Copy constructor creating a copy of
+     *
      * @param b for the board
      */
     public Board(Board b){
@@ -77,7 +80,7 @@ public class Board {
             for(int c = 0; c < size; c++){
                 board[r][c] = b.board[r][c];
             }
-        }//end loop
+        }// end loop
     }
 
     /**
@@ -118,10 +121,11 @@ public class Board {
     }
 
     /**
-     * finds the value at a specific place of the board
-     * @param index
-     * @return role
-     * @throws IndexOutOfBoundsException
+     * Finds the value at a specific place of the board
+     *
+     * @param index being searched for
+     * @return color of the player
+     * @throws IndexOutOfBoundsException if the index that is passed in is out of bounds
      */
     public final PlayerColor at(BoardIndex index) throws IndexOutOfBoundsException{
         return board[index.row][index.column];
@@ -129,6 +133,7 @@ public class Board {
 
     /**
      * Returns the score of the PlayerColor object passed in
+     *
      * @param role, color of the player
      * @return score, number of instances of the player on the board
      */
@@ -149,6 +154,7 @@ public class Board {
 
     /**
      * Checks the board to see if the move attempted is valid
+     *
      * @param role, color of the player
      * @param index, square of the board move is attempting to be made onto
      */
@@ -167,15 +173,16 @@ public class Board {
             int dc = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
             //checks if the move is valid
             if(isValidMove(role, dr, dc, index)) {
-                return true;
+                return true; //if the move is valid
             }
         }//end loop
 
-        return false;
+        return false; //if the move is invalid
     }
 
     /**
      * Private method isValidMove handles the loop to check move validity in each direction
+     *
      * @param dr change in x
      * @param dc change in y
      * @return if the move is valid
@@ -213,10 +220,11 @@ public class Board {
 
     /**
      * Find the different moves that could be made and store them into an ArrayList
-     * @param role of the player
+     *
+     * @param color of the player
      * @return ArrayList moves
      */
-    public ArrayList<BoardIndex> getPossibleMoves(PlayerColor role ){
+    public ArrayList<BoardIndex> getPossibleMoves(PlayerColor color ){
         //declare an array for possible moves method
         ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
 
@@ -226,7 +234,7 @@ public class Board {
         for(indx.row = 0; indx.row < size; indx.row++) {
             for(indx.column = 0; indx.column < size; indx.column++) {
                 //checks if the move is valid
-                if (isValidMove(role, indx)) {
+                if (isValidMove(color, indx)) {
                     moves.add(new BoardIndex(indx)); //adds the valid move into the array of moves
                 }
             }
@@ -248,12 +256,22 @@ public class Board {
                 int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
                 int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
                 //Actually flip tile
-                if(flipTiles(c, dr, dc, 1)) anyFlipped = true;
+                if(flipTiles(c, dr, dc, 1))
+                    anyFlipped = true;
             }
-            if(anyFlipped) board[c.position.row][c.position.column] = c.player;
+            if(anyFlipped)
+                board[c.position.row][c.position.column] = c.player;
         }
     }
 
+    /**
+     * Private helper method to check for flippable tiles in each direction flip if valid
+     * @param c gets the move command, index and color
+     * @param dr change in row
+     * @param dc change in column
+     * @param count
+     * @return
+     */
     private boolean flipTiles(MoveCommand c, int dr, int dc, int count) {
         PlayerColor tile = null;
         try {
@@ -272,7 +290,7 @@ public class Board {
         }
         if (tile.isValid()) {
             if (flipTiles(c, dr, dc, count + 1)) {
-                board[c.position.row + dr*count][c.position.column + dc*count] = c.player;
+                board[c.position.row + dr * count][c.position.column + dc * count] = c.player;
                 return true;
             }
         }

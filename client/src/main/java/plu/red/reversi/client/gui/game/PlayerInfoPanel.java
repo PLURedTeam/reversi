@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;
@@ -77,7 +77,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
      */
     @Override
     public void commandApplied(Command cmd) {
-        if(cmd instanceof MoveCommand) {
+        if(cmd instanceof MoveCommand || cmd instanceof SurrenderCommand) {
             // Update this GUI component
             setActivePlayer(game.getCurrentPlayer().getRole());
             this.repaint();

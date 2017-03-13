@@ -1,5 +1,9 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.player.Player;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,18 +14,19 @@ import java.awt.event.KeyEvent;
  */
 public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
-    /** The GameWindow */
-    private GameWindow gui;
+    /** The MainWindow */
+    private MainWindow gui;
 
     /** Quit item */
     private JMenuItem quitMenuItem;
+    private JMenuItem surrenderMenuItem;
 
     /**
      * Constructs the menu bar
      *
-     * @param gui the main GameWindow
+     * @param gui the main MainWindow
      */
-    public ReversiMenuBar(GameWindow gui) {
+    public ReversiMenuBar(MainWindow gui) {
         this.gui = gui;
 
         // Build the "Game" menu
@@ -60,6 +65,16 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         menu.addSeparator();
 
+        surrenderMenuItem = new JMenuItem("Surrender");
+        surrenderMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        surrenderMenuItem.getAccessibleContext().setAccessibleDescription(
+                "Surrender the current game.");
+        surrenderMenuItem.addActionListener(this);
+        menu.add(surrenderMenuItem);
+
+        menu.addSeparator();
+
         quitMenuItem = new JMenuItem("Quit");
         quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_Q, ActionEvent.META_MASK));
@@ -75,6 +90,10 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == quitMenuItem) {
             System.exit(0);
+        } else if(e.getSource() == surrenderMenuItem) {
+            Player player = gui.getGamePanel().getGame().getCurrentPlayer();
+            if(player instanceof HumanPlayer)
+                gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
         }
     }
 }

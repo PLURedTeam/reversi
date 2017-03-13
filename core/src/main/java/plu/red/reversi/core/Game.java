@@ -3,7 +3,10 @@ package plu.red.reversi.core;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.listener.IGameOverListener;
+import plu.red.reversi.core.listener.IStatusListener;
 import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
@@ -26,6 +29,8 @@ public class Game {
     // This listener exists only because of the separation of Core and Client packages, which allows for only one-way
     //  communication between classes in different modules
     protected HashSet<ICommandListener> listenerSetCommands = new HashSet<ICommandListener>();
+    protected HashSet<IGameOverListener> listenerSetGameOver = new HashSet<IGameOverListener>();
+    protected HashSet<IStatusListener> listenerSetStatus = new HashSet<IStatusListener>();
 
     /**
      * Registers an ICommandListener that will have signals sent to it when Commands are applied.
@@ -37,6 +42,24 @@ public class Game {
     }
 
     /**
+     * Registers an IGameOverListener that will have signals sent to it when the Game ends.
+     *
+     * @param listener IGameOverListener to register
+     */
+    public void addGameOverListener(IGameOverListener listener) {
+        listenerSetGameOver.add(listener);
+    }
+
+    /**
+     * Registers an IStatusListener that will have signals sent to it when a status message occurs.
+     *
+     * @param listener IStatusListener to register
+     */
+    public void addStatusListener(IStatusListener listener) {
+        listenerSetStatus.add(listener);
+    }
+
+    /**
      * Unregisters an existing ICommandListener that has previously been registered. Does nothing if the specified
      * ICommandListener has not previously been registered.
      *
@@ -45,6 +68,27 @@ public class Game {
     public void removeCommandListener(ICommandListener listener) {
         listenerSetCommands.remove(listener);
     }
+
+    /**
+     * Unregisters an existing IGameOverListener that has previously been registered. Does nothing if the specified
+     * IGameOverListener has not previously been registered.
+     *
+     * @param listener IGameOverListener to unregister
+     */
+    public void removeGameOverListener(IGameOverListener listener) {
+        listenerSetGameOver.remove(listener);
+    }
+
+    /**
+     * Unregisters an existing IStatusListener that has previously been registered. Does nothing if the specified
+     * IStatusListener has not previously been registered.
+     *
+     * @param listener IStatusListener to unregister
+     */
+    public void removeStatusListener(IStatusListener listener) {
+        listenerSetStatus.remove(listener);
+    }
+    
 
 
 
@@ -62,6 +106,9 @@ public class Game {
     protected final HashMap<PlayerColor, Player> players = new HashMap<PlayerColor, Player>();
     protected PlayerColor currentPlayerColor = null;
     protected final HashSet<PlayerColor> usedPlayers = new HashSet<PlayerColor>();
+    protected final HashSet<PlayerColor> surrenderedPlayers = new HashSet<PlayerColor>();
+
+    protected boolean gameRunning = true;
 
 
 
@@ -70,23 +117,13 @@ public class Game {
     // ****************
 
     /**
-     * Constructor. Creates a new Game object with given settings and default board size of 8.
+     * Constructor. Creates a new Game object with given settings.
      *
      * @param settings SettingsMap to start Game with
      */
     public Game(SettingsMap settings) {
-        this(settings, 8);
-    }
-
-    /**
-     * Constructor. Creates a new Game object with given settings and board size.
-     *
-     * @param settings SettingsMap to start Game with
-     * @param boardSize Size of the board to create for this Game
-     */
-    public Game(SettingsMap settings, int boardSize) {
         this.settings = settings;
-        this.board = new Board(boardSize);
+        this.board = new Board(settings.getNumber("BoardSize").intValue());
         this.history = new History();
     }
 
@@ -147,8 +184,16 @@ public class Game {
     public Set<PlayerColor> getUsedPlayers() { return usedPlayers; }
 
     /**
+     * Retrieves the Set of PlayerRoles that have surrendered.
+     *
+     * @return this Game's Set of surrendered PlayerRoles
+     */
+    public Set<PlayerColor> getSurrenderedPlayers() { return surrenderedPlayers; }
+
+    /**
      * Sets the player for a game. Player role is dependant on the player's stored role. Will overwrite any preexisting
-     * stored players, in order to make it easy to switch out players mid-game.
+     * stored players, in order to make it easy to switch out players mid-game. Should not be used to add more players
+     * in the middle of a game.
      *
      * @param player Player object to set
      * @throws IllegalArgumentException if the given Player object does not have this Game object assigned to it, or if
@@ -188,8 +233,34 @@ public class Game {
      * @return Player whose turn is current after incrementing
      */
     public Player nextTurn() {
+        if(!gameRunning) return players.get(currentPlayerColor);
+        // Call internal helper recursive method
+        return nextTurn(0);
+    }
+    
+    protected final Player nextTurn(int skipCount) {
+
+        // Check to see if we need to end immediately
+        if(skipCount > usedPlayers.size()) {
+            endGame();
+            return players.get(currentPlayerColor);
+        }
+
+        // Iterate once through the turn loop
         currentPlayerColor = currentPlayerColor.getNext(usedPlayers);
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
+
+        // Check if the current player has already surrendered
+        if(surrenderedPlayers.contains(currentPlayerColor)) nextTurn(skipCount + 1);
+
+        // Check if its even possible for this Player to play
+        else if (board.getPossibleMoves(currentPlayerColor).isEmpty()) {
+            if (settings.getBoolean("AllowTurnSkipping"))
+                nextTurn(skipCount + 1); // Skip to the next Player's turn
+            else endGame();
+        }
+
+        // Return the Player we settled on
         return players.get(currentPlayerColor);
     }
 
@@ -205,6 +276,7 @@ public class Game {
 
         // Send Move Commands to the Board object
         if(cmd instanceof MoveCommand) {
+            if(!gameRunning) return false;
             board.apply((MoveCommand)cmd);
             nextTurn();
         }
@@ -212,6 +284,14 @@ public class Game {
         // Send Chat Commands somewhere
         if(cmd instanceof ChatCommand) {
             // TODO: Send Chat Command wherever it needs to go
+        }
+
+        // Listen to Surrender Commands
+        if(cmd instanceof SurrenderCommand) {
+            if(!gameRunning) return false;
+            PlayerColor player = ((SurrenderCommand)cmd).player;
+            surrenderedPlayers.add(player);
+            if(player == currentPlayerColor) nextTurn();
         }
 
         // Register the Command in History
@@ -222,5 +302,51 @@ public class Game {
             listener.commandApplied(cmd);
 
         return true;
+    }
+
+    /**
+     * End this Game, and determine the winner. Afterwards, signal to all IGameOverListeners that the Game has ended.
+     */
+    public void endGame() {
+        
+        // Find the winner
+        PlayerColor winner = PlayerColor.NONE;
+        int score = -1;
+        for(PlayerColor color : usedPlayers) {
+            // Surrendered Players aren't in the running for winning :P
+            if(surrenderedPlayers.contains(color)) continue;
+            int ss = board.getScore(color);
+            if(ss > score) {
+                score = ss;
+                winner = color;
+            }
+        }
+
+        gameRunning = false;
+
+        this.statusMessage("Game Over!");
+
+        // Signal Listeners that the Game has ended
+        for(IGameOverListener listener : listenerSetGameOver)
+            listener.onGameOver(getPlayer(winner), score);
+    }
+
+    /**
+     * Determines whether or not this game is still active and being played.
+     *
+     * @return true if this game is still running, false if it has ended
+     */
+    public boolean isGameOver() {
+        return !gameRunning;
+    }
+
+    /**
+     * Passes a status message to all IStatusListeners registered to this Game.
+     *
+     * @param message String message to pass
+     */
+    public void statusMessage(String message) {
+        for(IStatusListener listener : listenerSetStatus)
+            listener.onStatusMessage(message);
     }
 }

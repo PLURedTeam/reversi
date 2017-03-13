@@ -26,7 +26,7 @@ public class ThreadPoolTest {
     }
 
     @Test
-    public void testChangeSize() {
+    public void testChangeSize() throws InterruptedException {
         ThreadPool pool = new ThreadPool(1);
 
         Thread origThread = pool.getThreads()[0];
@@ -47,6 +47,7 @@ public class ThreadPoolTest {
         pool.changeThreadCount(5);
 
         Assert.assertEquals(origThread, pool.getThreads()[0]);
+        Thread.sleep(10); // should eliminate race conditions
         Assert.assertTrue(!quitThread.isAlive() || quitThread.isInterrupted());
 
         for(Thread t : pool.getThreads()) {
