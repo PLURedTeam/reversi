@@ -7,9 +7,9 @@ import plu.red.reversi.core.PlayerColor;
 /**
  * Glory to the Red Team.
  *
- * Command implementation class for a board move that causes flip side-effects.
+ * Command implementation class for a board move that doesn't cause side-effects.
  */
-public class MoveCommand extends BoardCommand {
+public class SetCommand extends BoardCommand {
 
     public final PlayerColor player;
     public final BoardIndex position;
@@ -20,7 +20,7 @@ public class MoveCommand extends BoardCommand {
      * @param player Player to make the move
      * @param position Location on the board.
      */
-    public MoveCommand(PlayerColor player, BoardIndex position) {
+    public SetCommand(PlayerColor player, BoardIndex position) {
         this(Source.PLAYER, player, position);
     }
 
@@ -30,22 +30,21 @@ public class MoveCommand extends BoardCommand {
      * @param player Player to make the move.
      * @param position Location on the board.
      */
-    public MoveCommand(Source source, PlayerColor player, BoardIndex position) {
+    public SetCommand(Source source, PlayerColor player, BoardIndex position) {
         super(source);
         this.player = player;
         this.position = position;
     }
 
     /**
-     * Uses data from the Game object to determine whether or not this Command is valid. IE: Whether a move played by a
-     * player is on a valid position of the board.
+     * Uses data from the Game object to determine whether or not this Command is valid.
      *
      * @param game Game object to pull data from
      * @return true if this Command is valid, false otherwise
      */
     @Override
     public boolean isValid(Game game) {
-        // Is it this Player's turn and is the position valid on the board
-        return game.getCurrentPlayer().getRole() == player && game.getBoard().isValidMove(player, position);
+        // Always valid
+        return true;
     }
 }
