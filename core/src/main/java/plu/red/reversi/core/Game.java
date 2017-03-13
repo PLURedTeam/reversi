@@ -95,23 +95,13 @@ public class Game {
     // ****************
 
     /**
-     * Constructor. Creates a new Game object with given settings and default board size of 8.
+     * Constructor. Creates a new Game object with given settings.
      *
      * @param settings SettingsMap to start Game with
      */
     public Game(SettingsMap settings) {
-        this(settings, 8);
-    }
-
-    /**
-     * Constructor. Creates a new Game object with given settings and board size.
-     *
-     * @param settings SettingsMap to start Game with
-     * @param boardSize Size of the board to create for this Game
-     */
-    public Game(SettingsMap settings, int boardSize) {
         this.settings = settings;
-        this.board = new Board(boardSize);
+        this.board = new Board(settings.getNumber("BoardSize").intValue());
         this.history = new History();
     }
 

@@ -18,6 +18,8 @@ public class SettingsLoader {
         
         settings.getBoolean("AllowTurnSkipping", false);
 
+        settings.getNumber("BoardSize", 8, 4, null);
+
 
         return settings;
     }
