@@ -6,6 +6,7 @@ import org.codehaus.jettison.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Glory to the Red Team.
@@ -129,9 +130,9 @@ public class SettingsMap {
     }
 
 
-    public Map<String, Boolean> getBooleanData() { return dataBooleans; }
-    public Map<String, String> getStringData() { return dataStrings; }
-    public Map<String, NumWrapper> getNumberData() { return dataNumbers; }
+    public Set<Map.Entry<String, Boolean>> getBooleanData() { return dataBooleans.entrySet(); }
+    public Set<Map.Entry<String, String>> getStringData() { return dataStrings.entrySet(); }
+    public Set<Map.Entry<String, NumWrapper>> getNumberData() { return dataNumbers.entrySet(); }
 
 
     /**
