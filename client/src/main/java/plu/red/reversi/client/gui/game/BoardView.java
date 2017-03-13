@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.game;
 
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
@@ -279,7 +279,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
 
         int cellRow = (int)Math.floor( y / cellSize );
         int cellCol = (int)Math.floor( x / cellSize );
-        System.out.printf("Cell row = %d col = %d\n", cellRow, cellCol);
+        game.statusMessage(String.format("Cell row = %d col = %d\n", cellRow, cellCol));
 
         game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
         repaint();

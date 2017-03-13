@@ -1,38 +1,26 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.game;
 
+import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
 import plu.red.reversi.core.Game;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * The main game window, contains all of the UI.
- */
-public class GameWindow extends JFrame {
 
-    /** The panel containing the board */
-    private BoardView boardView;
+public class GamePanel extends JPanel {
 
-    /** The panel containing the player's names and scores */
-    private PlayerInfoPanel playerInfoPanel;
-
-    /** The panel containing the game history */
-    private GameHistoryPanel historyPanel;
-
-    private Game game;
+    protected final Game game;
     public Game getGame() { return game; }
 
-    /**
-     * Constructs a new main window for the game.
-     */
-    public GameWindow(Game game)
-    {
-        this.game = game;
-        setTitle("Reversi");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    // GUI Components
+    private BoardView boardView;
+    private PlayerInfoPanel playerInfoPanel;
+    private GameHistoryPanel historyPanel;
 
-        // Add the menu bar
-        this.setJMenuBar(new ReversiMenuBar(this));
+    public GamePanel(Game game) {
+        this.game = game;
+
+        this.setLayout(new BorderLayout());
 
         // The panel that holds the BoardView and the PlayerInfoPanel
         JPanel boardPanel = new JPanel(new BorderLayout(0, 0));
@@ -48,8 +36,8 @@ public class GameWindow extends JFrame {
 
         // The board and edges
         JPanel boardAndEdges = new JPanel( new BorderLayout() );
-        boardAndEdges.add(BoardEdges.createTopPanel(8), BorderLayout.NORTH);
-        boardAndEdges.add(BoardEdges.createLeftPanel(8), BorderLayout.WEST);
+        boardAndEdges.add(BoardEdges.createTopPanel(game.getBoard().size), BorderLayout.NORTH);
+        boardAndEdges.add(BoardEdges.createLeftPanel(game.getBoard().size), BorderLayout.WEST);
         boardAndEdges.add(boardView, BorderLayout.CENTER);
         boardAndEdges.setBorder(BorderFactory.createMatteBorder(0,0,BoardEdges.EDGE_HEIGHT,
                 BoardEdges.EDGE_WIDTH,BoardEdges.BACKGROUND_COLOR));
@@ -61,13 +49,13 @@ public class GameWindow extends JFrame {
 
         historyPanel = new GameHistoryPanel();
 
+        // The board panel goes in the center
+        this.add(boardPanel, BorderLayout.CENTER);
+
         // History panel goes in the EAST
         this.add(historyPanel, BorderLayout.EAST);
 
-        // The board panel goes in the center
-        this.add(boardPanel, BorderLayout.CENTER);
-        this.pack();
-        this.setVisible(true);
+        this.revalidate();
     }
 
     /**

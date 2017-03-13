@@ -4,7 +4,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingSource;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
-import plu.red.reversi.client.gui.GameWindow;
+import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
@@ -31,7 +31,7 @@ public class Main {
 
         game.initialize();
 
-        // Create the GameWindow
-        GameWindow window = new GameWindow(game);
+        // Create the MainWindow
+        MainWindow window = new MainWindow(game);
     }
 }

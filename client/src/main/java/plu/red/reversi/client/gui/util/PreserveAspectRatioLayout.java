@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.util;
 
 import java.awt.*;
 

@@ -14,8 +14,8 @@ import java.awt.event.KeyEvent;
  */
 public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
-    /** The GameWindow */
-    private GameWindow gui;
+    /** The MainWindow */
+    private MainWindow gui;
 
     /** Quit item */
     private JMenuItem quitMenuItem;
@@ -24,9 +24,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     /**
      * Constructs the menu bar
      *
-     * @param gui the main GameWindow
+     * @param gui the main MainWindow
      */
-    public ReversiMenuBar(GameWindow gui) {
+    public ReversiMenuBar(MainWindow gui) {
         this.gui = gui;
 
         // Build the "Game" menu
@@ -91,9 +91,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         if(e.getSource() == quitMenuItem) {
             System.exit(0);
         } else if(e.getSource() == surrenderMenuItem) {
-            Player player = gui.getGame().getCurrentPlayer();
+            Player player = gui.getGamePanel().getGame().getCurrentPlayer();
             if(player instanceof HumanPlayer)
-                gui.getGame().acceptCommand(new SurrenderCommand(player.getRole()));
+                gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
         }
     }
 }

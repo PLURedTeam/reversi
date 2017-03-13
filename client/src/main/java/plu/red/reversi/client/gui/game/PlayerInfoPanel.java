@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;

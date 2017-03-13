@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.game;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

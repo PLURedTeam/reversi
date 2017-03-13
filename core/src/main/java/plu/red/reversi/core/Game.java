@@ -6,6 +6,7 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
+import plu.red.reversi.core.listener.IStatusListener;
 import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
@@ -29,6 +30,7 @@ public class Game {
     //  communication between classes in different modules
     protected HashSet<ICommandListener> listenerSetCommands = new HashSet<ICommandListener>();
     protected HashSet<IGameOverListener> listenerSetGameOver = new HashSet<IGameOverListener>();
+    protected HashSet<IStatusListener> listenerSetStatus = new HashSet<IStatusListener>();
 
     /**
      * Registers an ICommandListener that will have signals sent to it when Commands are applied.
@@ -46,6 +48,15 @@ public class Game {
      */
     public void addGameOverListener(IGameOverListener listener) {
         listenerSetGameOver.add(listener);
+    }
+
+    /**
+     * Registers an IStatusListener that will have signals sent to it when a status message occurs.
+     *
+     * @param listener IStatusListener to register
+     */
+    public void addStatusListener(IStatusListener listener) {
+        listenerSetStatus.add(listener);
     }
 
     /**
@@ -67,6 +78,17 @@ public class Game {
     public void removeGameOverListener(IGameOverListener listener) {
         listenerSetGameOver.remove(listener);
     }
+
+    /**
+     * Unregisters an existing IStatusListener that has previously been registered. Does nothing if the specified
+     * IStatusListener has not previously been registered.
+     *
+     * @param listener IStatusListener to unregister
+     */
+    public void removeStatusListener(IStatusListener listener) {
+        listenerSetStatus.remove(listener);
+    }
+    
 
 
 
@@ -302,8 +324,7 @@ public class Game {
 
         gameRunning = false;
 
-        // ! DEBUG !
-        System.out.println("Game Over!");
+        this.statusMessage("Game Over!");
 
         // Signal Listeners that the Game has ended
         for(IGameOverListener listener : listenerSetGameOver)
@@ -317,5 +338,15 @@ public class Game {
      */
     public boolean isGameOver() {
         return !gameRunning;
+    }
+
+    /**
+     * Passes a status message to all IStatusListeners registered to this Game.
+     *
+     * @param message String message to pass
+     */
+    public void statusMessage(String message) {
+        for(IStatusListener listener : listenerSetStatus)
+            listener.onStatusMessage(message);
     }
 }
