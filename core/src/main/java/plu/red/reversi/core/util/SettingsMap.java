@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Glory to the Red Team.
@@ -13,7 +14,44 @@ import java.util.Iterator;
  */
 public class SettingsMap {
 
-    protected HashMap<String, Number>  dataNumbers  = new HashMap<String, Number>();
+    /**
+     * Internal Wrapper class for Number which optionally has constraints as well.
+     */
+    protected final class NumWrapper {
+        private Number number;
+        private Number min;
+        private Number max;
+
+        public NumWrapper(Number number) {
+            this.number = number;
+            this.min = null;
+            this.max = null;
+        }
+
+        public NumWrapper(Number number, Number min, Number max) {
+            this.min = min;
+            this.max = max;
+            set(number);
+        }
+
+        public Number get() { return number; }
+
+        public void set(Number num) {
+            if(num == null) num = 0;
+            if(min != null && num.doubleValue() < min.doubleValue())       this.number = this.min;
+            else if(max != null && num.doubleValue() > max.doubleValue())  this.number = this.max;
+            else                                                           this.number = num;
+        }
+
+        public Number getMin() { return min; }
+        public Number getMax() { return max; }
+
+        public void setMin(Number num) { this.min = num; }
+        public void setMax(Number num) { this.max = num; }
+
+    }
+
+    protected HashMap<String, NumWrapper>  dataNumbers  = new HashMap<String, NumWrapper>();
     protected HashMap<String, String>  dataStrings  = new HashMap<String, String>();
     protected HashMap<String, Boolean> dataBooleans = new HashMap<String, Boolean>();
 
@@ -40,7 +78,20 @@ public class SettingsMap {
             Iterator it = numberMap.keys();
             while(it.hasNext()) {
                 String key = it.next().toString();
-                dataNumbers.put(key, numberMap.optDouble(key));
+                Object obj = numberMap.opt(key);
+                if(obj instanceof Number) dataNumbers.put(key, new NumWrapper((Number)obj));
+                else if(obj instanceof JSONObject) {
+                    JSONObject jobj = (JSONObject)obj;
+                    Object val = jobj.opt("value");
+                    Object min = jobj.opt("min");
+                    Object max = jobj.opt("max");
+                    if(val instanceof Number) {
+                        dataNumbers.put(key, new NumWrapper(
+                                (Number)val,
+                                min instanceof Number ? (Number)min : null,
+                                max instanceof Number ? (Number)max : null));
+                    }
+                }
             }
         }
 
@@ -59,8 +110,18 @@ public class SettingsMap {
         JSONObject result = new JSONObject();
         try {
             result.put("strings",  new JSONObject(dataStrings));
-            result.put("numbers",  new JSONObject(dataNumbers));
+            //result.put("numbers",  new JSONObject(dataNumbers));
             result.put("booleans", new JSONObject(dataBooleans));
+            JSONObject numbers = new JSONObject();
+            for(Map.Entry<String, NumWrapper> entry : dataNumbers.entrySet()) {
+                JSONObject jobj = new JSONObject();
+                NumWrapper val = entry.getValue();
+                jobj.put("value", val.get());
+                if(val.getMin() != null) jobj.put("min", val.getMin());
+                if(val.getMax() != null) jobj.put("max", val.getMax());
+                numbers.put(entry.getKey(), jobj);
+            }
+            result.put("numbers", numbers);
         } catch(JSONException ex) {
             throw new RuntimeException("Problem when turning settings into a JSON: " + ex.getMessage());
         }
@@ -77,10 +138,24 @@ public class SettingsMap {
      * @return Number value stored under requested key
      */
     public Number getNumber(String key, Number defaultValue) {
-        if(dataNumbers.containsKey(key)) return dataNumbers.get(key);
+        return getNumber(key, defaultValue, null, null);
+    }
+
+    /**
+     * Retrieve a Number setting if it exists, otherwise store setting with a default value and return newly
+     * stored default value. Also stores optional minimum and maximum constraints to keep a value in between.
+     *
+     * @param key String key to retrieve a setting with
+     * @param defaultValue Default Number value to store if setting does not already exist
+     * @param min Minimum value constraint; leave null for no minimum
+     * @param max Maximum value constraint; leave null for no maximum
+     * @return Number value stored under requested key
+     */
+    public Number getNumber(String key, Number defaultValue, Number min, Number max) {
+        if(dataNumbers.containsKey(key)) return dataNumbers.get(key).get();
         else {
-            dataNumbers.put(key, defaultValue);
-            return dataNumbers.get(key);
+            dataNumbers.put(key, new NumWrapper(defaultValue, min, max));
+            return dataNumbers.get(key).get();
         }
     }
 
@@ -91,7 +166,7 @@ public class SettingsMap {
      * @return Number value stored under requested key, or null if setting doesn't exist
      */
     public Number getNumber(String key) {
-        if(dataNumbers.containsKey(key)) return dataNumbers.get(key);
+        if(dataNumbers.containsKey(key)) return dataNumbers.get(key).get();
         else return null;
     }
 
@@ -102,7 +177,20 @@ public class SettingsMap {
      * @param value Number value to store
      */
     public void setNumber(String key, Number value) {
-        dataNumbers.put(key, value);
+        if(dataNumbers.containsKey(key)) dataNumbers.get(key).set(value);
+        else setNumber(key, value, null, null);
+    }
+
+    /**
+     * Stores a Number setting. Also stores optional minimum and maximum constraints to keep a value in between.
+     *
+     * @param key String key to store a setting with
+     * @param value Number value to store
+     * @param min Minimum value constraint; leave null for no minimum
+     * @param max Maximum value constraint; leave null for no maximum
+     */
+    public void setNumber(String key, Number value, Number min, Number max) {
+        dataNumbers.put(key, new NumWrapper(value, min, max));
     }
 
     /**
