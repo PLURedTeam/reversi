@@ -2,6 +2,7 @@ package plu.red.reversi.core;
 
 
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.util.SettingsMap;
 
 public class SettingsLoader {
     public static final SettingsLoader INSTANCE = new SettingsLoader();

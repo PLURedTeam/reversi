@@ -16,7 +16,8 @@ public enum PlayerColor {
     NONE(false, null),
     WHITE(true, Color.WHITE),
     BLACK(true, Color.BLACK),
-
+    RED(true, Color.RED),
+    BLUE(true, Color.BLUE),
     ;
 
     protected final boolean valid;

@@ -1,10 +1,8 @@
 package plu.red.reversi.client.player;
 
-import plu.red.reversi.client.gui.GameWindow;
 import plu.red.reversi.core.*;
-import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.command.*;
 
 /**
  * Created by daniel on 3/5/17.
@@ -12,35 +10,32 @@ import plu.red.reversi.core.player.Player;
  */
 public class HumanPlayer extends Player {
 
-    private GameWindow window;
-
-    public HumanPlayer(Game game, PlayerColor role, GameWindow window) {
+    public HumanPlayer(Game game, PlayerColor role) {
         super(game, role);
-
-        this.window = window;
     }
 
+    /**
+     * Called by the game board when the current turn changes.
+     *
+     * @param yours whether or not the changed turn is now for this player.
+     */
     @Override
     public void nextTurn(boolean yours) {
-        // IDK what we will do here
-        /*if(yours) {
-            // update the GUI to make it show that the user may now input their stuff
-            // TODO: Fix the GUI to use this actual input
-            window.getPlayerInfoPanel().setActivePlayer(getRole() == PlayerColor.WHITE ? 0 : 1);
-            window.getPlayerInfoPanel().setScore(0, getGame().getBoard().getScore(PlayerColor.WHITE));
-        }
-        else {
-            // set it to the player not us
-            window.getPlayerInfoPanel().setActivePlayer(getRole() == PlayerColor.WHITE ? 1 : 0);
-        }*/
+        // NOOP
     }
 
-    public void issuePlay(BoardIndex index) {
-        if(getGame().getCurrentPlayer() != this) {
-            throw new IllegalStateException("Cannot play on game when not current player");
-        }
-
-        getGame().acceptCommand(new MoveCommand(Command.Source.PLAYER, getRole(), index));
+    /**
+     * Called when a click event is generated for a specific Board square, and returns whether or not the action is
+     * accepted.
+     *
+     * @param position BoardIndex representing the square clicked
+     * @return true if this action is valid, false otherwise
+     */
+    @Override
+    public boolean boardClicked(BoardIndex position) {
+        // Don't bother checking validity, because its checked in Game.acceptCommand()
+        MoveCommand cmd = new MoveCommand(Command.Source.PLAYER, role, position);
+        return game.acceptCommand(cmd);
     }
 }
 

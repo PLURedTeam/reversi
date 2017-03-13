@@ -1,5 +1,7 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.core.Game;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -17,11 +19,15 @@ public class GameWindow extends JFrame {
     /** The panel containing the game history */
     private GameHistoryPanel historyPanel;
 
+    private Game game;
+    public Game getGame() { return game; }
+
     /**
      * Constructs a new main window for the game.
      */
-    public GameWindow()
+    public GameWindow(Game game)
     {
+        this.game = game;
         setTitle("Reversi");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -32,8 +38,10 @@ public class GameWindow extends JFrame {
         JPanel boardPanel = new JPanel(new BorderLayout(0, 0));
 
         // Other panels
-        playerInfoPanel = new PlayerInfoPanel();
-        boardView = new BoardView(8);
+        playerInfoPanel = new PlayerInfoPanel(game);
+        game.addCommandListener(playerInfoPanel);
+        boardView = new BoardView(game);
+        game.getBoard().addFlipListener(boardView);
 
         // This panel will preserve the aspect ratio of the component within it
         JPanel preserveAspectPanel = new JPanel(new PreserveAspectRatioLayout() );

@@ -3,9 +3,11 @@ package plu.red.reversi.core;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +18,33 @@ import java.util.Set;
  * required to play a game of Reversi, such as Players, the Board, and Settings.
  */
 public class Game {
+
+    // ***********
+    //  Listeners
+    // ***********
+
+    // This listener exists only because of the separation of Core and Client packages, which allows for only one-way
+    //  communication between classes in different modules
+    protected HashSet<ICommandListener> listenerSetCommands = new HashSet<ICommandListener>();
+
+    /**
+     * Registers an ICommandListener that will have signals sent to it when Commands are applied.
+     *
+     * @param listener ICommandListener to register
+     */
+    public void addCommandListener(ICommandListener listener) {
+        listenerSetCommands.add(listener);
+    }
+
+    /**
+     * Unregisters an existing ICommandListener that has previously been registered. Does nothing if the specified
+     * ICommandListener has not previously been registered.
+     *
+     * @param listener ICommandListener to unregister
+     */
+    public void removeCommandListener(ICommandListener listener) {
+        listenerSetCommands.remove(listener);
+    }
 
 
 
@@ -30,34 +59,34 @@ public class Game {
     // Store players as an array of possible roles. More extensible for possibly more than two players in the future.
     //  (I realize this is probably unnecessary, but it results in more extensible code, and is easier to manipulate
     //   as a whole, instead of manipulating individual Player references)
-    protected Player[] players = new Player[PlayerColor.validPlayers().length];
-    protected PlayerColor currentPlayerColor = PlayerColor.validPlayers()[0];
+    protected final HashMap<PlayerColor, Player> players = new HashMap<PlayerColor, Player>();
+    protected PlayerColor currentPlayerColor = null;
     protected final HashSet<PlayerColor> usedPlayers = new HashSet<PlayerColor>();
 
 
+
+    // ****************
+    //  Member Methods
+    // ****************
+
+
     /**
-     * Constructor. Creates a new Game object with a default Player count of 2.
+     * Constructor. Creates a new Game object with given settings.
      *
      * @param settings SettingsMap to start Game with
      */
     public Game(SettingsMap settings) {
-        this(settings, 2);
+        this.settings = settings;
+        this.board = new Board(12);
+        this.history = new History();
     }
 
     /**
-     * Constructor. Creates a new Game object with a given Player count.
-     *
-     * @param settings SettingsMap to start Game with
-     * @param playerCount Number of players to play this Game with
-     * @throws IllegalArgumentException if playerCount is less than 2 or more than the maximum valid PlayerColor count
+     * Initialization method. To be used after the board has been loaded with all required objects, such as players
+     * and settings being used.
      */
-    public Game(SettingsMap settings, int playerCount) throws IllegalArgumentException {
-        if(playerCount < 2 || playerCount > PlayerColor.validPlayers().length)
-            throw new IllegalArgumentException("Amount of Players for a game must be between 2 and " + PlayerColor.validPlayers().length);
-        this.settings = settings;
-        this.board = new Board(8);
-        this.history = new History();
-        for(int i = 0; i < playerCount; i++) usedPlayers.add(PlayerColor.validPlayers()[i]);
+    public void initialize() {
+        board.setupBoard(this);
     }
 
     /**
@@ -119,7 +148,9 @@ public class Game {
     public void setPlayer(Player player) throws IllegalArgumentException {
         if(!player.getRole().isValid()) throw new IllegalArgumentException("Player given to game has an invalid role; IE None");
         if(player.getGame() != this) throw new IllegalArgumentException("Player given to game does not have game assigned to it");
-        players[player.getRole().validOrdinal()] = player;
+        players.put(player.getRole(), player);
+        usedPlayers.add(player.getRole());
+        if(currentPlayerColor == null) currentPlayerColor = player.getRole();
     }
 
     /**
@@ -129,7 +160,7 @@ public class Game {
      * @return Player stored for the given role, or null if no Player is stored or the PlayerColor is invalid
      */
     public Player getPlayer(PlayerColor role) {
-        if(role.isValid()) return players[role.validOrdinal()];
+        if(role.isValid()) return players.get(role);
         else return null;
     }
 
@@ -139,7 +170,7 @@ public class Game {
      * @return Current Player
      */
     public Player getCurrentPlayer() {
-        return players[currentPlayerColor.validOrdinal()];
+        return players.get(currentPlayerColor);
     }
 
     /**
@@ -149,8 +180,8 @@ public class Game {
      */
     public Player nextTurn() {
         currentPlayerColor = currentPlayerColor.getNext(usedPlayers);
-        for(Player player : players) player.nextTurn(player.getRole() == currentPlayerColor);
-        return players[currentPlayerColor.validOrdinal()];
+        for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
+        return players.get(currentPlayerColor);
     }
 
     public boolean acceptCommand(Command cmd) {
@@ -164,7 +195,10 @@ public class Game {
         }
 
         // Send Move Commands to the Board object
-        if(cmd instanceof MoveCommand) board.apply((MoveCommand)cmd);
+        if(cmd instanceof MoveCommand) {
+            board.apply((MoveCommand)cmd);
+            nextTurn();
+        }
 
         // Send Chat Commands somewhere
         if(cmd instanceof ChatCommand) {
@@ -173,6 +207,10 @@ public class Game {
 
         // Register the Command in History
         history.addCommand(cmd);
+
+        // Signal Listeners that a Command has been applied
+        for(ICommandListener listener : listenerSetCommands)
+            listener.commandApplied(cmd);
 
         return true;
     }

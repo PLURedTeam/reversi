@@ -1,5 +1,9 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.command.*;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,11 +19,8 @@ public class DeveloperMenu extends JMenu implements ActionListener {
 
     private GameWindow gui;
     private JMenuItem testFlipAnimItem;
-    private JMenuItem incWhiteItem;
-    private int whiteScore;
     private JMenuItem changePlayer1NameItem;
     private JMenuItem swapActivePlayerItem;
-    private int activePlayer;
 
     private JMenuItem testServerItem;
 
@@ -29,8 +30,6 @@ public class DeveloperMenu extends JMenu implements ActionListener {
      * @param gui the main GameWindow object
      */
     public DeveloperMenu(GameWindow gui) {
-        whiteScore = 0;
-        activePlayer = 1;
 
         this.gui = gui;
         this.setText("Developer");
@@ -38,22 +37,17 @@ public class DeveloperMenu extends JMenu implements ActionListener {
         this.getAccessibleContext().setAccessibleDescription("Developer options");
 
         testFlipAnimItem = new JMenuItem("Test flip animation" );
-        testFlipAnimItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.META_MASK));
+        testFlipAnimItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.ALT_MASK));
         testFlipAnimItem.addActionListener(this);
         this.add(testFlipAnimItem);
 
-        incWhiteItem = new JMenuItem("Increment white score");
-        incWhiteItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.META_MASK));
-        incWhiteItem.addActionListener(this);
-        this.add(incWhiteItem);
-
         changePlayer1NameItem = new JMenuItem("Change Player 1 Name");
-        changePlayer1NameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.META_MASK));
+        changePlayer1NameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
         changePlayer1NameItem.addActionListener(this);
         this.add(changePlayer1NameItem);
 
         swapActivePlayerItem = new JMenuItem("Swap Active Player");
-        swapActivePlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.META_MASK));
+        swapActivePlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
         swapActivePlayerItem.addActionListener(this);
         this.add(swapActivePlayerItem);
 
@@ -66,8 +60,6 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == testFlipAnimItem) {
             testFlip();
-        } else if (e.getSource() == incWhiteItem) {
-            incWhiteScore();
         } else if( e.getSource() == changePlayer1NameItem) {
             changePlayer1Name();
         } else if( e.getSource() == swapActivePlayerItem ) {
@@ -78,24 +70,21 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void testFlip() {
-        gui.getBoardView().animateFlipSequence(5, 1, 1, 5,
-                BoardView.CellColor.BLACK, BoardView.CellColor.WHITE, 300);
-    }
-
-    private void incWhiteScore() {
-        whiteScore++;
-        gui.getPlayerInfoPanel().setScore(2, whiteScore);
+        gui.getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(1, 5),
+                PlayerColor.WHITE);
+        gui.getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(5, 6),
+                PlayerColor.WHITE);
     }
 
     private void changePlayer1Name() {
         String newName = JOptionPane.showInputDialog(gui, "New name");
-        gui.getPlayerInfoPanel().setPlayerName(1, newName);
+        //gui.getPlayerInfoPanel().setPlayerName(1, newName);
     }
 
     private void swapActivePlayer() {
-        if( activePlayer == 1)  activePlayer = 2;
-        else activePlayer = 1;
-        gui.getPlayerInfoPanel().setActivePlayer(activePlayer);
+        gui.getGame().nextTurn();
+        // Spoof PlayerInfoPanel with a fake command in order to update. Command contents don't matter, as it won't read them.
+        gui.getPlayerInfoPanel().commandApplied(new MoveCommand(Command.Source.PLAYER, PlayerColor.WHITE, new BoardIndex(0,0)));
     }
 
     private void testServer() {

@@ -6,13 +6,49 @@ package plu.red.reversi.core;
  */
 
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.listener.IFlipListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Represents the state of the board at a particular instant in time
  */
 public class Board {
+
+    // ***********
+    //  Listeners
+    // ***********
+
+    // This listener exists only because of the separation of Core and Client packages, which allows for only one-way
+    //  communication between classes in different modules
+    protected HashSet<IFlipListener> listenerSetFlips = new HashSet<IFlipListener>();
+
+    /**
+     * Registers an IFlipListener that will have signals sent to it when Flips are applied.
+     *
+     * @param listener IFlipListener to register
+     */
+    public void addFlipListener(IFlipListener listener) {
+        listenerSetFlips.add(listener);
+    }
+
+    /**
+     * Unregisters an existing IFlipListener that has previously been registered. Does nothing if the specified
+     * IFlipListener has not previously been registered.
+     *
+     * @param listener IFlipListener to unregister
+     */
+    public void removeFlipListener(IFlipListener listener) {
+        listenerSetFlips.remove(listener);
+    }
+
+
+
+    // *********
+    //  Members
+    // *********
+
     private PlayerColor[][] board;//2D array that represents the board
     public final int size;
 
@@ -28,11 +64,6 @@ public class Board {
                 board[i][j] = PlayerColor.NONE;
             }
         }
-        board[(size/2)-1][((size/2)-1)] = PlayerColor.WHITE;
-        board[((size/2)-1)][((size/2)-1)+1] = PlayerColor.BLACK;
-        board[((size/2)-1)+1][((size/2)-1)] = PlayerColor.BLACK;
-        board[((size/2)-1)+1][((size/2)-1)+1] = PlayerColor.WHITE;
-
     }
 
     /**
@@ -47,6 +78,29 @@ public class Board {
                 board[r][c] = b.board[r][c];
             }
         }//end loop
+    }
+
+    /**
+     * Method to setup the initial board position. Usually called from the initialization method of Game.
+     *
+     * @param game Game object this board is attached to during setup; generally used to determine player colors
+     */
+    public void setupBoard(Game game) {
+
+        // Temporary setup to get used Colors
+        PlayerColor color1 = null;
+        PlayerColor color2 = null;
+        for(PlayerColor color : game.getUsedPlayers()) {
+            if(color1 == null) color1 = color;
+            else if(color2 == null) color2 = color;
+            else break;
+        }
+
+        // Set the board up
+        board[(size/2)-1][((size/2)-1)] = color1;
+        board[((size/2)-1)][((size/2)-1)+1] = color2;
+        board[((size/2)-1)+1][((size/2)-1)] = color2;
+        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
     }
 
     /**
@@ -175,12 +229,14 @@ public class Board {
      */
     public void apply(MoveCommand c, boolean flipTiles) {
         if (flipTiles) {
+            boolean anyFlipped = false;
             for(int i = 0; i < 8; i++) {
                 int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
                 int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
                 //Actually flip tile
-                flipTiles(c, dr, dc, 0);
+                if(flipTiles(c, dr, dc, 1)) anyFlipped = true;
             }
+            if(anyFlipped) board[c.position.row][c.position.column] = c.player;
         }
     }
 
@@ -191,11 +247,18 @@ public class Board {
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
-        if (tile == c.player)
+        if (tile == c.player) {
+            // Signal our flip animation
+            for(IFlipListener listener : listenerSetFlips)
+                listener.doFlip(
+                        c.position,
+                        new BoardIndex(c.position.row + dr*(count-1), c.position.column + dc*(count-1)),
+                        c.player);
             return true;
+        }
         if (tile.isValid()) {
             if (flipTiles(c, dr, dc, count + 1)) {
-                board[c.position.row][c.position.column] = c.player;
+                board[c.position.row + dr*count][c.position.column + dc*count] = c.player;
                 return true;
             }
         }

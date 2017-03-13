@@ -2,6 +2,8 @@ package plu.red.reversi.client.gui;
 
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
+import plu.red.reversi.core.*;
+import plu.red.reversi.core.listener.IFlipListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,22 +12,13 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static plu.red.reversi.client.gui.BoardView.CellColor.BLACK;
-import static plu.red.reversi.client.gui.BoardView.CellColor.WHITE;
-
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends JPanel implements MouseListener {
-
-    /** The size (width and height) of the board in pixels */
-    private int size;
+public class BoardView extends JPanel implements MouseListener, IFlipListener {
 
     /** Used to help with animation */
     private FlipAnimator fAnimator;
-
-    /** The state of each cell on the board */
-    private CellState[][] boardState;
 
     /**
      * This is an internal class used to manage the animation of pieces flipping over.
@@ -33,15 +26,13 @@ public class BoardView extends JPanel implements MouseListener {
     private class FlipAnimator extends TimingTargetAdapter {
 
         private ArrayList<CellState> cells;
-        private CellColor startColor;
-        private CellColor endColor;
+        private PlayerColor newColor;
         private Animator animator;
 
         @Override
         public void end(Animator source) {
             for( CellState c : cells ) {
-                c.cellColor = endColor;
-                c.height = 1.0f;
+                cellStates[c.row][c.col] = null;
             }
             repaint();
         }
@@ -58,14 +49,15 @@ public class BoardView extends JPanel implements MouseListener {
                     double h = 0.0;
                     if( fraction < cellStart + cellChunk2 ) {
                         h = 1.0 - (fraction - cellStart) / cellChunk2;
-                        c.cellColor = startColor;
+                        // Don't change cellColor, so leave this commented
+                        //c.cellColor = startColor;
                     } else {
                         h = 1.0 - (cellEnd - fraction) / cellChunk2;
-                        c.cellColor = endColor;
+                        c.cellColor = newColor;
                     }
                     c.height = (float)h;
                 } else if( fraction > cellEnd ) {
-                    c.cellColor = endColor;
+                    c.cellColor = newColor;
                     c.height = 1.0f;
                 }
             }
@@ -76,7 +68,6 @@ public class BoardView extends JPanel implements MouseListener {
         @Override
         public void begin(Animator source) {
             for( CellState c : cells ) {
-                c.cellColor = startColor;
                 c.height = 1.0f;
             }
             repaint();
@@ -84,47 +75,62 @@ public class BoardView extends JPanel implements MouseListener {
 
         public FlipAnimator(int startRow, int startCol,
                             int endRow, int endCol,
-                            CellColor start, CellColor end,
+                            PlayerColor newColor,
                             long milliseconds)
         {
             cells = new ArrayList<CellState>();
-            this.startColor = start;
-            this.endColor = end;
+            this.newColor = newColor;
 
             // Gather a list of cells to animate
 
             if( startRow == endRow ) {
                 if( startCol > endCol ) {
-                    for( int col = startCol; col >= endCol; col--)
-                        cells.add(boardState[startRow][col]);
+                    for( int col = startCol; col >= endCol; col--) {
+                        cellStates[startRow][col] = new CellState(game.getBoard().at(new BoardIndex(startRow, col)), startRow, col);
+                        cells.add(cellStates[startRow][col]);
+                    }
                 } else {
-                    for( int col = startCol; col <= endCol; col++ )
-                        cells.add(boardState[startRow][col]);
+                    for( int col = startCol; col <= endCol; col++ ) {
+                        cellStates[startRow][col] = new CellState(game.getBoard().at(new BoardIndex(startRow, col)), startRow, col);
+                        cells.add(cellStates[startRow][col]);
+                    }
                 }
             } else if( startCol == endCol ) {
                 if( startRow > endRow ) {
-                    for( int row = startRow; row >= endRow; row--)
-                        cells.add(boardState[row][startCol]);
+                    for( int row = startRow; row >= endRow; row--) {
+                        cellStates[row][startCol] = new CellState(game.getBoard().at(new BoardIndex(row, startCol)), row, startCol);
+                        cells.add(cellStates[row][startCol]);
+                    }
                 } else {
-                    for( int row = startRow; row <= endRow; row++)
-                        cells.add(boardState[row][startCol]);
+                    for( int row = startRow; row <= endRow; row++) {
+                        cellStates[row][startCol] = new CellState(game.getBoard().at(new BoardIndex(row, startCol)), row, startCol);
+                        cells.add(cellStates[row][startCol]);
+                    }
                 }
             } else if( Math.abs(startRow - endRow) == Math.abs(startCol - endCol)) {
                 if( startCol > endCol ) {
                     if( startRow > endRow ) {
-                        for (int row = startRow, col = startCol; col >= endCol; col--, row--)
-                            cells.add(boardState[row][col]);
+                        for (int row = startRow, col = startCol; col >= endCol; col--, row--) {
+                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
+                            cells.add(cellStates[row][col]);
+                        }
                     } else {
-                        for (int row = startRow, col = startCol; col >= endCol; col--, row++)
-                            cells.add(boardState[row][col]);
+                        for (int row = startRow, col = startCol; col >= endCol; col--, row++) {
+                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
+                            cells.add(cellStates[row][col]);
+                        }
                     }
                 } else {
                     if( startRow > endRow ) {
-                        for (int row = startRow, col = startCol; col <= endCol; col++, row--)
-                            cells.add(boardState[row][col]);
+                        for (int row = startRow, col = startCol; col <= endCol; col++, row--) {
+                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
+                            cells.add(cellStates[row][col]);
+                        }
                     } else {
-                        for (int row = startRow, col = startCol; col <= endCol; col++, row++)
-                            cells.add(boardState[row][col]);
+                        for (int row = startRow, col = startCol; col <= endCol; col++, row++) {
+                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
+                            cells.add(cellStates[row][col]);
+                        }
                     }
                 }
             } else {
@@ -146,74 +152,61 @@ public class BoardView extends JPanel implements MouseListener {
 
     }
 
-    public enum CellColor {
-        WHITE, BLACK, EMPTY
-    }
-
+    
     private class CellState {
-        private float height;  // Fractional height used for animation
-        private CellColor cellColor;
-        private int row, col;
+        public float height;  // Fractional height used for animation
+        public PlayerColor cellColor;
+        public int row, col;
 
-        public CellState( int row, int col ) {
-            cellColor = CellColor.EMPTY;
+        public CellState(PlayerColor cellColor, int row, int col) {
+            this.cellColor = cellColor;
             this.row = row;
             this.col = col;
             this.height = 1.0f;
         }
+    }
+    
 
-        public void setColor( CellColor c)
-        {
-            cellColor = c;
-        }
+    protected final void drawCell(Graphics g, float cellSize, int column, int row) {
+        Board board = game.getBoard();
+        PlayerColor player = cellStates[row][column] == null ? board.at(new BoardIndex(row, column)) : cellStates[row][column].cellColor;
+        //PlayerColor player = cellStates[row][column] == null ? PlayerColor.NONE : cellStates[row][column].cellColor;
+        
+        if(player != PlayerColor.NONE) {
+            float pad = cellSize * 0.1f;
+            float x = column * cellSize;
+            float cy = cellSize * (row  + 0.5f);
+            float h = (cellStates[row][column] == null ? 1.0f : cellStates[row][column].height) * (cellSize - 2.0f * pad);
 
-        public CellColor getColor() { return cellColor; }
+            g.setColor(player.color);
 
-        public void draw(Graphics g, float cellSize) {
-
-            if (cellColor != CellColor.EMPTY) {
-                float pad = cellSize * 0.1f;
-                float x = col * cellSize;
-                float cy = cellSize * (row  + 0.5f);
-                float h = height * (cellSize - 2.0f * pad);
-
-                if (cellColor == CellColor.BLACK)
-                    g.setColor(Color.black);
-                else
-                    g.setColor(Color.white);
-
-                g.fillOval(
-                        Math.round(x + pad),
-                        Math.round(cy - h / 2.0f),
-                        Math.round(cellSize - 2 * pad),
-                        Math.round(h));
-            }
+            g.fillOval(
+                    Math.round(x + pad),
+                    Math.round(cy - h / 2.0f),
+                    Math.round(cellSize - 2 * pad),
+                    Math.round(h));
         }
     }
 
+    protected final Game game;
+    protected CellState cellStates[][];
+
     /**
-     * Constructs a new BoardView panel with the given size.
+     * Constructs a new BoardView.
      *
-     * @param size width/height in pixels
+     * @param game Game object to pull data from
      */
-    public BoardView( int size )
+    public BoardView( Game game )
     {
-        this.size = size;
+        this.game = game;
         this.setPreferredSize(new Dimension(500,500) );
         this.setBackground(new Color(12, 169, 18));
-        boardState = new CellState[size][size];
-        for( int i = 0; i < size ; i++)
-            for(int j = 0; j < size; j++ )
-                boardState[i][j] = new CellState(i, j);
 
-
-        // Set up the initial board
-        // TODO: This should really be determined by the model.  This should be removed and replaced with something
-        // that queries the model for the board state.
-        boardState[3][3].setColor(BLACK);
-        boardState[3][4].setColor(WHITE);
-        boardState[4][3].setColor(WHITE);
-        boardState[4][4].setColor(BLACK);
+        int size = game.getBoard().size;
+        this.cellStates = new CellState[size][size];
+        for(int i = 0; i < size; i++)
+            for(int j = 0; j < size; j++)
+                this.cellStates[i][j] = null;
 
         fAnimator = null;
         this.addMouseListener(this);
@@ -232,17 +225,19 @@ public class BoardView extends JPanel implements MouseListener {
         int w = this.getWidth();
         int h = this.getHeight();
 
-        float cellSize = (float)w / size;
+        Board board = game.getBoard();
 
-        for(int i = 1; i < size; i++ ) {
+        float cellSize = (float)w / board.size;
+
+        for(int i = 1; i < board.size; i++ ) {
             int pos = Math.round( i * cellSize );
             g.drawLine(pos, 0, pos, h );
             g.drawLine(0, pos, w, pos);
         }
 
-        for( int row = 0; row< size; row++ ) {
-            for( int col = 0; col < size; col++ ) {
-                boardState[row][col].draw(g, cellSize);
+        for( int row = 0; row< board.size; row++ ) {
+            for( int col = 0; col < board.size; col++ ) {
+                drawCell(g, cellSize, col, row);
             }
         }
     }
@@ -251,26 +246,43 @@ public class BoardView extends JPanel implements MouseListener {
      * Mouse clicked event.  Determines the cell where the mouse
      * was clicked and prints the row/column to the console.
      *
-     * TODO: Replace this with something more useful.
-     *
      * @param e
      */
     public void mouseClicked(MouseEvent e) {
+        /*
         int x = e.getX();
         int y = e.getY();
 
         int w = this.getWidth();
         int h = this.getHeight();
 
-        float cellSize = (float)w / size;
+        float cellSize = (float)w / game.getBoard().size;
 
         int cellRow = (int)Math.floor( y / cellSize );
         int cellCol = (int)Math.floor( x / cellSize );
         System.out.printf("Cell row = %d col = %d\n", cellRow, cellCol);
+
+        game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
+        repaint();
+        */
     }
 
+    // This now happens in mousePressed because mouseClicked does not properly handle click and drag actions
     public void mousePressed(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
 
+        int w = this.getWidth();
+        int h = this.getHeight();
+
+        float cellSize = (float)w / game.getBoard().size;
+
+        int cellRow = (int)Math.floor( y / cellSize );
+        int cellCol = (int)Math.floor( x / cellSize );
+        System.out.printf("Cell row = %d col = %d\n", cellRow, cellCol);
+
+        game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
+        repaint();
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -292,15 +304,31 @@ public class BoardView extends JPanel implements MouseListener {
      * @param startCol start column number
      * @param endRow end row number
      * @param endCol end column number
-     * @param start the color of the cells before flipping
-     * @param end the color of the cells after flipping
+     * @param newColor the color of the cells after flipping
      * @param milliseconds the time of the entire animation in milliseconds
      */
-    public void animateFlipSequence(int startRow, int startCol,
+    protected final void animateFlipSequence(int startRow, int startCol,
                                     int endRow, int endCol,
-                                    CellColor start, CellColor end,
+                                    PlayerColor newColor,
                                     long milliseconds) {
-        fAnimator = new FlipAnimator(startRow, startCol, endRow, endCol, start, end, milliseconds);
+        fAnimator = new FlipAnimator(startRow, startCol, endRow, endCol, newColor, milliseconds);
         fAnimator.start();
     }
+
+    /**
+     * Indicates that a section of tiles should be flipped.
+     *
+     * @param startPosition BoardIndex representing the starting tile
+     * @param endPosition BoardIndex representing the ending tile
+     * @param newColor PlayerRole representing the color that is being flipped to
+     */
+    @Override
+    public void doFlip(BoardIndex startPosition, BoardIndex endPosition, PlayerColor newColor) {
+        animateFlipSequence(
+                startPosition.row, startPosition.column,
+                endPosition.row, endPosition.column,
+                newColor,
+                300);
+    }
+
 }

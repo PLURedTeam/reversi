@@ -31,4 +31,5 @@ public abstract class Command {
      * @return true if this Command is valid, false otherwise
      */
     public abstract boolean isValid(Game game);
+
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Stores all the past actions and commands of the player.
  */
 public class History {
-    private ArrayList<Command> commands;
+    private ArrayList<Command> commands = new ArrayList<Command>();
 
     /**
      * Used to find out how many commands have been stored in history.

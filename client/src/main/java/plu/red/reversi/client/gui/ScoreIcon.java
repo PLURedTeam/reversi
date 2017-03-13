@@ -1,5 +1,8 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.PlayerColor;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
@@ -7,21 +10,27 @@ import java.util.Map;
 public class ScoreIcon extends JPanel {
 
     private Color chipColor, fontColor;
-    private int scoreValue;
+    //private int scoreValue;
     private static Font font = new Font("SansSerif", Font.PLAIN, 14);
+    private final Player player;
 
-    public ScoreIcon(Color chipColor, Color fontColor) {
-        this.chipColor = chipColor;
-        this.fontColor = fontColor;
+    public ScoreIcon(Player player) {
+        this.player = player;
+        PlayerColor playerType = player.getRole();
+        this.chipColor = playerType.color;
+        this.fontColor = ((playerType.color.getRed() + playerType.color.getGreen() + playerType.color.getBlue()) / 3) > 128 ? Color.BLACK : Color.WHITE;
         this.setPreferredSize(new Dimension(37,37));
         this.setOpaque(false);
-        scoreValue = 0;
+        //scoreValue = 0;
     }
 
+    // TODO: Cue repaint from somewhere when score changes
+    /*
     public void setScoreValue( int value ) {
         this.scoreValue = value;
         this.repaint();
     }
+    */
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -42,7 +51,7 @@ public class ScoreIcon extends JPanel {
 
         g2d.setColor(chipColor);
         g2d.fillOval(0, 0, w, h);
-        String label = "" + scoreValue;
+        String label = "" + player.getScore();
         g2d.setColor(fontColor);
         g2d.setFont(font);
         Utilities.drawCenteredString(g2d, label, new Rectangle(0, 0, w, h));
