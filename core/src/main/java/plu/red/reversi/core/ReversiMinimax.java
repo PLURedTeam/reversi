@@ -85,7 +85,7 @@ public class ReversiMinimax implements Runnable {
 
             //board is not equal yet, so check children
             if(candidates.isEmpty() || currentRoot.children.isEmpty())
-                throw new IndexOutOfBoundsException("Minimax cache exceeded, need to regenerate from scratch");
+                throw new IndexOutOfBoundsException("Minimax scoreCache exceeded, need to regenerate from scratch");
 
             //go through all children, consider a candidate any that have moves which were made
             for(ReversiNode i : currentRoot.children)

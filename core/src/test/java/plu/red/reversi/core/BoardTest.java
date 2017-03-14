@@ -56,10 +56,17 @@ public class BoardTest {
     }
 
 
-//    @Test
-//    public void testApply() {
-//        CommandMove c = new CommandMove(Command.Source.PLAYER, PlayerRole.BLACK, new BoardIndex(1, 0));
-//        board.apply(c);
-//        assertEquals(PlayerRole.BLACK, board.at(c.position));
-//    }
+    @Test
+    public void testApply() {
+        //moving a piece in a legal index
+        MoveCommand c = new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(1, 0));
+        Board brd = new Board(4);
+        brd.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
+        brd.apply(c, true);
+        assertEquals(PlayerColor.BLACK, brd.at(c.position));
+
+        //trying to apply a piece on an illegal index
+
+        assertEquals(PlayerColor.BLACK, brd.at(c.position));
+    }
 }
