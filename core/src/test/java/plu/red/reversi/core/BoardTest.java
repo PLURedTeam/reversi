@@ -24,7 +24,7 @@ public class BoardTest {
 
         assertEquals(2, board.getScore(PlayerColor.WHITE));
         assertEquals(2, board.getScore(PlayerColor.BLACK));
-        board.apply(new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(3, 0)), true);
+        board.apply(new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(3, 0)));
         assertEquals(3, board.getScore(PlayerColor.BLACK));
         assertEquals(2, board.getScore(PlayerColor.WHITE));
     }
@@ -64,7 +64,7 @@ public class BoardTest {
         MoveCommand c = new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(1, 0));
         Board brd = new Board(4);
         brd.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
-        brd.apply(c, true);
+        brd.apply(c);
         assertEquals(PlayerColor.BLACK, brd.at(c.position));
 
         //trying to apply a piece on an illegal index

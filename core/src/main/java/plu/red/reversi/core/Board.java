@@ -5,14 +5,13 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IFlipListener;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents the state of the board at a particular instant in time
@@ -88,12 +87,12 @@ public class Board {
 
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
+     * Set commands to history.
      *
      * @param game Game object this board is attached to during setup; generally used to determine player colors
      */
-    public void setupBoard(Game game) {
-
-        // Temporary setup to get used Colors
+    public void setupBoard(Game game, History history) {
+        //TODO: improve; temporary setup to get used Colors
         PlayerColor color1 = null;
         PlayerColor color2 = null;
         for(PlayerColor color : game.getUsedPlayers()) {
@@ -102,11 +101,16 @@ public class Board {
             else break;
         }
 
-        // Set the board up
-        board[(size/2)-1][((size/2)-1)] = color1;
-        board[((size/2)-1)][((size/2)-1)+1] = color2;
-        board[((size/2)-1)+1][((size/2)-1)] = color2;
-        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
+        LinkedList<SetCommand> list = new LinkedList<>();
+        list.add(new SetCommand(color1, new BoardIndex((size / 2) - 1, (size / 2) - 1)));
+        list.add(new SetCommand(color2, new BoardIndex((size / 2) - 1, size / 2)));
+        list.add(new SetCommand(color2, new BoardIndex((size / 2) + 1, (size / 2) - 1)));
+        list.add(new SetCommand(color1, new BoardIndex(size / 2, size / 2)));
+
+        for(SetCommand c : list) {
+            apply(c);
+            history.addCommand(c);
+        }
     }
 
     /**
@@ -253,23 +257,25 @@ public class Board {
     /**
      * Applies the move made, updating the board
      * @param c command made
-     * @param flipTiles
      */
-    public void apply(MoveCommand c, boolean flipTiles) {
+    public void apply(MoveCommand c) {
+        //actually set the tile
+        apply(new SetCommand(c));
+
+        //flip the tiles as a result of placing this one
+        for(int i = 0; i < 8; i++) {
+            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
+            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
+            //Actually flip tile
+            flipTiles(c, dr, dc, 1);
+        }
+    }
+
+    public void apply(SetCommand c) {
         //invalidate the cache
         Arrays.fill(scoreCache, -1);
-
         //set the tile
         board[c.position.row][c.position.column] = c.player;
-
-        if (flipTiles) {
-            for(int i = 0; i < 8; i++) {
-                int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
-                int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
-                //Actually flip tile
-                flipTiles(c, dr, dc, 1);
-            }
-        }
     }
 
     /**
@@ -305,14 +311,6 @@ public class Board {
         return false;
     }
 
-
-    /**
-     * Applies a move and flips tiles
-     * @param c command made
-     */
-    public void apply(MoveCommand c) {
-        apply(c, true);
-    }
 
     public boolean equals(final Board b){
         //if the size isn't the same return false

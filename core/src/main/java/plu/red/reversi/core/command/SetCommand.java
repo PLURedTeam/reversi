@@ -15,7 +15,7 @@ public class SetCommand extends BoardCommand {
     public final BoardIndex position;
 
     /**
-     * Constructs a new move command.
+     * Constructs a new set command.
      * Defaults to PLAYER Source.
      * @param player Player to make the move
      * @param position Location on the board.
@@ -25,7 +25,7 @@ public class SetCommand extends BoardCommand {
     }
 
     /**
-     * Constructs a new move command.
+     * Constructs a new set command.
      * @param source Where the command comes from.
      * @param player Player to make the move.
      * @param position Location on the board.
@@ -34,6 +34,16 @@ public class SetCommand extends BoardCommand {
         super(source);
         this.player = player;
         this.position = position;
+    }
+
+    /**
+     * Constructs a new set command from a move command.
+     * @param m Move command to copy.
+     */
+    public SetCommand(MoveCommand m) {
+        super(m.source);
+        this.player = m.player;
+        this.position = m.position;
     }
 
     /**
