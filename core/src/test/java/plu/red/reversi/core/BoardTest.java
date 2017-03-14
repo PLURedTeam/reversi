@@ -8,6 +8,7 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.SettingsMap;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -46,13 +47,14 @@ public class BoardTest {
         Board board = new Board(4);
         board.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
 
-        ArrayList<BoardIndex> moveList;
+        Set<BoardIndex> moveList;
         moveList = board.getPossibleMoves(PlayerColor.BLACK);
 
-        assertTrue(moveList.get(0).equals(new BoardIndex(0, 1)));
-        assertTrue(moveList.get(1).equals(new BoardIndex(1, 0)));
-        assertTrue(moveList.get(2).equals(new BoardIndex(2, 3)));
-        assertTrue(moveList.get(3).equals(new BoardIndex(3, 2)));
+        assertEquals(4, moveList.size());
+        assertTrue(moveList.contains(new BoardIndex(0, 1)));
+        assertTrue(moveList.contains(new BoardIndex(1, 0)));
+        assertTrue(moveList.contains(new BoardIndex(2, 3)));
+        assertTrue(moveList.contains(new BoardIndex(3, 2)));
     }
 
 

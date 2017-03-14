@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -158,11 +159,14 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
         public PlayerColor cellColor;
         public int row, col;
 
+        public boolean highlighted; // whether or not this tile should feature a reduced opacity because it is "highlighted"
+
         public CellState(PlayerColor cellColor, int row, int col) {
             this.cellColor = cellColor;
             this.row = row;
             this.col = col;
             this.height = 1.0f;
+            this.highlighted = false;
         }
     }
     
@@ -178,7 +182,16 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
             float cy = cellSize * (row  + 0.5f);
             float h = (cellStates[row][column] == null ? 1.0f : cellStates[row][column].height) * (cellSize - 2.0f * pad);
 
-            g.setColor(player.color);
+            Color color = player.color;
+
+            Color actualColor = new Color(
+                    color.getRed(),
+                    color.getGreen(),
+                    color.getBlue(),
+                    cellStates[row][column] != null && cellStates[row][column].highlighted ? 128 : 255
+            );
+
+            g.setColor(actualColor);
 
             g.fillOval(
                     Math.round(x + pad),
@@ -191,6 +204,8 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
     protected final Game game;
     protected CellState cellStates[][];
 
+    protected boolean showPossibleMoves;
+
     /**
      * Constructs a new BoardView.
      *
@@ -202,14 +217,18 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
         this.setPreferredSize(new Dimension(500,500) );
         this.setBackground(new Color(12, 169, 18));
 
+        resetCellStates();
+
+        fAnimator = null;
+        this.addMouseListener(this);
+    }
+
+    private void resetCellStates() {
         int size = game.getBoard().size;
         this.cellStates = new CellState[size][size];
         for(int i = 0; i < size; i++)
             for(int j = 0; j < size; j++)
                 this.cellStates[i][j] = null;
-
-        fAnimator = null;
-        this.addMouseListener(this);
     }
 
     /**
@@ -324,11 +343,36 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
      */
     @Override
     public void doFlip(BoardIndex startPosition, BoardIndex endPosition, PlayerColor newColor) {
+
+        clearHighlights();
+
         animateFlipSequence(
                 startPosition.row, startPosition.column,
                 endPosition.row, endPosition.column,
                 newColor,
                 300);
+    }
+
+    public void highlightCells(PlayerColor color, Set<BoardIndex> indexes) {
+
+        for(BoardIndex index : indexes) {
+            if(cellStates[index.row][index.column] == null) {
+                cellStates[index.row][index.column] = new CellState(color, index.row, index.column);
+                cellStates[index.row][index.column].highlighted = true;
+            }
+        }
+
+        repaint();
+    }
+
+    public void clearHighlights() {
+        for(int i = 0;i < cellStates.length;i++) {
+            for(int j = 0;j < cellStates[i].length;j++) {
+                if(cellStates[i][j] != null && cellStates[i][j].highlighted) {
+                    cellStates[i][j] = null;
+                }
+            }
+        }
     }
 
 }

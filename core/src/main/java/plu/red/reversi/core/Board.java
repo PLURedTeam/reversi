@@ -10,6 +10,7 @@ import plu.red.reversi.core.listener.IFlipListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents the state of the board at a particular instant in time
@@ -224,9 +225,9 @@ public class Board {
      * @param color of the player
      * @return ArrayList moves
      */
-    public ArrayList<BoardIndex> getPossibleMoves(PlayerColor color ){
+    public Set<BoardIndex> getPossibleMoves(PlayerColor color ){
         //declare an array for possible moves method
-        ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
+        HashSet<BoardIndex> moves = new HashSet<>();
 
         BoardIndex indx = new BoardIndex();
 
