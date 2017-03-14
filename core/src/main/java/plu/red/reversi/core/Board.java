@@ -145,12 +145,12 @@ public class Board {
         if(scoreCache[ordinal] >= 0)
             return scoreCache[ordinal];
 
-        scoreCache[ordinal] = 0;
+        Arrays.fill(scoreCache, 0);
         //look for the instances of the role on the board
         for(int r = 0; r < size; r++){
             for(int c = 0; c < size; c++){
-                if(board[r][c] == role){
-                    scoreCache[ordinal]++;
+                if(board[r][c].isValid()){
+                    scoreCache[board[r][c].validOrdinal()]++;
                 }
             }
         }//end loop
