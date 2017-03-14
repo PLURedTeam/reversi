@@ -20,7 +20,7 @@ public class BoardTest {
     @Test
     public void testGetScore() {
         Board board = new Board(4);
-        board.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
+        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
 
         assertEquals(2, board.getScore(PlayerColor.WHITE));
         assertEquals(2, board.getScore(PlayerColor.BLACK));
@@ -32,7 +32,7 @@ public class BoardTest {
     @Test
     public void testIsValidMove() {
         Board board = new Board(4);
-        board.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
+        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
 
         assertFalse(board.isValidMove(PlayerColor.BLACK, new BoardIndex(0, 0)));
         assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(1, 0)));
@@ -45,7 +45,7 @@ public class BoardTest {
     @Test
     public void getPossibleMoves() {
         Board board = new Board(4);
-        board.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
+        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
 
         Set<BoardIndex> moveList;
         moveList = board.getPossibleMoves(PlayerColor.BLACK);
@@ -63,7 +63,7 @@ public class BoardTest {
         //moving a piece in a legal index
         MoveCommand c = new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(1, 0));
         Board brd = new Board(4);
-        brd.setupBoard(PlayerColor.WHITE, PlayerColor.BLACK);
+        brd.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
         brd.apply(c);
         assertEquals(PlayerColor.BLACK, brd.at(c.position));
 

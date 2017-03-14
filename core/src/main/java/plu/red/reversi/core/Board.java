@@ -89,9 +89,10 @@ public class Board {
      * Method to setup the initial board position. Usually called from the initialization method of Game.
      * Set commands to history.
      *
-     * @param game Game object this board is attached to during setup; generally used to determine player colors
+     * @param game Game object this board is attached to during setup; generally used to determine player colors.
+     * @param size Size of the board for which to generate the commands for.
      */
-    public void setupBoard(Game game, History history) {
+    public static LinkedList<BoardCommand> getSetupCommands(Game game, int size) {
         //TODO: improve; temporary setup to get used Colors
         PlayerColor color1 = null;
         PlayerColor color2 = null;
@@ -101,30 +102,29 @@ public class Board {
             else break;
         }
 
-        LinkedList<SetCommand> list = new LinkedList<>();
-        list.add(new SetCommand(color1, new BoardIndex((size / 2) - 1, (size / 2) - 1)));
-        list.add(new SetCommand(color2, new BoardIndex((size / 2) - 1, size / 2)));
-        list.add(new SetCommand(color2, new BoardIndex((size / 2) + 1, (size / 2) - 1)));
-        list.add(new SetCommand(color1, new BoardIndex(size / 2, size / 2)));
+        return getSetupCommands(color1, color2, size);
+    }
 
-        for(SetCommand c : list) {
-            apply(c);
-            history.addCommand(c);
-        }
+    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor c1, PlayerColor c2, int size) {
+        LinkedList<BoardCommand> list = new LinkedList<>();
+        list.add(new SetCommand(c1, new BoardIndex(size / 2 - 1,size / 2 - 1)));
+        list.add(new SetCommand(c2, new BoardIndex(size / 2 - 1,size / 2)));
+        list.add(new SetCommand(c2, new BoardIndex(size / 2,size / 2 -1)));
+        list.add(new SetCommand(c1, new BoardIndex(size / 2,size / 2)));
+        return list;
     }
 
     /**
-     * Method to setup the initial board position. Called manually from wherever.
-     *
-     * @param color1 PlayerColor to use for Player 1
-     * @param color2 PlayerColor to use for Player 2
+     * Apply multiple commands at once.
+     * @param commands List of commands to be applied in order.
      */
-    public void setupBoard(PlayerColor color1, PlayerColor color2) {
-        // Set the board up
-        board[(size/2)-1][((size/2)-1)] = color1;
-        board[((size/2)-1)][((size/2)-1)+1] = color2;
-        board[((size/2)-1)+1][((size/2)-1)] = color2;
-        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
+    public void applyCommands(LinkedList<BoardCommand> commands) {
+        for(BoardCommand c : commands) {
+            if(c instanceof MoveCommand)
+                apply((MoveCommand)c);
+            else if(c instanceof SetCommand)
+                apply((SetCommand)c);
+        }
     }
 
     /**

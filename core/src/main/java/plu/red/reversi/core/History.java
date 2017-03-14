@@ -1,38 +1,107 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.*;
+import sun.awt.image.ImageWatched;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+
 
 /**
- * Stores all the past actions and commands of the player.
+ * Stores all the past actions and moves of the player.
  */
 public class History {
-    private ArrayList<Command> commands = new ArrayList<Command>();
+    private ArrayList<BoardCommand> moves;
+    private ArrayList<ChatCommand>  messages;
 
     /**
-     * Used to find out how many commands have been stored in history.
-     * @return The total number of commands stored in history
+     * Basic constructor, initializes lists to be empty.
      */
-    public int getNumCommands() {
-        return commands.size();
+    public History() {
+        moves = new ArrayList<>();
+        messages = new ArrayList<>();
+        //currentIndex = 0;
     }
 
     /**
-     * Used to retrieve a specific command.
-     * @param i Index of the desired command.
-     * @return Command stored at the index.
+     * Copy constructor, makes a copy of another history object.
+     * @param other History object to be copied.
+     */
+    public History(History other) {
+        moves = new ArrayList<>(other.moves);
+        messages = new ArrayList<>(other.messages);
+        //currentIndex = other.currentIndex;
+    }
+
+    /**
+     * Used to find out how many moves have been stored in history.
+     * @return Total number of moves stored in history.
+     */
+    public int getNumBoardCommands() {
+        return moves.size();
+    }
+
+    /**
+     * Used to find out how many messages have been stored in histroy.
+     * @return  Total number of messages stored in history.
+     */
+    public int getNumChatCommands() {
+        return messages.size();
+    }
+
+    /**
+     * Used to retrieve a specific move.
+     * @param i Index of the desired move.
+     * @return Move stored at the index.
      * @throws ArrayIndexOutOfBoundsException If the requested index is invalid.
      */
-    public final Command getCommand(int i) throws ArrayIndexOutOfBoundsException {
-        return commands.get(i);
+    public BoardCommand getBoardCommand(int i) throws ArrayIndexOutOfBoundsException {
+        return moves.get(i);
     }
 
     /**
-     * Adds a new command to the history.
-     * @param c Command to be added.
+     * Used to retrieve a specifc message.
+     * @param i Index of the desired command.
+     * @return Message stored at that index.
+     * @throws ArrayIndexOutOfBoundsException If the requesed index is invalid.
      */
+    public ChatCommand getChatCommand(int i) throws ArrayIndexOutOfBoundsException {
+        return messages.get(i);
+    }
+
+    /**
+     * Adds a new message to the history.
+     * @param c ChatCommand to be added.
+     */
+    public void addCommand(ChatCommand c) {
+        messages.add(c);
+    }
+
+    /**
+     * Adds a new board command to the history.
+     * @param c BoardCommand to be added.
+     */
+    public void addCommand(BoardCommand c) {
+        moves.add(c);
+    }
+
     public void addCommand(Command c) {
-        commands.add(c);
+        if(c instanceof BoardCommand)
+            addCommand((BoardCommand)c);
+        else if(c instanceof ChatCommand)
+            addCommand((ChatCommand)c);
+    }
+
+    /**
+     * Used to retrieve all commands made until a certain point in the game.
+     * @param i Index of the furthest command (exclusive).
+     * @return List containing indicies [0, i).
+     * @throws IndexOutOfBoundsException If the requested index is invalid.
+     */
+    public LinkedList<BoardCommand> getMoveCommandsUntil(int i) throws IndexOutOfBoundsException {
+        LinkedList<BoardCommand> list = new LinkedList<>();
+        list.addAll(moves.subList(0, i));
+        return list;
     }
 }

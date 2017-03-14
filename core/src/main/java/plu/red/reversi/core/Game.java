@@ -9,6 +9,7 @@ import plu.red.reversi.core.util.SettingsMap;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -129,7 +130,7 @@ public class Game {
      * and settings being used.
      */
     public void initialize() {
-        board.setupBoard(this, history);
+        board.applyCommands(board.getSetupCommands(this, settings.getNumber("BoardSize").intValue()));
     }
 
     /**
