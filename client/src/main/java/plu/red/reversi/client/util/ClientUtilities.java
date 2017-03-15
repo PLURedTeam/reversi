@@ -1,6 +1,10 @@
 package plu.red.reversi.client.util;
 
 //import statements
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import javax.xml.transform.Result;
 import java.sql.*;
 
 /**
@@ -10,6 +14,7 @@ public class ClientUtilities {
 
     //Fields
     private Connection conn; //Connection Object
+    ConnectDB dbConnection; //The database connector class
 
     /**
      * Constructor for ClientUtilities class
@@ -18,145 +23,71 @@ public class ClientUtilities {
      *  and sets the conn field to the connection
      */
     public ClientUtilities() {
-        ConnectDB dbConnection = new ConnectDB(); //Create the connection
+        dbConnection = new ConnectDB(); //Create the connection
         dbConnection.openDB();
         conn = dbConnection.getConn(); //Set the util connection
+
+        //TURN ON FOREIGN KEY CONSTRAINTS
+        String sql = "PRAGMA foreign_keys = ON;";
+        try {
+            Statement command = conn.createStatement();
+            command.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
     }//constructor
 
     /**
-     * Creates the user in the util
-     * @param username username of the user, must be unique
-     * @param password the password for the user (Stored using SHA256)
-     * @return true if user created, false otherwise
+     * Calls the ConnectDB class to close the database
+     * This will only be used when the program closes
      */
-    public boolean createUser(String username, String password) {
-        int result = 0;
-        String sql = "Insert into USER values(?,?)";
+    public void closeDB() {
+        dbConnection.closeDB();
+    }//closeDB
+
+    /**
+     * Saves the game to the database
+     * @param name the name of the game
+     * @return true if game saved, false otherwise
+     */
+    public boolean saveGame(String name, String color) {
+        boolean gameSaved = false;
+        int gameID;
+        int result;
+        String sql = "insert into GAME values(?,?,?);";
 
         try {
+            Statement max = conn.createStatement();
+            ResultSet maxID = max.executeQuery("select max(game_id) from GAME");
+
+            if(maxID.next())
+                gameID = maxID.getInt(1) + 1;
+            else
+                gameID = 1;
+
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.clearParameters();
-            stmt.setString(1,username);
-            stmt.setString(2,password);
-
+            stmt.setInt(1,gameID);
+            stmt.setString(2,name);
+            stmt.setString(3,color);
             result = stmt.executeUpdate();
 
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }//catch
-
-        if(result > 0)
-            return true;
-        else
-            return false;
-    }//createUser
-
-    /**
-     * Returns an array of users that are in the util
-     * @return an array of users in the util
-     */
-    public String[] getUsers() {
-        String[] users = null;
-        ResultSet rs, rsSize;
-
-        String sql = "select username from USER";
-        String sizeSql = "select count(username) from USER";
-        int size = 0;
-
-        try {
-            Statement stmt = conn.createStatement();
-
-            rsSize = stmt.executeQuery(sizeSql);
-            size = rsSize.getInt(1);
-            users = new String[size];
-
-            rs = stmt.executeQuery(sql);
-
-            int i = 0;
-            while(rs.next()) {
-                users[i] = rs.getString(1);
-                i++;
-            }//while
+            if(result > 0)
+                gameSaved = true;
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
 
-        return users;
-    }//getUsers
+        return gameSaved;
+    }//saveGame
 
     /**
-     * Deletes a user from the util
-     * @param username username of the user
-     * @param password password for the user
-     * @return true if deleted, false otherwise
-     */
-    public boolean deleteUser(String username, String password) {
-        int result = 0;
-        String sql = "delete from USER where username=? and password=?";
-
-        try {
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.clearParameters();
-            stmt.setString(1,username);
-            stmt.setString(2,password);
-
-            result = stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }//catch
-
-        if(result > 0)
-            return true;
-        else
-            return false;
-    }//deleteUser
-
-    /**
-     * Tests the login information against what is in the util
-     * @param username the username of the user
-     * @param password the password of the user
-     * @return true if valid login credentials, false otherwise
-     */
-    public boolean login(String username, String password) {
-        ResultSet result;
-        boolean validLogin = false;
-        String sql = "select username from USER where username=? and password=?";
-
-        try {
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.clearParameters();
-            stmt.setString(1,username);
-            stmt.setString(2,password);
-
-            result = stmt.executeQuery();
-
-            if(result.next())
-                validLogin = true;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }//catch
-
-        return validLogin;
-    }//login
-
-    /**
-     *
-     * @param name
+     * Loads the game history from the database
+     * @param gameID the id of the game to be loaded
      * @return
-     */
-    public int createGame(String name) {
-        int gameID = -1;
-
-
-        return gameID;
-    }//createGame
-
-    /**
      *
-     * @param gameID
-     * @return
+     *  TODO: FINISH THIS
      */
     public String[] loadGame(int gameID) {
         String[] gameHistory = null;
@@ -165,26 +96,119 @@ public class ClientUtilities {
         return gameHistory;
     }//loadGame
 
-    public String[] getGames(String username) {
+    public String[] getGames() {
+        int numGames = 0;
         String[] games = null;
+
+        try {
+            //Query the database to get the number of saved games
+            Statement num = conn.createStatement();
+            ResultSet getNumGames = num.executeQuery("select count(*) from GAME");
+            if(getNumGames.next())
+                numGames = getNumGames.getInt(1);
+
+            //Initialize the array to the number of games
+            games = new String[numGames];
+
+            //Query to get the names
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select name from GAME");
+
+            //Fill in the array with the game names
+            int i = 0;
+            while(rs.next()) {
+                games[i] = rs.getString(1);
+                i++;
+            }//while
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
 
         return games;
     }//getGames
 
     /**
-     *
-     * @param gameID
+     * Deletes a game from the database
+     * @param gameID the id of the game to be deleted
+     * @return true if deleted, false otherwise
      */
-    public void saveGameSettings(int gameID) {
+    public boolean deleteGame(int gameID) {
+        int result = 0;
+        String sql = "delete from GAME where gameID=?";
 
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,gameID);
+
+            result = stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+
+        if(result > 0)
+            return true;
+        else
+            return false;
+    }//deleteGame
+
+    /**
+     * Saves the game settings to the database
+     * @param gameID the id of the game
+     * @param settings the JSONObject that includes the game settings
+     */
+    public boolean saveGameSettings(int gameID, JSONObject settings) {
+        boolean saved = false;
+        int result;
+
+        String sql = "insert into GAME_SETTINGS values(?,?)\n"
+                + "on duplicate key\n"
+                + "update game_settings = ?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,gameID);
+            stmt.setString(2,settings.toString());
+            stmt.setString(3,settings.toString());
+            result = stmt.executeUpdate();
+
+            if(result > 0)
+                saved = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+        return saved;
     }//saveGameSettings
 
     /**
-     *
-     * @param gameID
+     * Loads the game settings JSON object from the database for the game
+     * @param gameID the ID of the game to get the settings
+     * @return JSON object with the game settings
      */
-    public void loadGameSettings(int gameID) {
+    public JSONObject loadGameSettings(int gameID) {
+        JSONObject json = null;
 
+        String sql = "select game_settings from GAME_SETTINGS where game_id=?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,gameID);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.next())
+                json = new JSONObject(rs.getString(1));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+        catch (JSONException e) {
+            e.printStackTrace();
+        }//catch
+
+        return json;
     }//loadGameSettings
-
 }//ClientUtilities

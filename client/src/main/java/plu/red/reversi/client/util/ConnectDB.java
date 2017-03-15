@@ -25,7 +25,7 @@ public class ConnectDB {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
     }//constructor
 
@@ -57,10 +57,10 @@ public class ConnectDB {
             } else {
                 //Creates the util file and connects to it
                 conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-                CreateDB db = new CreateDB(conn); //Creates the tables in the util
+                CreateDB db = new CreateDB(conn); //Creates the tables in the database
             }//else
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
         if (conn != null)
             connStatus = "Successfully connected to util";
@@ -79,12 +79,12 @@ public class ConnectDB {
             }//if
             conn = null;
         } catch (SQLException e) {
-            connStatus = "Failed to close util connection: " + e;
+            connStatus = "Failed to close database connection: " + e;
         }//catch
 
         if (conn == null) {
-            connStatus = "Successfully disconnected from util";
-        }
+            connStatus = "Successfully disconnected from database";
+        }//if
         return connStatus;
     }// closeDB
 

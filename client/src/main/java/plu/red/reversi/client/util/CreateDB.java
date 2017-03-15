@@ -27,31 +27,11 @@ public class CreateDB {
             System.out.println("Could not connect to the util.");
         else {
             //Call methods to create tables
-            createUserTable();
             createGameTable();
             createGameHistoryTable();
             createGameSettingsTable();
         }//else
     }//constructor
-
-    /**
-     * Creates the USER table in the util using SQL commands
-     * If the SQL statement fails, will print the SQL message to
-     *  the console
-     */
-    public void createUserTable() {
-        String sql = "create table USER (\n"
-                   + "username varchar(50) UNIQUE,\n"
-                   + "password char(64),\n"
-                   + "PRIMARY KEY(username)\n"
-                   + ");";
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }//catch
-    }//createUserTable
 
     /**
      * Creates the GAME table in the util using SQL commands
@@ -61,20 +41,15 @@ public class CreateDB {
     public void createGameTable() {
         String sql = "create table GAME (\n"
                 + "game_id int NOT NULL,\n"
-                + "username varchar(50) NOT NULL,\n"
                 + "name varchar(50),\n"
                 + "user_color varchar(50),\n"
-                + "game_score int,\n"
-                + "game_won boolean,\n"
                 + "PRIMARY KEY(game_id),\n"
-                + "FOREIGN KEY(username) references USER(username)\n"
-                + "ON DELETE CASCADE\n"
                 + ");";
         try {
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
     }//createGameTable
 
@@ -97,7 +72,7 @@ public class CreateDB {
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
     }//createGameHistoryTable
 
@@ -109,8 +84,7 @@ public class CreateDB {
     public void createGameSettingsTable() {
         String sql = "create table GAME_SETTINGS (\n"
                 + "game_id int NOT NULL,\n"
-                + "board_size int NOT NULL,\n"
-                + "board_colors varchar(20) NOT NULL,\n"
+                + "game_settings text NOT NULL,\n"
                 + "PRIMARY KEY(game_id)\n"
                 + "FOREIGN KEY(game_id) references GAME(game_id)\n"
                 + "ON DELETE CASCADE\n"
@@ -119,7 +93,7 @@ public class CreateDB {
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
     }//createGameSettingsTable
 }//class
