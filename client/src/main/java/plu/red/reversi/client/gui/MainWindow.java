@@ -2,9 +2,12 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.GamePanel;
 import plu.red.reversi.core.Game;
+import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * The main game window, contains all of the UI.
@@ -38,6 +41,13 @@ public class MainWindow extends JFrame {
         this.statusBar = new StatusBar();
         game.addStatusListener(this.statusBar);
         this.add(statusBar, BorderLayout.SOUTH);
+
+        Timer timer = new Timer(30, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Looper.getLooper(Thread.currentThread()).run();
+            }
+        });
 
         this.pack();
         this.setVisible(true);
