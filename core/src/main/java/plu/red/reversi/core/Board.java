@@ -5,11 +5,13 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IFlipListener;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Represents the state of the board at a particular instant in time
@@ -51,6 +53,7 @@ public class Board {
 
     private PlayerColor[][] board; // 2D array that represents the board
     public final int size;
+    public int[] scoreCache;
 
 
     /**
@@ -61,10 +64,10 @@ public class Board {
     public Board(int sz){
         size = sz;
         board = new PlayerColor[sz][sz];
+        scoreCache = new int[PlayerColor.validPlayerColors.length];
+        Arrays.fill(scoreCache, -1);
         for(int i = 0; i < size; i++) {
-            for(int j = 0; j < size; j++) {
-                board[i][j] = PlayerColor.NONE;
-            }
+            Arrays.fill(board[i], PlayerColor.NONE);
         }
     }
 
@@ -75,22 +78,22 @@ public class Board {
      */
     public Board(Board b){
         size = b.size;
+        scoreCache = Arrays.copyOf(b.scoreCache, b.scoreCache.length);
         board = new PlayerColor[size][size];
         for(int r = 0; r < size; r++){
-            for(int c = 0; c < size; c++){
-                board[r][c] = b.board[r][c];
-            }
+            board[r] = Arrays.copyOf(b.board[r], size);
         }// end loop
     }
 
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
+     * Set commands to history.
      *
-     * @param game Game object this board is attached to during setup; generally used to determine player colors
+     * @param game Game object this board is attached to during setup; generally used to determine player colors.
+     * @param size Size of the board for which to generate the commands for.
      */
-    public void setupBoard(Game game) {
-
-        // Temporary setup to get used Colors
+    public static LinkedList<BoardCommand> getSetupCommands(Game game, int size) {
+        //TODO: improve; temporary setup to get used Colors
         PlayerColor color1 = null;
         PlayerColor color2 = null;
         for(PlayerColor color : game.getUsedPlayers()) {
@@ -99,25 +102,29 @@ public class Board {
             else break;
         }
 
-        // Set the board up
-        board[(size/2)-1][((size/2)-1)] = color1;
-        board[((size/2)-1)][((size/2)-1)+1] = color2;
-        board[((size/2)-1)+1][((size/2)-1)] = color2;
-        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
+        return getSetupCommands(color1, color2, size);
+    }
+
+    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor c1, PlayerColor c2, int size) {
+        LinkedList<BoardCommand> list = new LinkedList<>();
+        list.add(new SetCommand(c1, new BoardIndex(size / 2 - 1,size / 2 - 1)));
+        list.add(new SetCommand(c2, new BoardIndex(size / 2 - 1,size / 2)));
+        list.add(new SetCommand(c2, new BoardIndex(size / 2,size / 2 -1)));
+        list.add(new SetCommand(c1, new BoardIndex(size / 2,size / 2)));
+        return list;
     }
 
     /**
-     * Method to setup the initial board position. Called manually from wherever.
-     *
-     * @param color1 PlayerColor to use for Player 1
-     * @param color2 PlayerColor to use for Player 2
+     * Apply multiple commands at once.
+     * @param commands List of commands to be applied in order.
      */
-    public void setupBoard(PlayerColor color1, PlayerColor color2) {
-        // Set the board up
-        board[(size/2)-1][((size/2)-1)] = color1;
-        board[((size/2)-1)][((size/2)-1)+1] = color2;
-        board[((size/2)-1)+1][((size/2)-1)] = color2;
-        board[((size/2)-1)+1][((size/2)-1)+1] = color1;
+    public void applyCommands(LinkedList<BoardCommand> commands) {
+        for(BoardCommand c : commands) {
+            if(c instanceof MoveCommand)
+                apply((MoveCommand)c);
+            else if(c instanceof SetCommand)
+                apply((SetCommand)c);
+        }
     }
 
     /**
@@ -138,18 +145,21 @@ public class Board {
      * @return score, number of instances of the player on the board
      */
     public int getScore(PlayerColor role){
-        int score=0;
+        int ordinal = role.validOrdinal();
+        if(scoreCache[ordinal] >= 0)
+            return scoreCache[ordinal];
 
+        Arrays.fill(scoreCache, 0);
         //look for the instances of the role on the board
         for(int r = 0; r < size; r++){
             for(int c = 0; c < size; c++){
-                if(board[r][c] == role){
-                    score++;
+                if(board[r][c].isValid()){
+                    scoreCache[board[r][c].validOrdinal()]++;
                 }
             }
         }//end loop
 
-        return score;
+        return scoreCache[ordinal];
     }
 
     /**
@@ -224,9 +234,9 @@ public class Board {
      * @param color of the player
      * @return ArrayList moves
      */
-    public ArrayList<BoardIndex> getPossibleMoves(PlayerColor color ){
+    public Set<BoardIndex> getPossibleMoves(PlayerColor color ){
         //declare an array for possible moves method
-        ArrayList<BoardIndex> moves = new ArrayList<BoardIndex>();
+        HashSet<BoardIndex> moves = new HashSet<>();
 
         BoardIndex indx = new BoardIndex();
 
@@ -247,21 +257,25 @@ public class Board {
     /**
      * Applies the move made, updating the board
      * @param c command made
-     * @param flipTiles
      */
-    public void apply(MoveCommand c, boolean flipTiles) {
-        if (flipTiles) {
-            boolean anyFlipped = false;
-            for(int i = 0; i < 8; i++) {
-                int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
-                int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
-                //Actually flip tile
-                if(flipTiles(c, dr, dc, 1))
-                    anyFlipped = true;
-            }
-            if(anyFlipped)
-                board[c.position.row][c.position.column] = c.player;
+    public void apply(MoveCommand c) {
+        //actually set the tile
+        apply(new SetCommand(c));
+
+        //flip the tiles as a result of placing this one
+        for(int i = 0; i < 8; i++) {
+            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
+            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
+            //Actually flip tile
+            flipTiles(c, dr, dc, 1);
         }
+    }
+
+    public void apply(SetCommand c) {
+        //invalidate the cache
+        Arrays.fill(scoreCache, -1);
+        //set the tile
+        board[c.position.row][c.position.column] = c.player;
     }
 
     /**
@@ -297,14 +311,6 @@ public class Board {
         return false;
     }
 
-
-    /**
-     * Applies a move and flips tiles
-     * @param c command made
-     */
-    public void apply(MoveCommand c) {
-        apply(c, true);
-    }
 
     public boolean equals(final Board b){
         //if the size isn't the same return false

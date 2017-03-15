@@ -10,6 +10,7 @@ import plu.red.reversi.core.util.Looper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Using the minimax algorithm, calculate the optimal move for a particular currentPlayer given the specified currentState.
@@ -85,7 +86,7 @@ public class ReversiMinimax implements Runnable {
 
             //board is not equal yet, so check children
             if(candidates.isEmpty() || currentRoot.children.isEmpty())
-                throw new IndexOutOfBoundsException("Minimax cache exceeded, need to regenerate from scratch");
+                throw new IndexOutOfBoundsException("Minimax scoreCache exceeded, need to regenerate from scratch");
 
             //go through all children, consider a candidate any that have moves which were made
             for(ReversiNode i : currentRoot.children)
@@ -142,7 +143,7 @@ public class ReversiMinimax implements Runnable {
         if(!node.children.isEmpty()) return;
         //need to calculate, i is current game state
         // start by getting all the possible moves for the next player
-        ArrayList<BoardIndex> possible = node.getPossibleMoves();
+        Set<BoardIndex> possible = node.getPossibleMoves();
 
         if(possible.isEmpty()) return;
 
@@ -196,7 +197,7 @@ public class ReversiMinimax implements Runnable {
          * Finds the possible moves for the next player with the current board state.
          * @return An array list of possible moves for currentPlayer.
          */
-        public ArrayList<BoardIndex> getPossibleMoves() {
+        public Set<BoardIndex> getPossibleMoves() {
             return board.getPossibleMoves(currentPlayer);
         }
 

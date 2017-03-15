@@ -1,18 +1,24 @@
 package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The main menu bar.
  */
-public class ReversiMenuBar extends JMenuBar implements ActionListener {
+public class ReversiMenuBar extends JMenuBar implements ActionListener, Looper.LooperCallback<BoardIndex> {
 
     /** The MainWindow */
     private MainWindow gui;
@@ -20,6 +26,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     /** Quit item */
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
+
+    private JMenuItem highlightMenuItem;
+    private JMenuItem bestMoveMenuItem;
 
     /**
      * Constructs the menu bar
@@ -65,6 +74,24 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         menu.addSeparator();
 
+        highlightMenuItem = new JMenuItem("Toggle Show Possible Moves");
+        highlightMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.META_MASK));
+        highlightMenuItem.getAccessibleContext().setAccessibleDescription(
+                "Toggles the showing of all the places which the current player can play on the board.");
+        highlightMenuItem.addActionListener(this);
+        menu.add(highlightMenuItem);
+
+        bestMoveMenuItem = new JMenuItem("Select Best Move");
+        bestMoveMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_W, ActionEvent.META_MASK));
+        bestMoveMenuItem.getAccessibleContext().setAccessibleDescription(
+                "Selects and play the best move automatically.");
+        bestMoveMenuItem.addActionListener(this);
+        menu.add(bestMoveMenuItem);
+
+        menu.addSeparator();
+
         surrenderMenuItem = new JMenuItem("Surrender");
         surrenderMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -88,12 +115,45 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        Game game = gui.getGamePanel().getGame();
+
         if(e.getSource() == quitMenuItem) {
             System.exit(0);
         } else if(e.getSource() == surrenderMenuItem) {
-            Player player = gui.getGamePanel().getGame().getCurrentPlayer();
+            Player player = game.getCurrentPlayer();
             if(player instanceof HumanPlayer)
                 gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
+        } else if(e.getSource() == highlightMenuItem) {
+
+            gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
+
+        } else if(e.getSource() == bestMoveMenuItem) {
+
+            Looper.LooperCall<BoardIndex> looperCall = Looper.getLooper(Thread.currentThread()).getCall(new Looper.LooperCallback<BoardIndex>() {
+                @Override
+                public void onLooperCallback(BoardIndex result) {
+                    Set<BoardIndex> indexes = new HashSet<>();
+                    indexes.add(result);
+
+                    gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
+                }
+            });
+
+            // TODO: Show a loading indicator of some kind
+            // TODO: Cancel minimax result if play is performed, or disable ability to play on board
+            ReversiMinimax minimax = new ReversiMinimax(game,
+                    game.getCurrentPlayer().getRole(),
+                    game.getCurrentPlayer().getRole().getNext(),
+                    looperCall);
+
+            new Thread(minimax).start();
+
         }
+    }
+
+    @Override
+    public void onLooperCallback(BoardIndex result) {
+
     }
 }

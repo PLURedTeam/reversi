@@ -6,7 +6,7 @@ import java.sql.*;
 
 /**
  * Created by Andrew on 3/7/2017.
- * Creates and manages the connection object to the util
+ * Creates and manages the connection object to the database
  */
 public class ConnectDB {
 
@@ -25,7 +25,7 @@ public class ConnectDB {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
     }//constructor
 
@@ -35,11 +35,11 @@ public class ConnectDB {
      *   username or password none of those parameters
      *   are passed.
      *
-     *  If the util does not exist, one will be created
+     *  If the database does not exist, one will be created
      *   with the name ClientDB.db and the CreateDB class will
      *   be called to create the tables.
      *
-     *  If the connection to the util fails the SQL message
+     *  If the connection to the database fails the SQL message
      *   will be printed to the console.
      *
      * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
@@ -57,18 +57,22 @@ public class ConnectDB {
             } else {
                 //Creates the util file and connects to it
                 conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-                CreateDB db = new CreateDB(conn); //Creates the tables in the util
+                CreateDB db = new CreateDB(conn); //Creates the tables in the database
             }//else
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }//catch
         if (conn != null)
-            connStatus = "Successfully connected to util";
+            connStatus = "Successfully connected to database";
         return connStatus;
     }// openDB
 
     /**
      * Close the connection to the DB
+     * This is important, without closing the database
+     *  it can become locked for editing the next time
+     *  that the database is opened. Also it may prevent
+     *  the process from being terminated.
      * @return the status of the util connection
      */
     public String closeDB() {
@@ -79,12 +83,12 @@ public class ConnectDB {
             }//if
             conn = null;
         } catch (SQLException e) {
-            connStatus = "Failed to close util connection: " + e;
+            connStatus = "Failed to close database connection: " + e;
         }//catch
 
         if (conn == null) {
-            connStatus = "Successfully disconnected from util";
-        }
+            connStatus = "Successfully disconnected from database";
+        }//if
         return connStatus;
     }// closeDB
 

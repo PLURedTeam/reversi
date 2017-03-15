@@ -29,10 +29,11 @@ public class BoardIndex {
         return row + column*10000;
     }
 
-    public boolean equals(final BoardIndex i){
-        return i.row == row && i.column == column;
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof BoardIndex && ((BoardIndex)o).row == row && ((BoardIndex)o).column == column;
     }
 
     //TODO: Convert to and from character
-
 }

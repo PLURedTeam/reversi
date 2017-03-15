@@ -5,6 +5,8 @@ package plu.red.reversi.core.util;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.BoardIndex;
+
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -41,8 +43,8 @@ public class Looper {
 
     /**
      * Construct a new looper call
-     * @param callback the callback which should be executed after the asynchronous operation completes.
      * @param <T> the type of result which should be expected in the LooperCallback
+     * @param callback the callback which should be executed after the asynchronous operation completes.
      * @return a looper call connected to this thread which may be passed to the asynchronous operation
      */
     public <T> LooperCall<T> getCall(LooperCallback<T> callback) {
