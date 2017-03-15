@@ -27,6 +27,7 @@ public class BaseEndpoint {
      *         session id, will be false if incorrect credentials and null for
      *         the session id.
      */
+    @Path("login")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(String username, String password) {
@@ -40,6 +41,7 @@ public class BaseEndpoint {
      *                  login
      * @return true if users is logged out, false otherwise
      */
+    @Path("logout")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public String logout(String username, int sessionID) {
@@ -53,6 +55,7 @@ public class BaseEndpoint {
      *                 format
      * @return true if user was created, false if username exists
      */
+    @Path("create-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public String createUser(String username, String password) {
@@ -68,6 +71,7 @@ public class BaseEndpoint {
      *                 format
      * @return true if user is deleted, false if incorrect credentials
      */
+    @Path("delete-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteUser(String username, String password) {
@@ -79,6 +83,7 @@ public class BaseEndpoint {
      * (i.e. in lobby, in game)
      * @return A JSON object of users currently online
      */
+    @Path("online-users")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOnlineUsers() {
@@ -89,6 +94,7 @@ public class BaseEndpoint {
      * Gets the current status of the leaderboard
      * @return A JSON Object of the current leaderboard
      */
+    @Path("leaderboard")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLeaderboard() {
