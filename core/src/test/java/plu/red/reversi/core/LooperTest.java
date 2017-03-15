@@ -1,8 +1,6 @@
 package plu.red.reversi.core;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import plu.red.reversi.core.util.Looper;
 
 import java.util.ArrayList;
@@ -12,6 +10,17 @@ import java.util.ArrayList;
  * Glory to the Red Team.
  */
 public class LooperTest implements Looper.LooperCallback<Integer> {
+
+
+
+    @BeforeClass
+    /**
+     * It is possible for the tests to leave some looper items active after execution. This can cause errors in later tests,
+     * so I fix by adding this to flush out any remaining looper calls that may exist.
+     */
+    public static void ensureLooperCleared() {
+        Looper.getLooper(Thread.currentThread()).run();
+    }
 
     private ArrayList<Integer> looperResults = new ArrayList<>();
 
@@ -31,6 +40,10 @@ public class LooperTest implements Looper.LooperCallback<Integer> {
         Looper l2 = Looper.getLooper(Thread.currentThread());
 
         Assert.assertTrue(l1 == l2); // we want to test that the actual references are the same
+
+        Looper l3 = Looper.getLooper(new Thread());
+
+        Assert.assertFalse(l2 == l3);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package plu.red.reversi.core;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import plu.red.reversi.core.util.Looper;
