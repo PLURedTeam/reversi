@@ -6,7 +6,7 @@ import java.sql.*;
 
 /**
  * Created by Andrew on 3/7/2017.
- * Creates and manages the connection object to the util
+ * Creates and manages the connection object to the database
  */
 public class ConnectDB {
 
@@ -35,11 +35,11 @@ public class ConnectDB {
      *   username or password none of those parameters
      *   are passed.
      *
-     *  If the util does not exist, one will be created
+     *  If the database does not exist, one will be created
      *   with the name ClientDB.db and the CreateDB class will
      *   be called to create the tables.
      *
-     *  If the connection to the util fails the SQL message
+     *  If the connection to the database fails the SQL message
      *   will be printed to the console.
      *
      * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
@@ -69,6 +69,10 @@ public class ConnectDB {
 
     /**
      * Close the connection to the DB
+     * This is important, without closing the database
+     *  it can become locked for editing the next time
+     *  that the database is opened. Also it may prevent
+     *  the process from being terminated.
      * @return the status of the util connection
      */
     public String closeDB() {
