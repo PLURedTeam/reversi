@@ -63,7 +63,7 @@ public class ConnectDB {
             e.printStackTrace();
         }//catch
         if (conn != null)
-            connStatus = "Successfully connected to util";
+            connStatus = "Successfully connected to database";
         return connStatus;
     }// openDB
 

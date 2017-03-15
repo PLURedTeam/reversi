@@ -26,15 +26,15 @@ public class ConnectDBTest {
     @Test
     public void openDB() throws Exception {
         String conn = util.openDB();
-        Assert.assertEquals("Successfully connected to util", conn);
-        Assert.assertNotEquals("Error connecting to util", conn);
+        Assert.assertEquals("Successfully connected to database", conn);
+        Assert.assertNotEquals("Error connecting to database", conn);
     }//openDB
 
     @Test
     public void closeDB() throws Exception {
         util.openDB(); //Open the DB to test closure
         String conn = util.closeDB();
-        Assert.assertEquals("Successfully disconnected from util", conn);
+        Assert.assertEquals("Successfully disconnected from database", conn);
         Assert.assertNotEquals("Failed to close util connection: ", conn);
     }//closeDB
 }//ConnectDBTest
