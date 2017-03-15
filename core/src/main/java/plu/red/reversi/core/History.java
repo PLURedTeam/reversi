@@ -21,7 +21,6 @@ public class History {
     public History() {
         moves = new ArrayList<>();
         messages = new ArrayList<>();
-        //currentIndex = 0;
     }
 
     /**
@@ -31,7 +30,6 @@ public class History {
     public History(History other) {
         moves = new ArrayList<>(other.moves);
         messages = new ArrayList<>(other.messages);
-        //currentIndex = other.currentIndex;
     }
 
     /**
@@ -54,9 +52,9 @@ public class History {
      * Used to retrieve a specific move.
      * @param i Index of the desired move.
      * @return Move stored at the index.
-     * @throws ArrayIndexOutOfBoundsException If the requested index is invalid.
+     * @throws IndexOutOfBoundsException If the requested index is invalid.
      */
-    public BoardCommand getBoardCommand(int i) throws ArrayIndexOutOfBoundsException {
+    public BoardCommand getBoardCommand(int i) throws IndexOutOfBoundsException {
         return moves.get(i);
     }
 
@@ -64,9 +62,9 @@ public class History {
      * Used to retrieve a specifc message.
      * @param i Index of the desired command.
      * @return Message stored at that index.
-     * @throws ArrayIndexOutOfBoundsException If the requesed index is invalid.
+     * @throws IndexOutOfBoundsException If the requesed index is invalid.
      */
-    public ChatCommand getChatCommand(int i) throws ArrayIndexOutOfBoundsException {
+    public ChatCommand getChatCommand(int i) throws IndexOutOfBoundsException {
         return messages.get(i);
     }
 
