@@ -30,7 +30,7 @@ public class ConnectDB {
     }//constructor
 
     /**
-     * Open a SQLite DB connection
+     * Open a SQLite DBUtilities connection
      *  Since the util is local and does not need a
      *   username or password none of those parameters
      *   are passed.
@@ -68,7 +68,7 @@ public class ConnectDB {
     }// openDB
 
     /**
-     * Close the connection to the DB
+     * Close the connection to the DBUtilities
      * This is important, without closing the database
      *  it can become locked for editing the next time
      *  that the database is opened. Also it may prevent
