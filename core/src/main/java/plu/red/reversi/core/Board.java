@@ -191,6 +191,15 @@ public class Board {
     }
 
     /**
+     * Checks the board to see if the move attempted is valid
+     * @param command Checks to see if this move is valid.
+     * @return True if it is a valid move, otherwise false.
+     */
+    public boolean isValidMove(MoveCommand command) {
+        return isValidMove(command.player, command.position);
+    }
+
+    /**
      * Private method isValidMove handles the loop to check move validity in each direction
      *
      * @param dr change in x
@@ -312,7 +321,11 @@ public class Board {
     }
 
 
-    public boolean equals(final Board b){
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Board)) return false;
+        Board b = (Board)o;
+
         //if the size isn't the same return false
         if(this.size != b.size)
             return false;
