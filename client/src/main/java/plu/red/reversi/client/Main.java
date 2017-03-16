@@ -10,6 +10,7 @@ import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
+import plu.red.reversi.core.player.NullPlayer;
 import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 

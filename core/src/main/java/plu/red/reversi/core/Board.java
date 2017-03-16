@@ -89,20 +89,16 @@ public class Board {
      * Method to setup the initial board position. Usually called from the initialization method of Game.
      * Set commands to history.
      *
-     * @param game Game object this board is attached to during setup; generally used to determine player colors.
-     * @param size Size of the board for which to generate the commands for.
+     * @param game Game object this board is attached to during setup; generally used to determine player colors and size.
      */
-    public static LinkedList<BoardCommand> getSetupCommands(Game game, int size) {
+    public static LinkedList<BoardCommand> getSetupCommands(Game game) {
         //TODO: improve; temporary setup to get used Colors
         PlayerColor color1 = null;
         PlayerColor color2 = null;
-        for(PlayerColor color : game.getUsedPlayers()) {
-            if(color1 == null) color1 = color;
-            else if(color2 == null) color2 = color;
-            else break;
-        }
+        color1 = game.getCurrentPlayer().getRole();
+        color2 = color1.getNext(game.getUsedPlayers());
 
-        return getSetupCommands(color1, color2, size);
+        return getSetupCommands(color1, color2, game.getSettings().getNumber("BoardSize").intValue());
     }
 
     public static LinkedList<BoardCommand> getSetupCommands(PlayerColor c1, PlayerColor c2, int size) {
@@ -332,7 +328,7 @@ public class Board {
 
         for(int r = 0; r < size; r++)
             for(int c = 0; c < size; c++){
-                if(board[r][c] != b.at(new BoardIndex(r, c)))
+                if(board[r][c] != b.board[r][c])
                     return false;
             }
         return true;

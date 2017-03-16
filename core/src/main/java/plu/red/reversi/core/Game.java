@@ -130,7 +130,7 @@ public class Game {
      * and settings being used.
      */
     public void initialize() {
-        board.applyCommands(board.getSetupCommands(this, settings.getNumber("BoardSize").intValue()));
+        board.applyCommands(board.getSetupCommands(this));
     }
 
     /**

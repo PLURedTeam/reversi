@@ -3,7 +3,7 @@ package plu.red.reversi.core;
 /**
  * Represents a single tile on the board
  */
-public class BoardIndex {
+public class BoardIndex implements Comparable<BoardIndex> {
     public int row, column;
 
     public BoardIndex() {
@@ -33,6 +33,21 @@ public class BoardIndex {
     @Override
     public boolean equals(Object o) {
         return o instanceof BoardIndex && ((BoardIndex)o).row == row && ((BoardIndex)o).column == column;
+    }
+
+    @Override
+    public int compareTo(BoardIndex boardIndex) {
+        if(row < boardIndex.row) {
+            return -1;
+        } else if(row > boardIndex.row) {
+            return 1;
+        } else {
+            if(column < boardIndex.column) {
+                return -1;
+            } else if(column > boardIndex.column) {
+                return 1;
+            } else return 0;
+        }
     }
 
     //TODO: Convert to and from character
