@@ -9,6 +9,8 @@ import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.player.BotPlayer;
+import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
 public class Main {
@@ -23,11 +25,11 @@ public class Main {
         SettingsMap settings = SettingsLoader.INSTANCE.loadFromJSON(new JSONObject());
         Game game = new Game(settings);
 
-        HumanPlayer black = new HumanPlayer(game, PlayerColor.WHITE);
-        HumanPlayer white = new HumanPlayer(game, PlayerColor.BLACK);
+        HumanPlayer p1 = new HumanPlayer(game, PlayerColor.WHITE);
+        Player p2 = new BotPlayer(game, PlayerColor.BLACK, PlayerColor.WHITE);
 
-        game.setPlayer(black);
-        game.setPlayer(white);
+        game.setPlayer(p1);
+        game.setPlayer(p2);
 
         game.initialize();
 

@@ -21,23 +21,25 @@ import plu.red.reversi.core.util.Looper;
 public class BotPlayer extends Player implements Looper.LooperCallback<BoardIndex> {
 
     private ReversiMinimax minimax;
-    private Looper.LooperCall<BoardIndex> looperCall;
+    //private Looper.LooperCall<BoardIndex> looperCall;
 
-    public BotPlayer(Game game, PlayerColor role) {
+    /**
+     * Constructs a new BotPlayer.
+     * @param game Current game obj which this player plays on.
+     * @param role Bot's game role.
+     * @param firstPlayer Player for the current board state.
+     */
+    public BotPlayer(Game game, PlayerColor role, PlayerColor firstPlayer) {
         super(game, role);
-
-        // for later
-        //minimax = new ReversiMinimax(getGame().board, getRole());
-        looperCall = Looper.getLooper(Thread.currentThread()).getCall(this);
+        //minimax = new ReversiMinimax(game, role, firstPlayer);
     }
 
     @Override
     public void nextTurn(boolean yours) {
-        // TODO: In the future, we should simply update the minimax algorithm with the performed move.
-        // for right now the act of reinit will be ok for what we are doing now, however.
-        minimax = new ReversiMinimax(getGame(), getRole(), getRole().getNext(), looperCall);
-
-        new Thread(minimax).start();
+        if(!yours) return;
+        minimax = new ReversiMinimax(game, role, role);
+        BoardIndex index = minimax.getBestPlay();
+        game.acceptCommand(new MoveCommand(role, index));
     }
 
     /**
