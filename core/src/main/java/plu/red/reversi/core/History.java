@@ -9,7 +9,7 @@ import java.util.LinkedList;
 
 
 /**
- * Stores all the past actions and moves of the player.
+ * Stores all the past actions and moves of the players.
  */
 public class History {
     private ArrayList<BoardCommand> moves;
@@ -84,6 +84,10 @@ public class History {
         moves.add(c);
     }
 
+    /**
+     * Adds a command to the history. Auto sorts based on sub-type.
+     * @param c Command to be added.
+     */
     public void addCommand(Command c) {
         if(c instanceof BoardCommand)
             addCommand((BoardCommand)c);
