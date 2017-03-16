@@ -25,9 +25,10 @@ public class ReversiMinimax implements Runnable {
     private BoardIndex bestPlay;
 
     /**
-     * Constructs a ReversiMinimax problem to solve
-     * @param game
-     * @param aiRole
+     * Constructs a ReversiMinimax problem to solve.
+     * @param game Reference to current game so we can get information like board state.
+     * @param aiRole Player we want to maximize (who we are).
+     * @param nextPlay Person who will make the next move given current board state.
      */
     public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay) {
         this.game = game;
@@ -37,6 +38,12 @@ public class ReversiMinimax implements Runnable {
         bestPlay = null;
     }
 
+    /**
+     * Constructs a ReversiMinimax problem to solve using async calls.
+     * @param game Reference to current game so we can get information like board state.
+     * @param aiRole Player we want to maximize (who we are).
+     * @param nextPlay Person who will make the next move given current board state.
+     */
     public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay, Looper.LooperCall<BoardIndex> call) {
         this(game, aiRole, nextPlay);
         this.call = call;
@@ -124,6 +131,7 @@ public class ReversiMinimax implements Runnable {
 
             //END GAME CONDITION, weight the score by 2^4
             node.score = basicScore > 0 ? basicScore << 4 : basicScore >> 4;
+            return node;
         }
 
         ReversiNode choice = null;
@@ -189,7 +197,7 @@ public class ReversiMinimax implements Runnable {
          * @param parent
          */
         private ReversiNode(final Board board, BoardIndex moveMade, final ReversiNode parent) {
-            this(board, parent, parent.currentPlayer.getNext(), parent.depth + 1);
+            this(board, parent, parent.currentPlayer.getNext(game.getUsedPlayers()), parent.depth + 1);
             this.moveMade = moveMade;
         }
 
@@ -207,7 +215,7 @@ public class ReversiMinimax implements Runnable {
         }
 
         public int getBasicScore() {
-            return board.getScore(aiRole) - board.getScore(aiRole.getNext());
+            return board.getScore(aiRole) - board.getScore(aiRole.getNext(game.getUsedPlayers()));
         }
     }
 }
