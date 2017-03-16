@@ -10,22 +10,22 @@ import java.sql.*;
 /**
  * Created by Andrew on 3/9/2017.
  */
-public class ClientUtilities {
+public class DBUtilities {
 
     //Fields
     private Connection conn; //Connection Object
     ConnectDB dbConnection; //The database connector class
 
     /**
-     * Constructor for ClientUtilities class
+     * Constructor for DBUtilities class
      * Calls the dbConnection class to create a connection
      *  to the util (One will be created if none exist)
      *  and sets the conn field to the connection
      */
-    public ClientUtilities() {
+    public DBUtilities() {
         dbConnection = new ConnectDB(); //Create the connection
-        dbConnection.openDB();
-        conn = dbConnection.getConn(); //Set the util connection
+        dbConnection.openDB(); //Open the connection
+        conn = dbConnection.getConn(); //Set the database connection
 
         //TURN ON FOREIGN KEY CONSTRAINTS
         String sql = "PRAGMA foreign_keys = ON;";
@@ -46,25 +46,37 @@ public class ClientUtilities {
     }//closeDB
 
     /**
-     * Saves the game to the database
-     * @param name the name of the game
-     * @return true if game saved, false otherwise
+     * Creates a new game in the database
+     * @param name the name of the new game
+     * @return the gameID to be used for the game
      */
-    public boolean saveGame(String name, String color) {
-        boolean gameSaved = false;
-        int gameID;
-        int result;
-        String sql = "insert into GAME values(?,?,?);";
+    public int createGame(String name) {
+        int gameID = 1; //Default gameID for first game
 
         try {
             Statement max = conn.createStatement();
             ResultSet maxID = max.executeQuery("select max(game_id) from GAME");
 
             if(maxID.next())
-                gameID = maxID.getInt(1) + 1;
-            else
-                gameID = 1;
+                gameID = maxID.getInt(1) + 1; //Choose largest gameID + 1
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+        return gameID;
+    }//createGame
+
+    /**
+     * Saves the game to the database
+     * @param name the name of the game
+     * @return true if game saved, false otherwise
+     */
+    public boolean saveGame(int gameID, String name, String color) {
+        boolean gameSaved = false;
+        int result;
+        String sql = "insert into GAME values(?,?,?);";
+
+        try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.clearParameters();
             stmt.setInt(1,gameID);
@@ -211,4 +223,4 @@ public class ClientUtilities {
 
         return json;
     }//loadGameSettings
-}//ClientUtilities
+}//DBUtilities
