@@ -1,2 +1,3 @@
+include ':android'
 rootProject.name = 'reversi'
 include 'core', 'server', 'client'

@@ -373,6 +373,8 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
                 }
             }
         }
+
+        repaint();
     }
 
 }

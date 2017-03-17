@@ -30,6 +30,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private JMenuItem highlightMenuItem;
     private JMenuItem bestMoveMenuItem;
 
+    private boolean highlighted = false;
+
     /**
      * Constructs the menu bar
      *
@@ -76,7 +78,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         highlightMenuItem = new JMenuItem("Toggle Show Possible Moves");
         highlightMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_S, ActionEvent.META_MASK));
+                KeyEvent.VK_H, ActionEvent.CTRL_MASK));
         highlightMenuItem.getAccessibleContext().setAccessibleDescription(
                 "Toggles the showing of all the places which the current player can play on the board.");
         highlightMenuItem.addActionListener(this);
@@ -126,7 +128,15 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
         } else if(e.getSource() == highlightMenuItem) {
 
-            gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
+            if(highlighted == false) {
+                gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
+                highlighted = true;
+            } else {
+                gui.getGamePanel().getBoardView().clearHighlights();
+                highlighted = false;
+            }//else
+
+
 
         } else if(e.getSource() == bestMoveMenuItem) {
 

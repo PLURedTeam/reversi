@@ -1,6 +1,15 @@
 package plu.red.reversi.client.gui.game;
 
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.History;
+import plu.red.reversi.core.command.BoardCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.listener.ICommandListener;
+
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
@@ -14,18 +23,14 @@ import java.util.ArrayList;
  * doesn't belong here.  I suggest moving that over to a model subsystem
  * because it is something many subsystems might be interested in.
  */
-public class GameHistoryPanel extends JPanel {
+public class GameHistoryPanel extends JPanel implements ICommandListener {
 
     private JTable historyTable;
-    private ArrayList<Move> history;
+    private CommandHistoryTableModel tableModel;
 
-    /**
-     *  This is just an example table model to get you started.  It isn't
-     *  complete and will need to be updated.
-     *
-     *  TODO: Update this to work with the rest of the system.
-     */
-    private class ExampleTableModel extends AbstractTableModel {
+    private History gameHistory;
+
+    private class CommandHistoryTableModel extends AbstractTableModel {
         @Override
         public String getColumnName(int column) {
             if( column == 0 ) return "#";
@@ -36,7 +41,7 @@ public class GameHistoryPanel extends JPanel {
 
         @Override
         public int getRowCount() {
-            return history.size();
+            return gameHistory.getNumBoardCommands();
         }
 
         @Override
@@ -46,34 +51,29 @@ public class GameHistoryPanel extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if( rowIndex >= history.size() ) return null;
+            if( rowIndex >= gameHistory.getNumBoardCommands() ) return null;
 
-            Move m = history.get(rowIndex);
-            if( columnIndex == 0 ) return "" + (rowIndex + 1);
-            else if( columnIndex == 1) return m.cell;
-            else if( columnIndex == 2) {
-                // Should ask the model for the player name here,
-                // but for now, we "hard code"
-                if( m.player == 1 ) return "Player 1";
-                else if(m.player == 2 ) return "Player 2";
-                else return "";
+            BoardCommand command = gameHistory.getBoardCommand(rowIndex);
+
+            if(command instanceof MoveCommand) {
+
+                MoveCommand moveCommand = (MoveCommand)command;
+
+                if( columnIndex == 0 ) return "" + (rowIndex + 1);
+                else if( columnIndex == 1) return moveCommand.position;
+                else if( columnIndex == 2) {
+                    // TODO: Would be better if player was actually connecting to the actual player object here???
+                    // there is no way to get a reference to the player short of having the game, and that is bad here
+                    // since this is just supposed to show the history.
+                    return moveCommand.player.name;
+                }
+                return null;
             }
-            return null;
-        }
-    }
-
-    /**
-     * This is a temporary class, just for demo purposes.  This really belongs in the model,
-     * not in the GUI.  You should remove this and implement it in the model.
-     *
-     * TODO: Probably belongs in the model system.
-     */
-    private class Move {
-        private String cell;
-        private int player;
-        public Move(String cell, int player) {
-            this.cell = cell;
-            this.player = player;
+            else {
+                System.err.println("Undefined command type in command history (please implement: ");
+                System.err.println(command.getClass().getName());
+                return null;
+            }
         }
     }
 
@@ -83,20 +83,18 @@ public class GameHistoryPanel extends JPanel {
      *
      * TODO: Implement "real" history
      */
-    public GameHistoryPanel() {
+    public GameHistoryPanel(Game game) {
 
-        // Fill the history list with some arbitrary example data.
-        // This should be stored in the model, not here.
-        // TODO: move this to the model
-        history = new ArrayList<Move>();
-        history.add( new Move("D4", 1));
-        history.add( new Move("E4", 2));
-        history.add( new Move("E5", 1));
-        history.add( new Move("D5", 2));
+        this.gameHistory = game.getHistory();
+
+        game.addCommandListener(this);
 
         this.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         this.setLayout(new BorderLayout());
-        historyTable = new JTable(new ExampleTableModel());
+
+        tableModel = new CommandHistoryTableModel();
+
+        historyTable = new JTable(tableModel);
 
         JScrollPane scrollPane = new JScrollPane(historyTable);
         scrollPane.setPreferredSize(new Dimension(250,0));
@@ -114,5 +112,10 @@ public class GameHistoryPanel extends JPanel {
         borderPanel.add(scrollPane);
 
         this.add(borderPanel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void commandApplied(Command cmd) {
+        tableModel.fireTableDataChanged();
     }
 }

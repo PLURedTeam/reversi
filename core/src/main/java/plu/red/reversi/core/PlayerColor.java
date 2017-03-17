@@ -13,24 +13,26 @@ import java.util.Set;
  */
 public enum PlayerColor {
 
-    NONE(false, null),
-    WHITE(true, Color.WHITE),
-    BLACK(true, Color.BLACK),
-    RED(true, Color.RED),
-    BLUE(true, Color.BLUE),
+    NONE(false, null, "Non-player"),
+    WHITE(true, Color.WHITE, "White"),
+    BLACK(true, Color.BLACK, "Black"),
+    RED(true, Color.RED, "Red"),
+    BLUE(true, Color.BLUE, "Blue"),
     ;
 
     protected final boolean valid;
     protected PlayerColor next;
     protected int vOrdinal;
     public final Color color;
+    public final String name;
 
     // Constructor occurs before any static code
-    PlayerColor(boolean valid, Color color) {
+    PlayerColor(boolean valid, Color color, String name) {
         this.valid = valid;
         this.next = this;
         this.vOrdinal = -1;
         this.color = color;
+        this.name = name;
     }
 
     static PlayerColor[] validPlayerColors;
