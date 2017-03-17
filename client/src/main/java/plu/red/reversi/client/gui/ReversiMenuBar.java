@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * The main menu bar.
  */
-public class ReversiMenuBar extends JMenuBar implements ActionListener, Looper.LooperCallback<BoardIndex> {
+public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
     /** The MainWindow */
     private MainWindow gui;
@@ -130,30 +130,15 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, Looper.L
 
         } else if(e.getSource() == bestMoveMenuItem) {
 
-            Looper.LooperCall<BoardIndex> looperCall = Looper.getLooper(Thread.currentThread()).getCall(new Looper.LooperCallback<BoardIndex>() {
-                @Override
-                public void onLooperCallback(BoardIndex result) {
-                    Set<BoardIndex> indexes = new HashSet<>();
-                    indexes.add(result);
-
-                    gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
-                }
-            });
-
             // TODO: Show a loading indicator of some kind
             // TODO: Cancel minimax result if play is performed, or disable ability to play on board
             ReversiMinimax minimax = new ReversiMinimax(game,
                     game.getCurrentPlayer().getRole(),
                     game.getCurrentPlayer().getRole().getNext(game.getUsedPlayers()),
-                    looperCall);
+                    5);
 
             new Thread(minimax).start();
 
         }
-    }
-
-    @Override
-    public void onLooperCallback(BoardIndex result) {
-
     }
 }

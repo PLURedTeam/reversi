@@ -262,7 +262,7 @@ public class Game {
         return players.get(currentPlayerColor);
     }
 
-    public boolean acceptCommand(Command cmd) {
+    public synchronized boolean acceptCommand(Command cmd) {
 
         // Check to see if this Command is ok to apply and/or send to the server
         if(!cmd.isValid(this)) return false;

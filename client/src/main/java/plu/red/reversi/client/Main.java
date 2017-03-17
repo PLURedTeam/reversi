@@ -24,12 +24,11 @@ public class Main {
         ts.init();
 
         SettingsMap settings = SettingsLoader.INSTANCE.createGameSettings();
-        settings.set(SettingsLoader.GAME_BOARD_SIZE, 12);
+        settings.set(SettingsLoader.GAME_BOARD_SIZE, 8);
         Game game = new Game(settings);
 
-        HumanPlayer player1 = new HumanPlayer(game, PlayerColor.RED);
-        HumanPlayer player2 = new HumanPlayer(game, PlayerColor.BLACK);
-        //BotPlayer player2 = new BotPlayer(game, PlayerColor.BLACK);
+        HumanPlayer player1 = new HumanPlayer(game, PlayerColor.WHITE);
+        BotPlayer player2 = new BotPlayer(game, PlayerColor.BLACK, PlayerColor.WHITE);
 
         game.setPlayer(player1);
         game.setPlayer(player2);
