@@ -98,7 +98,7 @@ public class Board {
         color1 = game.getCurrentPlayer().getRole();
         color2 = color1.getNext(game.getUsedPlayers());
 
-        return getSetupCommands(color1, color2, game.getSettings().getNumber("BoardSize").intValue());
+        return getSetupCommands(color1, color2, game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
     }
 
     public static LinkedList<BoardCommand> getSetupCommands(PlayerColor c1, PlayerColor c2, int size) {

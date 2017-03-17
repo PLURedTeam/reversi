@@ -121,7 +121,7 @@ public class Game {
      */
     public Game(SettingsMap settings) {
         this.settings = settings;
-        this.board = new Board(settings.getNumber("BoardSize").intValue());
+        this.board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
         this.history = new History();
     }
 
@@ -253,7 +253,7 @@ public class Game {
 
         // Check if its even possible for this Player to play
         else if (board.getPossibleMoves(currentPlayerColor).isEmpty()) {
-            if (settings.getBoolean("AllowTurnSkipping"))
+            if (settings.get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class))
                 nextTurn(skipCount + 1); // Skip to the next Player's turn
             else endGame();
         }
