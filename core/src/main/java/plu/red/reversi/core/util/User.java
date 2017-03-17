@@ -1,4 +1,4 @@
-package plu.red.reversi.client.util;
+package plu.red.reversi.core.util;
 
 /**
  * Created by Andrew on 3/16/2017.
@@ -30,4 +30,5 @@ public class User {
     public String getPassword() { return password; }
     public int getSessionID() {return sessionID; }
     public void setSessionID(int s) { sessionID = s; }
+    public void setPassword(String p) { password = p; }
 }//User

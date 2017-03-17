@@ -1,9 +1,9 @@
 package plu.red.reversi.server.endpoints;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import com.sun.xml.internal.bind.v2.TODO;
+import plu.red.reversi.core.util.User;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,31 +20,32 @@ public class BaseEndpoint {
 
     /**
      * Login method to authenticate the users credentials
-     * @param username The username of the user logging in
-     * @param password The password of the user logging in, transmitted in SHA256
-     *                 format
-     * @return JSON object that will include true if correct credentials and also the
+     * @param user A user object that holds the username and password
+     * @return User object that will include true if correct credentials and also the
      *         session id, will be false if incorrect credentials and null for
      *         the session id.
      */
     @Path("login")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response login(String username, String password) {
+    public User login(User user) {
+
+       // TODO: Connect with database to authenticate user
+
+       //TODO: Set the password to false in the object for security reasons
+
         return null;
     }//login
 
     /**
      * Logout method to logout the user from the server
-     * @param username The username of the user logging in
-     * @param sessionID The session id given to the user during
-     *                  login
+     * @param user A user object that holds the username, and sessionID
      * @return true if users is logged out, false otherwise
      */
     @Path("logout")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String logout(String username, int sessionID) {
+    public String logout(User user) {
         return "true";
     }//logout
 
