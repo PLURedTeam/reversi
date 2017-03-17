@@ -5,6 +5,7 @@ package plu.red.reversi.core;
  * Glory to the Red Team.
  */
 
+import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ import java.util.Set;
  */
 public class ReversiMinimax implements Runnable {
     private Game game;
-    private ReversiNode root;
+    private RootReversiNode root;
     private PlayerColor aiRole;
     private final int MAX_DEPTH;
 
@@ -31,7 +32,7 @@ public class ReversiMinimax implements Runnable {
     public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay, int MAX_DEPTH) {
         this.game = game;
         this.aiRole = aiRole;
-        root = new ReversiNode(game.getBoard(), nextPlay);
+        root = new RootReversiNode(game.getBoard(), nextPlay);
         bestPlay = null;
         this.MAX_DEPTH = MAX_DEPTH;
     }
@@ -75,6 +76,14 @@ public class ReversiMinimax implements Runnable {
     }
 
     /**
+     * Used for testing, gets the current number of nodes in the tree.
+     * @return Current number of nodes in the tree.
+     */
+    public int getNodeCount() {
+        return root.countNodes();
+    }
+
+    /**
      * Retrieve the best move as a move command.
      * @return A move command representing the best move.
      */
@@ -89,7 +98,7 @@ public class ReversiMinimax implements Runnable {
      */
     public BoardIndex getBestPlay() throws IndexOutOfBoundsException {
         //check if we are already up to date
-        if(bestPlay != null && root.board.equals(game.getBoard()))
+        if(bestPlay != null && root.getBoard().equals(game.getBoard()))
             return bestPlay;
 
         //get the current root from cached data.
@@ -170,9 +179,7 @@ public class ReversiMinimax implements Runnable {
 
         //go through the locations, and create new nodes for them
         for(BoardIndex l : possible) {
-            Board state = new Board(node.board);
-            state.apply(new MoveCommand(node.currentPlayer, l));
-            node.children.add(new ReversiNode(state, l, node));
+            node.children.add(new ReversiNode(l, node));
         }
     }
 
@@ -185,11 +192,10 @@ public class ReversiMinimax implements Runnable {
             ReversiNode nroot = findCurrentRoot();
             if(nroot != root) {
                 bestPlay = null; //invalidate cache
-                root = nroot;
-                root.parent = null;
+                root = new RootReversiNode(nroot);
             }
         } catch(IndexOutOfBoundsException e) {
-            root = new ReversiNode(game.getBoard(), game.getCurrentPlayer().getRole());
+            root = new RootReversiNode(game.getBoard(), game.getCurrentPlayer().getRole());
         }
     }
 
@@ -220,8 +226,8 @@ public class ReversiMinimax implements Runnable {
             //save on computation, since the board will not be the same if some of the currentRoot's
             // children are candidates
             if(!foundCandidate)
-                if(game.getBoard().equals(currentRoot.board))
-                    return currentRoot;
+                if(game.getBoard().equals(currentRoot.getBoard()))
+                    return new RootReversiNode(currentRoot);
         }
 
         throw new IndexOutOfBoundsException("Minimax scoreCache exceeded, need to regenerate from scratch");
@@ -229,7 +235,7 @@ public class ReversiMinimax implements Runnable {
 
 
     private class ReversiNode {
-        public final Board board;
+        //public final Board board;
         public ReversiNode parent;
         public LinkedList<ReversiNode> children;
         public PlayerColor currentPlayer;
@@ -238,37 +244,25 @@ public class ReversiMinimax implements Runnable {
 
         public int score;
 
-
-
         /**
-         * Initial constructor used only once.
-         * @param board Inital board of ReversiNodes
-         * @param currentPlayer Player who's turn it is right now.
+         * Used by other constructors
          */
-        public ReversiNode(Board board, PlayerColor currentPlayer) {
-            this.board = new Board(board);
-            this.parent = null;
-            children = new LinkedList<>();
+        protected ReversiNode(ReversiNode parent, LinkedList<ReversiNode> children, PlayerColor currentPlayer, int depth, BoardIndex moveMade, int score) {
+            this.parent = parent;
+            this.children = children;
             this.currentPlayer = currentPlayer;
-            this.depth = 0;
-            this.moveMade = null;
-            this.score = 0;
+            this.depth = depth;
+            this.moveMade = moveMade;
+            this.score = score;
         }
 
         /**
          * Constructor used when calculating the tree.
-         * @param board A new board with the current game state.
          * @param parent State which yeilded this one with the moveMade.
          * @param moveMade Action taken to get to this state.
          */
-        private ReversiNode(Board board, BoardIndex moveMade, final ReversiNode parent) {
-            this.board = board;
-            this.parent = parent;
-            children = new LinkedList<>();
-            this.currentPlayer = parent.currentPlayer.getNext(game.getUsedPlayers());
-            this.depth = parent.depth + 1;
-            this.moveMade = moveMade;
-            this.score = 0;
+        private ReversiNode(BoardIndex moveMade, final ReversiNode parent) {
+            this(parent, new LinkedList<ReversiNode>(), parent.currentPlayer.getNext(game.getUsedPlayers()), parent.depth + 1, moveMade, 0);
         }
 
         /**
@@ -276,7 +270,7 @@ public class ReversiMinimax implements Runnable {
          * @return An array list of possible moves for currentPlayer.
          */
         public Set<BoardIndex> getPossibleMoves() {
-            return board.getPossibleMoves(currentPlayer);
+            return getBoard().getPossibleMoves(currentPlayer);
         }
 
         public int getHeuristicScore() {
@@ -285,7 +279,56 @@ public class ReversiMinimax implements Runnable {
         }
 
         public int getBasicScore() {
+            Board board = getBoard();
             return board.getScore(aiRole) - board.getScore(aiRole.getNext(game.getUsedPlayers()));
+        }
+
+        public Board getBoard() {
+            Board b = new Board(root.getBoard());
+            LinkedList<BoardCommand> commands = new LinkedList<>();
+            for(ReversiNode i = this; i != root; i = i.parent) {
+                commands.push(new MoveCommand(i.parent.currentPlayer, i.moveMade));
+            }
+            b.applyCommands(commands);
+            return b;
+        }
+
+        public int countNodes() {
+            int num = 1;
+            for(ReversiNode i : children)
+                num += i.countNodes();
+            return num;
+        }
+    }
+
+    private class RootReversiNode extends ReversiNode {
+        Board board;
+
+        /**
+         * Initial constructor used only once.
+         * @param board Initial board of ReversiNodes
+         * @param currentPlayer Player who's turn it is right now.
+         */
+        public RootReversiNode(Board board, PlayerColor currentPlayer) {
+            super(null, new LinkedList<ReversiNode>(), currentPlayer, 0, null, 0);
+            this.board = new Board(board);
+        }
+
+        /**
+         * Used to convert a node.
+         */
+        public RootReversiNode(ReversiNode n) {
+            super(null, n.children, n.currentPlayer, n.depth, null, n.score);
+            this.board = n.getBoard();
+
+            //Update pointers
+            for(ReversiNode i : n.children)
+                i.parent = this;
+        }
+
+        @Override
+        public Board getBoard() {
+            return board;
         }
     }
 }
