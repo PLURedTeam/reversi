@@ -47,7 +47,7 @@ public class GamePanel extends JPanel {
         boardPanel.add(preserveAspectPanel, BorderLayout.CENTER);
         boardPanel.add(playerInfoPanel, BorderLayout.NORTH);
 
-        historyPanel = new GameHistoryPanel();
+        historyPanel = new GameHistoryPanel(game);
 
         // The board panel goes in the center
         this.add(boardPanel, BorderLayout.CENTER);

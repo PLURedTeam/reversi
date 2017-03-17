@@ -50,5 +50,18 @@ public class BoardIndex implements Comparable<BoardIndex> {
         }
     }
 
-    //TODO: Convert to and from character
+    /**
+     * Prints the current board index in chess form (see image: http://www.chess-poster.com/english/learn_chess/notation/images/coordinates_2.gif)
+     * @return the string representing this board coordinate
+     */
+    public String getCoordinateString() {
+        char c = 'a';
+        c += column;
+        return "" + c + row;
+    }
+
+    @Override
+    public String toString() {
+        return getCoordinateString();
+    }
 }
