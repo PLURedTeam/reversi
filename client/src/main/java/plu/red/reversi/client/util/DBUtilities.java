@@ -70,6 +70,7 @@ public class DBUtilities {
      * Saves the game to the database
      * @param name the name of the game
      * @return true if game saved, false otherwise
+     * TODO: Figure out what format to store moves in from History
      */
     public boolean saveGame(int gameID, String name, String color) {
         boolean gameSaved = false;

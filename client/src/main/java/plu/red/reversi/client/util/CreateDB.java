@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * Created by Andrew on 3/8/2017.
  *
- * Creates the tables for the clientside util
+ * Creates the tables for the clientside database
  */
 public class CreateDB {
 
@@ -16,15 +16,15 @@ public class CreateDB {
     /**
      * Constructor for the CreateDB class
      * Checks the connection status and then creates the tables in the
-     *  util.
+     *  database.
      *
-     * @param c The connection object to the util
+     * @param c The connection object to the database
      */
     public CreateDB(Connection c) {
         conn = c;//Set the connection to the open connection in ConnectDB
 
         if(conn == null)
-            System.out.println("Could not connect to the util.");
+            System.out.println("Could not connect to the database.");
         else {
             //Call methods to create tables
             createGameTable();
@@ -38,7 +38,7 @@ public class CreateDB {
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
-    public void createGameTable() {
+    private void createGameTable() {
         String sql = "create table GAME (\n"
                 + "game_id int NOT NULL,\n"
                 + "name varchar(50),\n"
@@ -58,7 +58,7 @@ public class CreateDB {
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
-    public void createGameHistoryTable() {
+    private void createGameHistoryTable() {
         String sql = "create table GAME_HISTORY (\n"
                 + "game_id int NOT NULL,\n"
                 + "move_id int NOT NULL,\n"
@@ -84,7 +84,7 @@ public class CreateDB {
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
-    public void createGameSettingsTable() {
+    private void createGameSettingsTable() {
         String sql = "create table GAME_SETTINGS (\n"
                 + "game_id int NOT NULL,\n"
                 + "game_settings text NOT NULL,\n"
