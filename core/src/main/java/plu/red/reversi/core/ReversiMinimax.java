@@ -6,7 +6,6 @@ package plu.red.reversi.core;
  */
 
 import plu.red.reversi.core.command.MoveCommand;
-import plu.red.reversi.core.util.Looper;
 
 import java.util.LinkedList;
 import java.util.Set;
@@ -45,7 +44,11 @@ public class ReversiMinimax implements Runnable {
      */
     @Override
     public void run() {
-        //TODO: call game with apply command when done
+        try {
+            game.acceptCommand(getBestMoveCommand());
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("AI cannot move.");
+        }
     }
 
     /**

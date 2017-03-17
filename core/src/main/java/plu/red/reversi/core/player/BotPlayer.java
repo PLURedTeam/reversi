@@ -5,20 +5,17 @@ package plu.red.reversi.core.player;
  * Glory to the Red Team.
  */
 
-import plu.red.reversi.core.BoardIndex;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.ReversiMinimax;
-import plu.red.reversi.core.command.MoveCommand;
 
 /**
  * An instance of a player which the computer can play as (basically an AI)
  * It utilizes the reversi minimax algorithm to compute the best move, and then execute it.
  */
 public class BotPlayer extends Player {
-
+    Thread thread;
     private ReversiMinimax minimax;
-    //private Looper.LooperCall<BoardIndex> looperCall;
 
     /**
      * Constructs a new BotPlayer.
@@ -28,14 +25,15 @@ public class BotPlayer extends Player {
      */
     public BotPlayer(Game game, PlayerColor role, PlayerColor firstPlayer) {
         super(game, role);
-        //minimax = new ReversiMinimax(game, role, firstPlayer);
+        thread = null;
+        minimax = new ReversiMinimax(game, role, firstPlayer, 5);
     }
 
     @Override
     public void nextTurn(boolean yours) {
         if(!yours) return;
-        minimax = new ReversiMinimax(game, role, role, 5);
-        BoardIndex index = minimax.getBestPlay();
-        game.acceptCommand(new MoveCommand(role, index));
+
+        thread = new Thread(minimax);
+        thread.start();
     }
 }
