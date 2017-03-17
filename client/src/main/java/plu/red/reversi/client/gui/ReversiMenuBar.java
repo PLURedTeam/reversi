@@ -134,7 +134,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
             // TODO: Cancel minimax result if play is performed, or disable ability to play on board
             ReversiMinimax minimax = new ReversiMinimax(game,
                     game.getCurrentPlayer().getRole(),
-                    game.getCurrentPlayer().getRole().getNext(game.getUsedPlayers()),
                     5);
 
             new Thread(minimax).start();

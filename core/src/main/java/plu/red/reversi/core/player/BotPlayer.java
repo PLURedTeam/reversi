@@ -26,7 +26,7 @@ public class BotPlayer extends Player {
     public BotPlayer(Game game, PlayerColor role, PlayerColor firstPlayer) {
         super(game, role);
         thread = null;
-        minimax = new ReversiMinimax(game, role, firstPlayer, 8);
+        minimax = new ReversiMinimax(game, role, 10);
     }
 
     @Override
