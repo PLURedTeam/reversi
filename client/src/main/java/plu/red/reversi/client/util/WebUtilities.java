@@ -23,5 +23,4 @@ public class WebUtilities {
         WebTarget target = client.target("url" + "login");
     }//login
 
-
 }//webUtilities
