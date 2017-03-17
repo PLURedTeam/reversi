@@ -90,9 +90,32 @@ public class ReversiMinimax implements Runnable {
         return bestMove;
     }
 
-    private int heuristicScore(Board board) {
+    /**
+     * Determines the heuristic score for a given state.
+     * @param board Game state to analyze.
+     * @param endgame Is this an endgame analysis?
+     * @return Score for the game state.
+     */
+    private int heuristicScore(Board board, boolean endgame) {
         //ours - (all - ours) == ours * 2 - all
-        return (board.getScore(aiRole) * 2) - board.getTotalPieces();
+        int score = (board.getScore(aiRole) * 2) - board.getTotalPieces();
+
+        if(!endgame) {
+            PlayerColor player = board.at(new BoardIndex(0, 0));
+            if(player.isValid()) score += player == aiRole ? 4 : -4;
+
+            player = board.at(new BoardIndex(board.size - 1, 0));
+            if(player.isValid()) score += player == aiRole ? 4 : -4;
+
+            player = board.at(new BoardIndex(0, board.size - 1));
+            if(player.isValid()) score += player == aiRole ? 4 : -4;
+
+            player = board.at(new BoardIndex(board.size - 1, board.size - 1));
+            if(player.isValid()) score += player == aiRole ? 4 : -4;
+
+            return score;
+        }
+        return score * 16; //weight the score
     }
 
     /**
@@ -102,12 +125,15 @@ public class ReversiMinimax implements Runnable {
      */
     private int getBestPlay(Board board, PlayerColor player, int alpha, int beta, int depth) {
         if(depth >= MAX_DEPTH)
-            return heuristicScore(board);
+            return heuristicScore(board, false);
+
+        Set<BoardIndex> possibleMoves = board.getPossibleMoves(player);
+        if(possibleMoves.isEmpty()) //can't move
+            return heuristicScore(board, true);
 
         final boolean maximize = player == aiRole;
         int bestScore = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-        Set<BoardIndex> possibleMoves = board.getPossibleMoves(player);
         for(BoardIndex i : possibleMoves) {
             Board subBoard = new Board(board);
             subBoard.apply(new MoveCommand(player, i));
