@@ -96,7 +96,7 @@ public class ReversiMinimax implements Runnable {
         updateRoot();
 
         //now find the best option using recursion
-        ReversiNode i = getBestPlay(root, root.depth + MAX_DEPTH);
+        ReversiNode i = getBestPlay(root, Integer.MIN_VALUE, Integer.MAX_VALUE,root.depth + MAX_DEPTH);
 
         //System.out.println(root.children.size());
         if(i == root) { //Occurs if no more moves can be made
@@ -115,7 +115,7 @@ public class ReversiMinimax implements Runnable {
      * @param node Current node in the tree.
      * @return A child of node which is the best state to go to.
      */
-    private ReversiNode getBestPlay(ReversiNode node, int maxDepth) {
+    private ReversiNode getBestPlay(ReversiNode node, int alpha, int beta, int maxDepth) {
         if(node.depth >= maxDepth) {
             node.score = node.getHeuristicScore();
             return node;
@@ -138,11 +138,19 @@ public class ReversiMinimax implements Runnable {
         ReversiNode choice = null;
 
         for(ReversiNode i : node.children) {
-            ReversiNode b = getBestPlay(i, maxDepth);
-            if((maximize && b.score > node.score) || (!maximize && b.score < node.score)) {
-                node.score = b.score;
+            ReversiNode b = getBestPlay(i, alpha, beta, maxDepth);
+
+            if(maximize && b.score > node.score) {
                 choice = i;
+                node.score = b.score;
+                alpha = Integer.max(alpha, node.score);
             }
+            else if(!maximize && b.score < node.score) {
+                choice = i;
+                node.score = b.score;
+                beta = Integer.min(beta, node.score);
+            }
+            if(beta <= alpha) break;
         }
         return choice;
     }
