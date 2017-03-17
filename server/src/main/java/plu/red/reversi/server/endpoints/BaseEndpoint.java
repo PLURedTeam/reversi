@@ -1,6 +1,5 @@
 package plu.red.reversi.server.endpoints;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.*;
