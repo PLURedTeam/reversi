@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * Created by Andrew on 3/8/2017.
  */
-public class ConnectDBTest {
+public class DBUtilitiesTest {
 
     ConnectDB util; //ConnectDB Object
 
@@ -32,7 +32,7 @@ public class ConnectDBTest {
 
     @Test
     public void closeDB() throws Exception {
-        util.openDB(); //Open the DB to test closure
+        util.openDB(); //Open the DBUtilities to test closure
         String conn = util.closeDB();
         Assert.assertEquals("Successfully disconnected from database", conn);
         Assert.assertNotEquals("Failed to close util connection: ", conn);

@@ -144,7 +144,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, Looper.L
             // TODO: Cancel minimax result if play is performed, or disable ability to play on board
             ReversiMinimax minimax = new ReversiMinimax(game,
                     game.getCurrentPlayer().getRole(),
-                    game.getCurrentPlayer().getRole().getNext(),
+                    game.getCurrentPlayer().getRole().getNext(game.getUsedPlayers()),
                     looperCall);
 
             new Thread(minimax).start();

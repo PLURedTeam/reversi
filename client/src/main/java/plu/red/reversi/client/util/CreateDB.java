@@ -43,7 +43,7 @@ public class CreateDB {
                 + "game_id int NOT NULL,\n"
                 + "name varchar(50),\n"
                 + "user_color varchar(50),\n"
-                + "PRIMARY KEY(game_id),\n"
+                + "PRIMARY KEY(game_id)\n"
                 + ");";
         try {
             Statement stmt = conn.createStatement();
@@ -64,10 +64,10 @@ public class CreateDB {
                 + "move_id int NOT NULL,\n"
                 + "move_index_r int NOT NULL,\n"
                 + "move_index_c int NOT NULL,\n"
-                + "move_command in NOT NULL\n"
-                + "move_source int NOT NULL\n"
-                + "player int NOT NULL\n"
-                + "PRIMARY KEY(game_id, move_id)\n"
+                + "move_command int NOT NULL,\n"
+                + "move_source int NOT NULL,\n"
+                + "player int NOT NULL,\n"
+                + "PRIMARY KEY(game_id, move_id),\n"
                 + "FOREIGN KEY(game_id) references GAME(game_id)\n"
                 + "ON DELETE CASCADE\n"
                 + ");";
