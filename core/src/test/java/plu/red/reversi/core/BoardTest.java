@@ -1,6 +1,7 @@
 package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.command.BoardCommand;
@@ -64,6 +65,15 @@ public class BoardTest {
         assertNotEquals(b1, b2);
         b2.apply(new MoveCommand(PlayerColor.WHITE, new BoardIndex(2, 4)));
         assertEquals(b1, b2);
+    }
+
+    @Test
+    public void testGetTotalPieces() {
+        Board b = new Board(8);
+        assertEquals(0, b.getTotalPieces());
+
+        b.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK, 8));
+        assertEquals(4, b.getTotalPieces());
     }
 
     @Test

@@ -9,6 +9,7 @@ import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IFlipListener;
+import plu.red.reversi.core.player.Player;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -156,6 +157,29 @@ public class Board {
         }//end loop
 
         return scoreCache[ordinal];
+    }
+
+    /**
+     * Find the total number of pieces on the board.
+     * @return Total pieces on board.
+     */
+    public int getTotalPieces() {
+        boolean valid = true;
+        int sum = 0;
+        for(int x = 0; x < scoreCache.length; ++x) {
+            if(scoreCache[x] < 0) {
+                valid = false;
+                break;
+            }
+            sum += scoreCache[x];
+        }
+
+        if(valid) return sum;
+
+        sum = 0;
+        for(int x = 0; x < PlayerColor.validPlayerColors.length; ++x)
+            sum += getScore(PlayerColor.validPlayerColors[x]);
+        return sum;
     }
 
     /**
