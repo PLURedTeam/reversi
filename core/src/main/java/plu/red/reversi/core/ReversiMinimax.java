@@ -8,7 +8,6 @@ package plu.red.reversi.core;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.Looper;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -19,9 +18,8 @@ public class ReversiMinimax implements Runnable {
     private Game game;
     private ReversiNode root;
     private PlayerColor aiRole;
+    private final int MAX_DEPTH;
 
-
-    private Looper.LooperCall<BoardIndex> call;
     private BoardIndex bestPlay;
 
     /**
@@ -29,24 +27,14 @@ public class ReversiMinimax implements Runnable {
      * @param game Reference to current game so we can get information like board state.
      * @param aiRole Player we want to maximize (who we are).
      * @param nextPlay Person who will make the next move given current board state.
+     * @param MAX_DEPTH Maximum search depth.
      */
-    public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay) {
+    public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay, int MAX_DEPTH) {
         this.game = game;
         this.aiRole = aiRole;
-        call = null;
-        root = new ReversiNode(game.getBoard(), null, nextPlay, 0);
+        root = new ReversiNode(game.getBoard(), nextPlay);
         bestPlay = null;
-    }
-
-    /**
-     * Constructs a ReversiMinimax problem to solve using async calls.
-     * @param game Reference to current game so we can get information like board state.
-     * @param aiRole Player we want to maximize (who we are).
-     * @param nextPlay Person who will make the next move given current board state.
-     */
-    public ReversiMinimax(final Game game, PlayerColor aiRole, PlayerColor nextPlay, Looper.LooperCall<BoardIndex> call) {
-        this(game, aiRole, nextPlay);
-        this.call = call;
+        this.MAX_DEPTH = MAX_DEPTH;
     }
 
     /**
@@ -57,53 +45,65 @@ public class ReversiMinimax implements Runnable {
      */
     @Override
     public void run() {
-        if(call != null)
-            call.call(getBestPlay());
+        //TODO: call game with apply command when done
     }
 
+    /**
+     * Check if the current player can make a move on the current game state.
+     * Does not account for when their turn will be, assumes it is being to asked right now.
+     * @return True if a move can be made, otherwise false.
+     */
+    public boolean canPlay() {
+        updateRoot();
+
+        if(!root.children.isEmpty())
+            return true;
+        if(!root.getPossibleMoves().isEmpty())
+            return true;
+        return false;
+    }
+
+    /**
+     * Used for testing, gets the current depth of the root node.
+     * @return Depth of root node since creation of cache.
+     */
+    public int getRootDetph() {
+        return root.depth;
+    }
+
+    /**
+     * Retrieve the best move as a move command.
+     * @return A move command representing the best move.
+     */
+    public MoveCommand getBestMoveCommand() {
+        return new MoveCommand(aiRole, getBestPlay());
+    }
+
+    /**
+     * Finds the index of the best play.
+     * @return Index of best play.
+     * @throws IndexOutOfBoundsException If no moves can be made.
+     */
     public BoardIndex getBestPlay() throws IndexOutOfBoundsException {
         //check if we are already up to date
         if(bestPlay != null && root.board.equals(game.getBoard()))
             return bestPlay;
 
-        //move root forward (may do nothing)
-        root = findCurrentRoot();
-        root.parent = null;
+        //get the current root from cached data.
+        updateRoot();
 
         //now find the best option using recursion
-        ReversiNode i = getBestPlay(root, root.depth + 5);
+        ReversiNode i = getBestPlay(root, root.depth + MAX_DEPTH);
 
-        if(i == root) //Not sure if this can happen, but just in case
-            throw new IndexOutOfBoundsException("Best play is root, need to regenerate tree from scratch");
+        //System.out.println(root.children.size());
+        if(i == root) { //Occurs if no more moves can be made
+            throw new IndexOutOfBoundsException("No moves can be made.");
+        }
 
         //find the move that needs to be made to get there
         bestPlay = i.moveMade;
 
         return bestPlay;
-    }
-
-    private ReversiNode findCurrentRoot() throws IndexOutOfBoundsException {
-        ReversiNode currentRoot = root;
-
-        //any moves which could have happened according to the board state
-        LinkedList<ReversiNode> candidates = new LinkedList<>();
-
-        //breadth-first search to find current root
-        while(!currentRoot.board.equals(game.getBoard())) {
-
-            //board is not equal yet, so check children
-            if(candidates.isEmpty() || currentRoot.children.isEmpty())
-                throw new IndexOutOfBoundsException("Minimax scoreCache exceeded, need to regenerate from scratch");
-
-            //go through all children, consider a candidate any that have moves which were made
-            for(ReversiNode i : currentRoot.children)
-                if(game.getBoard().at(i.moveMade).isValid())
-                    candidates.add(i);
-
-            currentRoot = candidates.poll();
-        }
-
-        return currentRoot;
     }
 
     /**
@@ -127,10 +127,8 @@ public class ReversiMinimax implements Runnable {
             generateChildren(node);
         if(node.children.isEmpty()) {
             //TODO: Handle setting for game not ending on no-move condition
-            int basicScore = node.getBasicScore(); //our pieces - their pieces
-
-            //END GAME CONDITION, weight the score by 2^4
-            node.score = basicScore > 0 ? basicScore << 4 : basicScore >> 4;
+            //END GAME CONDITION, weight the score heavily (if negative it will become more negative)
+            node.score = node.getBasicScore() * 16;
             return node;
         }
 
@@ -143,10 +141,14 @@ public class ReversiMinimax implements Runnable {
                 choice = i;
             }
         }
-
         return choice;
     }
 
+    /**
+     * Generate all the children for a given node. Basically calculate all possible
+     * moves for the given state and create a new ReversiNode for it.
+     * @param node Node for which the children will be generated.
+     */
     private void generateChildren(ReversiNode node) {
         if(!node.children.isEmpty()) return;
         //need to calculate, i is current game state
@@ -157,10 +159,61 @@ public class ReversiMinimax implements Runnable {
 
         //go through the locations, and create new nodes for them
         for(BoardIndex l : possible) {
-            Board state = new Board(game.getBoard());
+            Board state = new Board(node.board);
             state.apply(new MoveCommand(node.currentPlayer, l));
             node.children.add(new ReversiNode(state, l, node));
         }
+    }
+
+    /**
+     * Update the cached tree such that the root is at the current board state.
+     */
+    private void updateRoot() {
+        //move root forward (may do nothing)
+        try {
+            ReversiNode nroot = findCurrentRoot();
+            if(nroot != root) {
+                bestPlay = null; //invalidate cache
+                root = nroot;
+                root.parent = null;
+            }
+        } catch(IndexOutOfBoundsException e) {
+            root = new ReversiNode(game.getBoard(), game.getCurrentPlayer().getRole());
+        }
+    }
+
+    /**
+     * Find the root representing the current board state in the tree.
+     * @return Node representing current board state.
+     * @throws IndexOutOfBoundsException When the cache does not contain the current board state.
+     */
+    private ReversiNode findCurrentRoot() throws IndexOutOfBoundsException {
+        //any moves which could have happened according to the board state
+        LinkedList<ReversiNode> candidates = new LinkedList<>();
+        candidates.add(root);
+
+        ReversiNode currentRoot;
+        //while the currentRoot's board does not equal the current game state
+        while(!candidates.isEmpty()) {
+            currentRoot = candidates.poll();
+
+            boolean foundCandidate = false;
+            //go through all children, consider a candidate any that have moves which were made
+            for(ReversiNode i : currentRoot.children) {
+                if(game.getBoard().at(i.moveMade).isValid()) {
+                    foundCandidate = true;
+                    candidates.add(i);
+                }
+            }
+
+            //save on computation, since the board will not be the same if some of the currentRoot's
+            // children are candidates
+            if(!foundCandidate)
+                if(game.getBoard().equals(currentRoot.board))
+                    return currentRoot;
+        }
+
+        throw new IndexOutOfBoundsException("Minimax scoreCache exceeded, need to regenerate from scratch");
     }
 
 
@@ -175,30 +228,36 @@ public class ReversiMinimax implements Runnable {
         public int score;
 
 
+
         /**
-         * Initial constructor used at beginning of the game
-         * @param board
-         * @param parent
-         * @param currentPlayer
+         * Initial constructor used only once.
+         * @param board Inital board of ReversiNodes
+         * @param currentPlayer Player who's turn it is right now.
          */
-        public ReversiNode(final Board board, ReversiNode parent, PlayerColor currentPlayer, int depth) {
-            this.board = board;
-            this.parent = parent;
+        public ReversiNode(Board board, PlayerColor currentPlayer) {
+            this.board = new Board(board);
+            this.parent = null;
             children = new LinkedList<>();
             this.currentPlayer = currentPlayer;
-            this.depth = depth;
+            this.depth = 0;
             this.moveMade = null;
             this.score = 0;
         }
 
         /**
-         * Constructor used when calculating the tree
-         * @param board
-         * @param parent
+         * Constructor used when calculating the tree.
+         * @param board A new board with the current game state.
+         * @param parent State which yeilded this one with the moveMade.
+         * @param moveMade Action taken to get to this state.
          */
-        private ReversiNode(final Board board, BoardIndex moveMade, final ReversiNode parent) {
-            this(board, parent, parent.currentPlayer.getNext(game.getUsedPlayers()), parent.depth + 1);
+        private ReversiNode(Board board, BoardIndex moveMade, final ReversiNode parent) {
+            this.board = board;
+            this.parent = parent;
+            children = new LinkedList<>();
+            this.currentPlayer = parent.currentPlayer.getNext(game.getUsedPlayers());
+            this.depth = parent.depth + 1;
             this.moveMade = moveMade;
+            this.score = 0;
         }
 
         /**

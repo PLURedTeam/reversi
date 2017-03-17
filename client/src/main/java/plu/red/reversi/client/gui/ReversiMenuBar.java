@@ -145,6 +145,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, Looper.L
             ReversiMinimax minimax = new ReversiMinimax(game,
                     game.getCurrentPlayer().getRole(),
                     game.getCurrentPlayer().getRole().getNext(game.getUsedPlayers()),
+                    5,
                     looperCall);
 
             new Thread(minimax).start();
