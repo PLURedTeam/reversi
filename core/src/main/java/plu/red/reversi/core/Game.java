@@ -131,7 +131,6 @@ public class Game {
      */
     public void initialize() {
         board.applyCommands(board.getSetupCommands(this));
-        for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
     }
 
     /**

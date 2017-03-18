@@ -23,7 +23,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     /** The MainWindow */
     private MainWindow gui;
 
-    private JMenuItem newGameItem;
+    /** Quit item */
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
 
@@ -53,15 +53,14 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         menu.getAccessibleContext().setAccessibleDescription(
                 "New game");
 
-        newGameItem = new JMenuItem("New Game");
-        newGameItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        newGameItem.getAccessibleContext().setAccessibleDescription(
+        JMenuItem menuItem = new JMenuItem("New Game");
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_N, ActionEvent.META_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
                 "Start a new game against the computer");
-        newGameItem.addActionListener(this);
-        menu.add(newGameItem);
+        menu.add(menuItem);
 
-        JMenuItem menuItem = new JMenuItem("New Online Game");
+        menuItem = new JMenuItem("New Online Game");
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_O, ActionEvent.META_MASK));
         menuItem.getAccessibleContext().setAccessibleDescription(
@@ -87,7 +86,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         bestMoveMenuItem = new JMenuItem("Select Best Move");
         bestMoveMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+                KeyEvent.VK_W, ActionEvent.META_MASK));
         bestMoveMenuItem.getAccessibleContext().setAccessibleDescription(
                 "Selects and play the best move automatically.");
         bestMoveMenuItem.addActionListener(this);
@@ -97,7 +96,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         surrenderMenuItem = new JMenuItem("Surrender");
         surrenderMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_S, ActionEvent.ALT_MASK));
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         surrenderMenuItem.getAccessibleContext().setAccessibleDescription(
                 "Surrender the current game.");
         surrenderMenuItem.addActionListener(this);
@@ -107,7 +106,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         quitMenuItem = new JMenuItem("Quit");
         quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
+                KeyEvent.VK_Q, ActionEvent.META_MASK));
         quitMenuItem.getAccessibleContext().setAccessibleDescription(
                 "Exit Reversi.");
         quitMenuItem.addActionListener(this);
@@ -119,44 +118,36 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(gui.getGamePanel() != null) {
-            Game game = gui.getGamePanel().getGame();
-
-            if(e.getSource() == surrenderMenuItem) {
-                Player player = game.getCurrentPlayer();
-                if(player instanceof HumanPlayer)
-                    gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
-            }
-
-            if(e.getSource() == highlightMenuItem) {
-
-                if(highlighted == false) {
-                    gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
-                    highlighted = true;
-                } else {
-                    gui.getGamePanel().getBoardView().clearHighlights();
-                    highlighted = false;
-                }//else
-            }
-
-            if(e.getSource() == bestMoveMenuItem) {
-
-                // TODO: Show a loading indicator of some kind
-                // TODO: Cancel minimax result if play is performed, or disable ability to play on board
-                ReversiMinimax minimax = new ReversiMinimax(game,
-                        game.getCurrentPlayer().getRole(),
-                        5);
-
-                new Thread(minimax).start();
-            }
-        }
+        Game game = gui.getGamePanel().getGame();
 
         if(e.getSource() == quitMenuItem) {
             System.exit(0);
-        }
+        } else if(e.getSource() == surrenderMenuItem) {
+            Player player = game.getCurrentPlayer();
+            if(player instanceof HumanPlayer)
+                gui.getGamePanel().getGame().acceptCommand(new SurrenderCommand(player.getRole()));
+        } else if(e.getSource() == highlightMenuItem) {
 
-        if(e.getSource() == newGameItem) {
-            gui.createNewGame();
+            if(highlighted == false) {
+                gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
+                highlighted = true;
+            } else {
+                gui.getGamePanel().getBoardView().clearHighlights();
+                highlighted = false;
+            }//else
+
+
+
+        } else if(e.getSource() == bestMoveMenuItem) {
+
+            // TODO: Show a loading indicator of some kind
+            // TODO: Cancel minimax result if play is performed, or disable ability to play on board
+            ReversiMinimax minimax = new ReversiMinimax(game,
+                    game.getCurrentPlayer().getRole(),
+                    5);
+
+            new Thread(minimax).start();
+
         }
     }
 }
