@@ -307,6 +307,13 @@ public class Board {
         board[c.position.row][c.position.column] = c.player;
     }
 
+    public void apply(BoardCommand c){
+        if(c instanceof SetCommand)
+            apply((SetCommand)c);
+        else if(c instanceof  MoveCommand)
+            apply((MoveCommand)c);
+    }
+
     /**
      * Private helper method to check for flippable tiles in each direction flip if valid
      * @param c gets the move command, index and color
