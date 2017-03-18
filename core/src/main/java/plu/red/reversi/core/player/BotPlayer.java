@@ -21,12 +21,12 @@ public class BotPlayer extends Player {
      * Constructs a new BotPlayer.
      * @param game Current game obj which this player plays on.
      * @param role Bot's game role.
-     * @param firstPlayer Player for the current board state.
+     * @param difficulty How far into the tree should it search?
      */
-    public BotPlayer(Game game, PlayerColor role, PlayerColor firstPlayer) {
+    public BotPlayer(Game game, PlayerColor role, int difficulty) {
         super(game, role);
         thread = null;
-        minimax = new ReversiMinimax(game, role, 10);
+        minimax = new ReversiMinimax(game, role, difficulty);
     }
 
     @Override

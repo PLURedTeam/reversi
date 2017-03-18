@@ -1,6 +1,5 @@
 package plu.red.reversi.client;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingSource;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
@@ -10,8 +9,6 @@ import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
-import plu.red.reversi.core.player.NullPlayer;
-import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
 public class Main {
@@ -27,13 +24,16 @@ public class Main {
         settings.set(SettingsLoader.GAME_BOARD_SIZE, 8);
         Game game = new Game(settings);
 
-        HumanPlayer player1 = new HumanPlayer(game, PlayerColor.WHITE);
-        BotPlayer player2 = new BotPlayer(game, PlayerColor.BLACK, PlayerColor.WHITE);
+        HumanPlayer player1 = new HumanPlayer(game, PlayerColor.BLACK);
+        //BotPlayer player1 = new BotPlayer(game, PlayerColor.BLACK, 5);
+        BotPlayer player2 = new BotPlayer(game, PlayerColor.WHITE, 10);
 
         game.setPlayer(player1);
         game.setPlayer(player2);
 
         game.initialize();
+
+        //game.nextTurn();
 
         // Create the MainWindow
         MainWindow window = new MainWindow(game);
