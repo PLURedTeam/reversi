@@ -93,21 +93,44 @@ public class Board {
      * @param game Game object this board is attached to during setup; generally used to determine player colors and size.
      */
     public static LinkedList<BoardCommand> getSetupCommands(Game game) {
-        //TODO: improve; temporary setup to get used Colors
-        PlayerColor color1 = null;
-        PlayerColor color2 = null;
-        color1 = game.getCurrentPlayer().getRole();
-        color2 = color1.getNext(game.getUsedPlayers());
-
-        return getSetupCommands(color1, color2, game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+        return getSetupCommands(game.getUsedPlayers().toArray(new PlayerColor[]{}),
+                game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
     }
 
-    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor c1, PlayerColor c2, int size) {
+    /**
+     * Method to setup the initial board position. Usually called from the initialization method of Game.
+     * Set commands to history.
+     *
+     * @param usedPlayers Array of PlayerColors used in this setup
+     * @param size Size of the board to setup
+     */
+    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor[] usedPlayers, int size) {
         LinkedList<BoardCommand> list = new LinkedList<>();
-        list.add(new SetCommand(c1, new BoardIndex(size / 2 - 1,size / 2 - 1)));
-        list.add(new SetCommand(c2, new BoardIndex(size / 2 - 1,size / 2)));
-        list.add(new SetCommand(c2, new BoardIndex(size / 2,size / 2 -1)));
-        list.add(new SetCommand(c1, new BoardIndex(size / 2,size / 2)));
+        switch(usedPlayers.length) {
+            case 2:
+                list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2 - 1,size / 2 - 1)));
+                list.add(new SetCommand(usedPlayers[1], new BoardIndex(size / 2 - 1,size / 2)));
+                list.add(new SetCommand(usedPlayers[1], new BoardIndex(size / 2,size / 2 -1)));
+                list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2,size / 2)));
+                break;
+            case 4:
+                list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2 - 1,size / 2 - 1)));
+                list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2,size / 2 + 1)));
+                list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2 + 1,size / 2)));
+                list.add(new SetCommand(usedPlayers[1], new BoardIndex(size / 2,size / 2)));
+                list.add(new SetCommand(usedPlayers[1], new BoardIndex(size / 2 - 1,size / 2 - 2)));
+                list.add(new SetCommand(usedPlayers[1], new BoardIndex(size / 2 - 2,size / 2 - 1)));
+                list.add(new SetCommand(usedPlayers[2], new BoardIndex(size / 2 - 1,size / 2)));
+                list.add(new SetCommand(usedPlayers[2], new BoardIndex(size / 2,size / 2 - 2)));
+                list.add(new SetCommand(usedPlayers[2], new BoardIndex(size / 2 + 1,size / 2 - 1)));
+                list.add(new SetCommand(usedPlayers[3], new BoardIndex(size / 2,size / 2 - 1)));
+                list.add(new SetCommand(usedPlayers[3], new BoardIndex(size / 2 - 2,size / 2)));
+                list.add(new SetCommand(usedPlayers[3], new BoardIndex(size / 2 - 1,size / 2 + 1)));
+                break;
+            default:
+                throw new IllegalArgumentException("Player Count must be 2 or 4");
+        }
+
         return list;
     }
 

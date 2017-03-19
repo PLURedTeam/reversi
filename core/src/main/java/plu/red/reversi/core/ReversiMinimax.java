@@ -34,11 +34,12 @@ public class ReversiMinimax implements Runnable {
      */
     @Override
     public void run() {
-        MoveCommand command = getBestMoveCommand();
-        if(command.position == null)
-            System.err.println("AI cannot move.");
-        else
+        try {
+            MoveCommand command = getBestMoveCommand();
             game.acceptCommand(command);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("AI cannot move.");
+        }
     }
 
     /**
