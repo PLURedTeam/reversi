@@ -114,5 +114,12 @@ public class GameHistoryPanel extends JPanel implements ICommandListener {
     @Override
     public void commandApplied(Command cmd) {
         tableModel.fireTableDataChanged();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                historyTable.changeSelection(historyTable.getRowCount(), 0, false, false);
+            }
+        });
     }
 }
