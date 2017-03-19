@@ -22,6 +22,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     private JMenuItem testFlipAnimItem;
     private JMenuItem changePlayer1NameItem;
     private JMenuItem swapActivePlayerItem;
+    private JMenuItem makeWinnerItem;
 
     private JMenuItem testServerItem;
 
@@ -56,6 +57,10 @@ public class DeveloperMenu extends JMenu implements ActionListener {
         testServerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
         testServerItem.addActionListener(this);
         this.add(testServerItem);
+
+        makeWinnerItem = new JMenuItem("Make Current Player Winner");
+        makeWinnerItem.addActionListener(this);
+        this.add(makeWinnerItem);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -67,6 +72,8 @@ public class DeveloperMenu extends JMenu implements ActionListener {
             swapActivePlayer();
         } else if( e.getSource() == testServerItem ) {
             testServer();
+        } else if( e.getSource() == makeWinnerItem) {
+            makeWinner();
         }
     }
 
@@ -90,5 +97,12 @@ public class DeveloperMenu extends JMenu implements ActionListener {
 
     private void testServer() {
         // TODO: test a connection to the server.
+    }
+
+    private void makeWinner() {
+        gui.getGamePanel().getBoardView().onGameOver(
+                gui.getGamePanel().getGame().getCurrentPlayer(),
+                gui.getGamePanel().getGame().getCurrentPlayer().getScore()
+        );
     }
 }

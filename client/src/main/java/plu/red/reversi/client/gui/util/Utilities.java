@@ -28,4 +28,8 @@ public class Utilities {
         g2d.drawString(text, x, y);
     }
 
+    public static Color getLessContrastColor(Color color) {
+        return new Color((color.getRed()-192)*3/8+192, (color.getGreen()-192)*3/8+192, (color.getBlue()-192)*3/8+192);
+    }
+
 }

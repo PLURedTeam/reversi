@@ -2,19 +2,20 @@ package plu.red.reversi.client.gui.game;
 
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
-import plu.red.reversi.core.Board;
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.client.gui.util.Utilities;
+import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IFlipListener;
+import plu.red.reversi.core.listener.IGameOverListener;
+import plu.red.reversi.core.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener {
+public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener, IGameOverListener {
 
     /** Used to help with animation */
     private FlipAnimator fAnimator;
@@ -211,6 +212,10 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
     protected CellState cellStates[][];
 
     protected boolean showPossibleMoves = false;
+    protected Player winningPlayer = null;
+    protected int winningScore = 0;
+
+    protected static final Font END_GAME_FONT = new Font("Sans Serif", Font.BOLD, 28);
 
     /**
      * Constructs a new BoardView.
@@ -275,6 +280,31 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
                 drawCell(g, cellSize, col, row);
             }
         }
+
+        if(winningPlayer != null) {
+            g.setFont(END_GAME_FONT);
+
+            String displayStr = winningPlayer.getName() + " Wins!";
+            Rectangle2D strBounds = g.getFontMetrics().getStringBounds(displayStr, g);
+            int dispW = (int)strBounds.getWidth()+32;
+            int dispH = (int)strBounds.getHeight()+32;
+
+            g.setColor(BoardEdges.BACKGROUND_COLOR);
+            g.fillRect((w-dispW)/2, (h-dispH)/2, dispW, dispH);
+
+            g.setColor(Utilities.getLessContrastColor(winningPlayer.getRole().color));
+            g.fillRect((w-dispW)/2+8, (h-dispH)/2+8, dispW-16, dispH-16);
+
+            g.setColor(Color.BLACK);
+            Utilities.drawCenteredString((Graphics2D)g, displayStr, new Rectangle(0, 0, w, h));
+        }
+    }
+
+    @Override
+    public void onGameOver(Player player, int score) {
+        winningPlayer = player;
+        winningScore = score;
+        this.repaint();
     }
 
     /**

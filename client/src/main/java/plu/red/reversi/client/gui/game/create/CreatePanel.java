@@ -2,6 +2,7 @@ package plu.red.reversi.client.gui.game.create;
 
 import plu.red.reversi.client.gui.ChatPanel;
 import plu.red.reversi.client.gui.MainWindow;
+import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
@@ -82,7 +83,7 @@ public class CreatePanel extends JPanel implements ActionListener {
         for(int i = 0; i < playerSlots.size(); i++) {
             PlayerPanel slot = playerSlots.get(i);
             Color color = PlayerColor.validPlayers()[i].color;
-            slot.setBackground(new Color((color.getRed()-192)*3/8+192, (color.getGreen()-192)*3/8+192, (color.getBlue()-192)*3/8+192));
+            slot.setBackground(Utilities.getLessContrastColor(color));
             playerSelectList.add(slot);
         }
 
