@@ -25,7 +25,7 @@ public class BoardTest {
     @Test
     public void testGetScore() {
         Board board = new Board(4);
-        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
+        board.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 4));
 
         assertEquals(2, board.getScore(PlayerColor.WHITE));
         assertEquals(2, board.getScore(PlayerColor.BLACK));
@@ -37,7 +37,7 @@ public class BoardTest {
     @Test
     public void testIsValidMove() {
         Board board = new Board(4);
-        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
+        board.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 4));
 
         assertFalse(board.isValidMove(PlayerColor.BLACK, new BoardIndex(0, 0)));
         assertTrue(board.isValidMove(PlayerColor.BLACK, new BoardIndex(1, 0)));
@@ -54,7 +54,7 @@ public class BoardTest {
 
 
         Board b2 = new Board(b1);
-        LinkedList<BoardCommand> commands = Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK, 8);
+        LinkedList<BoardCommand> commands = Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 8);
         b1.applyCommands(commands);
         assertNotEquals(b1, b2);
 
@@ -72,14 +72,14 @@ public class BoardTest {
         Board b = new Board(8);
         assertEquals(0, b.getTotalPieces());
 
-        b.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK, 8));
+        b.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 8));
         assertEquals(4, b.getTotalPieces());
     }
 
     @Test
     public void testGetPossibleMoves() {
         Board board = new Board(4);
-        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
+        board.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 4));
 
         Set<BoardIndex> moveList;
         moveList = board.getPossibleMoves(PlayerColor.BLACK);
@@ -98,7 +98,7 @@ public class BoardTest {
         //moving a piece in a legal index
         MoveCommand c = new MoveCommand(Command.Source.PLAYER, PlayerColor.BLACK, new BoardIndex(1, 0));
         Board brd = new Board(4);
-        brd.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK,4));
+        brd.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 4));
         brd.apply(c);
         assertEquals(PlayerColor.BLACK, brd.at(c.position));
 
@@ -110,7 +110,7 @@ public class BoardTest {
     @Test
     public void testRepeatedMoves() {
         Board board = new Board(8);
-        board.applyCommands(Board.getSetupCommands(PlayerColor.WHITE, PlayerColor.BLACK, 8));
+        board.applyCommands(Board.getSetupCommands(new PlayerColor[]{ PlayerColor.WHITE, PlayerColor.BLACK }, 8));
 
         for(int x = 0; x < 15; ++x) {
             MoveCommand m = new MoveCommand(PlayerColor.WHITE, board.getPossibleMoves(PlayerColor.WHITE).iterator().next());

@@ -93,10 +93,19 @@ public class Board {
      * @param game Game object this board is attached to during setup; generally used to determine player colors and size.
      */
     public static LinkedList<BoardCommand> getSetupCommands(Game game) {
+        return getSetupCommands(game.getUsedPlayers().toArray(new PlayerColor[]{}),
+                game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+    }
 
+    /**
+     * Method to setup the initial board position. Usually called from the initialization method of Game.
+     * Set commands to history.
+     *
+     * @param usedPlayers Array of PlayerColors used in this setup
+     * @param size Size of the board to setup
+     */
+    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor[] usedPlayers, int size) {
         LinkedList<BoardCommand> list = new LinkedList<>();
-        PlayerColor[] usedPlayers = game.getUsedPlayers().toArray(new PlayerColor[]{});
-        int size = game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class);
         switch(usedPlayers.length) {
             case 2:
                 list.add(new SetCommand(usedPlayers[0], new BoardIndex(size / 2 - 1,size / 2 - 1)));
@@ -121,7 +130,7 @@ public class Board {
             default:
                 throw new IllegalArgumentException("Player Count must be 2 or 4");
         }
-        
+
         return list;
     }
 
