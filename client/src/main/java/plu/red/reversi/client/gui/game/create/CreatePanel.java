@@ -26,7 +26,9 @@ public class CreatePanel extends JPanel implements ActionListener {
     JPanel playerSelectList;
     PlayerPanelSelect addPlayerButtons;
     ArrayList<PlayerPanel> playerSlots = new ArrayList<>();
+
     JButton startButton;
+    JButton loadButton;
 
     public CreatePanel(MainWindow gui) {
         this.gui = gui;
@@ -41,8 +43,16 @@ public class CreatePanel extends JPanel implements ActionListener {
 
         startButton = new JButton("Start");
         startButton.addActionListener(this);
+
+        loadButton = new JButton("Load");
+        loadButton.addActionListener(this);
+
         JPanel startContainer = new JPanel();
+        startContainer.setLayout(new BoxLayout(startContainer, BoxLayout.X_AXIS));
+        startContainer.add(loadButton);
+        startContainer.add(Box.createHorizontalGlue());
         startContainer.add(startButton);
+
         panelSettings = new GameSettingsPanel(settings);
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
@@ -147,10 +157,12 @@ public class CreatePanel extends JPanel implements ActionListener {
             human.setVerticalAlignment(SwingConstants.CENTER);
             human.setHorizontalAlignment(SwingConstants.CENTER);
             human.addActionListener(buttonListener);
+
             network = new JButton("Add Networked Player");
             network.setVerticalAlignment(SwingConstants.CENTER);
             network.setHorizontalAlignment(SwingConstants.CENTER);
             network.addActionListener(buttonListener);
+
             bot = new JButton("Add AI Player");
             bot.setVerticalAlignment(SwingConstants.CENTER);
             bot.setHorizontalAlignment(SwingConstants.CENTER);
