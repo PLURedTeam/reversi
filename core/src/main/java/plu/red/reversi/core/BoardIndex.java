@@ -57,7 +57,7 @@ public class BoardIndex implements Comparable<BoardIndex> {
     public String getCoordinateString() {
         char c = 'a';
         c += column;
-        return "" + c + row;
+        return "" + c + (row + 1);
     }
 
     @Override
