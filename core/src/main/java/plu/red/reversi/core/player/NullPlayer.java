@@ -5,7 +5,7 @@ import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.command.MoveCommand;
 
 /**
- * Used for testing, always returns the first valid move given by board.
+ * Used for testing; does nothing.
  */
 public class NullPlayer extends  Player {
 
@@ -20,15 +20,5 @@ public class NullPlayer extends  Player {
      */
     @Override
     public void nextTurn(boolean yours) {
-        if(!yours) return;
-        game.acceptCommand(
-            new MoveCommand(
-                role,
-                game.getBoard()
-                    .getPossibleMoves(role)
-                    .iterator()
-                    .next()
-            )
-        );
     }
 }
