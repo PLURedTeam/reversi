@@ -1,8 +1,11 @@
 package plu.red.reversi.client.player;
 
-import plu.red.reversi.core.*;
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.command.*;
 
 /**
  * Created by daniel on 3/5/17.

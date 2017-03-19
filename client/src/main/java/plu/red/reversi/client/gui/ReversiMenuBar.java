@@ -2,19 +2,15 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.player.HumanPlayer;
-import plu.red.reversi.core.BoardIndex;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The main menu bar.

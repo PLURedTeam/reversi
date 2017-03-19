@@ -5,8 +5,6 @@ package plu.red.reversi.core.util;
  * Glory to the Red Team.
  */
 
-import plu.red.reversi.core.util.Looper;
-
 import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 

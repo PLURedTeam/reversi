@@ -2,7 +2,6 @@ package plu.red.reversi.client.util;
 
 import plu.red.reversi.core.util.User;
 
-import javax.swing.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;

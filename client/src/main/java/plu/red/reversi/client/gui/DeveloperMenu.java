@@ -2,7 +2,8 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.core.BoardIndex;
 import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.command.*;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

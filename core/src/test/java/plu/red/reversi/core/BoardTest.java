@@ -1,19 +1,12 @@
 package plu.red.reversi.core;
 
-import org.codehaus.jettison.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
-import plu.red.reversi.core.command.SetCommand;
-import plu.red.reversi.core.util.SettingsMap;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 

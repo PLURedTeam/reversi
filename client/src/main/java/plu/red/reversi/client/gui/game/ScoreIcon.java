@@ -1,8 +1,8 @@
 package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.player.Player;
 
 import javax.swing.*;
 import java.awt.*;

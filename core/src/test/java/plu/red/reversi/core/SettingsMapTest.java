@@ -6,7 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.util.SettingsMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Glory to the Red Team.

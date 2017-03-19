@@ -1,7 +1,10 @@
 package plu.red.reversi.client.util;
 
 //import statements
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Created by Andrew on 3/8/2017.

@@ -5,8 +5,6 @@ package plu.red.reversi.core.util;
  * Glory to the Red Team.
  */
 
-import plu.red.reversi.core.BoardIndex;
-
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

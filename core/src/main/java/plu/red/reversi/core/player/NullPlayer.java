@@ -2,7 +2,6 @@ package plu.red.reversi.core.player;
 
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.command.MoveCommand;
 
 /**
  * Used for testing; does nothing.

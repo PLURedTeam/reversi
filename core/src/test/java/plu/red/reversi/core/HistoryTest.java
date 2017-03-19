@@ -1,14 +1,11 @@
 package plu.red.reversi.core;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
-import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 

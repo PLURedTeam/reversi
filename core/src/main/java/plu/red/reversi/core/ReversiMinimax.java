@@ -1,9 +1,7 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 
-import java.util.LinkedList;
 import java.util.Set;
 
 /**

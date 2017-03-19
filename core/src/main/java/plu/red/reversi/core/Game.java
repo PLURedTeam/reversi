@@ -1,6 +1,9 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.*;
+import plu.red.reversi.core.command.ChatCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.listener.IStatusListener;
@@ -9,7 +12,6 @@ import plu.red.reversi.core.util.SettingsMap;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
