@@ -15,6 +15,7 @@ public class GameSettingsPanel extends JPanel {
 
     // Swing Components
     SliderSetting panelBoardSize;
+    CheckBoxSetting panelAllowTurnSkipping;
 
     public GameSettingsPanel(SettingsMap settings) {
         this.settings = settings;
@@ -27,10 +28,16 @@ public class GameSettingsPanel extends JPanel {
         panelBoardSize.slider.setPaintTicks(true);
         panelBoardSize.slider.setSnapToTicks(true);
         this.add(panelBoardSize);
+
+        panelAllowTurnSkipping = new CheckBoxSetting(settings, SettingsLoader.GAME_ALLOW_TURN_SKIPPING);
+        this.add(panelAllowTurnSkipping);
+
+        this.add(Box.createVerticalGlue());
     }
 
     public SettingsMap getSettings() {
         settings.set(SettingsLoader.GAME_BOARD_SIZE, panelBoardSize.slider.getValue());
+        settings.set(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, panelAllowTurnSkipping.checkBox.isSelected());
         return settings;
     }
 
@@ -80,6 +87,32 @@ public class GameSettingsPanel extends JPanel {
             if(e.getSource() == slider) {
                 count.setText(""+slider.getValue());
             }
+        }
+    }
+
+    class CheckBoxSetting extends JPanel {
+
+        public final JLabel label;
+        public final JCheckBox checkBox;
+
+        public CheckBoxSetting(SettingsMap settings, String name) {
+
+            label = new JLabel(name);
+            label.setHorizontalAlignment(SwingConstants.LEFT);
+
+            checkBox = new JCheckBox();
+            checkBox.setSelected(settings.get(name, Boolean.class));
+
+            SettingsMap.Setting s = settings.getSetting(name);
+
+            label.setToolTipText(s.getDescription());
+            checkBox.setToolTipText(s.getDescription());
+
+            JPanel container = new JPanel();
+            container.setLayout(new BorderLayout());
+            container.add(label, BorderLayout.WEST);
+            container.add(checkBox, BorderLayout.EAST);
+            this.add(container);
         }
     }
 }

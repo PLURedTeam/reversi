@@ -3,6 +3,9 @@ package plu.red.reversi.client.gui.game;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import plu.red.reversi.core.*;
+import plu.red.reversi.core.command.BoardCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IFlipListener;
 
 import javax.swing.*;
@@ -16,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends JPanel implements MouseListener, IFlipListener {
+public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener {
 
     /** Used to help with animation */
     private FlipAnimator fAnimator;
@@ -204,7 +207,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
     protected final Game game;
     protected CellState cellStates[][];
 
-    protected boolean showPossibleMoves;
+    protected boolean showPossibleMoves = false;
 
     /**
      * Constructs a new BoardView.
@@ -222,6 +225,16 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
         fAnimator = null;
         this.addMouseListener(this);
     }
+
+    public void setShowPossibleMoves(boolean value) {
+        showPossibleMoves = value;
+        clearHighlights();
+        if(showPossibleMoves) {
+            PlayerColor role = game.getCurrentPlayer().getRole();
+            highlightCells(role, game.getBoard().getPossibleMoves(role));
+        }
+    }
+    public boolean getShowPossibleMoves() { return showPossibleMoves; }
 
     private void resetCellStates() {
         int size = game.getBoard().size;
@@ -351,6 +364,17 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener {
                 endPosition.row, endPosition.column,
                 newColor,
                 300);
+    }
+
+    @Override
+    public void commandApplied(Command cmd) {
+        if(cmd instanceof BoardCommand) {
+            clearHighlights();
+            if(showPossibleMoves) {
+                PlayerColor role = game.getCurrentPlayer().getRole();
+                highlightCells(role, game.getBoard().getPossibleMoves(role));
+            }
+        }
     }
 
     public void highlightCells(PlayerColor color, Set<BoardIndex> indexes) {

@@ -1,5 +1,6 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.BoardIndex;
 import plu.red.reversi.core.Game;
@@ -130,13 +131,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
             if(e.getSource() == highlightMenuItem) {
 
-                if(highlighted == false) {
-                    gui.getGamePanel().getBoardView().highlightCells(game.getCurrentPlayer().getRole(), game.getBoard().getPossibleMoves(game.getCurrentPlayer().getRole()));
-                    highlighted = true;
-                } else {
-                    gui.getGamePanel().getBoardView().clearHighlights();
-                    highlighted = false;
-                }//else
+                BoardView bv = gui.getGamePanel().getBoardView();
+                bv.setShowPossibleMoves(!bv.getShowPossibleMoves());
             }
 
             if(e.getSource() == bestMoveMenuItem) {

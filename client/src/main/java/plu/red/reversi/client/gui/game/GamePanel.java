@@ -30,6 +30,7 @@ public class GamePanel extends JPanel {
         game.addCommandListener(playerInfoPanel);
         boardView = new BoardView(game);
         game.getBoard().addFlipListener(boardView);
+        game.addCommandListener(boardView);
 
         // This panel will preserve the aspect ratio of the component within it
         JPanel preserveAspectPanel = new JPanel(new PreserveAspectRatioLayout() );
