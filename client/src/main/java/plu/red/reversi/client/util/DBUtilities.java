@@ -4,7 +4,6 @@ package plu.red.reversi.client.util;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 
 /**
@@ -14,7 +13,7 @@ public class DBUtilities {
 
     //Fields
     private Connection conn; //Connection Object
-    ConnectDB dbConnection; //The database connector class
+    DBConnection dbConnection; //The database connector class
 
     /**
      * Constructor for DBUtilities class
@@ -23,7 +22,7 @@ public class DBUtilities {
      *  and sets the conn field to the connection
      */
     public DBUtilities() {
-        dbConnection = new ConnectDB(); //Create the connection
+        dbConnection = new DBConnection(); //Create the connection
         dbConnection.openDB(); //Open the connection
         conn = dbConnection.getConn(); //Set the database connection
 
@@ -38,7 +37,7 @@ public class DBUtilities {
     }//constructor
 
     /**
-     * Calls the ConnectDB class to close the database
+     * Calls the DBConnection class to close the database
      * This will only be used when the program closes
      */
     public void closeDB() {

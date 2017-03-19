@@ -21,7 +21,7 @@ public class CreateDB {
      * @param c The connection object to the database
      */
     public CreateDB(Connection c) {
-        conn = c;//Set the connection to the open connection in ConnectDB
+        conn = c;//Set the connection to the open connection in DBConnection
 
         if(conn == null)
             System.out.println("Could not connect to the database.");

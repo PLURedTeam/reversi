@@ -10,11 +10,11 @@ import org.junit.Test;
  */
 public class DBUtilitiesTest {
 
-    ConnectDB util; //ConnectDB Object
+    DBConnection util; //DBConnection Object
 
     @Before
     public void setUp() throws Exception {
-        util = new ConnectDB();
+        util = new DBConnection();
     }//setUp
 
     @After

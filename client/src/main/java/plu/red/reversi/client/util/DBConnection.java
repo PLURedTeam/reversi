@@ -8,19 +8,19 @@ import java.sql.*;
  * Created by Andrew on 3/7/2017.
  * Creates and manages the connection object to the database
  */
-public class ConnectDB {
+public class DBConnection {
 
     //fields
     private Connection conn = null; // Connection object
     private String connStatus = null; //Status of the connection
 
     /**
-     * Constructor for the ConnectDB class
+     * Constructor for the DBConnection class
      * Loads the JDBC driver from the SQLite dependency and
      *  prints the exception to the console if the driver could
      *  not be loaded
      */
-    public ConnectDB() {
+    public DBConnection() {
         // Load the SQLite JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
