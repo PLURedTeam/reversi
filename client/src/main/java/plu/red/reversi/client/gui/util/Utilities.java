@@ -128,7 +128,7 @@ public class Utilities {
         if(artificialDarken) {
             float avg = (tA[0] + tA[1] + tA[2]) / 3.0f;
             if(avg > 0.9f) {
-                for(int i = 0; i < 3; i++) tA[i] *= 0.8f;
+                for(int i = 0; i < 3; i++) tA[i] *= 0.7f;
             }
         }
 

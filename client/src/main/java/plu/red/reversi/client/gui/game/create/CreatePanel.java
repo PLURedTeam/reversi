@@ -130,7 +130,7 @@ public class CreatePanel extends JPanel implements ActionListener {
             PlayerPanel.SubPanel slot = playerSlots.get(i).getSubPanel();
             PlayerColor color = PlayerColor.validPlayers()[i];
             if(slot instanceof PlayerPanel.SubPanel.AI)
-                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.SubPanel.AI)slot).difficultySlider.getValue()*2));
+                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.SubPanel.AI)slot).difficultySlider.getValue()));
             else if(slot instanceof PlayerPanel.SubPanel.Local)
                 game.setPlayer(new HumanPlayer(game, color));
         }
