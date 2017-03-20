@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import plu.red.reversi.core.db.DBConnection;
 
 /**
  * Created by Andrew on 3/8/2017.

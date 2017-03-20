@@ -1,4 +1,4 @@
-package plu.red.reversi.client.util;
+package plu.red.reversi.core.db;
 
 //import statements
 

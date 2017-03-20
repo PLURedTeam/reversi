@@ -21,6 +21,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private MainWindow gui;
 
     private JMenuItem newGameItem;
+    private JMenuItem loadGameItem;
+    private JMenuItem saveGameItem;
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
 
@@ -57,6 +59,22 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 "Start a new game against the computer");
         newGameItem.addActionListener(this);
         menu.add(newGameItem);
+
+        loadGameItem = new JMenuItem("Load Game");
+        loadGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+        loadGameItem.getAccessibleContext().setAccessibleDescription(
+                "Load a previous game");
+        loadGameItem.addActionListener(this);
+        menu.add(loadGameItem);
+
+        saveGameItem = new JMenuItem("Save Game");
+        saveGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        saveGameItem.getAccessibleContext().setAccessibleDescription(
+                "Save the current game");
+        saveGameItem.addActionListener(this);
+        menu.add(saveGameItem);
 
         JMenuItem menuItem = new JMenuItem("New Online Game");
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -149,6 +167,15 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         if(e.getSource() == newGameItem) {
             gui.createNewGame();
+        }
+
+        if(e.getSource() == loadGameItem) {
+            String[] games = {"Test 1", "Test 2", "Test 3"};
+            String input = (String)JOptionPane.showInputDialog(gui,"Select a Game","Load Game",JOptionPane.QUESTION_MESSAGE,null,games,games[0]);
+        }
+
+        if(e.getSource() == saveGameItem) {
+            String name = JOptionPane.showInputDialog(gui, "Enter a name for the game","Save Game",1);
         }
     }
 }

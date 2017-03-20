@@ -1,4 +1,4 @@
-package plu.red.reversi.client.util;
+package plu.red.reversi.core.db;
 
 //import statements
 import org.codehaus.jettison.json.JSONException;
@@ -13,7 +13,7 @@ public class DBUtilities {
 
     //Fields
     private Connection conn; //Connection Object
-    DBConnection dbConnection; //The database connector class
+    private DBConnection dbConnection; //The database connector class
 
     /**
      * Constructor for DBUtilities class
