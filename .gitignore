@@ -82,4 +82,4 @@ fabric.properties
 !gradle-wrapper.jar
 
 
-client/ClientDB.db
+*.db

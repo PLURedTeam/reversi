@@ -6,6 +6,7 @@ import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.listener.IStatusListener;
 import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.db.DBUtilities;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,6 +109,9 @@ public class Game {
     protected boolean gameRunning = true;
 
 
+    private int gameID = 0;
+
+
 
     // ****************
     //  Member Methods
@@ -128,6 +132,8 @@ public class Game {
      * and settings being used.
      */
     public void initialize() {
+        gameID = DBUtilities.INSTANCE.createGame();
+        DBUtilities.INSTANCE.saveGame(gameID);
         this.history = new History();
         board.applyCommands(board.getSetupCommands(this));
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
@@ -139,8 +145,9 @@ public class Game {
      *
      * @param history History object to apply
      */
-    public void initialize(History history) {
+    public void initialize(History history, int newGameID) {
         this.history = history;
+        this.gameID = newGameID;
 
         // TODO: Add Players to Game
         
@@ -277,6 +284,7 @@ public class Game {
         if(cmd instanceof MoveCommand) {
             if(!gameRunning) return false;
             board.apply((MoveCommand)cmd);
+            DBUtilities.INSTANCE.saveMove(gameID, cmd);
             nextTurn();
         }
 
@@ -348,4 +356,13 @@ public class Game {
         for(IStatusListener listener : listenerSetStatus)
             listener.onStatusMessage(message);
     }
+
+    /**
+     * Accessor for the gameID field
+     * @return the gameID
+     */
+    public int getGameID() { return gameID; }
+
+
+
 }

@@ -1,4 +1,4 @@
-package plu.red.reversi.client.util;
+package plu.red.reversi.core.db;
 
 //import statements
 
@@ -67,9 +67,10 @@ public class CreateDB {
                 + "move_id int NOT NULL,\n"
                 + "move_index_r int NOT NULL,\n"
                 + "move_index_c int NOT NULL,\n"
-                + "move_command int NOT NULL,\n"
-                + "move_source int NOT NULL,\n"
-                + "player int NOT NULL,\n"
+                + "move_source varchar(50) NOT NULL,\n"
+                + "player varchar(50) NOT NULL,\n"
+                + "player_color int NOT NULL,\n"
+                + "command_type varchar(50) NOT NULL,\n"
                 + "PRIMARY KEY(game_id, move_id),\n"
                 + "FOREIGN KEY(game_id) references GAME(game_id)\n"
                 + "ON DELETE CASCADE\n"

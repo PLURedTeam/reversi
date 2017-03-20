@@ -1,11 +1,15 @@
 package plu.red.reversi.client.gui;
 
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.Game;
+import plu.red.reversi.core.History;
 import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.util.SettingsMap;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -21,6 +25,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private MainWindow gui;
 
     private JMenuItem newGameItem;
+    private JMenuItem loadGameItem;
+    private JMenuItem saveGameItem;
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
 
@@ -57,6 +63,22 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 "Start a new game against the computer");
         newGameItem.addActionListener(this);
         menu.add(newGameItem);
+
+        loadGameItem = new JMenuItem("Load Game");
+        loadGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+        loadGameItem.getAccessibleContext().setAccessibleDescription(
+                "Load a previous game");
+        loadGameItem.addActionListener(this);
+        menu.add(loadGameItem);
+
+        saveGameItem = new JMenuItem("Save Game");
+        saveGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        saveGameItem.getAccessibleContext().setAccessibleDescription(
+                "Save the current game");
+        saveGameItem.addActionListener(this);
+        menu.add(saveGameItem);
 
         JMenuItem menuItem = new JMenuItem("New Online Game");
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -149,6 +171,55 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         if(e.getSource() == newGameItem) {
             gui.createNewGame();
+        }
+
+        if(e.getSource() == loadGameItem) {
+            String[][] games = DBUtilities.INSTANCE.getGames();
+            String[] list = new String[games.length];
+            int gameID = 0;
+
+            //Convert to one dimensional array
+            for(int i = 0; i < games.length; i++)
+                list[i] = games[i][0];
+
+            String input = null;
+            if(games.length > 0)
+                input = (String)JOptionPane.showInputDialog(gui,"Select a Game","Load Game",JOptionPane.QUESTION_MESSAGE,null,list,list[0]);
+            else
+                JOptionPane.showMessageDialog(gui, "You do not have any saved games");
+
+            //Loop through array and set gameID
+            for(int i = 0; i < games.length; i++)
+                if(input == games[i][0])
+                    gameID = Integer.parseInt(games[i][1]);
+
+            History h = DBUtilities.INSTANCE.loadGame(gameID);
+            JSONObject obj = DBUtilities.INSTANCE.loadGameSettings(gameID);
+            SettingsMap map = new SettingsMap(obj);
+
+            Game g = new Game(map);
+
+           // g.setPlayer();
+
+            g.initialize(h, gameID);
+            gui.startGame(g);
+
+
+
+        }
+
+        if(e.getSource() == saveGameItem) {
+            int gameID;
+
+            if(gui.getGamePanel() != null) {
+                String name = JOptionPane.showInputDialog(gui, "Enter a name for the game","Save Game",1);
+                gameID = gui.getGamePanel().getGame().getGameID();
+                DBUtilities.INSTANCE.updateGame(gameID, name);
+                DBUtilities.INSTANCE.saveGameSettings(gameID, gui.getGamePanel().getGame().getSettings().toJSON());
+            } else {
+                JOptionPane.showMessageDialog(gui,"No game loaded");
+            }//else
+
         }
     }
 }
