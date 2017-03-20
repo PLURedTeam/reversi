@@ -100,13 +100,8 @@ public class CreatePanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         boolean rebuildPlayerSlots = false;
 
-        if(e.getSource() == addPlayerButtons.bot) {
-            playerSlots.add(new PlayerPanel.PlayerPanelBot(this));
-            rebuildPlayerSlots = true;
-        }
-
-        if(e.getSource() == addPlayerButtons.human) {
-            playerSlots.add(new PlayerPanel.PlayerPanelHuman(this));
+        if(e.getSource() == addPlayerButtons.add) {
+            playerSlots.add(new PlayerPanel(this));
             rebuildPlayerSlots = true;
         }
 
@@ -132,11 +127,11 @@ public class CreatePanel extends JPanel implements ActionListener {
         Game game = new Game(settings);
 
         for(int i = 0; i < playerSlots.size(); i++) {
-            PlayerPanel slot = playerSlots.get(i);
+            PlayerPanel.SubPanel slot = playerSlots.get(i).getSubPanel();
             PlayerColor color = PlayerColor.validPlayers()[i];
-            if(slot instanceof PlayerPanel.PlayerPanelBot)
-                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.PlayerPanelBot)slot).difficultySlider.getValue()*2));
-            else if(slot instanceof PlayerPanel.PlayerPanelHuman)
+            if(slot instanceof PlayerPanel.SubPanel.AI)
+                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.SubPanel.AI)slot).difficultySlider.getValue()*2));
+            else if(slot instanceof PlayerPanel.SubPanel.Local)
                 game.setPlayer(new HumanPlayer(game, color));
         }
 
@@ -147,18 +142,19 @@ public class CreatePanel extends JPanel implements ActionListener {
 
     public static class PlayerPanelSelect extends JPanel {
 
-        public final JButton human;
-        public final JButton network;
-        public final JButton bot;
+        public final JButton add;
+        //public final JButton network;
+        //public final JButton bot;
 
         public PlayerPanelSelect(ActionListener buttonListener) {
             this.setMaximumSize(new Dimension(10000, 36));
 
-            human = new JButton("Add Local Player");
-            human.setVerticalAlignment(SwingConstants.CENTER);
-            human.setHorizontalAlignment(SwingConstants.CENTER);
-            human.addActionListener(buttonListener);
+            add = new JButton("Add Player");
+            add.setVerticalAlignment(SwingConstants.CENTER);
+            add.setHorizontalAlignment(SwingConstants.CENTER);
+            add.addActionListener(buttonListener);
 
+            /*
             network = new JButton("Add Networked Player");
             network.setVerticalAlignment(SwingConstants.CENTER);
             network.setHorizontalAlignment(SwingConstants.CENTER);
@@ -168,10 +164,11 @@ public class CreatePanel extends JPanel implements ActionListener {
             bot.setVerticalAlignment(SwingConstants.CENTER);
             bot.setHorizontalAlignment(SwingConstants.CENTER);
             bot.addActionListener(buttonListener);
+            */
 
-            this.add(human);
-            this.add(network);
-            this.add(bot);
+            this.add(add);
+            //this.add(network);
+            //this.add(bot);
         }
     }
 }
