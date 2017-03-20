@@ -66,6 +66,15 @@ public class PlayerPanel extends JPanel implements ActionListener {
         this.add(Box.createRigidArea(new Dimension(15, 0)));
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if(removeButton != null) removeButton.setEnabled(enabled);
+        if(typeSelect != null) typeSelect.setEnabled(enabled);
+        if(middlePanel != null) middlePanel.setEnabled(enabled);
+        if(subPanel != null) subPanel.setEnabled(enabled);
+    }
+
     public SubPanel getSubPanel() { return subPanel; }
 
     public SlotType getType() { return slotType; }
@@ -91,6 +100,7 @@ public class PlayerPanel extends JPanel implements ActionListener {
         }
 
         subPanel.setBackground(bg);
+        subPanel.setEnabled(middlePanel.isEnabled());
 
         middlePanel.add(subPanel, BorderLayout.CENTER);
 
@@ -143,6 +153,12 @@ public class PlayerPanel extends JPanel implements ActionListener {
                 difficultySlider.setPaintTicks(true);
                 difficultySlider.setMaximumSize(new Dimension(300, 40));
                 this.add(difficultySlider);
+            }
+
+            @Override
+            public void setEnabled(boolean enabled) {
+                super.setEnabled(enabled);
+                if(difficultySlider != null) difficultySlider.setEnabled(enabled);
             }
 
             @Override

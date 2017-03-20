@@ -41,6 +41,13 @@ public class GameSettingsPanel extends JPanel {
         return settings;
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if(panelBoardSize != null) panelBoardSize.setEnabled(enabled);
+        if(panelAllowTurnSkipping != null) panelAllowTurnSkipping.setEnabled(enabled);
+    }
+
 
     class SliderSetting extends JPanel implements ChangeListener {
 
@@ -83,6 +90,12 @@ public class GameSettingsPanel extends JPanel {
         }
 
         @Override
+        public void setEnabled(boolean enabled) {
+            super.setEnabled(enabled);
+            if(slider != null) slider.setEnabled(enabled);
+        }
+
+        @Override
         public void stateChanged(ChangeEvent e) {
             if(e.getSource() == slider) {
                 count.setText(""+slider.getValue());
@@ -113,6 +126,12 @@ public class GameSettingsPanel extends JPanel {
             container.add(label, BorderLayout.WEST);
             container.add(checkBox, BorderLayout.EAST);
             this.add(container);
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            super.setEnabled(enabled);
+            if(checkBox != null) checkBox.setEnabled(enabled);
         }
     }
 }

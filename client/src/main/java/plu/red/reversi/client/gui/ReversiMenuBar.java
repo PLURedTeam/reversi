@@ -174,6 +174,10 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         }
 
         if(e.getSource() == loadGameItem) {
+
+            gui.loadGame();
+
+            /*
             String[][] games = DBUtilities.INSTANCE.getGames();
             String[] list = new String[games.length];
             int gameID = 0;
@@ -203,7 +207,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
             g.initialize(h, gameID);
             gui.startGame(g);
-
+            */
 
 
         }

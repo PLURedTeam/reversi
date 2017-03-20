@@ -5,6 +5,7 @@ import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.client.player.HumanPlayer;
 import plu.red.reversi.core.Game;
+import plu.red.reversi.core.History;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
@@ -31,12 +32,26 @@ public class CreatePanel extends JPanel implements ActionListener {
     JButton startButton;
     JButton loadButton;
 
+    // If null, creating a new game, otherwise loading a game
+    History loadedHistory = null;
+    int gameID = 0;
+
     public CreatePanel(MainWindow gui) {
         this.gui = gui;
 
         this.setLayout(new BorderLayout());
 
         populate(SettingsLoader.INSTANCE.createGameSettings());
+    }
+
+    public CreatePanel(MainWindow gui, SettingsMap loadedSettings, History loadedHistory, int gameID) {
+        this.gui = gui;
+        this.loadedHistory = loadedHistory;
+        this.gameID = gameID;
+
+        this.setLayout(new BorderLayout());
+
+        populate(loadedSettings);
     }
 
     protected final void populate(SettingsMap settings) {
@@ -55,6 +70,7 @@ public class CreatePanel extends JPanel implements ActionListener {
         startContainer.add(startButton);
 
         panelSettings = new GameSettingsPanel(settings);
+        panelSettings.setEnabled(loadedHistory == null);
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
         rightPanel.add(startContainer, BorderLayout.SOUTH);
@@ -85,6 +101,7 @@ public class CreatePanel extends JPanel implements ActionListener {
             Color color = PlayerColor.validPlayers()[i].color;
             slot.setBackground(Utilities.getLessContrastColor(color));
             playerSelectList.add(slot);
+            slot.setEnabled(loadedHistory == null);
         }
 
         // Keep at bottom
@@ -119,6 +136,10 @@ public class CreatePanel extends JPanel implements ActionListener {
         if(e.getSource() == startButton) {
             attemptGameStart();
         }
+
+        if(e.getSource() == loadButton) {
+            gui.loadGame();
+        }
     }
 
     protected final void attemptGameStart() {
@@ -135,7 +156,8 @@ public class CreatePanel extends JPanel implements ActionListener {
                 game.setPlayer(new HumanPlayer(game, color));
         }
 
-        game.initialize();
+        if(loadedHistory == null) game.initialize();
+        else game.initialize(loadedHistory, gameID);
 
         gui.startGame(game);
     }
