@@ -89,6 +89,8 @@ public class Utilities {
                     if(oldColor.getRed() + oldColor.getGreen() + oldColor.getBlue() < 32) {
                         newColor = new Color(0, 0, 0, 0);
                     } else {
+                        newColor = overlayBlend(oldColor, color, true);
+                        /*
                         int red = (int)((oldColor.getRed() * ( (color.getRed()) / 255.0f))*0.8f + oldColor.getRed()*0.2f);
                         int green = (int)((oldColor.getGreen() * ( (color.getGreen()) / 255.0f))*0.8f + oldColor.getGreen()*0.2f);
                         int blue = (int)((oldColor.getBlue() * ( (color.getBlue()) / 255.0f))*0.8f + oldColor.getBlue()*0.2f);
@@ -98,6 +100,7 @@ public class Utilities {
                                 blue > 255 ? 255 : blue,
                                 oldColor.getAlpha() < 32 ? 0 : (int)(oldColor.getAlpha() * (color.getAlpha() / 255.0f))
                         );
+                        */
                     }
                     img.setRGB(x, y, newColor.getRGB());
                 }
@@ -105,6 +108,45 @@ public class Utilities {
             tileCache.put(color, img);
             return img;
         }
+    }
+
+    /**
+     * Returns an Overlay blend of two colors, optionally artificially darkening the top color in order to avoid color
+     * bleedout where the resulting color is all white. In addition, unlike normal Overlay blend, the resulting Color's
+     * alpha value is equal to the top color.
+     *
+     * @param original The base Color
+     * @param top The Color to apply on top
+     * @param artificialDarken Artificially darken the given top color
+     * @return Blended Color value
+     */
+    public static Color overlayBlend(Color original, Color top, boolean artificialDarken) {
+
+        float[] oA = original.getRGBComponents(null);
+        float[] tA = top.getRGBComponents(null);
+
+        if(artificialDarken) {
+            float avg = (tA[0] + tA[1] + tA[2]) / 3.0f;
+            if(avg > 0.9f) {
+                for(int i = 0; i < 3; i++) tA[i] *= 0.8f;
+            }
+        }
+
+        float[] nA = new float[4];
+
+        for(int i = 0; i < 3; i++)
+            nA[i] = (oA[i] < 0.5f) ?
+                    (2.0f * oA[i] * tA[i]) :
+                    (1.0f - 2.0f*(1.0f - oA[i])*(1.0f - tA[i]));
+
+        nA[3] = tA[3];
+
+        return new Color(
+                Math.max(0.0f, Math.min(1.0f, nA[0])),
+                Math.max(0.0f, Math.min(1.0f, nA[1])),
+                Math.max(0.0f, Math.min(1.0f, nA[2])),
+                Math.max(0.0f, Math.min(1.0f, nA[3])));
+
     }
 
 }
