@@ -1,9 +1,6 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.ChatCommand;
-import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.MoveCommand;
-import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.listener.IStatusListener;
@@ -124,7 +121,6 @@ public class Game {
     public Game(SettingsMap settings) {
         this.settings = settings;
         this.board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
-        this.history = new History();
     }
 
     /**
@@ -132,6 +128,7 @@ public class Game {
      * and settings being used.
      */
     public void initialize() {
+        this.history = new History();
         board.applyCommands(board.getSetupCommands(this));
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
     }
@@ -142,11 +139,12 @@ public class Game {
      *
      * @param history History object to apply
      */
-    public void loadHistory(History history, boolean apply) {
+    public void initialize(History history) {
         this.history = history;
-        if(apply) {
-            // TODO: Apply History to this game
-        }
+
+        // TODO: Add Players to Game
+        
+        board.applyCommands(history.getMoveCommandsUntil(history.getNumBoardCommands()));
     }
 
     /**
