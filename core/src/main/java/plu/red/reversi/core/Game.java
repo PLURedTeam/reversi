@@ -216,7 +216,9 @@ public class Game {
             List<BoardCommand> setup = Board.getSetupCommands(this);
             for(BoardCommand cmd : setup) DBUtilities.INSTANCE.saveMove(gameID, cmd);
         } else {
-            board.applyCommands(history.getMoveCommandsUntil(history.getNumBoardCommands()));
+            LinkedList<BoardCommand> cmds = history.getMoveCommandsUntil(history.getNumBoardCommands());
+            board.applyCommands(cmds);
+            currentPlayerColor = cmds.getLast().player.getNext(usedPlayers);
         }
 
         gameInitialized = true;
