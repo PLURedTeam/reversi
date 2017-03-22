@@ -8,10 +8,7 @@ import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 import plu.red.reversi.core.db.DBUtilities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Glory to the Red Team.
@@ -138,6 +135,8 @@ public class Game {
         DBUtilities.INSTANCE.saveGamePlayers(gameID, players.values());
         this.history = new History();
         board.applyCommands(board.getSetupCommands(this));
+        LinkedList<BoardCommand> setup = board.getSetupCommands(this);
+        for(BoardCommand setupTiles: setup) DBUtilities.INSTANCE.saveMove(gameID,setupTiles); //Save Setup Tiles
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
     }
 
