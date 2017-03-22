@@ -13,11 +13,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 /**
  * The main game window, contains all of the UI.
  */
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements WindowListener {
 
     private GamePanel gamePanel = null;
     public GamePanel getGamePanel() { return gamePanel; }
@@ -53,6 +55,8 @@ public class MainWindow extends JFrame {
         });
 
         populate(new CreatePanel(this));
+
+        this.addWindowListener(this);
 
         this.pack();
         this.setVisible(true);
@@ -107,5 +111,54 @@ public class MainWindow extends JFrame {
 
         this.gamePanel = null;
         populate(new CreatePanel(this, game));
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+
+        // Ask about saving
+        if(gamePanel != null) {
+            if(JOptionPane.showConfirmDialog(this,
+                    "Do you want to save this game?", "Save",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+                    == JOptionPane.YES_OPTION) {
+
+                // Save Dialog
+                String name = JOptionPane.showInputDialog(this, "Enter a name for the game","Save Game",1);
+                int gameID = gamePanel.getGame().getGameID();
+                DBUtilities.INSTANCE.updateGame(gameID, name);
+                DBUtilities.INSTANCE.saveGameSettings(gameID, gamePanel.getGame().getSettings().toJSON());
+            }
+        }
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+
     }
 }

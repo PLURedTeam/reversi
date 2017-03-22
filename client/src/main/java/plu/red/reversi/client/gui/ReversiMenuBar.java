@@ -174,42 +174,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         }
 
         if(e.getSource() == loadGameItem) {
-
             gui.loadGame();
-
-            /*
-            String[][] games = DBUtilities.INSTANCE.getGames();
-            String[] list = new String[games.length];
-            int gameID = 0;
-
-            //Convert to one dimensional array
-            for(int i = 0; i < games.length; i++)
-                list[i] = games[i][0];
-
-            String input = null;
-            if(games.length > 0)
-                input = (String)JOptionPane.showInputDialog(gui,"Select a Game","Load Game",JOptionPane.QUESTION_MESSAGE,null,list,list[0]);
-            else
-                JOptionPane.showMessageDialog(gui, "You do not have any saved games");
-
-            //Loop through array and set gameID
-            for(int i = 0; i < games.length; i++)
-                if(input == games[i][0])
-                    gameID = Integer.parseInt(games[i][1]);
-
-            History h = DBUtilities.INSTANCE.loadGame(gameID);
-            JSONObject obj = DBUtilities.INSTANCE.loadGameSettings(gameID);
-            SettingsMap map = new SettingsMap(obj);
-
-            Game g = new Game(map);
-
-           // g.setPlayer();
-
-            g.initialize(h, gameID);
-            gui.startGame(g);
-            */
-
-
         }
 
         if(e.getSource() == saveGameItem) {
