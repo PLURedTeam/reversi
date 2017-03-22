@@ -2,7 +2,7 @@ package plu.red.reversi.core;
 
 
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 public class SettingsLoader {
     public static final SettingsLoader INSTANCE = new SettingsLoader();
@@ -11,12 +11,12 @@ public class SettingsLoader {
     public static final String GAME_BOARD_SIZE = "BoardSize";
     public static final String GAME_PLAYER_COUNT = "PlayerCount";
 
-    public SettingsMap createGameSettings() {
+    public DataMap createGameSettings() {
         return loadGameSettingsFromJSON(new JSONObject());
     }
 
-    public SettingsMap loadGameSettingsFromJSON(JSONObject json) {
-        SettingsMap settings = new SettingsMap(json);
+    public DataMap loadGameSettingsFromJSON(JSONObject json) {
+        DataMap settings = new DataMap(json);
 
 
         // ****************************************

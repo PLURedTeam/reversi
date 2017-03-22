@@ -5,7 +5,7 @@ import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.listener.IStatusListener;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.db.DBUtilities;
 
 import java.util.*;
@@ -98,7 +98,7 @@ public class Game {
         game
                 .setGameID(gameID)
                 .setHistory(DBUtilities.INSTANCE.loadGame(gameID))
-                .setSettings(new SettingsMap(DBUtilities.INSTANCE.loadGameSettings(gameID)));
+                .setSettings(new DataMap(DBUtilities.INSTANCE.loadGameSettings(gameID)));
         ArrayList<Player> players = DBUtilities.INSTANCE.loadGamePlayers(game);
         for(Player player : players) game.setPlayer(player);
         return game;
@@ -110,7 +110,7 @@ public class Game {
     //  Member Variables
     // ******************
 
-    protected SettingsMap settings = null;
+    protected DataMap settings = null;
     protected Board board = null;
     protected History history = null;
 
@@ -136,19 +136,19 @@ public class Game {
 
     /**
      * Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
-     * SettingsMap and Players) and then be initialized.
+     * DataMap and Players) and then be initialized.
      */
     public Game() {}
 
     /**
-     * Sets this Game's SettingsMap to the given SettingsMap. This operation must be performed before a Game can be
+     * Sets this Game's DataMap to the given DataMap. This operation must be performed before a Game can be
      * initialized, and cannot be performed afterwards.
      *
-     * @param settings SettingsMap to use
+     * @param settings DataMap to use
      * @return Reference to this Game object for chain-construction
      * @throws IllegalStateException if the Game has already been initialized
      */
-    public Game setSettings(SettingsMap settings) throws IllegalStateException {
+    public Game setSettings(DataMap settings) throws IllegalStateException {
         if(gameInitialized) throw new IllegalStateException("Game has already been initialized!");
         this.settings = settings;
         return this;
@@ -191,11 +191,11 @@ public class Game {
      * [optional] setHistory()
      * [optional] setGameID()
      *
-     * @throws IllegalStateException if not all required data has been set (such as a SettingsMap)
+     * @throws IllegalStateException if not all required data has been set (such as a DataMap)
      */
     public void initialize() throws IllegalStateException {
 
-        if(settings == null) throw new IllegalStateException("A SettingsMap has not been set!");
+        if(settings == null) throw new IllegalStateException("A DataMap has not been set!");
 
         board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
 
@@ -246,11 +246,11 @@ public class Game {
     */
 
     /**
-     * Retrieves the SettingsMap that this Game object is using.
+     * Retrieves the DataMap that this Game object is using.
      *
-     * @return this Game's SettingsMap
+     * @return this Game's DataMap
      */
-    public SettingsMap getSettings() { return settings; }
+    public DataMap getSettings() { return settings; }
 
     /**
      * Retrieves the Board that this Game object is using.

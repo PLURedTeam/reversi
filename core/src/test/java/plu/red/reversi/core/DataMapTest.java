@@ -4,7 +4,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -12,13 +12,13 @@ import static org.junit.Assert.fail;
 /**
  * Glory to the Red Team.
  */
-public class SettingsMapTest {
+public class DataMapTest {
 
-    private SettingsMap settings;
+    private DataMap settings;
 
     @Before
     public void setValues() {
-        settings = new SettingsMap();
+        settings = new DataMap();
         settings.set("Val1", "A String", "This is a test String");
         settings.set("Val2", false);
         settings.set("Val3", true, "This Boolean should be true");
@@ -241,7 +241,7 @@ public class SettingsMapTest {
         } catch(JSONException ex) {
             fail(ex.getMessage());
         }
-        SettingsMap settings = new SettingsMap(json);
+        DataMap settings = new DataMap(json);
         assertEquals(true, settings.get("Val1"));
         assertEquals(true, settings.get("Val1", Boolean.class));
         assertEquals(false, settings.get("Val2"));

@@ -5,12 +5,11 @@ import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.core.player.HumanPlayer;
 import plu.red.reversi.core.Game;
-import plu.red.reversi.core.History;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +64,7 @@ public class CreatePanel extends JPanel implements ActionListener {
         populate(loadedGame.getSettings());
     }
 
-    protected final void populate(SettingsMap settings) {
+    protected final void populate(DataMap settings) {
         this.removeAll();
 
         this.setLayout(new BorderLayout());
@@ -163,7 +162,7 @@ public class CreatePanel extends JPanel implements ActionListener {
             loadedGame = new Game();
 
             // Add Settings to the Game
-            SettingsMap settings = panelSettings.getSettings();
+            DataMap settings = panelSettings.getSettings();
             settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
             loadedGame.setSettings(settings);
 
