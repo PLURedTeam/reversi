@@ -19,7 +19,8 @@ public class ReversiMinimaxTest {
     @Before
     public void setup() {
         settingsMap = SettingsLoader.INSTANCE.loadGameSettingsFromJSON(new JSONObject());
-        game = new Game(settingsMap);
+        game = new Game();
+        game.setSettings(settingsMap);
         game.setPlayer(new NullPlayer(game, PlayerColor.WHITE));
         game.setPlayer(new NullPlayer(game, PlayerColor.BLACK));
         game.initialize();
