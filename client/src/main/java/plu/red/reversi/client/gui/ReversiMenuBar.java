@@ -1,15 +1,12 @@
 package plu.red.reversi.client.gui;
 
-import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.client.gui.game.BoardView;
-import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.core.player.HumanPlayer;
 import plu.red.reversi.core.Game;
-import plu.red.reversi.core.History;
 import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.util.SettingsMap;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

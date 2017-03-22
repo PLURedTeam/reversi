@@ -3,7 +3,7 @@ package plu.red.reversi.client.gui.game.create;
 import plu.red.reversi.client.gui.ChatPanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.core.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.History;
 import plu.red.reversi.core.PlayerColor;

@@ -8,6 +8,7 @@ import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 import plu.red.reversi.core.db.DBUtilities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -134,6 +135,7 @@ public class Game {
     public void initialize() {
         gameID = DBUtilities.INSTANCE.createGame();
         DBUtilities.INSTANCE.saveGame(gameID);
+        DBUtilities.INSTANCE.saveGamePlayers(gameID, players.values());
         this.history = new History();
         board.applyCommands(board.getSetupCommands(this));
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
@@ -149,7 +151,8 @@ public class Game {
         this.history = history;
         this.gameID = newGameID;
 
-        // TODO: Add Players to Game
+        ArrayList<Player> players = DBUtilities.INSTANCE.loadGamePlayers(this);
+        for(Player player : players) setPlayer(player);
         
         board.applyCommands(history.getMoveCommandsUntil(history.getNumBoardCommands()));
     }
@@ -284,7 +287,7 @@ public class Game {
         if(cmd instanceof MoveCommand) {
             if(!gameRunning) return false;
             board.apply((MoveCommand)cmd);
-            DBUtilities.INSTANCE.saveMove(gameID, cmd);
+            DBUtilities.INSTANCE.saveMove(gameID, (BoardCommand)cmd);
             nextTurn();
         }
 

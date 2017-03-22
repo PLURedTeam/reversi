@@ -1,4 +1,4 @@
-package plu.red.reversi.client.player;
+package plu.red.reversi.core.player;
 
 import plu.red.reversi.core.BoardIndex;
 import plu.red.reversi.core.Game;

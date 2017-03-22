@@ -8,8 +8,15 @@ import plu.red.reversi.core.Game;
 import plu.red.reversi.core.History;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.command.*;
+import plu.red.reversi.core.player.BotPlayer;
+import plu.red.reversi.core.player.HumanPlayer;
+import plu.red.reversi.core.player.NullPlayer;
+import plu.red.reversi.core.player.Player;
 
+import java.awt.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -101,6 +108,92 @@ public class DBUtilities {
         return gameSaved;
     }//saveGame
 
+    /**
+     * Saves the players for a game into the database
+     * @param gameID the game id for the saved game
+     * @param players the collection of players in a game
+     * @return true if saved, false otherwise
+     */
+    public boolean saveGamePlayers(int gameID, Collection<Player> players) {
+        boolean gameSaved = false;
+        int result = 0;
+        String sql = "insert into PLAYERS values(?,?,?,?,?);";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+
+            for(Player player: players) {
+                int type;
+                int playerDiff = 0;
+
+                if(player instanceof HumanPlayer)
+                    type = 0;
+                else if(player instanceof BotPlayer) {
+                    type = 1;
+                } else
+                    type = 2;
+
+                stmt = conn.prepareStatement(sql);
+                stmt.clearParameters();
+                stmt.setInt(1, gameID);
+                stmt.setInt(2, player.getRole().ordinal());
+                stmt.setString(3, player.getName());
+                stmt.setInt(4, type);
+                stmt.setInt(5, playerDiff);
+                result += stmt.executeUpdate();
+            }//for
+
+            if(result > 1)
+                gameSaved = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+
+        return gameSaved;
+    }//saveGamePlayers
+
+    /**
+     * Loads the players for a game from the database
+     * @param game the game to add the players to
+     * @return array of player objects
+     */
+    public ArrayList<Player> loadGamePlayers(Game game) {
+        ArrayList<Player> players = new ArrayList<Player>();
+
+        String sql = "select * from PLAYERS where game_id=?";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,game.getGameID());
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                int playerRole = rs.getInt("player_role");
+                String name = rs.getString("player_name");
+                int playerType = rs.getInt("player_type");
+                int playerDiff = rs.getInt("player_diff");
+
+
+                Player p;
+
+                if(playerType == 0)
+                    p = new HumanPlayer(game, PlayerColor.values()[playerRole]);
+                else if(playerType == 1)
+                    p = new BotPlayer(game, PlayerColor.values()[playerRole], playerDiff);
+                else
+                    p = new NullPlayer(game, PlayerColor.values()[playerRole]);
+            }//while
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+        return players;
+    }//loadGamePlayers
+
+
+
     public boolean updateGame(int gameID, String name) {
         boolean gameSaved = false;
         int result;
@@ -133,7 +226,7 @@ public class DBUtilities {
     public History loadGame(int gameID) {
         History h = new History();
 
-        String sql = "select * from GAME_HISTORY where game_id=?";
+        String sql = "select * from GAME_HISTORY where game_id=? order by move_id";
 
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -157,21 +250,25 @@ public class DBUtilities {
         return h;
     }//loadGame
 
-    public boolean saveMove(int gameID, Command command) {
+    public boolean saveMove(int gameID, BoardCommand cmd) {
         boolean moveSaved = false;
         int result;
         int moveID = 0;
+        int moveType;
 
-        if(command instanceof MoveCommand) {
-            MoveCommand cmd = (MoveCommand)command;
+        if(cmd instanceof MoveCommand)
+            moveType = 0;
+        else
+            moveType = 1;
+
             //Get the values from the Command Object
             int moveIndexR = cmd.position.row;
             int moveIndexC = cmd.position.column;
             String moveSource = cmd.source.toString();
-            String player = cmd.player.name;
             int color = cmd.player.validOrdinal();
-            String commandType = "Move Command";
 
+            //set move = 1
+            //move command = 0
             String sql = "select max(move_id) from GAME_HISTORY where game_id=?";
 
             try {
@@ -187,7 +284,7 @@ public class DBUtilities {
                     return false;
                 }//else
 
-                sql = "insert into GAME_HISTORY values(?,?,?,?,?,?,?,?)";
+                sql = "insert into GAME_HISTORY values(?,?,?,?,?,?,?)";
                 stmt = conn.prepareStatement(sql);
                 stmt.clearParameters();
                 stmt.setInt(1,gameID);
@@ -195,9 +292,8 @@ public class DBUtilities {
                 stmt.setInt(3,moveIndexR);
                 stmt.setInt(4,moveIndexC);
                 stmt.setString(5,moveSource);
-                stmt.setString(6,player);
-                stmt.setInt(7,color);
-                stmt.setString(8,commandType);
+                stmt.setInt(6,color);
+                stmt.setInt(7,moveType);
 
                 result = stmt.executeUpdate();
 
@@ -207,12 +303,6 @@ public class DBUtilities {
             } catch (SQLException e) {
                 e.printStackTrace();
             }//catch
-
-        } else if(command instanceof SurrenderCommand) {
-
-        } else if(command instanceof SetCommand) {
-
-        }//else
         return moveSaved;
     }//saveMove
 
