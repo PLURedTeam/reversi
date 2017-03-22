@@ -184,6 +184,7 @@ public class DBUtilities {
                     p = new BotPlayer(game, PlayerColor.values()[playerRole], playerDiff);
                 else
                     p = new NullPlayer(game, PlayerColor.values()[playerRole]);
+                players.add(p);
             }//while
 
         } catch (SQLException e) {

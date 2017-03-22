@@ -9,6 +9,7 @@ import plu.red.reversi.core.History;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
+import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.util.SettingsMap;
 
 import javax.swing.*;
@@ -33,29 +34,41 @@ public class CreatePanel extends JPanel implements ActionListener {
     JButton loadButton;
 
     // If null, creating a new game, otherwise loading a game
-    History loadedHistory = null;
-    int gameID = 0;
+    Game loadedGame = null;
 
     public CreatePanel(MainWindow gui) {
         this.gui = gui;
 
-        this.setLayout(new BorderLayout());
-
         populate(SettingsLoader.INSTANCE.createGameSettings());
     }
 
-    public CreatePanel(MainWindow gui, SettingsMap loadedSettings, History loadedHistory, int gameID) {
+    public CreatePanel(MainWindow gui, Game loadedGame) {
         this.gui = gui;
-        this.loadedHistory = loadedHistory;
-        this.gameID = gameID;
+        this.loadedGame = loadedGame;
 
-        this.setLayout(new BorderLayout());
+        for(PlayerColor color : PlayerColor.validPlayers()) {
+            Player player = loadedGame.getPlayer(color);
+            if(player != null) {
+                PlayerPanel panel = new PlayerPanel(this);
+                if(player instanceof BotPlayer) {
+                    panel.setType(PlayerPanel.SlotType.AI);
+                    PlayerPanel.SubPanel sp = panel.getSubPanel();
+                    if(sp instanceof PlayerPanel.SubPanel.AI)
+                        ((PlayerPanel.SubPanel.AI)sp).difficultySlider.setValue(((BotPlayer)player).getDifficulty());
+                } else {
+                    panel.setType(PlayerPanel.SlotType.LOCAL);
+                }
+                playerSlots.add(panel);
+            }
+        }
 
-        populate(loadedSettings);
+        populate(loadedGame.getSettings());
     }
 
     protected final void populate(SettingsMap settings) {
         this.removeAll();
+
+        this.setLayout(new BorderLayout());
 
         startButton = new JButton("Start");
         startButton.addActionListener(this);
@@ -70,7 +83,7 @@ public class CreatePanel extends JPanel implements ActionListener {
         startContainer.add(startButton);
 
         panelSettings = new GameSettingsPanel(settings);
-        panelSettings.setEnabled(loadedHistory == null);
+        panelSettings.setEnabled(loadedGame == null);
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
         rightPanel.add(startContainer, BorderLayout.SOUTH);
@@ -101,7 +114,7 @@ public class CreatePanel extends JPanel implements ActionListener {
             Color color = PlayerColor.validPlayers()[i].color;
             slot.setBackground(Utilities.getLessContrastColor(color));
             playerSelectList.add(slot);
-            slot.setEnabled(loadedHistory == null);
+            slot.setEnabled(loadedGame == null);
         }
 
         // Keep at bottom
@@ -143,23 +156,31 @@ public class CreatePanel extends JPanel implements ActionListener {
     }
 
     protected final void attemptGameStart() {
-        SettingsMap settings = panelSettings.getSettings();
-        settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
-        Game game = new Game(settings);
 
-        for(int i = 0; i < playerSlots.size(); i++) {
-            PlayerPanel.SubPanel slot = playerSlots.get(i).getSubPanel();
-            PlayerColor color = PlayerColor.validPlayers()[i];
-            if(slot instanceof PlayerPanel.SubPanel.AI)
-                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.SubPanel.AI)slot).difficultySlider.getValue()));
-            else if(slot instanceof PlayerPanel.SubPanel.Local)
-                game.setPlayer(new HumanPlayer(game, color));
+        if(loadedGame == null) {
+
+            // Create a new Game
+            loadedGame = new Game();
+
+            // Add Settings to the Game
+            SettingsMap settings = panelSettings.getSettings();
+            settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
+            loadedGame.setSettings(settings);
+
+            // Add Players to the Game
+            for (int i = 0; i < playerSlots.size(); i++) {
+                PlayerPanel.SubPanel slot = playerSlots.get(i).getSubPanel();
+                PlayerColor color = PlayerColor.validPlayers()[i];
+                if (slot instanceof PlayerPanel.SubPanel.AI)
+                    loadedGame.setPlayer(new BotPlayer(loadedGame, color, ((PlayerPanel.SubPanel.AI) slot).difficultySlider.getValue()));
+                else if (slot instanceof PlayerPanel.SubPanel.Local)
+                    loadedGame.setPlayer(new HumanPlayer(loadedGame, color));
+            }
         }
 
-        if(loadedHistory == null) game.initialize();
-        else game.initialize(loadedHistory, gameID);
+        loadedGame.initialize();
 
-        gui.startGame(game);
+        gui.startGame(loadedGame);
     }
 
     public static class PlayerPanelSelect extends JPanel {

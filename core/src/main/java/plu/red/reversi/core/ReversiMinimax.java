@@ -10,7 +10,7 @@ import java.util.Set;
 public class ReversiMinimax implements Runnable {
     private Game game;
     private PlayerColor aiRole;
-    private final int MAX_DEPTH;
+    public final int MAX_DEPTH;
 
     /**
      * Constructs a ReversiMinimax problem to solve.

@@ -96,16 +96,16 @@ public class MainWindow extends JFrame {
             return;
         }
 
+        if(input == null) return; // User cancelled
+
         //Loop through array and set gameID
         for(int i = 0; i < games.length; i++)
             if(input.equals(games[i][0]))
                 gameID = Integer.parseInt(games[i][1]);
 
-        History h = DBUtilities.INSTANCE.loadGame(gameID);
-        JSONObject obj = DBUtilities.INSTANCE.loadGameSettings(gameID);
-        SettingsMap map = new SettingsMap(obj);
+        Game game = Game.loadGameFromDatabase(gameID);
 
         this.gamePanel = null;
-        populate(new CreatePanel(this, map, h, gameID));
+        populate(new CreatePanel(this, game));
     }
 }

@@ -84,7 +84,25 @@ public class Game {
     public void removeStatusListener(IStatusListener listener) {
         listenerSetStatus.remove(listener);
     }
-    
+
+
+
+    /**
+     * Creates a new Game object and loads data from the Database into it. Does not initialized the Game object.
+     *
+     * @param gameID ID of Game in Database
+     * @return New Game object
+     */
+    public static Game loadGameFromDatabase(int gameID) {
+        Game game = new Game();
+        game
+                .setGameID(gameID)
+                .setHistory(DBUtilities.INSTANCE.loadGame(gameID))
+                .setSettings(new SettingsMap(DBUtilities.INSTANCE.loadGameSettings(gameID)));
+        ArrayList<Player> players = DBUtilities.INSTANCE.loadGamePlayers(game);
+        for(Player player : players) game.setPlayer(player);
+        return game;
+    }
 
 
 
@@ -92,9 +110,9 @@ public class Game {
     //  Member Variables
     // ******************
 
-    protected SettingsMap settings;
-    protected Board board;
-    protected History history;
+    protected SettingsMap settings = null;
+    protected Board board = null;
+    protected History history = null;
 
     // Store players as an array of possible roles. More extensible for possibly more than two players in the future.
     //  (I realize this is probably unnecessary, but it results in more extensible code, and is easier to manipulate
@@ -104,10 +122,11 @@ public class Game {
     protected final HashSet<PlayerColor> usedPlayers = new HashSet<PlayerColor>();
     protected final HashSet<PlayerColor> surrenderedPlayers = new HashSet<PlayerColor>();
 
+    protected boolean gameInitialized = false;
     protected boolean gameRunning = true;
 
 
-    private int gameID = 0;
+    private int gameID = -1;
 
 
 
@@ -116,27 +135,93 @@ public class Game {
     // ****************
 
     /**
-     * Constructor. Creates a new Game object with given settings.
-     *
-     * @param settings SettingsMap to start Game with
+     * Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
+     * SettingsMap and Players) and then be initialized.
      */
-    public Game(SettingsMap settings) {
+    public Game() {}
+
+    /**
+     * Sets this Game's SettingsMap to the given SettingsMap. This operation must be performed before a Game can be
+     * initialized, and cannot be performed afterwards.
+     *
+     * @param settings SettingsMap to use
+     * @return Reference to this Game object for chain-construction
+     * @throws IllegalStateException if the Game has already been initialized
+     */
+    public Game setSettings(SettingsMap settings) throws IllegalStateException {
+        if(gameInitialized) throw new IllegalStateException("Game has already been initialized!");
         this.settings = settings;
-        this.board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+        return this;
     }
 
     /**
-     * Initialization method. To be used after the board has been loaded with all required objects, such as players
-     * and settings being used.
+     * Sets this Game's History to the given History. This operation can only be performed before a Game is initialized,
+     * but unlike setSettings() does not need to be performed in order to initialize a game.
+     *
+     * @param history History to use
+     * @return Reference to this Game object for chain-construction
+     * @throws IllegalStateException if the Game has already been initialized
      */
-    public void initialize() {
-        gameID = DBUtilities.INSTANCE.createGame();
-        DBUtilities.INSTANCE.saveGame(gameID);
-        DBUtilities.INSTANCE.saveGamePlayers(gameID, players.values());
-        this.history = new History();
-        board.applyCommands(board.getSetupCommands(this));
-        LinkedList<BoardCommand> setup = board.getSetupCommands(this);
-        for(BoardCommand setupTiles: setup) DBUtilities.INSTANCE.saveMove(gameID,setupTiles); //Save Setup Tiles
+    public Game setHistory(History history) throws IllegalStateException {
+        if(gameInitialized) throw new IllegalStateException("Game has already been initialized!");
+        this.history = history;
+        return this;
+    }
+
+    /**
+     * Sets the Game's gameID to the given gameID. This operation can only be performed before a Game is initialized,
+     * but unlike setSettings() does not need to be performed in order to initialize a game.
+     *
+     * @param gameID GameID to use
+     * @return Reference to this Game object for chain-construction
+     * @throws IllegalStateException if the Game has already been initialized
+     */
+    public Game setGameID(int gameID) throws IllegalStateException {
+        if(gameInitialized) throw new IllegalStateException("Game has already been initialized");
+        this.gameID = gameID;
+        return this;
+    }
+
+    /**
+     * Initialization method. Initializes the Game after it has been loaded with all required data. Data loading methods
+     * are as follows:
+     *
+     * [required] setSettings()
+     * [required] setPlayer() - repeatedly
+     * [optional] setHistory()
+     * [optional] setGameID()
+     *
+     * @throws IllegalStateException if not all required data has been set (such as a SettingsMap)
+     */
+    public void initialize() throws IllegalStateException {
+
+        if(settings == null) throw new IllegalStateException("A SettingsMap has not been set!");
+
+        board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+
+        // Ensure a GameID exists
+        if(gameID < 0) {
+            gameID = DBUtilities.INSTANCE.createGame();
+            DBUtilities.INSTANCE.saveGame(gameID);
+            DBUtilities.INSTANCE.saveGamePlayers(gameID, players.values());
+        }
+
+        // Ensure a History exists and setup the Board
+        if(history == null) {
+
+            history = new History();
+            board.applyCommands(Board.getSetupCommands(this));
+
+            // Save the initial setup
+            List<BoardCommand> setup = Board.getSetupCommands(this);
+            for(BoardCommand cmd : setup) DBUtilities.INSTANCE.saveMove(gameID, cmd);
+        } else {
+            board.applyCommands(history.getMoveCommandsUntil(history.getNumBoardCommands()));
+        }
+
+        gameInitialized = true;
+
+        // Start the Game by signalling to players
         for(Player player : players.values()) player.nextTurn(player.getRole() == currentPlayerColor);
     }
 
@@ -146,6 +231,7 @@ public class Game {
      *
      * @param history History object to apply
      */
+    /*
     public void initialize(History history, int newGameID) {
         this.history = history;
         this.gameID = newGameID;
@@ -155,6 +241,7 @@ public class Game {
         
         board.applyCommands(history.getMoveCommandsUntil(history.getNumBoardCommands()));
     }
+    */
 
     /**
      * Retrieves the SettingsMap that this Game object is using.
@@ -190,6 +277,13 @@ public class Game {
      * @return this Game's Set of PlayerRoles
      */
     public Set<PlayerColor> getUsedPlayers() { return usedPlayers; }
+
+    /**
+     * Retrieves a Collection of the Players in this game (Human or otherwise).
+     *
+     * @return this Game's Collection of Players
+     */
+    public Collection<Player> getAllPlayers() { return players.values(); }
 
     /**
      * Retrieves the Set of PlayerRoles that have surrendered.
@@ -277,15 +371,15 @@ public class Game {
         // Check to see if this Command is ok to apply and/or send to the server
         if(!cmd.isValid(this)) return false;
 
-        // Propagate the Command to the servere if it came from a player
+        // Propagate the Command to the server if it came from a player
         if(cmd.source == Command.Source.PLAYER) {
             // TODO: Send Command to Server
         }
 
         // Send Move Commands to the Board object
-        if(cmd instanceof MoveCommand) {
+        if(cmd instanceof BoardCommand) {
             if(!gameRunning) return false;
-            board.apply((MoveCommand)cmd);
+            board.apply((BoardCommand)cmd);
             DBUtilities.INSTANCE.saveMove(gameID, (BoardCommand)cmd);
             nextTurn();
         }
@@ -348,6 +442,13 @@ public class Game {
     public boolean isGameOver() {
         return !gameRunning;
     }
+
+    /**
+     * Determines whether or not this game has been initialized yet.
+     *
+     * @return true if this game has been initialized
+     */
+    public boolean isInitialized() { return gameInitialized; }
 
     /**
      * Passes a status message to all IStatusListeners registered to this Game.
