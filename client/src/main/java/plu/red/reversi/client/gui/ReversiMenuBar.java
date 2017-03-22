@@ -46,6 +46,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         // Add the developer menu.  This should be removed when
         // the game is released
         this.add(new DeveloperMenu(gui));
+
+        //add the network menu
+        this.add(new NetworkMenu(gui));
     }
 
     private JMenu buildGameMenu() {
