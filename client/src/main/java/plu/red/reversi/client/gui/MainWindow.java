@@ -69,20 +69,31 @@ public class MainWindow extends JFrame implements WindowListener {
         this.repaint();
     }
 
+    /**
+     * Creates a new game panel and starts the game
+     * @param game
+     */
     public void startGame(Game game) {
         this.gamePanel = new GamePanel(game);
         game.addStatusListener(this.statusBar);
         populate(this.gamePanel);
     }
 
+    /**
+     * Creates a new game panel
+     */
     public void createNewGame() {
         this.gamePanel = null;
         populate(new CreatePanel(this));
     }
 
+    /**
+     * Displays a JOptionPane to get the game information to load the game
+     * Then loads and creates the game
+     */
     public void loadGame() {
-        String[][] games = DBUtilities.INSTANCE.getGames();
-        String[] list = new String[games.length];
+        String[][] games = DBUtilities.INSTANCE.getGames(); //Get the games from the DB
+        String[] list = new String[games.length]; //Array for the JOptionPane
         int gameID = 0;
 
         //Convert to one dimensional array
@@ -90,9 +101,11 @@ public class MainWindow extends JFrame implements WindowListener {
             list[i] = games[i][0];
 
         String input = null;
-        if(games.length > 0)
-            input = (String)JOptionPane.showInputDialog(this,"Select a Game","Load Game",JOptionPane.QUESTION_MESSAGE,null,list,list[0]);
-        else {
+        if(games.length > 0) {
+            //Get the input from the user for what game to load
+            input = (String) JOptionPane.showInputDialog(this, "Select a Game", "Load Game", JOptionPane.QUESTION_MESSAGE, null, list, list[0]);
+        } else {
+            //No saved games prompt
             JOptionPane.showMessageDialog(this, "You do not have any saved games");
             return;
         }
@@ -104,24 +117,49 @@ public class MainWindow extends JFrame implements WindowListener {
             if(input.equals(games[i][0]))
                 gameID = Integer.parseInt(games[i][1]);
 
+        //Loads a game from the database
         Game game = Game.loadGameFromDatabase(gameID);
-        game.setGameSaved(true);
+        game.setGameSaved(true); //Sets that the game has been saved before and has a name
 
+        //Creates the game panel
         this.gamePanel = null;
         populate(new CreatePanel(this, game));
     }
+
+    /**
+     * Displays a JOptionPane to get a name for the game to save to the database
+     * Then saves the game in the database
+     */
+    public void saveGame() {
+        int gameID; //The id of the game to save
+
+        if(getGamePanel() != null) {
+            getGamePanel().getGame().setGameSaved(true); //Set the game to saved
+            String name = JOptionPane.showInputDialog(this, "Enter a name for the game","Save Game",1);
+            gameID = getGamePanel().getGame().getGameID(); //Get the gameID
+            DBUtilities.INSTANCE.updateGame(gameID, name); //Update the game name in the database
+            DBUtilities.INSTANCE.saveGameSettings(gameID, getGamePanel().getGame().getSettings().toJSON()); //Save the game settings
+        } else {
+            //If no game loaded, show message
+            JOptionPane.showMessageDialog(this,"No game loaded");
+        }//else
+    }//saveGame
 
     @Override
     public void windowOpened(WindowEvent e) {
 
     }
 
+    /**
+     * Checks to see if the game has been saved, if not prompt the user to see if they
+     * want to save the game, if yes ask for name of game and save game, else exit program
+     * @param e the close window event
+     */
     @Override
     public void windowClosing(WindowEvent e) {
-
         // Ask about saving
         if(gamePanel != null) {
-            if(gamePanel.getGame().getGameSaved() == false) {
+            if(gamePanel.getGame().getGameSaved() == false) { //If game has been saved, do not show prompt
                 if (JOptionPane.showConfirmDialog(this,
                         "Do you want to save this game?", "Save",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)

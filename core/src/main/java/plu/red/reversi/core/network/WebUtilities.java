@@ -1,6 +1,4 @@
-package plu.red.reversi.core.db;
-
-import plu.red.reversi.server.PollingMachine;
+package plu.red.reversi.core.network;
 
 import plu.red.reversi.core.util.User;
 
@@ -13,7 +11,7 @@ import javax.ws.rs.core.Response;
 /**
  * Created by Andrew on 3/15/2017.
  */
-public class WebUtilities implements Runnable {
+public class WebUtilities {
 
     private Client client = null;
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
@@ -29,9 +27,7 @@ public class WebUtilities implements Runnable {
     public WebUtilities() {
         //create the client
         client = ClientBuilder.newClient();
-        PollingMachine machine = new PollingMachine(this, client);
     }//webUtilities
-
 
     /**
      * Calls the server to authenticate the user credentials to login
@@ -50,8 +46,8 @@ public class WebUtilities implements Runnable {
         user = response.readEntity(User.class);
         sessionID = user.getSessionID();
         loggedIn = true;
-        run();
 
+        PollingMachine machine = new PollingMachine(this, client, user);
 
         return true;
     }//login

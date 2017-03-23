@@ -178,18 +178,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         }
 
         if(e.getSource() == saveGameItem) {
-            int gameID;
-
-            if(gui.getGamePanel() != null) {
-                gui.getGamePanel().getGame().setGameSaved(true);
-                String name = JOptionPane.showInputDialog(gui, "Enter a name for the game","Save Game",1);
-                gameID = gui.getGamePanel().getGame().getGameID();
-                DBUtilities.INSTANCE.updateGame(gameID, name);
-                DBUtilities.INSTANCE.saveGameSettings(gameID, gui.getGamePanel().getGame().getSettings().toJSON());
-            } else {
-                JOptionPane.showMessageDialog(gui,"No game loaded");
-            }//else
-
+            gui.saveGame();
         }
     }
 }
