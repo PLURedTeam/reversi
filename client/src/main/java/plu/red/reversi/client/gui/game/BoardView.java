@@ -335,30 +335,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         this.repaint();
     }
 
-    /**
-     * Mouse clicked event.  Determines the cell where the mouse
-     * was clicked and prints the row/column to the console.
-     *
-     * @param e
-     */
-    public void mouseClicked(MouseEvent e) {
-        /*
-        int x = e.getX();
-        int y = e.getY();
-
-        int w = this.getWidth();
-        int h = this.getHeight();
-
-        float cellSize = (float)w / game.getBoard().size;
-
-        int cellRow = (int)Math.floor( y / cellSize );
-        int cellCol = (int)Math.floor( x / cellSize );
-        System.out.printf("Cell row = %d col = %d\n", cellRow, cellCol);
-
-        game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
-        repaint();
-        */
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     // This now happens in mousePressed because mouseClicked does not properly handle click and drag actions
     public void mousePressed(MouseEvent e) {
@@ -378,17 +355,10 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         repaint();
     }
 
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    public void mouseExited(MouseEvent e) {
-
-    }
+    // Unused MouseListener events
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
 
     /**
      * Start an animation of a number of pieces being flipped over.

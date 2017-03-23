@@ -6,6 +6,7 @@ import org.codehaus.jettison.json.JSONObject;
 import java.awt.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Glory to the Red Team.
@@ -13,7 +14,7 @@ import java.time.ZonedDateTime;
  * Object representing a single chat message. Stores data such as timestamps, username that sent it, and the actual
  * message. Also contains methods for serializing to and from JSON.
  */
-public class ChatMessage {
+public class ChatMessage implements Comparable<ChatMessage> {
 
     // Register JSON Converter
     static {
@@ -99,7 +100,30 @@ public class ChatMessage {
 
     @Override
     public String toString() {
-        return "[" + timestamp.toLocalTime().toString() + "][" + username + "] " + message;
+        return "[" + timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] " + username + ": " + message;
+    }
+
+    /**
+     * Creates a version of toString() with HTML tags for changing the color of the displayed username.
+     *
+     * @return HTML formatted String representation
+     */
+    public String toHTMLString() {
+        return "<html>[" + timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] <font color=rgb("
+                + usercolor.getRed() + "," + usercolor.getGreen() + "," + usercolor.getBlue() + ")>" + username
+                + "</font>: " + message + "</html>";
+    }
+
+    @Override
+    public int hashCode() {
+        return timestamp.hashCode();
+    }
+
+    @Override
+    public int compareTo(ChatMessage other) {
+        int c = timestamp.compareTo(other.timestamp);
+        if(c == 0) return message.compareTo(other.message);
+        else return c;
     }
 
     /**
