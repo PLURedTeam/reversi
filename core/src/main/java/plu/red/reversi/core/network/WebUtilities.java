@@ -1,5 +1,7 @@
 package plu.red.reversi.core.db;
 
+import plu.red.reversi.server.PollingMachine;
+
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.client.Client;
@@ -18,7 +20,7 @@ public class WebUtilities implements Runnable {
     private int sessionID;
     private User user;
 
-    private boolean loggedIn = false;
+    public boolean loggedIn = false;
 
     /**
      * Constructor for WebUtilities
@@ -27,6 +29,7 @@ public class WebUtilities implements Runnable {
     public WebUtilities() {
         //create the client
         client = ClientBuilder.newClient();
+        PollingMachine machine = new PollingMachine(this, client);
     }//webUtilities
 
 
@@ -67,24 +70,4 @@ public class WebUtilities implements Runnable {
         return true;
     }//logout
 
-
-    /**
-     * Keeps the current session alive by pinging the database to tell
-     * the server that the user is still there
-     */
-    public void run() {
-
-        while(loggedIn) {
-            WebTarget target = client.target("url" + "keep-session-alive");
-            Response response = target.queryParam(user.getUsername(),sessionID).request().get();
-            try {
-                Thread.sleep(5000);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }//while
-
-
-    }//run
 }//webUtilities
