@@ -127,6 +127,7 @@ public class Game {
 
 
     private int gameID = -1;
+    private boolean gameSaved = false;
 
 
 
@@ -468,6 +469,15 @@ public class Game {
      */
     public int getGameID() { return gameID; }
 
+    /**
+     * Accessor for the gameID field
+     * @return true if game saved, false otherwise
+     */
+    public boolean getGameSaved() { return gameSaved; }
 
+    /**
+     * Mutator for the gameSaved field
+     */
+    public void setGameSaved(boolean gs) { gameSaved = gs; }
 
 }

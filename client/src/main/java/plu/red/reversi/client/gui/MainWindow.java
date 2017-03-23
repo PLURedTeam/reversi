@@ -105,6 +105,7 @@ public class MainWindow extends JFrame implements WindowListener {
                 gameID = Integer.parseInt(games[i][1]);
 
         Game game = Game.loadGameFromDatabase(gameID);
+        game.setGameSaved(true);
 
         this.gamePanel = null;
         populate(new CreatePanel(this, game));
@@ -120,16 +121,18 @@ public class MainWindow extends JFrame implements WindowListener {
 
         // Ask about saving
         if(gamePanel != null) {
-            if(JOptionPane.showConfirmDialog(this,
-                    "Do you want to save this game?", "Save",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
-                    == JOptionPane.YES_OPTION) {
+            if(gamePanel.getGame().getGameSaved() == false) {
+                if (JOptionPane.showConfirmDialog(this,
+                        "Do you want to save this game?", "Save",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+                        == JOptionPane.YES_OPTION) {
 
-                // Save Dialog
-                String name = JOptionPane.showInputDialog(this, "Enter a name for the game","Save Game",1);
-                int gameID = gamePanel.getGame().getGameID();
-                DBUtilities.INSTANCE.updateGame(gameID, name);
-                DBUtilities.INSTANCE.saveGameSettings(gameID, gamePanel.getGame().getSettings().toJSON());
+                    // Save Dialog
+                    String name = JOptionPane.showInputDialog(this, "Enter a name for the game", "Save Game", 1);
+                    int gameID = gamePanel.getGame().getGameID();
+                    DBUtilities.INSTANCE.updateGame(gameID, name);
+                    DBUtilities.INSTANCE.saveGameSettings(gameID, gamePanel.getGame().getSettings().toJSON());
+                }
             }
         }
     }

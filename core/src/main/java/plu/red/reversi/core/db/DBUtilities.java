@@ -130,6 +130,7 @@ public class DBUtilities {
                     type = 0;
                 else if(player instanceof BotPlayer) {
                     type = 1;
+                    playerDiff = ((BotPlayer) player).getDifficulty();
                 } else
                     type = 2;
 
