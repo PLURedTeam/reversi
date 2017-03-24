@@ -9,6 +9,7 @@ import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
 import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
@@ -91,7 +92,7 @@ public class CreatePanel extends JPanel implements ActionListener {
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
         this.add(rightPanel, BorderLayout.EAST);
 
-        panelChat = new ChatPanel();
+        panelChat = new ChatPanel(ChatMessage.Channel.LOBBY_PREFIX);
         this.add(panelChat, BorderLayout.SOUTH);
 
         playerSelectList = new JPanel();

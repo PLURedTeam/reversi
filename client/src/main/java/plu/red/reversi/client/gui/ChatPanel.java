@@ -19,7 +19,10 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     public final JTextField chatEntryField;
     public final JButton chatEntryButton;
 
-    public ChatPanel() {
+    public final String channel;
+
+    public ChatPanel(String channel) {
+        this.channel = channel;
 
         // Create the History
         this.chatLog = new ChatLog();
@@ -41,8 +44,8 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
 
         this.setLayout(new BorderLayout());
         this.add(new JScrollPane(chatHistoryList,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.NORTH);
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.NORTH);
         this.add(chatEntryField, BorderLayout.CENTER);
         this.add(chatEntryButton, BorderLayout.EAST);
     }
@@ -76,7 +79,8 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
 
     @Override
     public void onChat(ChatMessage message) {
-        addChat(message);
+        if(message.channel.equals(channel))
+            addChat(message);
     }
 
     void addChat(ChatMessage message) {
@@ -84,13 +88,35 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         chatHistoryList.ensureIndexIsVisible(chatLog.getSize()-1);
     }
 
-    protected static final class ChatCellRenderer extends JLabel implements ListCellRenderer<ChatMessage> {
+    protected static final class ChatCellRenderer extends JPanel implements ListCellRenderer<ChatMessage> {
+
+        private void populate(ChatMessage msg, boolean isSmall) {
+            if(msg == null) return;
+
+            this.removeAll();
+
+            this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+            if(isSmall) {
+                JLabel timelabel = new JLabel("[...]");
+                timelabel.setToolTipText(msg.getTimeString());
+                this.add(timelabel);
+            } else this.add(new JLabel("[" + msg.getTimeString() + "]"));
+
+            JLabel namelabel = new JLabel(msg.username);
+            namelabel.setForeground(msg.usercolor);
+            this.add(namelabel);
+
+            this.add(new JLabel(": " + msg.message));
+
+            this.add(Box.createHorizontalGlue());
+        }
 
         @Override
         public Component getListCellRendererComponent(JList<? extends ChatMessage> list, ChatMessage value, int index, boolean isSelected, boolean cellHasFocus) {
-            setText(value.toHTMLString());
-            setFont(list.getFont());
-            setOpaque(true);
+            //setFont(list.getFont());
+            //setOpaque(true);
+            populate(value, list.getWidth() < 150);
             return this;
         }
     }

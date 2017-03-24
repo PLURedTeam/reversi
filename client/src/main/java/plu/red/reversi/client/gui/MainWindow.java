@@ -35,7 +35,7 @@ public class MainWindow extends JFrame implements WindowListener {
         setTitle("Reversi");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        this.setMinimumSize(new Dimension(800, 600));
+        this.setMinimumSize(new Dimension(800, 800));
         this.setLayout(layout);
 
         // Add the menu bar

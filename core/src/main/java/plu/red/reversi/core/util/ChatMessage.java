@@ -98,6 +98,15 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Creates a string representing this ChatMessage's timestamp.
+     *
+     * @return String version of <code>timestamp</code>
+     */
+    public String getTimeString() {
+        return timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    }
+
     @Override
     public String toString() {
         return "[" + timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] " + username + ": " + message;
@@ -109,7 +118,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
      * @return HTML formatted String representation
      */
     public String toHTMLString() {
-        return "<html>[" + timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] <font color=rgb("
+        return "<html>[" + getTimeString() + "] <font color=rgb("
                 + usercolor.getRed() + "," + usercolor.getGreen() + "," + usercolor.getBlue() + ")>" + username
                 + "</font>: " + message + "</html>";
     }

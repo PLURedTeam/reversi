@@ -50,7 +50,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
         activeBorder = BorderFactory.createMatteBorder(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE,
                 new Color(250,200,100));
 
-        this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        this.setLayout(new GridLayout(0, 2));
 
         for(PlayerColor player : game.getUsedPlayers()) {
             PlayerPanel panel = new PlayerPanel(game.getPlayer(player));
