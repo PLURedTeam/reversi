@@ -22,6 +22,10 @@ public class LocalServer {
 
     private static HttpServer server;
     public static void main(String[] args) {
+
+        SessionManager.INSTANCE = new SessionManager();
+        new Thread(SessionManager.INSTANCE).start();
+
         server = startServer();
     }
 }

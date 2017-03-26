@@ -45,7 +45,7 @@ public class BaseEndpoint {
         }//else
 
         UserManager.INSTANCE.addUser(user);
-        SessionManager.INSTANCE.addSession(user.getSessionID());
+        user.setSessionID(SessionManager.INSTANCE.addSession());
 
         return user;
     }//login
@@ -123,9 +123,14 @@ public class BaseEndpoint {
         return null;
     }//getLeaderboard
 
+    /**
+     * Keeps the current session Alive on the server
+     * @param sessionID
+     */
     @Path("keep-session-alive/{id}")
-    public void keepSessionAlive(@PathParam("id") int sessionID) {
+    public Response keepSessionAlive(@PathParam("id") int sessionID) {
         SessionManager.INSTANCE.keepSessionAlive(sessionID);
+        return Response.ok().build();
     }//keepSessionAlive
 
 }//BaseEndpoint

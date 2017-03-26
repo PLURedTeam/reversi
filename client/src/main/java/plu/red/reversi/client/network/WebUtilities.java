@@ -59,7 +59,8 @@ public class WebUtilities {
         sessionID = user.getSessionID();
         loggedIn = true;
 
-      //  PollingMachine machine = new PollingMachine(this, client, user);
+        PollingMachine machine = new PollingMachine(this, client, user);
+        new Thread(machine).start();
 
         return true;
     }//login

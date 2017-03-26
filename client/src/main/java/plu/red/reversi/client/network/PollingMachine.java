@@ -19,6 +19,7 @@ public class PollingMachine implements Runnable {
     private WebUtilities util;
     private Client client;
     private User user;
+    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
 
     /**
      * Constucts a new PollingMachine instance
@@ -39,7 +40,9 @@ public class PollingMachine implements Runnable {
     public void run() {
 
         while(util.loggedIn) {
-            WebTarget target = client.target("url" + "keep-session-alive/" + user.getSessionID());
+            System.out.println("Calling keep session Alive: " + System.currentTimeMillis());
+
+            WebTarget target = client.target( baseURI + "keep-session-alive/" + user.getSessionID());
             Response response = target.request().get();
             try {
                 Thread.sleep(5000);
@@ -47,6 +50,7 @@ public class PollingMachine implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }//while
 
 

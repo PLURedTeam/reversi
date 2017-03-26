@@ -10,7 +10,8 @@ public class SessionManager implements Runnable {
 
     public static SessionManager INSTANCE = new SessionManager();
 
-    ConcurrentHashMap<Integer, Long> sessions;
+    private ConcurrentHashMap<Integer, Long> sessions;
+    private int sessionIncrementer = 1000;
 
     /**
      * Constructor for the SessionManager
@@ -21,10 +22,16 @@ public class SessionManager implements Runnable {
 
     /**
      * Adds a session to the SessionManager
-     * @param sessionID the sessionID of the user
+     * @return the sessionID
      */
-    public void addSession(int sessionID) {
-        sessions.put(sessionID, System.currentTimeMillis());
+    public int addSession() {
+        int session = sessionIncrementer;
+        sessions.put(session, System.currentTimeMillis());
+        sessionIncrementer++;
+
+        System.out.println("Adding Session: " + session);
+
+        return session;
     }//addSession
 
     /**
@@ -49,10 +56,13 @@ public class SessionManager implements Runnable {
     public void run() {
 
         while(true) {
+            System.out.println("I am looping through sessions");
+
             for(Integer sessionID: sessions.keySet()) {
-                if(sessions.get(sessionID) > System.currentTimeMillis() + 30000) {
+                if(sessions.get(sessionID) < System.currentTimeMillis() - 30000) {
                     sessions.remove(sessionID);
                     UserManager.INSTANCE.timedOut(sessionID);
+                    System.out.println("Removing Session: " + sessionID);
                 }//if
 
             }//for
