@@ -1,14 +1,13 @@
 package plu.red.reversi.client.gui;
 
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.client.network.WebUtilities;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * This is a menu that displays the network items for the game. This menu
@@ -23,6 +22,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private JMenuItem createUser;
     private JMenuItem deleteUser;
     private JMenuItem seeRanking;
+    private JMenuItem onlineUsers;
 
     /**
      * Initialize the network menu
@@ -34,12 +34,12 @@ public class NetworkMenu extends JMenu implements ActionListener {
         //Create the menu
         this.gui = gui;
         this.setText("Network");
-        this.setMnemonic(KeyEvent.VK_D);
+        this.setMnemonic(KeyEvent.VK_N);
         this.getAccessibleContext().setAccessibleDescription("Network Items");
 
         //Create ranking menu item
-        login = new JMenuItem("See my ranking");
-        login.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.SHIFT_MASK));
+        login = new JMenuItem("Login to server");
+        login.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.SHIFT_MASK));
         login.addActionListener(this);
         this.add(login);
 
@@ -60,6 +60,12 @@ public class NetworkMenu extends JMenu implements ActionListener {
         seeRanking.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.SHIFT_MASK));
         seeRanking.addActionListener(this);
         this.add(seeRanking);
+
+        //Create the seeRanking menu item
+        onlineUsers = new JMenuItem("See online Users");
+        onlineUsers.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.SHIFT_MASK));
+        onlineUsers.addActionListener(this);
+        this.add(onlineUsers);
     }//constructor
 
     /**
@@ -75,7 +81,10 @@ public class NetworkMenu extends JMenu implements ActionListener {
         } else if(e.getSource() == seeRanking) {
             seeRanking();
         } else if(e.getSource() == login) {
-            login();
+            try {login();}
+            catch (NoSuchAlgorithmException e1) {e1.printStackTrace();}
+        } else if(e.getSource() == onlineUsers) {
+            getOnlineUsers();
         }//else
     }//actionPerformed
 
@@ -89,7 +98,34 @@ public class NetworkMenu extends JMenu implements ActionListener {
     /**
      * Calls the server to login with user credentials
      */
-    private void login() {
+    private void login() throws NoSuchAlgorithmException {
+        JTextField username = new JTextField();
+        JTextField password = new JPasswordField();
+        Object[] message = { "Username:", username, "Password:", password };
+
+        int option = JOptionPane.showConfirmDialog(gui, message, "Login", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+
+            //Convert the users password into SHA256 format
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
+            byte[] result = digest.digest(password.getText().getBytes()); //Get the byte array for the digest
+            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
+            for(int i = 0; i < result.length; i++)
+                sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+
+            //Call the server to check for valid login credentials
+            boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(),sb.toString());
+
+            if (loggedIn) {
+                System.out.println("Login successful");
+            } else {
+                System.out.println("login failed");
+            }
+        } else {
+            System.out.println("Login canceled");
+        }
+
+
 
     }//login
 
@@ -105,4 +141,16 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private void seeRanking() {
 
     }//seeRanking
+
+
+    /**
+     * Calls the server to get the current users online
+     */
+    private void getOnlineUsers() {
+
+
+
+
+    }//seeRanking
+
 }//NetworkMenu

@@ -1,4 +1,4 @@
-package plu.red.reversi.core.network;
+package plu.red.reversi.client.network;
 
 import plu.red.reversi.core.util.User;
 

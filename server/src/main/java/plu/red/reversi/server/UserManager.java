@@ -10,6 +10,8 @@ import java.util.HashMap;
  */
 public class UserManager {
 
+    public static UserManager INSTANCE = new UserManager();
+
     HashMap<String, User> onlineUsers;
 
 
@@ -20,6 +22,27 @@ public class UserManager {
         onlineUsers = new HashMap<String, User>();
     }//constructor
 
+    public void addUser(User user) {
+        onlineUsers.put(user.getUsername(), user);
+
+        System.out.println("IN ADD USER, USERNAME: " + user.getUsername());
+
+    }//addUser
+
+    /**
+     * Checks to see if user is loggedIn
+     * @param username
+     * @return
+     */
+    public boolean loggedIn(String username) {
+        if(onlineUsers.containsKey(username)) return true;
+        return false;
+    }//loggedIn
+
+    public void removeUser(User user) {
+        onlineUsers.remove(user.getUsername());
+    }//user
 
 
-}
+
+}//UserManager

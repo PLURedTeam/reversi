@@ -13,22 +13,26 @@ public class User {
     private String password;
     private int sessionID;
 
-    /**
-     * Constructor for the user class
-     * Will always be constructed on the clientside and
-     * passed to the server
-     * @param u username of the player
-     * @param p password of the player stored in SHA256 format
-     */
-    public User(String u, String p) {
-        username = u;
-        password = p;
-    }//user
+
+    public User() {}//DefaultConstructor
+
+//    /**
+//     * Constructor for the user class
+//     * Will always be constructed on the clientside and
+//     * passed to the server
+//     * @param u username of the player
+//     * @param p password of the player stored in SHA256 format
+//     */
+//    public User(String u, String p) {
+//        username = u;
+//        password = p;
+//    }//user
 
     //Accessors and Mutators
     public String getUsername() { return username; }
+    public void setUsername(String u) { username = u;}
     public String getPassword() { return password; }
-    public int getSessionID() {return sessionID; }
-    public void setSessionID(int s) { sessionID = s; }
     public void setPassword(String p) { password = p; }
+    public int getSessionID() { return sessionID; }
+    public void setSessionID(int s) { sessionID = s; }
 }//User
