@@ -23,6 +23,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private JMenuItem deleteUser;
     private JMenuItem seeRanking;
     private JMenuItem onlineUsers;
+    private JMenuItem logout;
 
     /**
      * Initialize the network menu
@@ -43,6 +44,11 @@ public class NetworkMenu extends JMenu implements ActionListener {
         login.addActionListener(this);
         this.add(login);
 
+        //Create the logout menu item
+        logout = new JMenuItem("Logout");
+        logout.addActionListener(this);
+        this.add(logout);
+
         //Create the Create an account menu item
         createUser = new JMenuItem("Create an online account" );
         createUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.SHIFT_MASK));
@@ -61,11 +67,12 @@ public class NetworkMenu extends JMenu implements ActionListener {
         seeRanking.addActionListener(this);
         this.add(seeRanking);
 
-        //Create the seeRanking menu item
+        //Create the onlineUsers menu item
         onlineUsers = new JMenuItem("See online Users");
         onlineUsers.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.SHIFT_MASK));
         onlineUsers.addActionListener(this);
         this.add(onlineUsers);
+
     }//constructor
 
     /**
@@ -85,7 +92,9 @@ public class NetworkMenu extends JMenu implements ActionListener {
             catch (NoSuchAlgorithmException e1) {e1.printStackTrace();}
         } else if(e.getSource() == onlineUsers) {
             getOnlineUsers();
-        }//else
+        } else if(e.getSource() == logout) {
+            logout();
+        }//logout
     }//actionPerformed
 
     /**
@@ -128,6 +137,12 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
 
     }//login
+
+    private void logout() {
+        boolean loggedOut = WebUtilities.INSTANCE.logout();
+    }//logout
+
+
 
     /**
      * Calls the server to delete the user from the server

@@ -11,6 +11,7 @@ public class User {
     //fields
     private String username;
     private String password;
+    private String status;
     private int sessionID;
 
 
@@ -35,4 +36,6 @@ public class User {
     public void setPassword(String p) { password = p; }
     public int getSessionID() { return sessionID; }
     public void setSessionID(int s) { sessionID = s; }
+    public String getStatus() { return status; }
+    public void setStatus(String s) { status = s; }
 }//User

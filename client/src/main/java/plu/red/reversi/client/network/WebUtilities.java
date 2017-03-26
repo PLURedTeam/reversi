@@ -1,13 +1,17 @@
 package plu.red.reversi.client.network;
 
+import org.codehaus.jettison.json.JSONArray;
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 
 /**
  * Created by Andrew on 3/15/2017.
@@ -46,7 +50,7 @@ public class WebUtilities {
         user.setPassword(password);
 
         //Create target and call server
-        WebTarget target = client.target("http://localhost:8080/reversi/login");
+        WebTarget target = client.target(baseURI + "login");
         Response response = target.request().post(Entity.json(user));
 
         //If invalid credentials, return false
@@ -65,13 +69,30 @@ public class WebUtilities {
      * application exit or if we support connection to multiple servers
      */
     public boolean logout() {
-        WebTarget target = client.target("url" + "logout");
+        WebTarget target = client.target(baseURI + "logout");
         Response response = target.request().post(Entity.json(user));
+
+        System.out.println("In web utils, logout");
 
         if(response.getStatus() != 200) return false;
         loggedIn = false;
 
         return true;
     }//logout
+
+    /**
+     * Gets a list of the users currently logged in to the server
+     * @return An arraylist of users logged in
+     */
+    public ArrayList<User> getOnlineUsers() {
+        WebTarget target = client.target("url" + "online-users");
+        Response response = target.request(MediaType.APPLICATION_JSON).get();
+
+
+        ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>(){});
+
+        return null;
+    }//getOnlineUsers
+
 
 }//webUtilities

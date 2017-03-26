@@ -3,15 +3,11 @@ package plu.red.reversi.server.endpoints;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.UserManager;
 
-
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import javax.ws.rs.*;
+import java.util.ArrayList;
 
 /**
  * Created by Andrew on 3/14/17.
@@ -36,18 +32,18 @@ public class BaseEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public User login(User user) {
 
-        System.out.print("I AM IN LOGIN");
+        if(user == null)
+            throw new WebApplicationException(403);
 
-        if(user.getUsername().equals("MajorSlime") && user.getPassword().equals("ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae")) {
-            user.setSessionID(1);
+        //Just for testing
+        // TODO: Connect to database
+        if(!user.getUsername().isEmpty()) {
             user.setPassword("");
         } else {
             throw new WebApplicationException(403);
         }//else
 
         UserManager.INSTANCE.addUser(user);
-
-
 
         return user;
     }//login
@@ -60,39 +56,38 @@ public class BaseEndpoint {
     @Path("logout")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String logout(User user) {
-        return "true";
+    public boolean logout(User user) {
+        UserManager.INSTANCE.removeUser(user);
+        System.out.println("In logout request");
+
+        return true;
     }//logout
 
-//    /**
-//     * Create user method to add a new user to the database
-//     * @param username The requested username of the user
-//     * @param password The password of the new user, transmitted in SHA256
-//     *                 format
-//     * @return true if user was created, false if username exists
-//     */
-//    @Path("create-user")
-//    @POST
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public String createUser(String username, String password) {
-//        return "true";
-//    }//createUser
-//
-//    /**
-//     * Deletes the user from the server database and removes all
-//     * saved games from the database. If user is logged in, will
-//     * logout user and terminate any games in progress.
-//     * @param username the users username
-//     * @param password the password of the user, transmitted in SHA256
-//     *                 format
-//     * @return true if user is deleted, false if incorrect credentials
-//     */
-//    @Path("delete-user")
-//    @POST
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public String deleteUser(String username, String password) {
-//        return "true";
-//    }//deleteUser
+    /**
+     * Create user method to add a new user to the database
+     * @param user the user to be added to the database
+     * @return true if user was created, false if username exists
+     */
+    @Path("create-user")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public String createUser(User user) {
+        return "true";
+    }//createUser
+
+    /**
+     * Deletes the user from the server database and removes all
+     * saved games from the database. If user is logged in, will
+     * logout user and terminate any games in progress.
+     * @param user the user to be deleted from the database
+     * @return true if user is deleted, false if incorrect credentials
+     */
+    @Path("delete-user")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteUser(User user) {
+        return "true";
+    }//deleteUser
 
     /**
      * Gets the users currently online and their current status
@@ -103,7 +98,13 @@ public class BaseEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOnlineUsers() {
-        return null;
+        ArrayList<User> u = UserManager.INSTANCE.onlineUsers();
+        if(u.isEmpty()) throw new WebApplicationException(404);
+
+        //Create a wrapper to send collection without breaking it apart
+        GenericEntity<ArrayList<User>> users = new GenericEntity<ArrayList<User>>(u) {};
+
+        return Response.ok(users).build();
     }//getOnlineUsers
 
     /**
