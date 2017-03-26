@@ -39,6 +39,16 @@ public class UserManager {
     }//user
 
     /**
+     * Removes a user that timed out from the user manager
+     * @param sessionID the sessionID of the user that timedOut
+     */
+    public void timedOut(int sessionID) {
+        for(String username: onlineUsers.keySet())
+            if(onlineUsers.get(username).getSessionID() == sessionID)
+                onlineUsers.remove(username);
+    }//timedOut
+
+    /**
      * Checks to see if user is loggedIn
      * @param username the username to see if logged in
      * @return true it user is logged in, false otherwise
@@ -59,9 +69,10 @@ public class UserManager {
 
         //Set sessionID and password(should already be null) to null
         for(User u: users) {
-            u.setSessionID(-1);
+            u.setSessionID(0);
             u.setPassword("");
         }//for
         return users;
     }//onlineUsers
+
 }//UserManager

@@ -39,8 +39,8 @@ public class PollingMachine implements Runnable {
     public void run() {
 
         while(util.loggedIn) {
-            WebTarget target = client.target("url" + "keep-session-alive");
-            Response response = target.queryParam(user.getUsername(),user.getSessionID()).request().get();
+            WebTarget target = client.target("url" + "keep-session-alive/" + user.getSessionID());
+            Response response = target.request().get();
             try {
                 Thread.sleep(5000);
 

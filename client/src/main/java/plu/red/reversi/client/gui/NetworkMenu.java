@@ -162,10 +162,8 @@ public class NetworkMenu extends JMenu implements ActionListener {
      * Calls the server to get the current users online
      */
     private void getOnlineUsers() {
-
-
-
-
-    }//seeRanking
+        //Just for testing
+        WebUtilities.INSTANCE.getOnlineUsers();
+    }//getOnlineUsers
 
 }//NetworkMenu

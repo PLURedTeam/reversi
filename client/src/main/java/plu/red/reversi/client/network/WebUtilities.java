@@ -69,14 +69,15 @@ public class WebUtilities {
      * application exit or if we support connection to multiple servers
      */
     public boolean logout() {
+        //If not logged in, return true
+        if(loggedIn == false) return true;
+
+        //Call server to logout
         WebTarget target = client.target(baseURI + "logout");
         Response response = target.request().post(Entity.json(user));
 
-        System.out.println("In web utils, logout");
-
         if(response.getStatus() != 200) return false;
         loggedIn = false;
-
         return true;
     }//logout
 
@@ -85,14 +86,12 @@ public class WebUtilities {
      * @return An arraylist of users logged in
      */
     public ArrayList<User> getOnlineUsers() {
-        WebTarget target = client.target("url" + "online-users");
+        WebTarget target = client.target(baseURI + "online-users");
         Response response = target.request(MediaType.APPLICATION_JSON).get();
-
 
         ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>(){});
 
-        return null;
+        return users;
     }//getOnlineUsers
-
 
 }//webUtilities

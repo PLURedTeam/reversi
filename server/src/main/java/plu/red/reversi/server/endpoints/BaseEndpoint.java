@@ -1,6 +1,7 @@
 package plu.red.reversi.server.endpoints;
 
 import plu.red.reversi.core.util.User;
+import plu.red.reversi.server.SessionManager;
 import plu.red.reversi.server.UserManager;
 
 import javax.ws.rs.*;
@@ -44,6 +45,7 @@ public class BaseEndpoint {
         }//else
 
         UserManager.INSTANCE.addUser(user);
+        SessionManager.INSTANCE.addSession(user.getSessionID());
 
         return user;
     }//login
@@ -57,9 +59,12 @@ public class BaseEndpoint {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public boolean logout(User user) {
-        UserManager.INSTANCE.removeUser(user);
-        System.out.println("In logout request");
 
+        if(user == null)
+            throw new WebApplicationException(403);
+
+        UserManager.INSTANCE.removeUser(user);
+        SessionManager.INSTANCE.removeSession(user.getSessionID());
         return true;
     }//logout
 
@@ -117,5 +122,10 @@ public class BaseEndpoint {
     public Response getLeaderboard() {
         return null;
     }//getLeaderboard
+
+    @Path("keep-session-alive/{id}")
+    public void keepSessionAlive(@PathParam("id") int sessionID) {
+        SessionManager.INSTANCE.keepSessionAlive(sessionID);
+    }//keepSessionAlive
 
 }//BaseEndpoint
