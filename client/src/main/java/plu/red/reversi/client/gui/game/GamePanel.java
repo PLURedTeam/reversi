@@ -1,7 +1,9 @@
 package plu.red.reversi.client.gui.game;
 
+import plu.red.reversi.client.gui.ChatPanel;
 import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
 import plu.red.reversi.core.Game;
+import plu.red.reversi.core.util.ChatMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +18,7 @@ public class GamePanel extends JPanel {
     private BoardView boardView;
     private PlayerInfoPanel playerInfoPanel;
     private GameHistoryPanel historyPanel;
+    private ChatPanel chatPanel;
 
     public GamePanel(Game game) {
         this.game = game;
@@ -31,6 +34,7 @@ public class GamePanel extends JPanel {
         boardView = new BoardView(game);
         game.getBoard().addFlipListener(boardView);
         game.addCommandListener(boardView);
+        game.addGameOverListener(boardView);
 
         // This panel will preserve the aspect ratio of the component within it
         JPanel preserveAspectPanel = new JPanel(new PreserveAspectRatioLayout() );
@@ -46,15 +50,21 @@ public class GamePanel extends JPanel {
         preserveAspectPanel.add(boardAndEdges);
 
         boardPanel.add(preserveAspectPanel, BorderLayout.CENTER);
-        boardPanel.add(playerInfoPanel, BorderLayout.NORTH);
 
         historyPanel = new GameHistoryPanel(game);
+        chatPanel = new ChatPanel(ChatMessage.Channel.game(""+game.getGameID()));
 
         // The board panel goes in the center
         this.add(boardPanel, BorderLayout.CENTER);
 
-        // History panel goes in the EAST
-        this.add(historyPanel, BorderLayout.EAST);
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BorderLayout());
+        rightPanel.add(playerInfoPanel, BorderLayout.NORTH);
+        rightPanel.add(historyPanel, BorderLayout.CENTER);
+
+        this.add(rightPanel, BorderLayout.EAST);
+
+        this.add(chatPanel, BorderLayout.SOUTH);
 
         this.revalidate();
     }

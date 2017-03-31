@@ -9,10 +9,11 @@ import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IFlipListener;
-import plu.red.reversi.core.player.Player;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Represents the state of the board at a particular instant in time

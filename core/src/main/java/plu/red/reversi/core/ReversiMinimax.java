@@ -1,9 +1,7 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -12,7 +10,7 @@ import java.util.Set;
 public class ReversiMinimax implements Runnable {
     private Game game;
     private PlayerColor aiRole;
-    private final int MAX_DEPTH;
+    public final int MAX_DEPTH;
 
     /**
      * Constructs a ReversiMinimax problem to solve.

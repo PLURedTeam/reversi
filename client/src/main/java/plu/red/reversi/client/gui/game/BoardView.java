@@ -2,24 +2,35 @@ package plu.red.reversi.client.gui.game;
 
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
+import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IFlipListener;
+import plu.red.reversi.core.listener.IGameOverListener;
+import plu.red.reversi.core.player.Player;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
+import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener {
+public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener, IGameOverListener {
 
     /** Used to help with animation */
     private FlipAnimator fAnimator;
@@ -172,7 +183,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
             this.highlighted = false;
         }
     }
-    
+
 
     protected final void drawCell(Graphics g, float cellSize, int column, int row) {
         Board board = game.getBoard();
@@ -196,11 +207,22 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
 
             g.setColor(actualColor);
 
-            g.fillOval(
-                    Math.round(x + pad),
-                    Math.round(cy - h / 2.0f),
-                    Math.round(cellSize - 2 * pad),
-                    Math.round(h));
+            if(Utilities.TILE_IMAGE == null) { // Couldn't load the Image for some reason
+                g.fillOval(
+                        Math.round(x + pad),
+                        Math.round(cy - h / 2.0f),
+                        Math.round(cellSize - 2 * pad),
+                        Math.round(h));
+            } else {
+                ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+                g.drawImage(
+                        Utilities.getColoredTile(actualColor),
+                        Math.round(x + pad),
+                        Math.round(cy - h / 2.0f),
+                        Math.round(cellSize - 2 * pad),
+                        Math.round(h),
+                        null);
+            }
         }
     }
 
@@ -208,6 +230,10 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
     protected CellState cellStates[][];
 
     protected boolean showPossibleMoves = false;
+    protected Player winningPlayer = null;
+    protected int winningScore = 0;
+
+    protected static final Font END_GAME_FONT = new Font("Sans Serif", Font.BOLD, 28);
 
     /**
      * Constructs a new BoardView.
@@ -267,37 +293,49 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
             g.drawLine(0, pos, w, pos);
         }
 
+        Graphics2D g2d = (Graphics2D)g;
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        Map map = (Map)(tk.getDesktopProperty("awt.font.desktophints"));
+        if (map != null) {
+            g2d.addRenderingHints(map);
+        }
+        g2d.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
         for( int row = 0; row< board.size; row++ ) {
             for( int col = 0; col < board.size; col++ ) {
                 drawCell(g, cellSize, col, row);
             }
         }
+
+        if(winningPlayer != null) {
+            g.setFont(END_GAME_FONT);
+
+            String displayStr = winningPlayer.getName() + " Wins!";
+            Rectangle2D strBounds = g.getFontMetrics().getStringBounds(displayStr, g);
+            int dispW = (int)strBounds.getWidth()+32;
+            int dispH = (int)strBounds.getHeight()+32;
+
+            g.setColor(BoardEdges.BACKGROUND_COLOR);
+            g.fillRect((w-dispW)/2, (h-dispH)/2, dispW, dispH);
+
+            g.setColor(Utilities.getLessContrastColor(winningPlayer.getRole().color));
+            g.fillRect((w-dispW)/2+8, (h-dispH)/2+8, dispW-16, dispH-16);
+
+            g.setColor(Color.BLACK);
+            Utilities.drawCenteredString((Graphics2D)g, displayStr, new Rectangle(0, 0, w, h));
+        }
     }
 
-    /**
-     * Mouse clicked event.  Determines the cell where the mouse
-     * was clicked and prints the row/column to the console.
-     *
-     * @param e
-     */
-    public void mouseClicked(MouseEvent e) {
-        /*
-        int x = e.getX();
-        int y = e.getY();
-
-        int w = this.getWidth();
-        int h = this.getHeight();
-
-        float cellSize = (float)w / game.getBoard().size;
-
-        int cellRow = (int)Math.floor( y / cellSize );
-        int cellCol = (int)Math.floor( x / cellSize );
-        System.out.printf("Cell row = %d col = %d\n", cellRow, cellCol);
-
-        game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
-        repaint();
-        */
+    @Override
+    public void onGameOver(Player player, int score) {
+        winningPlayer = player;
+        winningScore = score;
+        this.repaint();
     }
+
+    public void mouseClicked(MouseEvent e) {}
 
     // This now happens in mousePressed because mouseClicked does not properly handle click and drag actions
     public void mousePressed(MouseEvent e) {
@@ -317,17 +355,10 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         repaint();
     }
 
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    public void mouseExited(MouseEvent e) {
-
-    }
+    // Unused MouseListener events
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
 
     /**
      * Start an animation of a number of pieces being flipped over.

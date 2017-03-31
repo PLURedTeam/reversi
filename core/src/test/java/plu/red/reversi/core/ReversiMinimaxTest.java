@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.player.NullPlayer;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 import java.util.Iterator;
 
@@ -13,13 +13,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class ReversiMinimaxTest {
-    private SettingsMap settingsMap;
+    private DataMap settingsMap;
     private Game game;
 
     @Before
     public void setup() {
         settingsMap = SettingsLoader.INSTANCE.loadGameSettingsFromJSON(new JSONObject());
-        game = new Game(settingsMap);
+        game = new Game();
+        game.setSettings(settingsMap);
         game.setPlayer(new NullPlayer(game, PlayerColor.WHITE));
         game.setPlayer(new NullPlayer(game, PlayerColor.BLACK));
         game.initialize();

@@ -1,9 +1,12 @@
 package plu.red.reversi.client.gui.game;
 
-import plu.red.reversi.core.*;
-import plu.red.reversi.core.command.*;
-import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.Game;
+import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.player.Player;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -47,7 +50,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
         activeBorder = BorderFactory.createMatteBorder(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE,
                 new Color(250,200,100));
 
-        this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        this.setLayout(new GridLayout(0, 2));
 
         for(PlayerColor player : game.getUsedPlayers()) {
             PlayerPanel panel = new PlayerPanel(game.getPlayer(player));

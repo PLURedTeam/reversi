@@ -2,7 +2,7 @@ package plu.red.reversi.client.gui.game.create;
 
 
 import plu.red.reversi.core.SettingsLoader;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -11,13 +11,13 @@ import java.awt.*;
 
 public class GameSettingsPanel extends JPanel {
 
-    SettingsMap settings;
+    DataMap settings;
 
     // Swing Components
     SliderSetting panelBoardSize;
     CheckBoxSetting panelAllowTurnSkipping;
 
-    public GameSettingsPanel(SettingsMap settings) {
+    public GameSettingsPanel(DataMap settings) {
         this.settings = settings;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -35,10 +35,17 @@ public class GameSettingsPanel extends JPanel {
         this.add(Box.createVerticalGlue());
     }
 
-    public SettingsMap getSettings() {
+    public DataMap getSettings() {
         settings.set(SettingsLoader.GAME_BOARD_SIZE, panelBoardSize.slider.getValue());
         settings.set(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, panelAllowTurnSkipping.checkBox.isSelected());
         return settings;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if(panelBoardSize != null) panelBoardSize.setEnabled(enabled);
+        if(panelAllowTurnSkipping != null) panelAllowTurnSkipping.setEnabled(enabled);
     }
 
 
@@ -48,14 +55,14 @@ public class GameSettingsPanel extends JPanel {
         public final JLabel count;
         public final JSlider slider;
 
-        public SliderSetting(SettingsMap settings, String name, int defaultMin, int defaultMax) {
+        public SliderSetting(DataMap settings, String name, int defaultMin, int defaultMax) {
 
             int min = defaultMin;
             int max = defaultMax;
 
-            SettingsMap.Setting s = settings.getSetting(name);
-            if(s instanceof SettingsMap.BoundedSetting) {
-                SettingsMap.BoundedSetting bs = (SettingsMap.BoundedSetting)s;
+            DataMap.Setting s = settings.getSetting(name);
+            if(s instanceof DataMap.BoundedSetting) {
+                DataMap.BoundedSetting bs = (DataMap.BoundedSetting)s;
                 if(bs.getMin() != null) min = ((Number)bs.getMin()).intValue();
                 if(bs.getMax() != null) max = ((Number)bs.getMax()).intValue();
             }
@@ -83,6 +90,12 @@ public class GameSettingsPanel extends JPanel {
         }
 
         @Override
+        public void setEnabled(boolean enabled) {
+            super.setEnabled(enabled);
+            if(slider != null) slider.setEnabled(enabled);
+        }
+
+        @Override
         public void stateChanged(ChangeEvent e) {
             if(e.getSource() == slider) {
                 count.setText(""+slider.getValue());
@@ -95,7 +108,7 @@ public class GameSettingsPanel extends JPanel {
         public final JLabel label;
         public final JCheckBox checkBox;
 
-        public CheckBoxSetting(SettingsMap settings, String name) {
+        public CheckBoxSetting(DataMap settings, String name) {
 
             label = new JLabel(name);
             label.setHorizontalAlignment(SwingConstants.LEFT);
@@ -103,7 +116,7 @@ public class GameSettingsPanel extends JPanel {
             checkBox = new JCheckBox();
             checkBox.setSelected(settings.get(name, Boolean.class));
 
-            SettingsMap.Setting s = settings.getSetting(name);
+            DataMap.Setting s = settings.getSetting(name);
 
             label.setToolTipText(s.getDescription());
             checkBox.setToolTipText(s.getDescription());
@@ -113,6 +126,12 @@ public class GameSettingsPanel extends JPanel {
             container.add(label, BorderLayout.WEST);
             container.add(checkBox, BorderLayout.EAST);
             this.add(container);
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            super.setEnabled(enabled);
+            if(checkBox != null) checkBox.setEnabled(enabled);
         }
     }
 }

@@ -11,9 +11,6 @@ import plu.red.reversi.core.PlayerColor;
  */
 public class MoveCommand extends BoardCommand {
 
-    public final PlayerColor player;
-    public final BoardIndex position;
-
     /**
      * Constructs a new move command.
      * Defaults to PLAYER Source.
@@ -31,9 +28,7 @@ public class MoveCommand extends BoardCommand {
      * @param position Location on the board.
      */
     public MoveCommand(Source source, PlayerColor player, BoardIndex position) {
-        super(source);
-        this.player = player;
-        this.position = position;
+        super(source, player, position);
     }
 
     /**

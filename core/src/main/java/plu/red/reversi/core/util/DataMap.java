@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * SettingsMap is a data structure designed to store values based on keys; similar to a map, with a few differences.
- * A SettingsMap can store any value type regardless of any other value types it currently has (IE can store Booleans
+ * DataMap is a data structure designed to store values based on keys; similar to a map, with a few differences.
+ * A DataMap can store any value type regardless of any other value types it currently has (IE can store Booleans
  * and Strings at the same time), and its keys are always Strings that represent a particular Setting's name.
- * In addition, a SettingsMap is designed to be able to be written to and read from a JSON representation (this
+ * In addition, a DataMap is designed to be able to be written to and read from a JSON representation (this
  * implementation uses the Jettison JSON library).
  *
  * Anyone who wishes can feel free to re-use this class in current and/or future projects, as long as proper credit is
@@ -20,25 +20,25 @@ import java.util.Set;
  *
  * @author James De Broeck (its ma baby)
  */
-public class SettingsMap {
+public class DataMap {
 
     // The atual data that is stored. This is the only data member in this class.
     protected HashMap<String, Setting> dataMap = new HashMap<>();
 
     /**
-     * Default (Empty) Constructor. Creates a brand new SettingsMap, with nothing stored.
+     * Default (Empty) Constructor. Creates a brand new DataMap, with nothing stored.
      */
-    public SettingsMap() {
+    public DataMap() {
         // Default Constructor doesn't do anything, but allows for this class to also have a non-default constructor
     }
 
     /**
-     * JSON Constructor. Creates a new SettingsMap and populates it with data from a given JSON representation.
+     * JSON Constructor. Creates a new DataMap and populates it with data from a given JSON representation.
      *
      * @param json JSONObject to populate with
-     * @throws RuntimeException if there is an issue when parsing the JSON representation into a SettingsMap
+     * @throws RuntimeException if there is an issue when parsing the JSON representation into a DataMap
      */
-    public SettingsMap(JSONObject json) throws RuntimeException {
+    public DataMap(JSONObject json) throws RuntimeException {
         // Iterate through the JSONObject's keys
         Iterator<String> it = json.keys();
         it.forEachRemaining((key) -> {
@@ -63,12 +63,12 @@ public class SettingsMap {
      * statically registered to the Setting class.
      *
      * @return JSONObject representation of this SettingMap
-     * @throws RuntimeException if there is an issue writing a JSON representation from the SettingsMap
+     * @throws RuntimeException if there is an issue writing a JSON representation from the DataMap
      */
     public JSONObject toJSON() throws RuntimeException {
         JSONObject result = new JSONObject();
         try {
-            // Iterate through the SettingsMap and convert every entry to a JSONObject to insert into the main JSONObject
+            // Iterate through the DataMap and convert every entry to a JSONObject to insert into the main JSONObject
             for(Map.Entry<String, Setting> entry : dataMap.entrySet())
                 result.put(entry.getKey(), entry.getValue().toJSON());
         } catch(JSONException ex) {
@@ -88,7 +88,7 @@ public class SettingsMap {
     }
 
     /**
-     * Does this SettingsMap contain a specific String key?
+     * Does this DataMap contain a specific String key?
      *
      * @param key String key to check
      * @return true if the String key exists, false otherwise
@@ -490,14 +490,14 @@ public class SettingsMap {
     }
 
     /**
-     * Clears all setings from this SettingsMap.
+     * Clears all setings from this DataMap.
      */
     public void clear() {
         dataMap.clear();
     }
 
     /**
-     * Determines if this SettingsMap is empty.
+     * Determines if this DataMap is empty.
      *
      * @return true if there are no settings stored, false otherwise
      */
@@ -506,7 +506,7 @@ public class SettingsMap {
     }
 
     /**
-     * Determines how many settings are stored in this SettingsMap.
+     * Determines how many settings are stored in this DataMap.
      *
      * @return number of stored settings
      */

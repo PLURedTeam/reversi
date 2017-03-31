@@ -1,20 +1,17 @@
 package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.BoardView;
-import plu.red.reversi.client.player.HumanPlayer;
-import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.player.Player;
-import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The main menu bar.
@@ -25,6 +22,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private MainWindow gui;
 
     private JMenuItem newGameItem;
+    private JMenuItem loadGameItem;
+    private JMenuItem saveGameItem;
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
 
@@ -47,6 +46,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         // Add the developer menu.  This should be removed when
         // the game is released
         this.add(new DeveloperMenu(gui));
+
+        //add the network menu
+        this.add(new NetworkMenu(gui));
     }
 
     private JMenu buildGameMenu() {
@@ -61,6 +63,22 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 "Start a new game against the computer");
         newGameItem.addActionListener(this);
         menu.add(newGameItem);
+
+        loadGameItem = new JMenuItem("Load Game");
+        loadGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+        loadGameItem.getAccessibleContext().setAccessibleDescription(
+                "Load a previous game");
+        loadGameItem.addActionListener(this);
+        menu.add(loadGameItem);
+
+        saveGameItem = new JMenuItem("Save Game");
+        saveGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        saveGameItem.getAccessibleContext().setAccessibleDescription(
+                "Save the current game");
+        saveGameItem.addActionListener(this);
+        menu.add(saveGameItem);
 
         JMenuItem menuItem = new JMenuItem("New Online Game");
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -153,6 +171,14 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         if(e.getSource() == newGameItem) {
             gui.createNewGame();
+        }
+
+        if(e.getSource() == loadGameItem) {
+            gui.loadGame();
+        }
+
+        if(e.getSource() == saveGameItem) {
+            gui.saveGame();
         }
     }
 }

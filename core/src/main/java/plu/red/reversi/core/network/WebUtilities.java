@@ -1,8 +1,7 @@
-package plu.red.reversi.client.util;
+package plu.red.reversi.core.network;
 
 import plu.red.reversi.core.util.User;
 
-import javax.swing.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -19,6 +18,8 @@ public class WebUtilities {
     private int sessionID;
     private User user;
 
+    public boolean loggedIn = false;
+
     /**
      * Constructor for WebUtilities
      * Creates a new Client Object
@@ -27,7 +28,6 @@ public class WebUtilities {
         //create the client
         client = ClientBuilder.newClient();
     }//webUtilities
-
 
     /**
      * Calls the server to authenticate the user credentials to login
@@ -45,6 +45,10 @@ public class WebUtilities {
         if(response.getStatus() == 403) return false;
         user = response.readEntity(User.class);
         sessionID = user.getSessionID();
+        loggedIn = true;
+
+        PollingMachine machine = new PollingMachine(this, client, user);
+
         return true;
     }//login
 
@@ -57,19 +61,9 @@ public class WebUtilities {
         Response response = target.request().post(Entity.json(user));
 
         if(response.getStatus() != 200) return false;
+        loggedIn = false;
+
         return true;
     }//logout
-
-
-
-
-
-
-
-
-
-
-
-
 
 }//webUtilities

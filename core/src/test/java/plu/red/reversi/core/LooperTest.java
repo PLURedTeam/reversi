@@ -1,6 +1,9 @@
 package plu.red.reversi.core;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import plu.red.reversi.core.util.Looper;
 
 import java.util.ArrayList;

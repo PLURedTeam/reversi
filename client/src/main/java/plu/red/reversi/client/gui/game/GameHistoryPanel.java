@@ -5,19 +5,12 @@ import plu.red.reversi.core.History;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
-import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.HierarchyBoundsListener;
-import java.awt.event.HierarchyEvent;
-import java.util.ArrayList;
 
 /**
  * This panel displays the history of moves that have taken place

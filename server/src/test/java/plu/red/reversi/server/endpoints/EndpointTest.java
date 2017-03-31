@@ -2,7 +2,6 @@ package plu.red.reversi.server.endpoints;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import plu.red.reversi.server.LocalServer;
 

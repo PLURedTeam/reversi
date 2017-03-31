@@ -1,10 +1,10 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.*;
-import sun.awt.image.ImageWatched;
+import plu.red.reversi.core.command.BoardCommand;
+import plu.red.reversi.core.command.ChatCommand;
+import plu.red.reversi.core.command.Command;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 
 

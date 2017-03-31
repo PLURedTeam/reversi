@@ -1,5 +1,8 @@
 package plu.red.reversi.core.command;
 
+import plu.red.reversi.core.BoardIndex;
+import plu.red.reversi.core.PlayerColor;
+
 /**
  * Glory to the Red Team.
  *
@@ -7,5 +10,12 @@ package plu.red.reversi.core.command;
  */
 public abstract class BoardCommand extends Command {
 
-    public BoardCommand(Source source) { super(source); }
+    public final PlayerColor player;
+    public final BoardIndex position;
+
+    public BoardCommand(Source source, PlayerColor player, BoardIndex position) {
+        super(source);
+        this.player = player;
+        this.position = position;
+    }
 }

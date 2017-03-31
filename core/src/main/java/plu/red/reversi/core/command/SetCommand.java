@@ -11,9 +11,6 @@ import plu.red.reversi.core.PlayerColor;
  */
 public class SetCommand extends BoardCommand {
 
-    public final PlayerColor player;
-    public final BoardIndex position;
-
     /**
      * Constructs a new set command.
      * Defaults to PLAYER Source.
@@ -31,9 +28,7 @@ public class SetCommand extends BoardCommand {
      * @param position Location on the board.
      */
     public SetCommand(Source source, PlayerColor player, BoardIndex position) {
-        super(source);
-        this.player = player;
-        this.position = position;
+        super(source, player, position);
     }
 
     /**
@@ -41,9 +36,7 @@ public class SetCommand extends BoardCommand {
      * @param m Move command to copy.
      */
     public SetCommand(MoveCommand m) {
-        super(m.source);
-        this.player = m.player;
-        this.position = m.position;
+        super(m.source, m.player, m.position);
     }
 
     /**

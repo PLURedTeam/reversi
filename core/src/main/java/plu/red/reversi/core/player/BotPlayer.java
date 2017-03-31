@@ -29,6 +29,15 @@ public class BotPlayer extends Player {
         minimax = new ReversiMinimax(game, role, difficulty);
     }
 
+    /**
+     * Retrieves the Difficulty level that this BotPlayer is set to.
+     *
+     * @return Difficulty level
+     */
+    public int getDifficulty() {
+        return minimax.MAX_DEPTH;
+    }
+
     @Override
     public void nextTurn(boolean yours) {
         if(!yours) return;

@@ -1,8 +1,8 @@
 package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.player.Player;
 import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,14 +25,6 @@ public class ScoreIcon extends JPanel {
         //scoreValue = 0;
     }
 
-    // TODO: Cue repaint from somewhere when score changes
-    /*
-    public void setScoreValue( int value ) {
-        this.scoreValue = value;
-        this.repaint();
-    }
-    */
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -51,7 +43,12 @@ public class ScoreIcon extends JPanel {
                 RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
         g2d.setColor(chipColor);
-        g2d.fillOval(0, 0, w, h);
+        if(Utilities.TILE_IMAGE == null)
+            g2d.fillOval(0, 0, w, h);
+        else
+            g2d.drawImage(
+                Utilities.getColoredTile(chipColor),
+                0, 0, w, h, null);
         String label = "" + player.getScore();
         g2d.setColor(fontColor);
         g2d.setFont(font);

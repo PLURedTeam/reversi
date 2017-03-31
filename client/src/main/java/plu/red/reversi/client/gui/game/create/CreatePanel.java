@@ -2,12 +2,15 @@ package plu.red.reversi.client.gui.game.create;
 
 import plu.red.reversi.client.gui.ChatPanel;
 import plu.red.reversi.client.gui.MainWindow;
-import plu.red.reversi.client.player.HumanPlayer;
+import plu.red.reversi.client.gui.util.Utilities;
+import plu.red.reversi.core.player.HumanPlayer;
 import plu.red.reversi.core.Game;
 import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.player.BotPlayer;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,16 +33,42 @@ public class CreatePanel extends JPanel implements ActionListener {
     JButton startButton;
     JButton loadButton;
 
+    // If null, creating a new game, otherwise loading a game
+    Game loadedGame = null;
+
     public CreatePanel(MainWindow gui) {
         this.gui = gui;
-
-        this.setLayout(new BorderLayout());
 
         populate(SettingsLoader.INSTANCE.createGameSettings());
     }
 
-    protected final void populate(SettingsMap settings) {
+    public CreatePanel(MainWindow gui, Game loadedGame) {
+        this.gui = gui;
+        this.loadedGame = loadedGame;
+
+        for(PlayerColor color : PlayerColor.validPlayers()) {
+            Player player = loadedGame.getPlayer(color);
+            if(player != null) {
+                PlayerPanel panel = new PlayerPanel(this);
+                if(player instanceof BotPlayer) {
+                    panel.setType(PlayerPanel.SlotType.AI);
+                    PlayerPanel.SubPanel sp = panel.getSubPanel();
+                    if(sp instanceof PlayerPanel.SubPanel.AI)
+                        ((PlayerPanel.SubPanel.AI)sp).difficultySlider.setValue(((BotPlayer)player).getDifficulty());
+                } else {
+                    panel.setType(PlayerPanel.SlotType.LOCAL);
+                }
+                playerSlots.add(panel);
+            }
+        }
+
+        populate(loadedGame.getSettings());
+    }
+
+    protected final void populate(DataMap settings) {
         this.removeAll();
+
+        this.setLayout(new BorderLayout());
 
         startButton = new JButton("Start");
         startButton.addActionListener(this);
@@ -54,6 +83,7 @@ public class CreatePanel extends JPanel implements ActionListener {
         startContainer.add(startButton);
 
         panelSettings = new GameSettingsPanel(settings);
+        panelSettings.setEnabled(loadedGame == null);
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
         rightPanel.add(startContainer, BorderLayout.SOUTH);
@@ -62,7 +92,7 @@ public class CreatePanel extends JPanel implements ActionListener {
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
         this.add(rightPanel, BorderLayout.EAST);
 
-        panelChat = new ChatPanel();
+        panelChat = new ChatPanel(ChatMessage.Channel.LOBBY_PREFIX);
         this.add(panelChat, BorderLayout.SOUTH);
 
         playerSelectList = new JPanel();
@@ -82,8 +112,9 @@ public class CreatePanel extends JPanel implements ActionListener {
         for(int i = 0; i < playerSlots.size(); i++) {
             PlayerPanel slot = playerSlots.get(i);
             Color color = PlayerColor.validPlayers()[i].color;
-            slot.setBackground(new Color((color.getRed()-192)*3/8+192, (color.getGreen()-192)*3/8+192, (color.getBlue()-192)*3/8+192));
+            slot.setBackground(Utilities.getLessContrastColor(color));
             playerSelectList.add(slot);
+            slot.setEnabled(loadedGame == null);
         }
 
         // Keep at bottom
@@ -99,13 +130,8 @@ public class CreatePanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         boolean rebuildPlayerSlots = false;
 
-        if(e.getSource() == addPlayerButtons.bot) {
-            playerSlots.add(new PlayerPanel.PlayerPanelBot(this));
-            rebuildPlayerSlots = true;
-        }
-
-        if(e.getSource() == addPlayerButtons.human) {
-            playerSlots.add(new PlayerPanel.PlayerPanelHuman(this));
+        if(e.getSource() == addPlayerButtons.add) {
+            playerSlots.add(new PlayerPanel(this));
             rebuildPlayerSlots = true;
         }
 
@@ -123,41 +149,55 @@ public class CreatePanel extends JPanel implements ActionListener {
         if(e.getSource() == startButton) {
             attemptGameStart();
         }
+
+        if(e.getSource() == loadButton) {
+            gui.loadGame();
+        }
     }
 
     protected final void attemptGameStart() {
-        SettingsMap settings = panelSettings.getSettings();
-        settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
-        Game game = new Game(settings);
 
-        for(int i = 0; i < playerSlots.size(); i++) {
-            PlayerPanel slot = playerSlots.get(i);
-            PlayerColor color = PlayerColor.validPlayers()[i];
-            if(slot instanceof PlayerPanel.PlayerPanelBot)
-                game.setPlayer(new BotPlayer(game, color, ((PlayerPanel.PlayerPanelBot)slot).difficultySlider.getValue()*2));
-            else if(slot instanceof PlayerPanel.PlayerPanelHuman)
-                game.setPlayer(new HumanPlayer(game, color));
+        if(loadedGame == null) {
+
+            // Create a new Game
+            loadedGame = new Game();
+
+            // Add Settings to the Game
+            DataMap settings = panelSettings.getSettings();
+            settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
+            loadedGame.setSettings(settings);
+
+            // Add Players to the Game
+            for (int i = 0; i < playerSlots.size(); i++) {
+                PlayerPanel.SubPanel slot = playerSlots.get(i).getSubPanel();
+                PlayerColor color = PlayerColor.validPlayers()[i];
+                if (slot instanceof PlayerPanel.SubPanel.AI)
+                    loadedGame.setPlayer(new BotPlayer(loadedGame, color, ((PlayerPanel.SubPanel.AI) slot).difficultySlider.getValue()));
+                else if (slot instanceof PlayerPanel.SubPanel.Local)
+                    loadedGame.setPlayer(new HumanPlayer(loadedGame, color));
+            }
         }
 
-        game.initialize();
+        loadedGame.initialize();
 
-        gui.startGame(game);
+        gui.startGame(loadedGame);
     }
 
     public static class PlayerPanelSelect extends JPanel {
 
-        public final JButton human;
-        public final JButton network;
-        public final JButton bot;
+        public final JButton add;
+        //public final JButton network;
+        //public final JButton bot;
 
         public PlayerPanelSelect(ActionListener buttonListener) {
             this.setMaximumSize(new Dimension(10000, 36));
 
-            human = new JButton("Add Local Player");
-            human.setVerticalAlignment(SwingConstants.CENTER);
-            human.setHorizontalAlignment(SwingConstants.CENTER);
-            human.addActionListener(buttonListener);
+            add = new JButton("Add Player");
+            add.setVerticalAlignment(SwingConstants.CENTER);
+            add.setHorizontalAlignment(SwingConstants.CENTER);
+            add.addActionListener(buttonListener);
 
+            /*
             network = new JButton("Add Networked Player");
             network.setVerticalAlignment(SwingConstants.CENTER);
             network.setHorizontalAlignment(SwingConstants.CENTER);
@@ -167,10 +207,11 @@ public class CreatePanel extends JPanel implements ActionListener {
             bot.setVerticalAlignment(SwingConstants.CENTER);
             bot.setHorizontalAlignment(SwingConstants.CENTER);
             bot.addActionListener(buttonListener);
+            */
 
-            this.add(human);
-            this.add(network);
-            this.add(bot);
+            this.add(add);
+            //this.add(network);
+            //this.add(bot);
         }
     }
 }
