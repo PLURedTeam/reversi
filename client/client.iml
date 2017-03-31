@@ -23,6 +23,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -31,6 +32,7 @@
     <orderEntry type="library" exported="" name="timingframework-core-7.3.1" level="project" />
     <orderEntry type="library" exported="" name="jersey-media-json-jettison-2.25.1" level="project" />
     <orderEntry type="library" exported="" name="sqlite-jdbc-3.16.1" level="project" />
+    <orderEntry type="library" exported="" name="joml-1.9.2" level="project" />
     <orderEntry type="library" exported="" name="promises-4.4.0" level="project" />
     <orderEntry type="library" exported="" name="jersey-common-2.25.1" level="project" />
     <orderEntry type="library" exported="" name="jersey-media-jaxb-2.25.1" level="project" />
