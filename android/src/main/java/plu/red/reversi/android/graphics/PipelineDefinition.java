@@ -5,5 +5,23 @@ package plu.red.reversi.android.graphics;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class ShaderDefinition {
+public class PipelineDefinition {
+    public int pointLightCount;
+    public int directionalLightCount;
+
+    public boolean usesSampler;
+
+    public PipelineDefinition() {
+        pointLightCount = 0;
+        directionalLightCount = 0;
+
+        usesSampler = false;
+    }
+
+    public PipelineDefinition(PipelineDefinition other) {
+        pointLightCount = other.pointLightCount;
+        directionalLightCount = other.directionalLightCount;
+
+        usesSampler = other.usesSampler;
+    }
 }

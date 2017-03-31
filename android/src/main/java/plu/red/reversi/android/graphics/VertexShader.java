@@ -5,5 +5,13 @@ package plu.red.reversi.android.graphics;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class VertexShader {
+public abstract class VertexShader extends Shader {
+
+    public final PipelineDefinition def;
+
+    public VertexShader(PipelineDefinition d) {
+        super(ShaderType.VERTEX);
+
+        def = d;
+    }
 }

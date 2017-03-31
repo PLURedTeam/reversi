@@ -1,0 +1,48 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="plu.red.reversi.android.PlayFragment">
+
+    <plu.red.reversi.android.GameSurfaceView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/surface_game"/>
+
+    <!-- Top bar to show game info -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/panel_game_info"
+        android:layout_alignParentTop="true">
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/panel_game_actions"
+        android:background="@color/gray_semitransparent"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/button_confirm_move"
+            android:visibility="gone"
+            android:text="@string/button_confirm_move" />
+
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/button_switch_camera_mode"
+            android:background="@drawable/ic_camera"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -5,6 +5,13 @@ package plu.red.reversi.android.graphics;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public abstract class FragmentShader extends Shader {
+public abstract class PixelShader extends Shader {
 
+    public final PipelineDefinition def;
+
+    public PixelShader(PipelineDefinition d) {
+        super(ShaderType.PIXEL);
+
+        def = d;
+    }
 }
