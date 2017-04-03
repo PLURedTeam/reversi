@@ -1,6 +1,8 @@
 package plu.red.reversi.core;
 
-import java.awt.*;
+import org.joml.Vector3f;
+
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -14,20 +16,20 @@ import java.util.Set;
 public enum PlayerColor {
 
     NONE(false, null, "Non-player"),
-    WHITE(true, Color.WHITE, "White"),
-    BLACK(true, Color.BLACK, "Black"),
-    RED(true, Color.RED, "Red"),
-    BLUE(true, Color.BLUE, "Blue"),
+    WHITE(true, new Vector3f(1.0f, 1.0f, 1.0f), "White"),
+    BLACK(true, new Vector3f(0.0f, 0.0f, 1.0f), "Black"),
+    RED(true, new Vector3f(1.0f, 0.0f, 0.0f), "Red"),
+    BLUE(true, new Vector3f(0.0f, 0.0f, 1.0f), "Blue"),
     ;
 
     protected final boolean valid;
     protected PlayerColor next;
     protected int vOrdinal;
-    public final Color color;
+    public final Vector3f color;
     public final String name;
 
     // Constructor occurs before any static code
-    PlayerColor(boolean valid, Color color, String name) {
+    PlayerColor(boolean valid, Vector3f color, String name) {
         this.valid = valid;
         this.next = this;
         this.vOrdinal = -1;
