@@ -149,4 +149,21 @@ public class Utilities {
 
     }
 
+    /**
+     * Multiplies a color by a certain multiplier, clamping the resulting RGB values between 0 and 255. Does not modify
+     * the alpha value.
+     *
+     * @param original Original color to modify
+     * @param multiplier Multiplier to change color by
+     * @return Newly created Color that is the result of this operation
+     */
+    public static Color multiplyColor(Color original, float multiplier) {
+        return new Color(
+                Math.min(255, Math.max(0, (int)(original.getRed()*multiplier))),
+                Math.min(255, Math.max(0, (int)(original.getGreen()*multiplier))),
+                Math.min(255, Math.max(0, (int)(original.getBlue()*multiplier))),
+                original.getAlpha()
+        );
+    }
+
 }

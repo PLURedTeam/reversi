@@ -12,6 +12,7 @@
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-swing:7.3.1" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.jersey.media:jersey-media-json-jettison:2.25.1" level="project" />
     <orderEntry type="library" name="Gradle: org.xerial:sqlite-jdbc:3.16.1" level="project" />
+    <orderEntry type="library" name="Gradle: org.joml:joml:1.9.2" level="project" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-core:7.3.1" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.jersey.core:jersey-common:2.25.1" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.jersey.media:jersey-media-jaxb:2.25.1" level="project" />

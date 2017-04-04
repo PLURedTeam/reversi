@@ -1,4 +1,4 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.game;
 
 /**
  * Created by JChase on 3/17/17.

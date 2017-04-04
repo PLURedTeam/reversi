@@ -25,7 +25,7 @@ import plu.red.reversi.core.PlayerColor;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.listener.ICommandListener;
-import plu.red.reversi.core.player.NullPlayer;
+import plu.red.reversi.core.game.player.NullPlayer;
 
 /**
  * Created by daniel on 3/18/17.

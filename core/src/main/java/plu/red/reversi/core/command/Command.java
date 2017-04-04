@@ -1,6 +1,6 @@
 package plu.red.reversi.core.command;
 
-import plu.red.reversi.core.Game;
+import plu.red.reversi.core.Controller;
 
 /**
  * Glory to the Red Team.
@@ -10,26 +10,33 @@ import plu.red.reversi.core.Game;
 public abstract class Command {
 
     /**
-     * Represents the source of the command, whether it came from a Player or the Server
+     * Source Enumeration. Used to represents where a Command originated from, either from the client or the server.
      */
     public enum Source {
-        PLAYER,
+        CLIENT,
+        CLIENTSIDE_ONLY,
         SERVER
     }
 
+    /**
+     * Represents the Source of this Command.
+     */
     public final Source source;
 
-    public Command(Source source) {
-        this.source = source;
-    }
+    /**
+     * Abstract Constructor. Constructs a new Command with a given <code>source</code>.
+     *
+     * @param source Source enum differentiating the origin of a Command between the client or the server
+     */
+    protected Command(Source source) { this.source = source; }
 
     /**
-     * Uses data from the Game object to determine whether or not this Command is valid. IE: Whether a move played by a
-     * player is on a valid position of the board.
+     * Uses data from a Controller object to determine whether or not this Command is valid. IE: Whether a move played
+     * by a player is on a valid position of a board.
      *
-     * @param game Game object to pull data from
+     * @param controller Controller object to pull data from
      * @return true if this Command is valid, false otherwise
      */
-    public abstract boolean isValid(Game game);
+    public abstract boolean isValid(Controller controller);
 
 }

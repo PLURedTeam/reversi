@@ -1,9 +1,12 @@
 package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.GamePanel;
-import plu.red.reversi.client.gui.game.create.CreatePanel;
-import plu.red.reversi.core.Game;
+import plu.red.reversi.client.gui.lobby.LobbyPanel;
+import plu.red.reversi.client.gui.util.StatusBar;
+import plu.red.reversi.core.*;
 import plu.red.reversi.core.db.DBUtilities;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
@@ -14,15 +17,24 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 /**
- * The main game window, contains all of the UI.
+ * Glory to the Red Team.
+ *
+ * The main game window, acts as a Controller for the GUI. Will have one center panel at all times, whether that panel
+ * is the game, a lobby screen, or a server browser.
  */
-public class MainWindow extends JFrame implements WindowListener {
+public class MainWindow extends JFrame implements WindowListener, IMainGUI {
 
-    private GamePanel gamePanel = null;
-    public GamePanel getGamePanel() { return gamePanel; }
+    private CorePanel corePanel;
+    public CorePanel getCorePanel() { return corePanel; }
 
     private StatusBar statusBar;
     public StatusBar getStatusBar() { return statusBar; }
+
+    private SettingsWindow settingsWindow = null;
+    public SettingsWindow getSettingsWindow() { return settingsWindow; }
+
+    private Client client = null;
+    public Client getClient() { return client; }
 
     private BorderLayout layout = new BorderLayout();
 
@@ -51,40 +63,117 @@ public class MainWindow extends JFrame implements WindowListener {
             }
         });
 
-        populate(new CreatePanel(this));
-
         this.addWindowListener(this);
 
         this.pack();
         this.setVisible(true);
     }
 
-    protected final void populate(Component centerComponent) {
+    protected final void populate(CorePanel corePanel) {
+
+        // Cleanup the old panel
+        if(this.corePanel != null) this.corePanel.cleanup();
+
+        // Replace reference with the new panel
+        this.corePanel = corePanel;
+
+        // Remove the old center panel
         Component old = layout.getLayoutComponent(this, BorderLayout.CENTER);
         if(old != null) this.remove(old);
 
-        this.add(centerComponent, BorderLayout.CENTER);
+        // Add the new center panel
+        this.add(corePanel, BorderLayout.CENTER);
 
+        // Refresh and repaint
         this.revalidate();
         this.repaint();
     }
 
     /**
-     * Creates a new game panel and starts the game
-     * @param game
+     * GUI Display Updater. Called from a Client object when the Client object has changed significantly and the GUI
+     * needs to be updated to accommodate. Example usages include when the <code>core</code> Controller of a Client
+     * object is swapped out. Causes the entire GUI to be recreated.
      */
-    public void startGame(Game game) {
-        this.gamePanel = new GamePanel(game);
-        game.addStatusListener(this.statusBar);
-        populate(this.gamePanel);
+    @Override
+    public void updateGUIMajor() {
+        Controller core = client.getCore();
+
+        if(core instanceof Game) {
+            populate(new GamePanel(this, (Game)core));
+        } else if(core instanceof Lobby) {
+            populate(new LobbyPanel(this, (Lobby)core));
+        }
+
+        core.addListener(statusBar);
+    }
+
+    /**
+     * GUI Display Updater. Called from a Client object when small changes have been made in the Client and the GUI
+     * needs to be updated to reflect these changes. Example usages include when a Lobby changes the amount of Player
+     * Slots it has. Causes small portions of the GUI to be recalculated and redrawn.
+     */
+    @Override
+    public void updateGUIMinor() {
+        if(corePanel != null) corePanel.updateGUI();
+    }
+
+    /**
+     * Client Setter. Sets what Client master controller this GUI is displaying for. Usually only used by the Client
+     * class's constructor.
+     *
+     * @param client Client object to set
+     */
+    @Override
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    /**
+     * Save Dialog Display Method. Shows a Save Dialog to the user, which queries what name to save a Game as. Can be
+     * cancelled.
+     *
+     * @return String name chosen, or null if the user cancelled
+     */
+    @Override
+    public String showSaveDialog() {
+        return JOptionPane.showInputDialog(this, "Enter a name for the game","Save Game",1);
+    }
+
+    /**
+     * Load Dialog Display Method. Shows a Load Dialog o the user, which queries what Game to load from existing saved
+     * Games. Can be cancelled.
+     *
+     * @return String name chosen, or null if the user cancelled
+     */
+    @Override
+    public String showLoadDialog() {
+        String[][] games = DBUtilities.INSTANCE.getGames(); //Get the games from the DB
+        String[] list = new String[games.length]; //Array for the JOptionPane
+
+        //Convert to one dimensional array
+        for(int i = 0; i < games.length; i++)
+            list[i] = games[i][0];
+
+        if(list.length < 1) {
+            JOptionPane.showMessageDialog(this, "No Games Are Saved.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
+            return null;
+        }
+
+        return (String)JOptionPane.showInputDialog(this, "Select a Game", "Load Game", JOptionPane.QUESTION_MESSAGE, null, list, list[0]);
+    }
+
+    /**
+     * Creates a new game panel and starts the game
+     */
+    public void startGame() {
+        client.startGame();
     }
 
     /**
      * Creates a new game panel
      */
     public void createNewGame() {
-        this.gamePanel = null;
-        populate(new CreatePanel(this));
+        client.createIntoLobby();
     }
 
     /**
@@ -92,38 +181,7 @@ public class MainWindow extends JFrame implements WindowListener {
      * Then loads and creates the game
      */
     public void loadGame() {
-        String[][] games = DBUtilities.INSTANCE.getGames(); //Get the games from the DB
-        String[] list = new String[games.length]; //Array for the JOptionPane
-        int gameID = 0;
-
-        //Convert to one dimensional array
-        for(int i = 0; i < games.length; i++)
-            list[i] = games[i][0];
-
-        String input = null;
-        if(games.length > 0) {
-            //Get the input from the user for what game to load
-            input = (String) JOptionPane.showInputDialog(this, "Select a Game", "Load Game", JOptionPane.QUESTION_MESSAGE, null, list, list[0]);
-        } else {
-            //No saved games prompt
-            JOptionPane.showMessageDialog(this, "You do not have any saved games");
-            return;
-        }
-
-        if(input == null) return; // User cancelled
-
-        //Loop through array and set gameID
-        for(int i = 0; i < games.length; i++)
-            if(input.equals(games[i][0]))
-                gameID = Integer.parseInt(games[i][1]);
-
-        //Loads a game from the database
-        Game game = Game.loadGameFromDatabase(gameID);
-        game.setGameSaved(true); //Sets that the game has been saved before and has a name
-
-        //Creates the game panel
-        this.gamePanel = null;
-        populate(new CreatePanel(this, game));
+        client.loadIntoLobby();
     }
 
     /**
@@ -131,23 +189,24 @@ public class MainWindow extends JFrame implements WindowListener {
      * Then saves the game in the database
      */
     public void saveGame() {
-        int gameID; //The id of the game to save
+        try {
+            client.saveGame();
+        } catch(IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Save Game", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
-        if(getGamePanel() != null) {
-            getGamePanel().getGame().setGameSaved(true); //Set the game to saved
-            String name = JOptionPane.showInputDialog(this, "Enter a name for the game","Save Game",1);
-            gameID = getGamePanel().getGame().getGameID(); //Get the gameID
-            DBUtilities.INSTANCE.updateGame(gameID, name); //Update the game name in the database
-            DBUtilities.INSTANCE.saveGameSettings(gameID, getGamePanel().getGame().getSettings().toJSON()); //Save the game settings
+    /**
+     * Opens the Main's Settings window, where they can change options and settings. If the window is already open
+     * when this method is called, it simply switches focus to the already open window.
+     */
+    public void openClientSettings() {
+        if(settingsWindow == null) {
+            settingsWindow = new SettingsWindow();
+            settingsWindow.addWindowListener(this);
         } else {
-            //If no game loaded, show message
-            JOptionPane.showMessageDialog(this,"No game loaded");
-        }//else
-    }//saveGame
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-
+            settingsWindow.requestFocus();
+        }
     }
 
     /**
@@ -158,24 +217,26 @@ public class MainWindow extends JFrame implements WindowListener {
     @Override
     public void windowClosing(WindowEvent e) {
         // Ask about saving
-        if(gamePanel != null) {
-            if(gamePanel.getGame().getGameSaved() == false) { //If game has been saved, do not show prompt
+        if(e.getSource() == this && client.getCore() instanceof Game) {
+            Game game = (Game)client.getCore();
+            if(!game.getGameSaved()) { //If game has been saved, do not show prompt
                 if (JOptionPane.showConfirmDialog(this,
                         "Do you want to save this game?", "Save",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
                         == JOptionPane.YES_OPTION) {
-
-                    // Save Dialog
-                    String name = JOptionPane.showInputDialog(this, "Enter a name for the game", "Save Game", 1);
-                    int gameID = gamePanel.getGame().getGameID();
-                    DBUtilities.INSTANCE.updateGame(gameID, name);
-                    DBUtilities.INSTANCE.saveGameSettings(gameID, gamePanel.getGame().getSettings().toJSON());
+                    client.saveGame();
                 }
             }
+        }
+
+        // Remove SettingsWindow reference so we can open a new one
+        if(e.getSource() == settingsWindow) {
+            settingsWindow = null;
         }
     }
 
     // Unused WindowListener implemented methods - required even if they don't do anything
+    @Override public void windowOpened(WindowEvent e) {}
     @Override public void windowClosed(WindowEvent e) {}
     @Override public void windowIconified(WindowEvent e) {}
     @Override public void windowDeiconified(WindowEvent e) {}

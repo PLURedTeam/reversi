@@ -3,14 +3,14 @@ package plu.red.reversi.core;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.command.BoardCommand;
-import plu.red.reversi.core.command.ChatCommand;
-import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.History;
 
 import java.util.LinkedList;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class HistoryTest {
     private History history;
@@ -23,41 +23,27 @@ public class HistoryTest {
     @Test
     public void testHistory() {
         assertEquals(0, history.getNumBoardCommands());
-        assertEquals(0, history.getNumChatCommands());
     }
 
     @Test
     public void testHistoryHistory() {
         History h2 = new History(history);
 
-        history.addCommand(new MoveCommand(PlayerColor.BLACK, new BoardIndex(0, 0)));
+        history.addCommand(new MoveCommand(1, new BoardIndex(0, 0)));
 
         assertEquals(0, h2.getNumBoardCommands());
-        assertEquals(0, h2.getNumChatCommands());
     }
 
     @Test
     public void testGetBoardCommand() {
         try {
             history.getBoardCommand(0);
-            assertTrue(false);
+            fail("Expected IndexOutOfBoundsException");
         } catch(IndexOutOfBoundsException e) {}
 
-        MoveCommand c = new MoveCommand(PlayerColor.BLACK, new BoardIndex(1, 2));
+        MoveCommand c = new MoveCommand(1, new BoardIndex(1, 2));
         history.addCommand(c);
         assertEquals(history.getBoardCommand(0), c);
-    }
-
-    @Test
-    public void testGetChatCommand() {
-        try {
-            history.getChatCommand(0);
-            assertTrue(false);
-        } catch(IndexOutOfBoundsException e) {}
-
-        ChatCommand c = new ChatCommand(Command.Source.PLAYER, "Testing Message");
-        history.addCommand(c);
-        assertEquals(history.getChatCommand(0), c);
     }
 
     @Test
@@ -66,12 +52,12 @@ public class HistoryTest {
 
         try {
             t = history.getMoveCommandsUntil(1);
-            assertTrue(false);
+            fail("Expected IndexOutOfBoundsException");
         } catch(IndexOutOfBoundsException e) {}
 
-        history.addCommand(new MoveCommand(PlayerColor.BLACK, new BoardIndex(1, 2)));
-        history.addCommand(new MoveCommand(PlayerColor.WHITE, new BoardIndex(3, 5)));
-        history.addCommand(new MoveCommand(PlayerColor.BLACK, new BoardIndex(2, 0)));
+        history.addCommand(new MoveCommand(0, new BoardIndex(1, 2)));
+        history.addCommand(new MoveCommand(1, new BoardIndex(3, 5)));
+        history.addCommand(new MoveCommand(0, new BoardIndex(2, 0)));
 
         assertEquals(1, history.getMoveCommandsUntil(1).size());
         assertEquals(3, history.getMoveCommandsUntil(3).size());

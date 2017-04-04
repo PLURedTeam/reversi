@@ -4,8 +4,12 @@ import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingSource;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 import plu.red.reversi.client.gui.MainWindow;
+import plu.red.reversi.core.Client;
 
 public class Main {
+
+    private static Client client;
+    public static Client getClient() { return client; }
 
     public static void main(String[] args)
     {
@@ -14,7 +18,7 @@ public class Main {
         Animator.setDefaultTimingSource(ts);
         ts.init();
 
-        // Create the MainWindow
-        MainWindow window = new MainWindow();
+        // Create the Client
+        client = new Client(new MainWindow());
     }
 }

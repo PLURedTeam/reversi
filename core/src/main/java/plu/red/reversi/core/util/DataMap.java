@@ -599,11 +599,14 @@ public class DataMap {
             registerConverter(String.class,  (key, value, json) -> json.put(key, value), (key, json) -> json.getString(key));
 
             // Register more basic Conversions for specific Number types
-            registerConverter(Integer.class,  (key, value, json) -> json.put(key, value), (key, json) -> json.getInt(key));
-            registerConverter(Float.class,  (key, value, json) -> json.put(key, value), (key, json) -> (float)json.getDouble(key) );
+            registerConverter(Integer.class, (key, value, json) -> json.put(key, value), (key, json) -> json.getInt(key));
+            registerConverter(Float.class,   (key, value, json) -> json.put(key, value), (key, json) -> (float)json.getDouble(key) );
             registerConverter(Double.class,  (key, value, json) -> json.put(key, value), (key, json) -> json.getDouble(key));
-            registerConverter(Short.class,  (key, value, json) -> json.put(key, value), (key, json) -> (short)json.getInt(key));
-            registerConverter(Long.class,  (key, value, json) -> json.put(key, value), (key, json) -> (long)json.getInt(key));
+            registerConverter(Short.class,   (key, value, json) -> json.put(key, value), (key, json) -> (short)json.getInt(key));
+            registerConverter(Long.class,    (key, value, json) -> json.put(key, value), (key, json) -> (long)json.getInt(key));
+
+            // Register Recursive Conversion
+            registerConverter(DataMap.class, (key, value, json) -> json.put(key, value.toJSON()), (key, json) -> new DataMap(json.getJSONObject(key)));
         }
 
         protected String description;

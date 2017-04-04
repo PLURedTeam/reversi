@@ -13,6 +13,7 @@ import java.util.Set;
  * and extensible, so that it is possible to add more Player colors/types with very little effort, and in many cases no
  * changes outside this file.
  */
+@Deprecated
 public enum PlayerColor {
 
     NONE(false, null, "Non-player"),

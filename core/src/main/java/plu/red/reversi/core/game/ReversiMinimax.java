@@ -1,4 +1,4 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.game;
 
 import plu.red.reversi.core.command.MoveCommand;
 
@@ -9,18 +9,18 @@ import java.util.Set;
  */
 public class ReversiMinimax implements Runnable {
     private Game game;
-    private PlayerColor aiRole;
+    private int aiID;
     public final int MAX_DEPTH;
 
     /**
      * Constructs a ReversiMinimax problem to solve.
      * @param game Reference to current game so we can get information like board state.
-     * @param aiRole Player we want to maximize (who we are).
+     * @param aiID Player ID we want to maximize (who we are).
      * @param MAX_DEPTH Maximum search depth.
      */
-    public ReversiMinimax(final Game game, PlayerColor aiRole, int MAX_DEPTH) {
+    public ReversiMinimax(final Game game, int aiID, int MAX_DEPTH) {
         this.game = game;
-        this.aiRole = aiRole;
+        this.aiID = aiID;
         this.MAX_DEPTH = MAX_DEPTH;
     }
 
@@ -46,7 +46,7 @@ public class ReversiMinimax implements Runnable {
      * @return True if a move can be made, otherwise false.
      */
     public boolean canPlay() {
-        if(game.getBoard().getPossibleMoves(aiRole).isEmpty()) return false;
+        if(game.getBoard().getPossibleMoves(aiID).isEmpty()) return false;
         return true;
     }
 
@@ -57,7 +57,7 @@ public class ReversiMinimax implements Runnable {
     public MoveCommand getBestMoveCommand() throws IndexOutOfBoundsException {
         BoardIndex b = getBestPlay();
         if(b == null) throw new IndexOutOfBoundsException("AI Cannot move");
-        return new MoveCommand(aiRole, b);
+        return new MoveCommand(aiID, b);
     }
 
     /**
@@ -67,7 +67,7 @@ public class ReversiMinimax implements Runnable {
      */
     public BoardIndex getBestPlay() {
         Board board = game.getBoard();
-        Set<BoardIndex> possibleMoves = board.getPossibleMoves(aiRole);
+        Set<BoardIndex> possibleMoves = board.getPossibleMoves(aiID);
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
         int bestScore = Integer.MIN_VALUE;
@@ -75,9 +75,9 @@ public class ReversiMinimax implements Runnable {
         BoardIndex bestMove = null;
         for(BoardIndex i : possibleMoves) {
             Board subBoard = new Board(board);
-            subBoard.apply(new MoveCommand(aiRole, i));
+            subBoard.apply(new MoveCommand(aiID, i));
 
-            final int childScore = getBestPlay(subBoard, aiRole.getNext(game.getUsedPlayers()), alpha, beta, 1);
+            final int childScore = getBestPlay(subBoard, game.getNextPlayerID(aiID), alpha, beta, 1);
             if(childScore > bestScore) {
                 bestScore = childScore;
                 bestMove = i;
@@ -97,20 +97,20 @@ public class ReversiMinimax implements Runnable {
      */
     private int heuristicScore(Board board, boolean endgame) {
         //ours - (all - ours) == ours * 2 - all
-        int score = (board.getScore(aiRole) * 2) - board.getTotalPieces();
+        int score = (board.getScore(aiID) * 2) - board.getTotalPieces();
 
         if(!endgame) {
-            PlayerColor player = board.at(new BoardIndex(0, 0));
-            if(player.isValid()) score += player == aiRole ? 4 : -4;
+            int player = board.at(new BoardIndex(0, 0));
+            if(player >= 0) score += player == aiID ? 4 : -4;
 
             player = board.at(new BoardIndex(board.size - 1, 0));
-            if(player.isValid()) score += player == aiRole ? 4 : -4;
+            if(player >= 0) score += player == aiID ? 4 : -4;
 
             player = board.at(new BoardIndex(0, board.size - 1));
-            if(player.isValid()) score += player == aiRole ? 4 : -4;
+            if(player >= 0) score += player == aiID ? 4 : -4;
 
             player = board.at(new BoardIndex(board.size - 1, board.size - 1));
-            if(player.isValid()) score += player == aiRole ? 4 : -4;
+            if(player >= 0) score += player == aiID ? 4 : -4;
 
             return score;
         }
@@ -122,7 +122,7 @@ public class ReversiMinimax implements Runnable {
      * on their turn.
      * @return A child of node which is the best state to go to.
      */
-    private int getBestPlay(Board board, PlayerColor player, int alpha, int beta, int depth) {
+    private int getBestPlay(Board board, int player, int alpha, int beta, int depth) {
         if(depth >= MAX_DEPTH)
             return heuristicScore(board, false);
 
@@ -130,14 +130,14 @@ public class ReversiMinimax implements Runnable {
         if(possibleMoves.isEmpty()) //can't move
             return heuristicScore(board, true);
 
-        final boolean maximize = player == aiRole;
+        final boolean maximize = player == aiID;
         int bestScore = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for(BoardIndex i : possibleMoves) {
             Board subBoard = new Board(board);
             subBoard.apply(new MoveCommand(player, i));
 
-            final int childScore = getBestPlay(subBoard, player.getNext(game.getUsedPlayers()), alpha, beta, depth + 1);
+            final int childScore = getBestPlay(subBoard, game.getNextPlayerID(player), alpha, beta, depth + 1);
             if(maximize && childScore > bestScore) {
                 bestScore = childScore;
                 alpha = Integer.max(alpha, childScore);

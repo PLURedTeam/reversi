@@ -1,4 +1,4 @@
-package plu.red.reversi.client.gui;
+package plu.red.reversi.client.gui.util;
 
 
 import plu.red.reversi.core.listener.IChatListener;
@@ -104,7 +104,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
             } else this.add(new JLabel("[" + msg.getTimeString() + "]"));
 
             JLabel namelabel = new JLabel(msg.username);
-            namelabel.setForeground(msg.usercolor);
+            namelabel.setForeground(new Color(msg.usercolor.composite));
             this.add(namelabel);
 
             this.add(new JLabel(": " + msg.message));

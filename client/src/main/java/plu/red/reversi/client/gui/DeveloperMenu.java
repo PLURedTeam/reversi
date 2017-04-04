@@ -1,13 +1,12 @@
 package plu.red.reversi.client.gui;
 
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.game.Game;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 /**
@@ -22,7 +21,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     private JMenuItem testFlipAnimItem;
     private JMenuItem changePlayer1NameItem;
     private JMenuItem swapActivePlayerItem;
-    private JMenuItem makeWinnerItem;
+    private JMenuItem endGameItem;
 
     private JMenuItem testServerItem;
 
@@ -39,28 +38,28 @@ public class DeveloperMenu extends JMenu implements ActionListener {
         this.getAccessibleContext().setAccessibleDescription("Developer options");
 
         testFlipAnimItem = new JMenuItem("Test flip animation" );
-        testFlipAnimItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.ALT_MASK));
+        testFlipAnimItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.ALT_MASK));
         testFlipAnimItem.addActionListener(this);
         this.add(testFlipAnimItem);
 
         changePlayer1NameItem = new JMenuItem("Change Player 1 Name");
-        changePlayer1NameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
+        changePlayer1NameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
         changePlayer1NameItem.addActionListener(this);
         this.add(changePlayer1NameItem);
 
         swapActivePlayerItem = new JMenuItem("Swap Active Player");
-        swapActivePlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
+        swapActivePlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK));
         swapActivePlayerItem.addActionListener(this);
         this.add(swapActivePlayerItem);
 
         testServerItem = new JMenuItem("Test Server");
-        testServerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
+        testServerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_MASK));
         testServerItem.addActionListener(this);
         this.add(testServerItem);
 
-        makeWinnerItem = new JMenuItem("Make Current Player Winner");
-        makeWinnerItem.addActionListener(this);
-        this.add(makeWinnerItem);
+        endGameItem = new JMenuItem("Force End the Game");
+        endGameItem.addActionListener(this);
+        this.add(endGameItem);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -72,37 +71,45 @@ public class DeveloperMenu extends JMenu implements ActionListener {
             swapActivePlayer();
         } else if( e.getSource() == testServerItem ) {
             testServer();
-        } else if( e.getSource() == makeWinnerItem) {
-            makeWinner();
+        } else if( e.getSource() == endGameItem) {
+            endGame();
         }
     }
 
+    @Deprecated
     private void testFlip() {
+        /*
         gui.getGamePanel().getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(1, 5),
                 PlayerColor.WHITE);
         gui.getGamePanel().getBoardView().doFlip(new BoardIndex(5, 1), new BoardIndex(5, 6),
                 PlayerColor.WHITE);
+                */
     }
 
+    @Deprecated
     private void changePlayer1Name() {
         String newName = JOptionPane.showInputDialog(gui, "New name");
         //gui.getPlayerInfoPanel().setPlayerName(1, newName);
     }
 
     private void swapActivePlayer() {
-        gui.getGamePanel().getGame().nextTurn();
-        // Spoof PlayerInfoPanel with a fake command in order to update. Command contents don't matter, as it won't read them.
-        gui.getGamePanel().getPlayerInfoPanel().commandApplied(new MoveCommand(Command.Source.PLAYER, PlayerColor.WHITE, new BoardIndex(0,0)));
+        Controller core = gui.getClient().getCore();
+        if(core instanceof Game) {
+            Game game = (Game)core;
+            game.nextTurn();
+        }
     }
 
+    @Deprecated
     private void testServer() {
-        // TODO: test a connection to the server.
+        // Moved to NetworkMenu
     }
 
-    private void makeWinner() {
-        gui.getGamePanel().getBoardView().onGameOver(
-                gui.getGamePanel().getGame().getCurrentPlayer(),
-                gui.getGamePanel().getGame().getCurrentPlayer().getScore()
-        );
+    private void endGame() {
+        Controller core = gui.getClient().getCore();
+        if(core instanceof Game) {
+            Game game = (Game)core;
+            game.endGame();
+        }
     }
 }

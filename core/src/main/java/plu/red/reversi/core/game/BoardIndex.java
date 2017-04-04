@@ -1,4 +1,4 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.game;
 
 /**
  * Represents a single tile on the board

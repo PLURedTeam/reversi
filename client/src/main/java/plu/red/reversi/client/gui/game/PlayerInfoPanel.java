@@ -1,12 +1,13 @@
 package plu.red.reversi.client.gui.game;
 
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.listener.ICommandListener;
-import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.listener.ISettingsListener;
+import plu.red.reversi.core.game.player.Player;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -14,13 +15,16 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PlayerInfoPanel extends JPanel implements ICommandListener {
+/**
+ * Glory to the Red Team.
+ *
+ * Panel for displaying the scores of players in a game. Arranges individual player scores in a Grid Layout with 2
+ * columns and infinite rows.
+ */
+public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettingsListener {
 
     private Border activeBorder;
     private Border inactiveBorder;
-    //private JPanel player1Panel, player2Panel;
-    //private JLabel player1NameLabel, player2NameLabel;
-    //private ScoreIcon player1Score, player2Score;
     private Color activeBackgroundColor = new Color(180, 250, 180);
 
     private class PlayerPanel extends JPanel {
@@ -37,7 +41,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
         }
     }
 
-    private HashMap<PlayerColor, PlayerPanel> playerPanelMap = new HashMap<PlayerColor, PlayerPanel>();
+    private HashMap<Integer, PlayerPanel> playerPanelMap = new HashMap<>();
     private final Game game;
 
     public PlayerInfoPanel(Game game) {
@@ -50,20 +54,36 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
         activeBorder = BorderFactory.createMatteBorder(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE,
                 new Color(250,200,100));
 
+        populate();
+
+        SettingsLoader.INSTANCE.addSettingsListener(this);
+    }
+
+    protected final void populate() {
+        this.removeAll();
         this.setLayout(new GridLayout(0, 2));
 
-        for(PlayerColor player : game.getUsedPlayers()) {
-            PlayerPanel panel = new PlayerPanel(game.getPlayer(player));
-            playerPanelMap.put(player, panel);
+        // Create an individual score panel for every player in the Game
+        for(Player player : game.getAllPlayers()) {
+            PlayerPanel panel = new PlayerPanel(player);
+            playerPanelMap.put(player.getID(), panel);
             this.add(panel);
         }
 
-        setActivePlayer(game.getCurrentPlayer().getRole());
+        // Set the currently active player to the correct instance
+        setActivePlayer(game.getCurrentPlayer().getID());
+
+        this.revalidate();
+        this.repaint();
     }
 
-    protected final void setActivePlayer( PlayerColor player ) {
-        for(Map.Entry<PlayerColor, PlayerPanel> entry : playerPanelMap.entrySet()) {
-            if(entry.getKey() == player) {
+    public final void updateGUI() {
+        populate();
+    }
+
+    protected final void setActivePlayer( int playerID ) {
+        for(Map.Entry<Integer, PlayerPanel> entry : playerPanelMap.entrySet()) {
+            if(entry.getKey() == playerID) {
                 entry.getValue().setBackground(activeBackgroundColor);
                 entry.getValue().setBorder(activeBorder);
             } else {
@@ -82,8 +102,17 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener {
     public void commandApplied(Command cmd) {
         if(cmd instanceof MoveCommand || cmd instanceof SurrenderCommand) {
             // Update this GUI component
-            setActivePlayer(game.getCurrentPlayer().getRole());
+            setActivePlayer(game.getCurrentPlayer().getID());
             this.repaint();
         }
+    }
+
+    /**
+     * Called when the client's settings have been changed.
+     */
+    @Override
+    public void onClientSettingsChanged() {
+        // Forces a refresh of the entire panel
+        populate();
     }
 }

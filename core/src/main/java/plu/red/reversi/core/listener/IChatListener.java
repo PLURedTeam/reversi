@@ -7,7 +7,7 @@ import plu.red.reversi.core.util.ChatMessage;
  *
  * Interface for when a chat message is received (usually from the server).
  */
-public interface IChatListener {
+public interface IChatListener extends IListener {
 
     /**
      * Called when a chat message has been received, usually from the server.

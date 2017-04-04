@@ -2,6 +2,7 @@ package plu.red.reversi.core;
 
 import org.junit.Assert;
 import org.junit.Test;
+import plu.red.reversi.core.game.BoardIndex;
 
 /**
  * Created by daniel on 3/19/17.

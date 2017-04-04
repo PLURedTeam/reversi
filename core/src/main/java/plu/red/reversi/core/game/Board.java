@@ -1,21 +1,16 @@
-package plu.red.reversi.core;
+package plu.red.reversi.core.game;
 
-/**
- * Created by daniel on 3/5/17.
- * Glory to the Red Team.
- */
-
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IFlipListener;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 /**
+ * Glory to the Red Team.
+ *
  * Represents the state of the board at a particular instant in time
  */
 public class Board {
@@ -53,59 +48,59 @@ public class Board {
     //  Members
     // *********
 
-    private PlayerColor[][] board; // 2D array that represents the board
+    private int[][] board; // 2D array that represents the board. -1 represents an empty space.
     public final int size;
-    public int[] scoreCache;
+    protected final HashMap<Integer, Integer> scoreCache = new HashMap<>();
 
 
     /**
-     * Constructor for initializing board array
+     * Basic Constructor. Constructs a new Board object with the given <code>size</code>.
      *
-     * @param sz for the size of the board
+     * @param size Integer size of the Board
      */
-    public Board(int sz){
-        size = sz;
-        board = new PlayerColor[sz][sz];
-        scoreCache = new int[PlayerColor.validPlayerColors.length];
-        Arrays.fill(scoreCache, -1);
+    public Board(int size){
+        this.size = size;
+        board = new int[size][size];
+        //Arrays.fill(scoreCache, -1);
         for(int i = 0; i < size; i++) {
-            Arrays.fill(board[i], PlayerColor.NONE);
+            Arrays.fill(board[i], -1);
         }
     }
 
     /**
-     * Copy constructor creating a copy of
+     * Copy Constructor. Constructs a new Board object that is a copy of an existing Board object.
      *
-     * @param b for the board
+     * @param b Board object to copy
      */
     public Board(Board b){
         size = b.size;
-        scoreCache = Arrays.copyOf(b.scoreCache, b.scoreCache.length);
-        board = new PlayerColor[size][size];
+
+        // Copy the board
+        board = new int[size][size];
         for(int r = 0; r < size; r++){
             board[r] = Arrays.copyOf(b.board[r], size);
         }// end loop
+
+        // Can't copy the scoreCache because of ConcurrentModificationExceptions
     }
 
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
-     * Set commands to history.
      *
      * @param game Game object this board is attached to during setup; generally used to determine player colors and size.
      */
     public static LinkedList<BoardCommand> getSetupCommands(Game game) {
-        return getSetupCommands(game.getUsedPlayers().toArray(new PlayerColor[]{}),
+        return getSetupCommands(game.getUsedPlayers(),
                 game.getSettings().get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
     }
 
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
-     * Set commands to history.
      *
-     * @param usedPlayers Array of PlayerColors used in this setup
+     * @param usedPlayers Array of Integer Player IDs used in this setup
      * @param size Size of the board to setup
      */
-    public static LinkedList<BoardCommand> getSetupCommands(PlayerColor[] usedPlayers, int size) {
+    public static LinkedList<BoardCommand> getSetupCommands(Integer[] usedPlayers, int size) {
         LinkedList<BoardCommand> list = new LinkedList<>();
         switch(usedPlayers.length) {
             case 2:
@@ -152,35 +147,35 @@ public class Board {
      * Finds the value at a specific place of the board
      *
      * @param index being searched for
-     * @return color of the player
+     * @return PlayerID at <code>index</code>
      * @throws IndexOutOfBoundsException if the index that is passed in is out of bounds
      */
-    public final PlayerColor at(BoardIndex index) throws IndexOutOfBoundsException{
+    public final int at(BoardIndex index) throws IndexOutOfBoundsException{
         return board[index.row][index.column];
     }
 
     /**
-     * Returns the score of the PlayerColor object passed in
+     * Returns the score of the Player ID passed in
      *
-     * @param role, color of the player
-     * @return score, number of instances of the player on the board
+     * @param player Integer Player ID
+     * @return Integer score representing the number of instances of the Player ID on the board
      */
-    public int getScore(PlayerColor role){
-        int ordinal = role.validOrdinal();
-        if(scoreCache[ordinal] >= 0)
-            return scoreCache[ordinal];
+    public int getScore(int player){
 
-        Arrays.fill(scoreCache, 0);
+        if(scoreCache.containsKey(player)) return scoreCache.get(player);
+
+        int score = 0;
         //look for the instances of the role on the board
         for(int r = 0; r < size; r++){
             for(int c = 0; c < size; c++){
-                if(board[r][c].isValid()){
-                    scoreCache[board[r][c].validOrdinal()]++;
+                if(board[r][c] == player){
+                    score++;
                 }
             }
         }//end loop
 
-        return scoreCache[ordinal];
+        scoreCache.put(player, score);
+        return score;
     }
 
     /**
@@ -188,6 +183,18 @@ public class Board {
      * @return Total pieces on board.
      */
     public int getTotalPieces() {
+
+        int sum = 0;
+        for(int r = 0; r < size; r++){
+            for(int c = 0; c < size; c++){
+                if(board[r][c] >= 0){
+                    sum++;
+                }
+            }
+        }
+        return sum;
+
+        /* Old method doesn't work anymore. A fix can be attempted in the future
         boolean valid = true;
         int sum = 0;
         for(int x = 0; x < scoreCache.length; ++x) {
@@ -204,21 +211,22 @@ public class Board {
         for(int x = 0; x < PlayerColor.validPlayerColors.length; ++x)
             sum += getScore(PlayerColor.validPlayerColors[x]);
         return sum;
+        */
     }
 
     /**
      * Checks the board to see if the move attempted is valid
      *
-     * @param role, color of the player
-     * @param index, square of the board move is attempting to be made onto
+     * @param player Integer Player ID to check
+     * @param index square of the board move is attempting to be made onto
      */
-    public boolean isValidMove(PlayerColor role, BoardIndex index){
+    public boolean isValidMove(int player, BoardIndex index){
         //check if the index is out of bounds
         if(index.row >= size || index.column >= size)
             return false;
 
         //check if the index is empty
-        if(board[index.row][index.column] != PlayerColor.NONE)
+        if(board[index.row][index.column] >= 0)
             return false;
 
         //This loop calls the private function isValidMove for each direction
@@ -226,7 +234,7 @@ public class Board {
             int dr = i < 3 ? -1 : ( i > 4 ? 1 : 0);
             int dc = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
             //checks if the move is valid
-            if(isValidMove(role, dr, dc, index)) {
+            if(isValidMove(player, dr, dc, index)) {
                 return true; //if the move is valid
             }
         }//end loop
@@ -240,20 +248,22 @@ public class Board {
      * @return True if it is a valid move, otherwise false.
      */
     public boolean isValidMove(MoveCommand command) {
-        return isValidMove(command.player, command.position);
+        return isValidMove(command.playerID, command.position);
     }
 
     /**
      * Private method isValidMove handles the loop to check move validity in each direction
      *
+     * @param player Integer Player ID to check
      * @param dr change in x
      * @param dc change in y
+     * @param i original BoardIndex move was played on
      * @return if the move is valid
      */
-    private boolean isValidMove(PlayerColor role, int dr, int dc, BoardIndex i){
+    private boolean isValidMove(int player, int dr, int dc, BoardIndex i){
         try {
-            PlayerColor r = board[i.row + dr][i.column + dc];
-            if (r == role || !r.isValid())
+            int r = board[i.row + dr][i.column + dc];
+            if (r == player || r < 0)
                 return false;
         }
         catch(IndexOutOfBoundsException e){
@@ -261,7 +271,7 @@ public class Board {
         }
 
         for(int j = 1; j<size; j++){
-            PlayerColor r= PlayerColor.NONE;
+            int r = -1;
             try {
                 r = board[i.row + dr * j][i.column + dc * j];
             }
@@ -269,11 +279,11 @@ public class Board {
                 return false;
             }
             //if the tile is occupied by a piece of the same color
-            if(r == role) {
+            if(r == player) {
                 return true;
             }
             //if the tile is occupied by no piece
-            if(!r.isValid()) {
+            if(r < 0) {
                 return false;
             }
         }
@@ -284,20 +294,20 @@ public class Board {
     /**
      * Find the different moves that could be made and store them into an ArrayList
      *
-     * @param color of the player
+     * @param player Integer Player ID to check for
      * @return ArrayList moves
      */
-    public Set<BoardIndex> getPossibleMoves(PlayerColor color ){
+    public Set<BoardIndex> getPossibleMoves(int player ){
         //declare an array for possible moves method
         HashSet<BoardIndex> moves = new HashSet<>();
 
         BoardIndex indx = new BoardIndex();
 
-        //This loop calls the function isValidMove for each direction
+        //This loop calls the function isValidMove for each position on the board
         for(indx.row = 0; indx.row < size; indx.row++) {
             for(indx.column = 0; indx.column < size; indx.column++) {
                 //checks if the move is valid
-                if (isValidMove(color, indx)) {
+                if (isValidMove(player, indx)) {
                     moves.add(new BoardIndex(indx)); //adds the valid move into the array of moves
                 }
             }
@@ -312,8 +322,10 @@ public class Board {
      * @param c command made
      */
     public void apply(MoveCommand c) {
+        //invalidate the entire cache
+        scoreCache.clear();
         //actually set the tile
-        apply(new SetCommand(c));
+        board[c.position.row][c.position.column] = c.playerID;
 
         //flip the tiles as a result of placing this one
         for(int i = 0; i < 8; i++) {
@@ -325,10 +337,10 @@ public class Board {
     }
 
     public void apply(SetCommand c) {
-        //invalidate the cache
-        Arrays.fill(scoreCache, -1);
+        //invalidate the cache for this player
+        scoreCache.remove(c.playerID);
         //set the tile
-        board[c.position.row][c.position.column] = c.player;
+        board[c.position.row][c.position.column] = c.playerID;
     }
 
     public void apply(BoardCommand c){
@@ -347,24 +359,24 @@ public class Board {
      * @return
      */
     private boolean flipTiles(MoveCommand c, int dr, int dc, int count) {
-        PlayerColor tile = null;
+        int tile = -1;
         try {
             tile = board[dr * count + c.position.row][dc * count + c.position.column];
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
-        if (tile == c.player) {
+        if (tile == c.playerID) {
             // Signal our flip animation
             for(IFlipListener listener : listenerSetFlips)
                 listener.doFlip(
                         c.position,
                         new BoardIndex(c.position.row + dr*(count-1), c.position.column + dc*(count-1)),
-                        c.player);
+                        c.playerID);
             return true;
         }
-        if (tile.isValid()) {
+        if (tile >= 0) {
             if (flipTiles(c, dr, dc, count + 1)) {
-                board[c.position.row + dr * count][c.position.column + dc * count] = c.player;
+                board[c.position.row + dr * count][c.position.column + dc * count] = c.playerID;
                 return true;
             }
         }
