@@ -1,5 +1,6 @@
 package plu.red.reversi.core.game;
 
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.MoveCommand;
 
 import java.util.Set;
@@ -126,9 +127,16 @@ public class ReversiMinimax implements Runnable {
         if(depth >= MAX_DEPTH)
             return heuristicScore(board, false);
 
+        final boolean turn_skipping = game.getSettings().get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class);
+        final int start_player = player;
         Set<BoardIndex> possibleMoves = board.getPossibleMoves(player);
-        if(possibleMoves.isEmpty()) //can't move
-            return heuristicScore(board, true);
+        while(possibleMoves.isEmpty()) { //can't move
+            player = game.getNextPlayerID(player);
+            if(player != start_player) //inc. player and make sure we have not looped
+                possibleMoves = board.getPossibleMoves(player);
+            else
+                return heuristicScore(board, true);
+        }
 
         final boolean maximize = player == aiID;
         int bestScore = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
