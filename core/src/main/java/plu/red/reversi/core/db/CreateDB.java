@@ -112,11 +112,12 @@ public class CreateDB {
     private void createPlayersTable() {
         String sql = "create table PLAYERS (\n"
                 + "game_id int NOT NULL,\n"
-                + "player_role int NOT NULL,\n"
+                + "player_id int NOT NULL,\n"
+                + "player_color int NOT NULL,\n"
                 + "player_name varchar(50),\n"
                 + "player_type int NOT NULL,\n"
                 + "player_diff int,\n"
-                + "PRIMARY KEY(game_id,player_role)\n"
+                + "PRIMARY KEY(game_id,player_id)\n"
                 + "FOREIGN KEY(game_id) references GAME(game_id)\n"
                 + "ON DELETE CASCADE\n"
                 + ");";

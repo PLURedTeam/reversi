@@ -3,7 +3,6 @@ package plu.red.reversi.core.util;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.awt.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -119,7 +118,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
      */
     public String toHTMLString() {
         return "<html>[" + getTimeString() + "] <font color=rgb("
-                + usercolor.getRed() + "," + usercolor.getGreen() + "," + usercolor.getBlue() + ")>" + username
+                + usercolor.red + "," + usercolor.green + "," + usercolor.blue + ")>" + username
                 + "</font>: " + message + "</html>";
     }
 
@@ -147,7 +146,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         JSONObject json = new JSONObject();
         json.put("channel", channel);
         json.put("username", username);
-        json.put("usercolor", usercolor.getRGB());
+        json.put("usercolor", usercolor.composite);
         json.put("message", message);
 
         // Serialize timestamp

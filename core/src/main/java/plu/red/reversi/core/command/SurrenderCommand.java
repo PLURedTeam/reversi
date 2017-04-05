@@ -1,46 +1,49 @@
 package plu.red.reversi.core.command;
 
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.game.Game;
 
 /**
  * Glory to the Red Team.
  *
- * Command implementation class for a surrender.
+ * Command implementation class for a surrender action.
  */
 public class SurrenderCommand extends Command {
 
-    public final PlayerColor player;
+    /**
+     * Integer ID specifying what Player issued this SurrenderCommand.
+     */
+    public final int playerID;
 
     /**
-     * Constructs a new Surrender Command. Source defaults to PLAYER.
+     * Basic Constructor. Constructs a new SurrenderCommand with a given <code>playerID</code> and a <code>source</code>
+     * of CLIENT.
      *
-     * @param player Player that is surrendering
+     * @param playerID Integer ID of the Player that is surrendering
      */
-    public SurrenderCommand(PlayerColor player) {
-        this(Source.PLAYER, player);
-    }
+    public SurrenderCommand(int playerID) { this(Source.CLIENT, playerID); }
 
     /**
-     * Constructs a new Surrender Command.
+     * Full Constructor. Constructs a new SurrenderCommand with a given <code>playerID</code> and <code>source</code>.
      *
-     * @param source Where the Command comes from
-     * @param player Player that is surrendering
+     * @param source Source enum differentiating the origin of a Command between the client or the server
+     * @param playerID Integer ID of the Player that is surrendering
      */
-    public SurrenderCommand(Source source, PlayerColor player) {
+    public SurrenderCommand(Source source, int playerID) {
         super(source);
-        this.player = player;
+        this.playerID = playerID;
     }
 
     /**
-     * Uses data from the Game object to determine whether or not this Command is valid. IE: Whether a move played by a
-     * player is on a valid position of the board.
+     * Uses data from a Controller object to determine whether or not this Command is valid. IE: Whether a move played
+     * by a player is on a valid position of a board.
      *
-     * @param game Game object to pull data from
+     * @param controller Controller object to pull data from
      * @return true if this Command is valid, false otherwise
      */
     @Override
-    public boolean isValid(Game game) {
-        return game.getCurrentPlayer().getRole() == player && game.getUsedPlayers().contains(player);
+    public boolean isValid(Controller controller) {
+        return controller instanceof Game &&
+                ((Game)controller).getCurrentPlayer().getID() == playerID;
     }
 }

@@ -7,7 +7,7 @@ import plu.red.reversi.core.command.Command;
  *
  * Interface for when a valid command is being applied.
  */
-public interface ICommandListener {
+public interface ICommandListener extends IListener {
 
     /**
      * Called when a Command is being passed through Game and has been validated.

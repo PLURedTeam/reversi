@@ -1,8 +1,7 @@
 package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.game.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,18 +10,15 @@ import java.util.Map;
 public class ScoreIcon extends JPanel {
 
     private Color chipColor, fontColor;
-    //private int scoreValue;
     private static Font font = new Font("SansSerif", Font.PLAIN, 14);
     private final Player player;
 
     public ScoreIcon(Player player) {
         this.player = player;
-        PlayerColor playerType = player.getRole();
-        this.chipColor = playerType.color;
-        this.fontColor = ((playerType.color.getRed() + playerType.color.getGreen() + playerType.color.getBlue()) / 3) > 128 ? Color.BLACK : Color.WHITE;
+        this.chipColor = new Color(player.getColor().composite);
+        this.fontColor = ((player.getColor().red + player.getColor().green + player.getColor().blue) / 3) > 128 ? Color.BLACK : Color.WHITE;
         this.setPreferredSize(new Dimension(37,37));
         this.setOpaque(false);
-        //scoreValue = 0;
     }
 
     @Override

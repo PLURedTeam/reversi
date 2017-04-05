@@ -1,8 +1,8 @@
 package plu.red.reversi.core.command;
 
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.game.Game;
 
 /**
  * Glory to the Red Team.
@@ -12,35 +12,38 @@ import plu.red.reversi.core.PlayerColor;
 public class MoveCommand extends BoardCommand {
 
     /**
-     * Constructs a new move command.
-     * Defaults to PLAYER Source.
-     * @param player Player to make the move
-     * @param position Location on the board.
-     */
-    public MoveCommand(PlayerColor player, BoardIndex position) {
-        this(Source.PLAYER, player, position);
-    }
-
-    /**
-     * Constructs a new move command.
-     * @param source Where the command comes from.
-     * @param player Player to make the move.
-     * @param position Location on the board.
-     */
-    public MoveCommand(Source source, PlayerColor player, BoardIndex position) {
-        super(source, player, position);
-    }
-
-    /**
-     * Uses data from the Game object to determine whether or not this Command is valid. IE: Whether a move played by a
-     * player is on a valid position of the board.
+     * Basic Constructor. Constructs a new MoveCommand with a given <code>playerID</code>, <code>position</code>, and
+     * a <code>source</code> of CLIENT.
      *
-     * @param game Game object to pull data from
+     * @param playerID Integer ID representing which Player issued the Command
+     * @param position BoardIndex <code>position</code> that this Command affects
+     */
+    public MoveCommand(int playerID, BoardIndex position) { this(Source.CLIENT, playerID, position); }
+
+    /**
+     * Full Constructor. Constructs a new MoveCommand with a given <code>source</code>, <code>playerID</code>, and
+     * <code>position</code>.
+     *
+     * @param source Source enum differentiating the origin of a Command between the client or the server
+     * @param playerID Integer ID representing which Player issued the Command
+     * @param position BoardIndex <code>position</code> that this Command affects
+     */
+    public MoveCommand(Source source, int playerID, BoardIndex position) {
+        super(source, playerID, position);
+    }
+
+    /**
+     * Uses data from a Controller object to determine whether or not this Command is valid. IE: Whether a move played
+     * by a player is on a valid position of a board.
+     *
+     * @param controller Controller object to pull data from
      * @return true if this Command is valid, false otherwise
      */
     @Override
-    public boolean isValid(Game game) {
+    public boolean isValid(Controller controller) {
         // Is it this Player's turn and is the position valid on the board
-        return game.getCurrentPlayer().getRole() == player && game.getBoard().isValidMove(player, position);
+        return controller instanceof Game &&
+                ((Game)controller).getCurrentPlayer().getID() == playerID &&
+                ((Game)controller).getBoard().isValidMove(playerID, position);
     }
 }

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="timingframework-swing-7.3.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.java.timingframework/timingframework-swing/7.3.1/dba1b70ced55cffa6974c25f85ae5484b835677/timingframework-swing-7.3.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.java.timingframework/timingframework-swing/7.3.1/936209d99e7b4373e797ef017134506cfdc5a904/timingframework-swing-7.3.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

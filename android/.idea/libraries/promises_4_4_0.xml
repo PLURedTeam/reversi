@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="promises-4.4.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.surelogic/promises/4.4.0/2a01c8e2e6b8236a281c59a44818928221c99dfa/promises-4.4.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.surelogic/promises/4.4.0/c81a67843c3127a93fbcbe7932cd9240748edd42/promises-4.4.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

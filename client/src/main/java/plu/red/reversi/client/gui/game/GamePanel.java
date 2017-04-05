@@ -1,15 +1,23 @@
 package plu.red.reversi.client.gui.game;
 
-import plu.red.reversi.client.gui.ChatPanel;
+import plu.red.reversi.client.gui.util.ChatPanel;
+import plu.red.reversi.client.gui.CorePanel;
+import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
-import plu.red.reversi.core.Game;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.util.ChatMessage;
 
 import javax.swing.*;
 import java.awt.*;
 
-
-public class GamePanel extends JPanel {
+/**
+ * Glory to the Red Team.
+ *
+ * GamePanel that controls the GUI side of a Game. Acts as a sub-controller for the MainWindow, and controls all
+ * in-game related GUI components.
+ */
+public class GamePanel extends CorePanel {
 
     protected final Game game;
     public Game getGame() { return game; }
@@ -20,7 +28,8 @@ public class GamePanel extends JPanel {
     private GameHistoryPanel historyPanel;
     private ChatPanel chatPanel;
 
-    public GamePanel(Game game) {
+    public GamePanel(MainWindow gui, Game game) {
+        super(gui);
         this.game = game;
 
         this.setLayout(new BorderLayout());
@@ -30,11 +39,10 @@ public class GamePanel extends JPanel {
 
         // Other panels
         playerInfoPanel = new PlayerInfoPanel(game);
-        game.addCommandListener(playerInfoPanel);
+        game.addListener(playerInfoPanel);
         boardView = new BoardView(game);
         game.getBoard().addFlipListener(boardView);
-        game.addCommandListener(boardView);
-        game.addGameOverListener(boardView);
+        game.addListener(boardView);
 
         // This panel will preserve the aspect ratio of the component within it
         JPanel preserveAspectPanel = new JPanel(new PreserveAspectRatioLayout() );
@@ -69,6 +77,11 @@ public class GamePanel extends JPanel {
         this.revalidate();
     }
 
+    @Override
+    public void updateGUI() {
+        playerInfoPanel.updateGUI();
+    }
+
     /**
      * Returns the PlayerInfoPanel
      * @return the PlayerInfoPanel
@@ -79,4 +92,10 @@ public class GamePanel extends JPanel {
      * @return the BoardView
      */
     public BoardView getBoardView() { return boardView; }
+
+    public void cleanup() {
+        // Unregister PlayerInfoPanel ISettingsListener to avoid reference leaks
+        SettingsLoader.INSTANCE.removeSettingsListener(playerInfoPanel);
+        game.cleanup();
+    }
 }

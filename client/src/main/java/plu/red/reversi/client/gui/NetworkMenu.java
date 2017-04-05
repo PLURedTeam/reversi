@@ -1,10 +1,10 @@
 package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.network.WebUtilities;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -51,19 +51,19 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
         //Create the Create an account menu item
         createUser = new JMenuItem("Create an online account" );
-        createUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.SHIFT_MASK));
+        createUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_MASK));
         createUser.addActionListener(this);
         this.add(createUser);
 
         //Create the delete account menu item
         deleteUser = new JMenuItem("Delete my online account");
-        deleteUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.SHIFT_MASK));
+        deleteUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_MASK));
         deleteUser.addActionListener(this);
         this.add(deleteUser);
 
         //Create the seeRanking menu item
         seeRanking = new JMenuItem("See my ranking");
-        seeRanking.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.SHIFT_MASK));
+        seeRanking.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.SHIFT_MASK));
         seeRanking.addActionListener(this);
         this.add(seeRanking);
 

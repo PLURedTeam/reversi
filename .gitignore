@@ -83,3 +83,6 @@ fabric.properties
 
 
 *.db
+*.json
+
+local.properties

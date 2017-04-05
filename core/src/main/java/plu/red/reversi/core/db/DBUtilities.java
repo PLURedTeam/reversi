@@ -3,21 +3,19 @@ package plu.red.reversi.core.db;
 //import statements
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.History;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.History;
 import plu.red.reversi.core.command.*;
-import plu.red.reversi.core.player.BotPlayer;
-import plu.red.reversi.core.player.HumanPlayer;
-import plu.red.reversi.core.player.NullPlayer;
-import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.game.player.BotPlayer;
+import plu.red.reversi.core.game.player.HumanPlayer;
+import plu.red.reversi.core.game.player.NullPlayer;
+import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.Color;
 
-import java.awt.*;
+//import java.awt.*;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Created by Andrew on 3/9/2017.
@@ -117,7 +115,7 @@ public class DBUtilities {
     public boolean saveGamePlayers(int gameID, Collection<Player> players) {
         boolean gameSaved = false;
         int result = 0;
-        String sql = "insert into PLAYERS values(?,?,?,?,?);";
+        String sql = "insert into PLAYERS values(?,?,?,?,?,?);";
 
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -137,10 +135,11 @@ public class DBUtilities {
                 stmt = conn.prepareStatement(sql);
                 stmt.clearParameters();
                 stmt.setInt(1, gameID);
-                stmt.setInt(2, player.getRole().ordinal());
-                stmt.setString(3, player.getName());
-                stmt.setInt(4, type);
-                stmt.setInt(5, playerDiff);
+                stmt.setInt(2, player.getID());
+                stmt.setInt(3, player.getColor().composite);
+                stmt.setString(4, player.getName());
+                stmt.setInt(5, type);
+                stmt.setInt(6, playerDiff);
                 result += stmt.executeUpdate();
             }//for
 
@@ -155,12 +154,11 @@ public class DBUtilities {
     }//saveGamePlayers
 
     /**
-     * Loads the players for a game from the database
+     * Loads the players for a game from the database, and adds them to the game
+     *
      * @param game the game to add the players to
-     * @return array of player objects
      */
-    public ArrayList<Player> loadGamePlayers(Game game) {
-        ArrayList<Player> players = new ArrayList<Player>();
+    public void loadGamePlayers(Game game) {
 
         String sql = "select * from PLAYERS where game_id=?";
 
@@ -171,27 +169,27 @@ public class DBUtilities {
             ResultSet rs = stmt.executeQuery();
 
             while(rs.next()) {
-                int playerRole = rs.getInt("player_role");
+                int playerID   = rs.getInt("player_id");
+                Color color = new Color(rs.getInt("player_color"));
                 String name = rs.getString("player_name");
                 int playerType = rs.getInt("player_type");
                 int playerDiff = rs.getInt("player_diff");
 
 
                 Player p;
-
                 if(playerType == 0)
-                    p = new HumanPlayer(game, PlayerColor.values()[playerRole]);
+                    p = new HumanPlayer(game, playerID, color);
                 else if(playerType == 1)
-                    p = new BotPlayer(game, PlayerColor.values()[playerRole], playerDiff);
+                    p = new BotPlayer(game, playerID, color, playerDiff);
                 else
-                    p = new NullPlayer(game, PlayerColor.values()[playerRole]);
-                players.add(p);
+                    p = new NullPlayer(game, playerID, color);
+
+                p.setName(name);
             }//while
 
         } catch (SQLException e) {
             e.printStackTrace();
         }//catch
-        return players;
     }//loadGamePlayers
 
 
@@ -237,11 +235,11 @@ public class DBUtilities {
             ResultSet rs = stmt.executeQuery();
 
             while(rs.next()) {
-                int color = rs.getInt("player_color");
+                int playerID = rs.getInt("player_color");
                 int row = rs.getInt("move_index_r");
                 int col = rs.getInt("move_index_c");
 
-                MoveCommand m = new MoveCommand(PlayerColor.validPlayers()[color],new BoardIndex(row,col));
+                MoveCommand m = new MoveCommand(playerID, new BoardIndex(row,col));
                 h.addCommand(m);
             }//while
 
@@ -267,7 +265,7 @@ public class DBUtilities {
             int moveIndexR = cmd.position.row;
             int moveIndexC = cmd.position.column;
             String moveSource = cmd.source.toString();
-            int color = cmd.player.validOrdinal();
+            int playerID = cmd.playerID;
 
             //set move = 1
             //move command = 0
@@ -294,7 +292,7 @@ public class DBUtilities {
                 stmt.setInt(3,moveIndexR);
                 stmt.setInt(4,moveIndexC);
                 stmt.setString(5,moveSource);
-                stmt.setInt(6,color);
+                stmt.setInt(6,playerID);
                 stmt.setInt(7,moveType);
 
                 result = stmt.executeUpdate();

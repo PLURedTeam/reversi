@@ -3,26 +3,22 @@ package plu.red.reversi.client.gui.game;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.game.Board;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IFlipListener;
 import plu.red.reversi.core.listener.IGameOverListener;
-import plu.red.reversi.core.player.Player;
+import plu.red.reversi.core.game.player.Player;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
-import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +37,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
     private class FlipAnimator extends TimingTargetAdapter {
 
         private ArrayList<CellState> cells;
-        private PlayerColor newColor;
+        private Color newColor;
         private Animator animator;
 
         @Override
@@ -87,10 +83,19 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
             }
             repaint();
         }
+        
+        // Private helper method
+        private void addCellState(Game game, int r, int c) {
+            CellState cell = new CellState(
+                    new Color( game.getPlayer(game.getBoard().at(new BoardIndex(r, c))).getColor().composite ),
+                    r, c);
+            cellStates[r][c] = cell;
+            cells.add(cell);
+        }
 
         public FlipAnimator(int startRow, int startCol,
                             int endRow, int endCol,
-                            PlayerColor newColor,
+                            Color newColor,
                             long milliseconds)
         {
             cells = new ArrayList<CellState>();
@@ -100,52 +105,28 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
 
             if( startRow == endRow ) {
                 if( startCol > endCol ) {
-                    for( int col = startCol; col >= endCol; col--) {
-                        cellStates[startRow][col] = new CellState(game.getBoard().at(new BoardIndex(startRow, col)), startRow, col);
-                        cells.add(cellStates[startRow][col]);
-                    }
+                    for( int col = startCol; col >= endCol; col--) addCellState(game, startRow, col);
                 } else {
-                    for( int col = startCol; col <= endCol; col++ ) {
-                        cellStates[startRow][col] = new CellState(game.getBoard().at(new BoardIndex(startRow, col)), startRow, col);
-                        cells.add(cellStates[startRow][col]);
-                    }
+                    for( int col = startCol; col <= endCol; col++ ) addCellState(game, startRow, col);
                 }
             } else if( startCol == endCol ) {
                 if( startRow > endRow ) {
-                    for( int row = startRow; row >= endRow; row--) {
-                        cellStates[row][startCol] = new CellState(game.getBoard().at(new BoardIndex(row, startCol)), row, startCol);
-                        cells.add(cellStates[row][startCol]);
-                    }
+                    for( int row = startRow; row >= endRow; row--) addCellState(game, row, startCol);
                 } else {
-                    for( int row = startRow; row <= endRow; row++) {
-                        cellStates[row][startCol] = new CellState(game.getBoard().at(new BoardIndex(row, startCol)), row, startCol);
-                        cells.add(cellStates[row][startCol]);
-                    }
+                    for( int row = startRow; row <= endRow; row++) addCellState(game, row, startCol);
                 }
             } else if( Math.abs(startRow - endRow) == Math.abs(startCol - endCol)) {
                 if( startCol > endCol ) {
                     if( startRow > endRow ) {
-                        for (int row = startRow, col = startCol; col >= endCol; col--, row--) {
-                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
-                            cells.add(cellStates[row][col]);
-                        }
+                        for (int row = startRow, col = startCol; col >= endCol; col--, row--) addCellState(game, row, col);
                     } else {
-                        for (int row = startRow, col = startCol; col >= endCol; col--, row++) {
-                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
-                            cells.add(cellStates[row][col]);
-                        }
+                        for (int row = startRow, col = startCol; col >= endCol; col--, row++) addCellState(game, row, col);
                     }
                 } else {
                     if( startRow > endRow ) {
-                        for (int row = startRow, col = startCol; col <= endCol; col++, row--) {
-                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
-                            cells.add(cellStates[row][col]);
-                        }
+                        for (int row = startRow, col = startCol; col <= endCol; col++, row--) addCellState(game, row, col);
                     } else {
-                        for (int row = startRow, col = startCol; col <= endCol; col++, row++) {
-                            cellStates[row][col] = new CellState(game.getBoard().at(new BoardIndex(row, col)), row, col);
-                            cells.add(cellStates[row][col]);
-                        }
+                        for (int row = startRow, col = startCol; col <= endCol; col++, row++) addCellState(game, row, col);
                     }
                 }
             } else {
@@ -170,12 +151,12 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
     
     private class CellState {
         public float height;  // Fractional height used for animation
-        public PlayerColor cellColor;
+        public Color cellColor;
         public int row, col;
 
         public boolean highlighted; // whether or not this tile should feature a reduced opacity because it is "highlighted"
 
-        public CellState(PlayerColor cellColor, int row, int col) {
+        public CellState(Color cellColor, int row, int col) {
             this.cellColor = cellColor;
             this.row = row;
             this.col = col;
@@ -187,42 +168,43 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
 
     protected final void drawCell(Graphics g, float cellSize, int column, int row) {
         Board board = game.getBoard();
-        PlayerColor player = cellStates[row][column] == null ? board.at(new BoardIndex(row, column)) : cellStates[row][column].cellColor;
-        //PlayerColor player = cellStates[row][column] == null ? PlayerColor.NONE : cellStates[row][column].cellColor;
-        
-        if(player != PlayerColor.NONE) {
-            float pad = cellSize * 0.1f;
-            float x = column * cellSize;
-            float cy = cellSize * (row  + 0.5f);
-            float h = (cellStates[row][column] == null ? 1.0f : cellStates[row][column].height) * (cellSize - 2.0f * pad);
+        Color color;
+        if(cellStates[row][column] == null) {
+            int playerID = board.at(new BoardIndex(row, column));
+            if(playerID >= 0) color = new Color(game.getPlayer(playerID).getColor().composite);
+            else return;
+        } else color = cellStates[row][column].cellColor;
 
-            Color color = player.color;
+        float pad = cellSize * 0.1f;
+        float x = column * cellSize;
+        float cy = cellSize * (row  + 0.5f);
+        float h = (cellStates[row][column] == null ? 1.0f : cellStates[row][column].height) * (cellSize - 2.0f * pad);
 
-            Color actualColor = new Color(
-                    color.getRed(),
-                    color.getGreen(),
-                    color.getBlue(),
-                    cellStates[row][column] != null && cellStates[row][column].highlighted ? 128 : 255
-            );
+        Color actualColor = new Color(
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                cellStates[row][column] != null && cellStates[row][column].highlighted ? 128 : 255
+        );
 
-            g.setColor(actualColor);
+        g.setColor(actualColor);
 
-            if(Utilities.TILE_IMAGE == null) { // Couldn't load the Image for some reason
-                g.fillOval(
-                        Math.round(x + pad),
-                        Math.round(cy - h / 2.0f),
-                        Math.round(cellSize - 2 * pad),
-                        Math.round(h));
-            } else {
-                ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-                g.drawImage(
-                        Utilities.getColoredTile(actualColor),
-                        Math.round(x + pad),
-                        Math.round(cy - h / 2.0f),
-                        Math.round(cellSize - 2 * pad),
-                        Math.round(h),
-                        null);
-            }
+        // TODO: Optimize Image Drawing/Loading/Caching
+        if(Utilities.TILE_IMAGE == null) { // Couldn't load the Image for some reason
+            g.fillOval(
+                    Math.round(x + pad),
+                    Math.round(cy - h / 2.0f),
+                    Math.round(cellSize - 2 * pad),
+                    Math.round(h));
+        } else {
+            ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+            g.drawImage(
+                    Utilities.getColoredTile(actualColor),
+                    Math.round(x + pad),
+                    Math.round(cy - h / 2.0f),
+                    Math.round(cellSize - 2 * pad),
+                    Math.round(h),
+                    null);
         }
     }
 
@@ -256,8 +238,8 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         showPossibleMoves = value;
         clearHighlights();
         if(showPossibleMoves) {
-            PlayerColor role = game.getCurrentPlayer().getRole();
-            highlightCells(role, game.getBoard().getPossibleMoves(role));
+            int playerID = game.getCurrentPlayer().getID();
+            highlightCells(new Color(game.getPlayer(playerID).getColor().composite), game.getBoard().getPossibleMoves(playerID));
         }
     }
     public boolean getShowPossibleMoves() { return showPossibleMoves; }
@@ -320,7 +302,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
             g.setColor(BoardEdges.BACKGROUND_COLOR);
             g.fillRect((w-dispW)/2, (h-dispH)/2, dispW, dispH);
 
-            g.setColor(Utilities.getLessContrastColor(winningPlayer.getRole().color));
+            g.setColor(Utilities.getLessContrastColor(new Color(winningPlayer.getColor().composite)));
             g.fillRect((w-dispW)/2+8, (h-dispH)/2+8, dispW-16, dispH-16);
 
             g.setColor(Color.BLACK);
@@ -349,7 +331,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
 
         int cellRow = (int)Math.floor( y / cellSize );
         int cellCol = (int)Math.floor( x / cellSize );
-        game.statusMessage(String.format("Cell row = %d col = %d\n", cellRow, cellCol));
+        //game.statusMessage(String.format("Cell row = %d col = %d\n", cellRow, cellCol));
 
         game.getCurrentPlayer().boardClicked(new BoardIndex(cellRow, cellCol));
         repaint();
@@ -372,7 +354,7 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
      */
     protected final void animateFlipSequence(int startRow, int startCol,
                                     int endRow, int endCol,
-                                    PlayerColor newColor,
+                                    Color newColor,
                                     long milliseconds) {
         fAnimator = new FlipAnimator(startRow, startCol, endRow, endCol, newColor, milliseconds);
         fAnimator.start();
@@ -383,17 +365,17 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
      *
      * @param startPosition BoardIndex representing the starting tile
      * @param endPosition BoardIndex representing the ending tile
-     * @param newColor PlayerRole representing the color that is being flipped to
+     * @param playerID Integer ID representing the Player that is being flipped to
      */
     @Override
-    public void doFlip(BoardIndex startPosition, BoardIndex endPosition, PlayerColor newColor) {
+    public void doFlip(BoardIndex startPosition, BoardIndex endPosition, int playerID) {
 
         clearHighlights();
 
         animateFlipSequence(
                 startPosition.row, startPosition.column,
                 endPosition.row, endPosition.column,
-                newColor,
+                new Color(game.getPlayer(playerID).getColor().composite),
                 300);
     }
 
@@ -402,13 +384,13 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         if(cmd instanceof BoardCommand) {
             clearHighlights();
             if(showPossibleMoves) {
-                PlayerColor role = game.getCurrentPlayer().getRole();
-                highlightCells(role, game.getBoard().getPossibleMoves(role));
+                int playerID = game.getCurrentPlayer().getID();
+                highlightCells(new Color(game.getPlayer(playerID).getColor().composite), game.getBoard().getPossibleMoves(playerID));
             }
         }
     }
 
-    public void highlightCells(PlayerColor color, Set<BoardIndex> indexes) {
+    public void highlightCells(Color color, Set<BoardIndex> indexes) {
 
         for(BoardIndex index : indexes) {
             if(cellStates[index.row][index.column] == null) {
