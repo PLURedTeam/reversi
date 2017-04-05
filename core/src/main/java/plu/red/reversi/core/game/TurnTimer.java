@@ -1,7 +1,5 @@
 package plu.red.reversi.core.game;
 
-import plu.red.reversi.core.util.DataMap;
-
 import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 
