@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -17,7 +18,7 @@ import java.util.TreeSet;
  * \@Result - A single variable field in the class must be annotated with this annotation. The contents of the annotated
  *   variable will be copied into a result method. Only one variable may be annotated.
  * \@Body - At least on method in the class must be annotated with this annotation. The method/s annotated this way will
- *   be ran by the ConcurrentCall internal system. They must have no parameters. There may be any number of methods
+ *   be ran by the ConcurrentCall internal system. They must have no parameters. There may be any number of callMethods
  *   annotated this way. In addition, an optional numeric priority is supported; higher priorities will be ran first.
  *
  * In addition to the calling object, another object must be passed to <code>createCall()</code> whose class has a
@@ -39,7 +40,8 @@ import java.util.TreeSet;
  */
 public class ConcurrentCall implements Runnable {
 
-    private static HashMap<CallID, HashSet<ConcurrentCall>> calls = new HashMap<>();
+    private static final HashMap<CallID, HashSet<ConcurrentCall>> calls = new HashMap<>();
+    private static final HashSet<ResultMethodSyncStruct> syncBuffer = new HashSet<>();
 
     /**
      * Creates and runs a new ConcurrentCall.
@@ -62,48 +64,90 @@ public class ConcurrentCall implements Runnable {
      */
     public static CallID createCall(Object callObject, Object resultObject, CallID id) {
 
+        // Scan for BodyMethods
         Method[] methods = callObject.getClass().getMethods();
-        TreeSet<MethodBody> methodSet = new TreeSet<>();
+        TreeSet<BodyMethodStruct> methodSet = new TreeSet<>();
         for(Method method : methods) {
-            if(method.isAnnotationPresent(Body.class)) {
+            if(method.isAnnotationPresent(BodyMethod.class)) {
+
+                int priority = method.getDeclaredAnnotation(BodyMethod.class).value();
+
+                // Check to make sure there are no parameters
                 if(method.getParameterCount() > 0)
                     throw new IllegalArgumentException("Body Method in a ConcurrentCall cannot have parameters");
-                int priority = method.getDeclaredAnnotation(Body.class).value();
-                methodSet.add(new MethodBody(priority, method));
+
+                // Add our BodyMethod
+                methodSet.add(new BodyMethodStruct(priority, method));
             }
         }
 
         if(methodSet.isEmpty())
-            throw new IllegalArgumentException("No Body Methods found in Call object of type "+callObject.getClass().getName());
+            throw new IllegalArgumentException("No BodyMethods found in class of type "+callObject.getClass().getName());
 
-        Field callField = null;
+        // Scan for ResultFields
         Field[] fields = callObject.getClass().getFields();
+        HashMap<Integer, Field> resultFields = new HashMap<>();
         for(Field field : fields) {
-            if(field.isAnnotationPresent(Result.class)) {
-                if(callField != null)
-                    throw new IllegalArgumentException("Only one Result Field can exist in a Call object (type: "+callObject.getClass().getName()+")");
-                callField = field;
+            if(field.isAnnotationPresent(ResultField.class)) {
+
+                int resultID = field.getDeclaredAnnotation(ResultField.class).value();
+
+                // Check for ID conflicts
+                if(resultFields.containsKey(resultID)) {
+                    Field oldField = resultFields.get(resultID);
+                    throw new IllegalArgumentException("ID Conflict in annotated ResultFields for class " + callObject.getClass().getName() +
+                            ": fields '" + oldField.getName() + "' and '" + field.getName() + "' both have ID " + resultID + ".");
+                }
+
+                // Add our ResultField
+                resultFields.put(resultID, field);
             }
         }
 
-        if(callField == null)
-            throw new IllegalArgumentException("No Result Field found in Call object of type "+callObject.getClass().getName());
+        // Make sure we found at least one ResultField
+        if(resultFields.isEmpty())
+            throw new IllegalArgumentException("No ResultFields found in class of type "+callObject.getClass().getName());
 
-        Method resultMethod = null;
-        Method[] resultMethods = resultObject.getClass().getMethods();
-        for(Method method : resultMethods) {
-            if(method.isAnnotationPresent(Result.class)) {
-                if(resultMethod != null)
-                    throw new IllegalArgumentException("Only one Result Method can exist in a Result object (type: "+resultObject.getClass().getName());
-                if(method.getParameterCount() != 1 || method.getParameterTypes()[0].isAssignableFrom(callField.getDeclaringClass()))
-                    throw new IllegalArgumentException("Result Method must have one parameter of type "+callField.getDeclaringClass().getName()+" for Result object of type "+resultObject.getClass().getName());
-                resultMethod = method;
+        // Scan for ResultMethods
+        methods = resultObject.getClass().getMethods();
+        HashSet<ResultMethodStruct> resultMethods = new HashSet<>();
+        for(Method method : methods) {
+            if(method.isAnnotationPresent(ResultMethod.class)) {
+
+                boolean sync = method.getDeclaredAnnotation(ResultMethod.class).value();
+
+                // Get ResultParameter IDs
+                Parameter[] params = method.getParameters();
+                int[] resultIDs = new int[params.length];
+                for(int i = 0; i < params.length; i++) {
+                    if(params[i].isAnnotationPresent(ResultParameter.class))
+                        resultIDs[i] = params[i].getAnnotation(ResultParameter.class).value();
+                    else
+                        resultIDs[i] = 0;
+                }
+
+                // Check to make Class types match with already scanned ResultFields
+                for(int i = 0; i < resultIDs.length; i++) {
+                    if(resultFields.containsKey(resultIDs[i])) {
+                        Field f = resultFields.get(resultIDs[i]);
+                        if(!method.getParameterTypes()[i].isAssignableFrom(f.getType()))
+                            throw new IllegalArgumentException("ResultMethod parameter " + i + " of type " + method.getParameterTypes()[i].getName() +
+                                    " cannot be assigned from ResultField of type " + f.getType().getName() + ".");
+                    } else throw new IllegalArgumentException("No ResultField with ID " + resultIDs[i] + " found for ResultMethod '" + method.getName() +
+                            "' of class " + resultObject.getClass().getName() + ".");
+                }
+
+                // Add our ResultMethod
+                resultMethods.add(new ResultMethodStruct(resultIDs, sync, method));
             }
         }
 
-        ConcurrentCall call = new ConcurrentCall(id, callObject, methodSet, callField, resultObject, resultMethod);
-        if(!calls.containsKey(id)) calls.put(id, new HashSet<>());
-        calls.get(id).add(call);
+        // Create our call and register it
+        ConcurrentCall call = new ConcurrentCall(id, callObject, methodSet, resultFields, resultObject, resultMethods);
+        synchronized(calls) {
+            if (!calls.containsKey(id)) calls.put(id, new HashSet<>());
+            calls.get(id).add(call);
+        }
         return id;
     }
 
@@ -113,12 +157,33 @@ public class ConcurrentCall implements Runnable {
      * @param id A CallID to identify calls with
      */
     public static void stopCall(CallID id) {
-        if(calls.containsKey(id)) {
-            HashSet<ConcurrentCall> callSet = calls.get(id);
-            for(ConcurrentCall call : callSet) {
-                call.stop();
+        synchronized(calls) {
+            if (calls.containsKey(id)) {
+                HashSet<ConcurrentCall> callSet = calls.get(id);
+                for (ConcurrentCall call : callSet)
+                    call.stop();
+                calls.remove(id);
             }
-            calls.remove(id);
+        }
+    }
+
+    /**
+     * Synchronized waiting ResultMethods. Iterates through and invokes all ResultMethods that have been told to wait
+     * for synchronization. This method should usually be called from the main Thread.
+     */
+    public static void syncCalls() {
+        synchronized(syncBuffer) {
+            // Do all the stored ResultMethod calls
+            for (ResultMethodSyncStruct method : syncBuffer) {
+                try {
+                    method.method.invoke(method.resultObject, method.values);
+                } catch (IllegalAccessException ex) {
+                    throw new IllegalArgumentException("Cannot access ResultMethod " + method.method.getName());
+                } catch (InvocationTargetException ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+            syncBuffer.clear();
         }
     }
 
@@ -127,26 +192,28 @@ public class ConcurrentCall implements Runnable {
 
     private final Thread thread;
     private final Object callObject;
-    private final TreeSet<MethodBody> methods;
-    private final Field callField;
+    private final TreeSet<BodyMethodStruct> callMethods;
+    private final HashMap<Integer, Field> resultFields;
     private final Object resultObject;
-    private final Method resultMethod;
+    private final HashSet<ResultMethodStruct> resultMethods;
 
     private volatile boolean stopped = false;
 
-    private ConcurrentCall(CallID id, Object callObject, TreeSet<MethodBody> methods, Field callField, Object resultObject, Method resultMethod) {
+    private ConcurrentCall(CallID id, Object callObject, TreeSet<BodyMethodStruct> methods, HashMap<Integer, Field> resultFields, Object resultObject, HashSet<ResultMethodStruct> resultMethods) {
         this.id = id;
         this.callObject = callObject;
-        this.methods = methods;
-        this.callField = callField;
+        this.callMethods = methods;
+        this.resultFields = resultFields;
         this.resultObject = resultObject;
-        this.resultMethod = resultMethod;
+        this.resultMethods = resultMethods;
         thread = new Thread(this);
         thread.start();
     }
 
     private void cleanup() {
-        if(calls.containsKey(id)) calls.get(id).remove(this);
+        synchronized(calls) {
+            if (calls.containsKey(id)) calls.get(id).remove(this);
+        }
     }
 
     private void stop() {
@@ -159,34 +226,54 @@ public class ConcurrentCall implements Runnable {
 
         try {
 
-            // Run the Body Methods
-            for (MethodBody method : methods) {
+            // Run the BodyMethods
+            for (BodyMethodStruct method : callMethods) {
+
+                // Try to invoke BodyMethod
                 try {
                     method.method.invoke(callObject);
                 } catch (IllegalAccessException ex) {
-                    throw new IllegalArgumentException("Cannot access Body Method " + method.method.getName());
+                    throw new IllegalArgumentException("Cannot access BodyMethod " + method.method.getName());
                 } catch (InvocationTargetException ex) {
                     throw new RuntimeException(ex.getMessage());
                 }
+
+                // Check for Stop flag
                 if (stopped) return;
             }
 
-            // Get the result
-            Object result;
-            try {
-                result = callField.get(callObject);
-            } catch (IllegalAccessException ex) {
-                throw new IllegalArgumentException("Cannot access Result Field " + callField.getName());
-            }
-            if (stopped) return;
+            // Run the ResultMethods
+            for (ResultMethodStruct method : resultMethods) {
 
-            // Give the result to the result method
-            try {
-                resultMethod.invoke(resultObject, result);
-            } catch (IllegalAccessException ex) {
-                throw new IllegalArgumentException("Cannot access Result Method " + resultMethod.getName());
-            } catch (InvocationTargetException ex) {
-                throw new RuntimeException(ex.getMessage());
+                // Get our ResultFields
+                Object[] values = new Object[method.ids.length];
+                for(int i = 0; i < method.ids.length; i++) {
+                    Field field = resultFields.get(method.ids[i]);
+                    try { // Try to get the ResultField value
+                        values[i] = field.get(callObject);
+                    } catch(IllegalAccessException ex) {
+                        throw new IllegalArgumentException("Cannot access ResultField " + field.getName());
+                    }
+                }
+
+                if(method.sync) {
+                    // Cache the ResultMethod for calling later
+                    synchronized(syncBuffer) {
+                        syncBuffer.add(new ResultMethodSyncStruct(values, resultObject, method.method));
+                    }
+                } else {
+                    // Try to invoke ResultMethod
+                    try {
+                        method.method.invoke(resultObject, values);
+                    } catch (IllegalAccessException ex) {
+                        throw new IllegalArgumentException("Cannot access ResultMethod " + method.method.getName());
+                    } catch (InvocationTargetException ex) {
+                        throw new RuntimeException(ex.getMessage());
+                    }
+                }
+
+                // Check for Stop flag
+                if (stopped) return;
             }
 
         } catch(Exception ex) {
@@ -235,40 +322,85 @@ public class ConcurrentCall implements Runnable {
         }
     }
 
-    private static class MethodBody implements Comparable<MethodBody> {
-        public final int priority;
-        public final Method method;
-        public MethodBody(int priority, Method method) {
+    private static class BodyMethodStruct implements Comparable<BodyMethodStruct> {
+        final int priority;
+        final Method method;
+        BodyMethodStruct(int priority, Method method) {
             this.priority = priority; this.method = method;
         }
-        @Override public int compareTo(MethodBody o) {
+        @Override public int compareTo(BodyMethodStruct o) {
             return (priority < o.priority) ? 1 : ( (priority > o.priority) ? -1 : 0 );
         }
     }
 
+    private static class ResultMethodStruct {
+        final int[] ids;
+        final boolean sync;
+        final Method method;
+        ResultMethodStruct(int[] ids, boolean sync, Method method) {
+            this.ids = ids; this.sync = sync; this.method = method;
+        }
+    }
+
+    private static class ResultMethodSyncStruct {
+        final Object[] values;
+        final Object resultObject;
+        final Method method;
+        ResultMethodSyncStruct(Object[] values, Object resultObject, Method method) {
+            this.values = values; this.resultObject = resultObject; this.method = method;
+        }
+    }
+
     /**
-     * Body Method Annotation. This annotation is used when determining what methods to run in a calling object. More
+     * Body Method Annotation. This annotation is used when determining what callMethods to run in a calling object. More
      * than one method in a class can be annotated with this annotation, but at least one method must be annotated.
-     * Methods annotated with this annotation must have no parameters.
+     * Methods annotated with this annotation must have no parameters. The Body annotation also has an optional
+     * parameter of <code>priority</code> which defaults to <code>0</code>. Higher numbers means that the annotated
+     * method will be invoked earlier.
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @Inherited
-    public @interface Body {
+    public @interface BodyMethod {
         int value() default 0;
     }
 
     /**
-     * Result Annotation. This annotation is used to pair a resulting variable in the calling object to a
-     * result-handling method in another object (possibly the same object as the calling object, however). One and only
-     * one variable in the calling object must be annotated with this annotation, and one and only one method that
-     * accepts a single parameter of the same type as the annotated variable must be annotated in the result-handling
-     * object.
+     * ResultField Annotation. This annotation is used to mark a field in the calling object as being a container
+     * for the end result of the ConcurrentCall. The annotated field will be paired with a method in the result
+     * object, and passed as a parameter to said method. Optionally, for complex systems of multiple result fields
+     * and result methods, an <code>ID</code> may be specified for the ResultField annotation in order to numerically
+     * pair with a ResultMethod annotation.
      */
-    @Target({ElementType.METHOD, ElementType.FIELD})
+    @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    @Inherited
-    public @interface Result {
-
+    public @interface ResultField {
+        int value() default 0;
     }
+
+    /**
+     * ResultMethod Annotation. This annotation is used to mark a method in the result object as the end target for
+     * a result variable/s. By default, a ResultMethod will execute immediately after the ConcurrentCall has run, on
+     * the same thread as the ConcurrentCall. Instead, the <code>sync</code> parameter - which defaults to
+     * <code>false</code> - can be used to specify that the ConcurrentCall will not immediately call the marked
+     * method, but instead wait until the static method <code>ConcurrentCall#syncCalls()</code> is called.
+     */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ResultMethod {
+        boolean value() default false;
+    }
+
+    /**
+     * ResultParameter Annotation. This annotation is used to specify that certain parameters in a ResultMethod have
+     * different IDs to map to a ResultField, rather than the default of <code>0</code>. If this annotation is omitted
+     * from a parameter, then that parameter will be assumed to map to a ResultField with an ID of <code>0</code>.
+     */
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ResultParameter {
+        int value();
+    }
+
+
 }
