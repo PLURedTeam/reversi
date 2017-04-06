@@ -26,6 +26,13 @@ public class Highlight3D extends ColorModel3D {
         height = 0;
     }
 
+    public Highlight3D(Highlight3D other) {
+        super(other.getGraphics3D(), other.getPipeline());
+
+        alphaBlended = other.alphaBlended;
+        height = other.height;
+    }
+
     @Override
     Vector4f[] getFaceColor(int sectionIndex, int faceIndex) {
 
@@ -41,8 +48,8 @@ public class Highlight3D extends ColorModel3D {
     }
 
     @Override
-    public Model3D newInstance(Graphics3D g3d, Pipeline p) {
-        return new Highlight3D(g3d, p);
+    public Model3D newInstance() {
+        return new Highlight3D(this);
     }
 
     @Override

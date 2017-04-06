@@ -33,6 +33,8 @@ import plu.red.reversi.android.graphics.VertexBufferObject;
 
 public abstract class Model3D extends Shape {
 
+    // IDs are only required here because of the fact that sortedset requires completely unique objects.
+    // this makes sure of that.
     private static int nextID = 0;
 
     private int id;
@@ -111,7 +113,7 @@ public abstract class Model3D extends Shape {
     @CallSuper
     public Model3D clone() {
 
-        Model3D n = newInstance(g3d, pipeline);
+        Model3D n = newInstance();
 
         n.vertices = vertices;
         n.normals = normals;
@@ -119,7 +121,7 @@ public abstract class Model3D extends Shape {
         return n;
     }
 
-    public abstract Model3D newInstance(Graphics3D g3d, Pipeline p);
+    abstract Model3D newInstance();
 
     public HashMap<String, VertexBufferObject> extras;
 

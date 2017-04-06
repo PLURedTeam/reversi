@@ -6,26 +6,18 @@ import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.widget.OverScroller;
 import android.widget.Scroller;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.PlayerColor;
-import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.listener.ICommandListener;
-import plu.red.reversi.core.game.player.NullPlayer;
 
 /**
  * Created by daniel on 3/18/17.
@@ -147,7 +139,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         BoardIndex index = mRenderer.getTappedIndex(new Vector2f(e.getX(), e.getY()));
 
         // is this a valid play index?
-        if(mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getRole()).contains(index)) {
+        if(mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getID()).contains(index)) {
 
 
             System.out.println("Got tap at " + index);
@@ -257,7 +249,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     /**
      * Notified when a single-tap occurs.
      * <p>
-     * Unlike {@link OnGestureListener#onSingleTapUp(MotionEvent)}, this
+     * Unlike OnGestureListener#onSingleTapUp, this
      * will only be called after the detector is confident that the user's
      * first tap is not followed by a second tap leading to a double-tap
      * gesture.
@@ -403,9 +395,14 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public void setGame(Game game) {
         mGame = game;
 
-        mGame.addCommandListener(this);
+        mGame.addListener(this);
 
-        mRenderer.setGame(game);
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.setGame(game);
+            }
+        });
     }
 
     public BoardIndex getCurrentSelected() {

@@ -13,6 +13,9 @@ import java.sql.SQLException;
  */
 public class DBConnection {
 
+    public static File dbFile = new File("ClientDB.db");
+    public static String dbConnector = "jdbc:sqlite:";
+
     //fields
     private Connection conn = null; // Connection object
     private String connStatus = null; //Status of the connection
@@ -25,11 +28,13 @@ public class DBConnection {
      */
     public DBConnection() {
         // Load the SQLite JDBC driver
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }//catch
+        if(dbConnector.equals("jdbc:sqlite:")) {
+            try {
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }//catch
+        }
     }//constructor
 
     /**
@@ -51,15 +56,12 @@ public class DBConnection {
      */
     public String openDB() {
         try {
-            //Testing to see if db file exists
-            File file = new File("ClientDB.db");
 
-            if(file.exists()) {
-                //Connects to the database file
-                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
-            } else {
-                //Creates the database file and connects to it
-                conn = DriverManager.getConnection("jdbc:sqlite:ClientDB.db");
+            boolean existed = dbFile.exists();
+
+            conn = DriverManager.getConnection(dbConnector + dbFile.getAbsolutePath());
+
+            if(!existed) {
                 CreateDB db = new CreateDB(conn); //Creates the tables in the database
             }//else
         } catch (SQLException e) {

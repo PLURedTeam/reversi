@@ -35,21 +35,26 @@ public class DBUtilities {
      *  and sets the conn field to the connection
      */
     public DBUtilities() {
-        dbConnection = new DBConnection(); //Create the connection
-        dbConnection.openDB(); //Open the connection
-        conn = dbConnection.getConn(); //Set the database connection
-
-        //TURN ON FOREIGN KEY CONSTRAINTS
-        String sql = "PRAGMA foreign_keys = ON;";
-        try {
-
-            Statement command = conn.createStatement();
-            command.execute(sql);
-            cleanupGames();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }//catch
     }//constructor
+
+    private void initDB() {
+        if(conn == null) {
+            dbConnection = new DBConnection(); //Create the connection
+            dbConnection.openDB(); //Open the connection
+            conn = dbConnection.getConn(); //Set the database connection
+
+            //TURN ON FOREIGN KEY CONSTRAINTS
+            String sql = "PRAGMA foreign_keys = ON;";
+            try {
+
+                Statement command = conn.createStatement();
+                command.execute(sql);
+                cleanupGames();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }//catch
+        }
+    }
 
     /**
      * Calls the DBConnection class to close the database
@@ -64,6 +69,9 @@ public class DBUtilities {
      * @return the gameID to be used for the game
      */
     public int createGame() {
+
+        initDB();
+
         int gameID = 1; //Default gameID for first game
 
         try {
@@ -86,6 +94,9 @@ public class DBUtilities {
      * TODO: Figure out what format to store moves in from History
      */
     public boolean saveGame(int gameID) {
+
+        initDB();
+
         boolean gameSaved = false;
         int result;
         String sql = "insert into GAME values(?,?,?);";
@@ -113,6 +124,9 @@ public class DBUtilities {
      * @return true if saved, false otherwise
      */
     public boolean saveGamePlayers(int gameID, Collection<Player> players) {
+
+        initDB();
+
         boolean gameSaved = false;
         int result = 0;
         String sql = "insert into PLAYERS values(?,?,?,?,?,?);";
@@ -160,6 +174,8 @@ public class DBUtilities {
      */
     public void loadGamePlayers(Game game) {
 
+        initDB();
+
         String sql = "select * from PLAYERS where game_id=?";
 
         try {
@@ -195,6 +211,9 @@ public class DBUtilities {
 
 
     public boolean updateGame(int gameID, String name) {
+
+        initDB();
+
         boolean gameSaved = false;
         int result;
         String sql = "update GAME set name=? where game_id=?";
@@ -224,6 +243,9 @@ public class DBUtilities {
      *  TODO: FINISH THIS
      */
     public History loadGame(int gameID) {
+
+        initDB();
+
         History h = new History();
 
         String sql = "select * from GAME_HISTORY where game_id=? order by move_id";
@@ -251,6 +273,9 @@ public class DBUtilities {
     }//loadGame
 
     public boolean saveMove(int gameID, BoardCommand cmd) {
+
+        initDB();
+
         boolean moveSaved = false;
         int result;
         int moveID = 0;
@@ -312,6 +337,9 @@ public class DBUtilities {
      * @return a two dimensional array (name, gameID)
      */
     public String[][] getGames() {
+
+        initDB();
+
         int numGames = 0;
         String[][] games = null;
 
@@ -349,6 +377,9 @@ public class DBUtilities {
      * @return true if deleted, false otherwise
      */
     public boolean deleteGame(int gameID) {
+
+        initDB();
+
         int result = 0;
         String sql = "delete from GAME where gameID=?";
 
@@ -375,6 +406,9 @@ public class DBUtilities {
      * @param settings the JSONObject that includes the game settings
      */
     public boolean saveGameSettings(int gameID, JSONObject settings) {
+
+        initDB();
+
         boolean saved = false;
         int result;
         String sql;
@@ -421,6 +455,9 @@ public class DBUtilities {
      * @return JSON object with the game settings
      */
     public JSONObject loadGameSettings(int gameID) {
+
+        initDB();
+
         JSONObject json = null;
 
         String sql = "select game_settings from GAME_SETTINGS where game_id=?";
@@ -449,6 +486,7 @@ public class DBUtilities {
      * to the database (i.e. games with no name)
      */
     private void cleanupGames() {
+
         String sql = "delete from GAME where name IS NULL or name=''";
 
         try {

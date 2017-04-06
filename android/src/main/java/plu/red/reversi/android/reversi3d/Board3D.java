@@ -10,9 +10,11 @@ import java.security.InvalidParameterException;
 
 import plu.red.reversi.android.graphics.Graphics3D;
 import plu.red.reversi.android.graphics.Pipeline;
-import plu.red.reversi.core.Board;
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.PlayerColor;
+import plu.red.reversi.core.game.Board;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.Color;
 
 /**
  * Created by daniel on 3/20/17.
@@ -30,16 +32,18 @@ public class Board3D extends ColorModel3D {
 
     private int size;
 
-    public Board3D(Graphics3D g3d, Pipeline pipeline, int size) {
+    public Board3D(Graphics3D g3d, Pipeline pipeline, Game game) {
 
         super(g3d, pipeline);
 
-        this.size = size;
+        this.size = game.getBoard().size;
 
         pieces = new Piece3D[(int)Math.pow(size, 2)];
         highlights = new Highlight3D[(int)Math.pow(size, 2)];
 
-        Piece3D piece = new Piece3D(g3d, pipeline);
+        Player[] players = game.getAllPlayers();
+
+        Piece3D piece = new Piece3D(g3d, pipeline, players[0].getColor(), players[1].getColor());
         Highlight3D highlight = new Highlight3D(g3d, pipeline);
 
         // this first piece is unused, only used to make clones for all the others.
@@ -79,6 +83,44 @@ public class Board3D extends ColorModel3D {
         }
     }
 
+    // TODO: Needs testing (even though this method will probobly never be used)
+    public Board3D(Board3D other) {
+
+        super(other.getGraphics3D(), other.getPipeline());
+
+        this.size = other.size;
+
+        pieces = new Piece3D[(int)Math.pow(size, 2)];
+        highlights = new Highlight3D[(int)Math.pow(size, 2)];
+
+        Vector3fc origin = getBoardOrigin();
+
+        for(int i = 0;i < Math.pow(size, 2);i++) {
+            int r = i / size;
+            int c = i % size;
+            Piece3D p = (Piece3D) other.pieces[i].clone();
+
+            Vector3f pos = new Vector3f(PIECE_SIZE * c + PIECE_SIZE / 2, PIECE_SIZE * r + PIECE_SIZE / 2, Piece3D.VERTICAL_RADIUS / 2).add(origin);
+
+            p.setPos(pos);
+
+            //addChild(p);
+            pieces[i] = p;
+
+            Highlight3D h = (Highlight3D) other.highlights[i].clone();
+
+            h.setHeight(0.002f);
+
+            h.highlightOn(
+                    new Vector2f(PIECE_SIZE * c + PIECE_BORDER_SIZE, PIECE_SIZE * r + PIECE_BORDER_SIZE).add(new Vector2f(origin.x(), origin.y())),
+                    new Vector2f(PIECE_SIZE * (c + 1) - PIECE_BORDER_SIZE, PIECE_SIZE * (r + 1) - PIECE_BORDER_SIZE).add(new Vector2f(origin.x(), origin.y()))
+            );
+
+            //if(r == c)
+            //    addChild(h);
+            highlights[i] = h;
+        }
+    }
 
     @Override
     Vector4f[] getFaceColor(int sectionIndex, int faceIndex) {
@@ -102,8 +144,8 @@ public class Board3D extends ColorModel3D {
     }
 
     @Override
-    public Model3D newInstance(Graphics3D g3d, Pipeline p) {
-        return new Board3D(g3d, p, size);
+    public Model3D newInstance() {
+        return new Board3D(this);
     }
 
     @Override
@@ -188,9 +230,9 @@ public class Board3D extends ColorModel3D {
         addChild(highlights[index.row * size + (size - index.column - 1)]);
     }
 
-    public void setBoard(Board board) {
+    public void setBoard(Game game) {
 
-        if(board.size != size)
+        if(game.getBoard().size != size)
             throw new InvalidParameterException("Board is not the same size as Board3D");
 
         for(int r = 0;r < size;r++) {
@@ -200,27 +242,23 @@ public class Board3D extends ColorModel3D {
 
                 BoardIndex idx = new BoardIndex(r, size - c - 1);
 
-                switch (board.at(idx)) {
-                    case BLACK:
-                        addChild(pieces[i]);
+                Player p = game.getPlayer(game.getBoard().at(idx));
 
-                        pieces[i].setFlipped(false);
+                Color color = null;
 
-                        break;
+                if(p != null)
+                    color = p.getColor();
 
-                    case WHITE:
-                        addChild(pieces[i]);
-
-                        pieces[i].setFlipped(true);
-
-                        break;
-
-                    case NONE:
-                        removeChild(pieces[i]);
-
-                        break;
-                    default:
-                        System.out.println("Unrecognized player color: " + board.at(idx));
+                if(color == null) {
+                    removeChild(pieces[i]);
+                }
+                else if(color.equals(pieces[i].getBaseColor())) {
+                    addChild(pieces[i]);
+                    pieces[i].setFlipped(false);
+                }
+                else {
+                    addChild(pieces[i]);
+                    pieces[i].setFlipped(true);
                 }
             }
         }

@@ -34,6 +34,7 @@ public abstract class ColorModel3D extends Model3D {
         albedos = new VertexBufferObject<>(Vector4fc.class);
     }
 
+    @Override
     public Model3D clone() {
 
         ColorModel3D n = (ColorModel3D)super.clone();

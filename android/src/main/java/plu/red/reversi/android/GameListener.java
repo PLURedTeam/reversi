@@ -1,6 +1,6 @@
 package plu.red.reversi.android;
 
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 /**
  * Created by daniel on 3/18/17.
@@ -8,5 +8,5 @@ import plu.red.reversi.core.util.SettingsMap;
  */
 
 public interface GameListener {
-    void onNewGame(SettingsMap gameSettings);
+    void onNewGame(DataMap gameSettings);
 }

@@ -24,8 +24,8 @@ import plu.red.reversi.android.graphics.SimpleGLVertexShader;
 import plu.red.reversi.android.graphics.VertexShader;
 import plu.red.reversi.android.reversi3d.Board3D;
 import plu.red.reversi.android.reversi3d.Camera;
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 
 /**
  * Created by daniel on 3/25/17.
@@ -52,9 +52,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private boolean mPresentationMode;
     private boolean mAutoRotate;
 
+    private boolean mGLIsAvailable;
+
     public GameRenderer() {
         mTick = 0;
         mPlayZoom = 3600;
+
+        mGLIsAvailable = false;
     }
 
     /**
@@ -99,20 +103,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         g3d.createPipeline(mPipeline);
         g3d.setPipeline(mPipeline);
 
-        mBoard = new Board3D(g3d, mPipeline, 8);
-        mCamera = new Camera();
-
-        float r = mBoard.getBoardRadius();
-
-        mCamera.setMoveBounds(new Vector2f(-r, -r), new Vector2f(r, r));
-
         g3d.bindPipelineUniform("fDirectionalLights[0]", mPipeline, new Vector3f(-0.6f, 0.25f, 1.0f).normalize());
         g3d.bindPipelineUniform("fDirectionalLights[1]", mPipeline, new Vector3f(0.6f, -0.25f, 1.0f).normalize());
 
-        setPresentationMode(mPresentationMode);
+        mCamera = new Camera();
+
+        mGLIsAvailable = true;
 
         if(mGame != null)
-            updateBoardState();
+            setGame(mGame);
     }
 
     /**
@@ -144,6 +143,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         mCamera.setViewport(new Vector2f(width, height));
 
+        setPresentationMode(mPresentationMode);
+
         g3d.bindPipelineUniform("projectionMatrix", mPipeline, mCamera.getProjectionMatrix());
     }
 
@@ -169,7 +170,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         g3d.bindPipelineUniform("viewMatrix", mPipeline, mCamera.getViewMatrix());
         g3d.bindPipelineUniform("projectionMatrix", mPipeline, mCamera.getProjectionMatrix());
 
-        mBoard.draw();
+        if(mGame != null) {
+            mBoard.draw();
+        }
     }
 
     public void setCameraPos(float x, float y) {
@@ -277,13 +280,21 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void setGame(Game game) {
         this.mGame = game;
 
-        updateBoardState();
+        if(mGLIsAvailable) {
+            mBoard = new Board3D(g3d, mPipeline, mGame);
+
+            float r = mBoard.getBoardRadius();
+
+            mCamera.setMoveBounds(new Vector2f(-r, -r), new Vector2f(r, r));
+
+            updateBoardState();
+        }
     }
 
     public void updateBoardState() {
         if(mBoard != null) {
             System.out.println("Update board state");
-            mBoard.setBoard(mGame.getBoard());
+            mBoard.setBoard(mGame);
         }
     }
 
