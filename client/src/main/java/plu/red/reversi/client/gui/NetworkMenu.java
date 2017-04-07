@@ -88,8 +88,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
         } else if(e.getSource() == seeRanking) {
             seeRanking();
         } else if(e.getSource() == login) {
-            try {login();}
-            catch (NoSuchAlgorithmException e1) {e1.printStackTrace();}
+            login();
         } else if(e.getSource() == onlineUsers) {
             getOnlineUsers();
         } else if(e.getSource() == logout) {
@@ -107,7 +106,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
     /**
      * Calls the server to login with user credentials
      */
-    private void login() throws NoSuchAlgorithmException {
+    private void login() {
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
         Object[] message = { "Username:", username, "Password:", password };
@@ -115,15 +114,8 @@ public class NetworkMenu extends JMenu implements ActionListener {
         int option = JOptionPane.showConfirmDialog(gui, message, "Login", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
 
-            //Convert the users password into SHA256 format
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
-            byte[] result = digest.digest(password.getText().getBytes()); //Get the byte array for the digest
-            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
-            for(int i = 0; i < result.length; i++)
-                sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
-
             //Call the server to check for valid login credentials
-            boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(),sb.toString());
+            boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(),password.getText());
 
             if (loggedIn) {
                 System.out.println("Login successful");

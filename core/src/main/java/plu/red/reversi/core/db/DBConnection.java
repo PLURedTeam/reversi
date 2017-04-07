@@ -45,8 +45,6 @@ public class DBConnection {
      *  If the connection to the database fails the SQL message
      *   will be printed to the console.
      *
-     * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
-     *
      * @return connection status
      */
     public String openDB() {

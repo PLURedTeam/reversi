@@ -14,20 +14,7 @@ public class User {
     private String status;
     private int sessionID;
 
-
     public User() {}//DefaultConstructor
-
-//    /**
-//     * Constructor for the user class
-//     * Will always be constructed on the clientside and
-//     * passed to the server
-//     * @param u username of the player
-//     * @param p password of the player stored in SHA256 format
-//     */
-//    public User(String u, String p) {
-//        username = u;
-//        password = p;
-//    }//user
 
     //Accessors and Mutators
     public String getUsername() { return username; }

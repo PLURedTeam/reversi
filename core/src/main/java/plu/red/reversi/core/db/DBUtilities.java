@@ -193,7 +193,12 @@ public class DBUtilities {
     }//loadGamePlayers
 
 
-
+    /**
+     *
+     * @param gameID
+     * @param name
+     * @return
+     */
     public boolean updateGame(int gameID, String name) {
         boolean gameSaved = false;
         int result;
@@ -221,7 +226,6 @@ public class DBUtilities {
      * @param gameID the id of the game to be loaded
      * @return
      *
-     *  TODO: FINISH THIS
      */
     public History loadGame(int gameID) {
         History h = new History();

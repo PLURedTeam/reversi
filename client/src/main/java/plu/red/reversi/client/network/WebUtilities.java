@@ -3,6 +3,7 @@ package plu.red.reversi.client.network;
 import org.codehaus.jettison.json.JSONArray;
 import plu.red.reversi.core.util.User;
 
+import javax.swing.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -24,8 +25,7 @@ public class WebUtilities {
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
     private int sessionID;
     private User user;
-
-    public boolean loggedIn = false;
+    private boolean loggedIn = false;
 
     /**
      * Constructor for WebUtilities
@@ -49,20 +49,25 @@ public class WebUtilities {
         user.setUsername(username);
         user.setPassword(password);
 
-        //Create target and call server
-        WebTarget target = client.target(baseURI + "login");
-        Response response = target.request().post(Entity.json(user));
+        try {
+            //Create target and call server
+            WebTarget target = client.target(baseURI + "login");
+            Response response = target.request().post(Entity.json(user));
 
-        //If invalid credentials, return false
-        if(response.getStatus() == 403) return false;
-        user = response.readEntity(User.class);
-        sessionID = user.getSessionID();
-        loggedIn = true;
+            //If invalid credentials, return false
+            if (response.getStatus() == 403) return false;
+            user = response.readEntity(User.class);
+            sessionID = user.getSessionID();
+            loggedIn = true;
 
-        PollingMachine machine = new PollingMachine(this, client, user);
-        new Thread(machine).start();
-
-        return true;
+            new PollingMachine(this, client, user);
+            return true;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Login Error",2);
+            return false;
+        }//catch
     }//login
 
     /**
@@ -73,14 +78,72 @@ public class WebUtilities {
         //If not logged in, return true
         if(loggedIn == false) return true;
 
+        try {
         //Call server to logout
         WebTarget target = client.target(baseURI + "logout");
         Response response = target.request().post(Entity.json(user));
 
         if(response.getStatus() != 200) return false;
         loggedIn = false;
+        user.setUsername(null);
+        user.setPassword(null);
+        user.setSessionID(-1);
+
         return true;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Logout Error",2);
+            return false;
+        }//catch
+
     }//logout
+
+    /**
+     * Calls the server to create a new network user account
+     * @param username the requested username for the player
+     * @param password the password for the player in SHA256 format
+     * @return true if user is created, false otherwise
+     */
+    public boolean createUser(String username, String password) {
+
+        //Logout the current user
+        if(loggedIn) logout();
+
+        //Create a user object
+        user.setUsername(username);
+        user.setPassword(password);
+
+        try {
+        WebTarget target = client.target(baseURI + "create-user");
+        Response response = target.request().post(Entity.json(user));
+
+        if(response.getStatus() == 201) return true;
+        if(response.getStatus() == 406) {
+            JOptionPane.showMessageDialog(null,
+                    "That username already exists, please try again with a different username.",
+                    "Create User Error", 2);
+            return false;
+        }//if
+
+        JOptionPane.showMessageDialog(null,
+                "A server error occurred. Please try again later.",
+                "Server Error",2);
+
+        return false;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Create User Error",2);
+            return false;
+        }//catch
+    }//createUser
+
+
+
+
 
     /**
      * Gets a list of the users currently logged in to the server
@@ -95,4 +158,11 @@ public class WebUtilities {
         return users;
     }//getOnlineUsers
 
+    /**
+     * Returns the Users network status (logged in or not)
+     * @return true if logged in, false otherwise
+     */
+    public boolean loggedIn() {
+        return loggedIn;
+    }//loggedIn
 }//webUtilities

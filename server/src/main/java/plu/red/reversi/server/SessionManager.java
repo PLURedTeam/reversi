@@ -56,7 +56,7 @@ public class SessionManager implements Runnable {
     public void run() {
 
         while(true) {
-            System.out.println("I am looping through sessions");
+            System.out.println("I am looping through sessions " + System.currentTimeMillis());
 
             for(Integer sessionID: sessions.keySet()) {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 30000) {
@@ -68,6 +68,6 @@ public class SessionManager implements Runnable {
             }//for
             try { Thread.sleep(5000);}
             catch (InterruptedException e) { e.printStackTrace();}
-        }//true
+        }//while
     }//run
 }//sessionManager

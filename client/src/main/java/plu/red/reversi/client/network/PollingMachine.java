@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
  *
  * Created by Andrew on 3/22/2017.
  */
-public class PollingMachine implements Runnable {
+public class PollingMachine {
 
     //Fields
     private WebUtilities util;
@@ -28,10 +28,58 @@ public class PollingMachine implements Runnable {
      * @param user
      */
     public PollingMachine(WebUtilities util, Client client, User user) {
+        //set fields for user
         this.util = util;
         this.client = client;
         this.user = user;
+        //start polling threads
+        new Thread(new SessionPoll()).start();
+        new Thread(new ChatPoll()).start();
+        new Thread(new MovePoll()).start();
     }//constructor
+
+    /**
+     * Polls the server in a new thread to keep the current users
+     * session active on the server
+     */
+    private class SessionPoll implements Runnable {
+        public void run() {
+            while(util.loggedIn()) {
+                System.out.println("I am polling for the session!!!");
+                WebTarget target = client.target( baseURI + "keep-session-alive/" + user.getSessionID());
+                Response response = target.request().get();
+                try { Thread.sleep(5000);}
+                catch (InterruptedException e) {e.printStackTrace(); }
+            }//while
+            System.out.println("Session Thread is Dead!");
+        }//run
+    }//SessionPoll
+
+    /**
+     * Polls the server in a new thread to get new chat messages
+     * from the server
+     */
+    private class ChatPoll implements Runnable {
+        public void run() {
+
+        }//run
+    }//SessionPoll
+
+    /**
+     * Polls the server in a new thread to get new moves
+     * that have been played during a game
+     */
+    private class MovePoll implements Runnable {
+        public void run() {
+
+        }//run
+    }//SessionPoll
+
+
+
+
+
+
 
     /**
      * Keeps the current session alive by pinging the database to tell
@@ -39,19 +87,7 @@ public class PollingMachine implements Runnable {
      */
     public void run() {
 
-        while(util.loggedIn) {
-            System.out.println("Calling keep session Alive: " + System.currentTimeMillis());
 
-            WebTarget target = client.target( baseURI + "keep-session-alive/" + user.getSessionID());
-            Response response = target.request().get();
-            try {
-                Thread.sleep(5000);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }//while
 
 
     }//run

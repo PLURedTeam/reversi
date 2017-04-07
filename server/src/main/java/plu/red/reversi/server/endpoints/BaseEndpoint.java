@@ -1,5 +1,6 @@
 package plu.red.reversi.server.endpoints;
 
+import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.SessionManager;
 import plu.red.reversi.server.UserManager;
@@ -32,9 +33,7 @@ public class BaseEndpoint {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public User login(User user) {
-
-        if(user == null)
-            throw new WebApplicationException(403);
+        if(user == null) throw new WebApplicationException(403);
 
         //Just for testing
         // TODO: Connect to database
@@ -76,8 +75,8 @@ public class BaseEndpoint {
     @Path("create-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String createUser(User user) {
-        return "true";
+    public boolean createUser(User user) {
+        return DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword());
     }//createUser
 
     /**
@@ -90,8 +89,12 @@ public class BaseEndpoint {
     @Path("delete-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String deleteUser(User user) {
-        return "true";
+    public boolean deleteUser(User user) {
+
+        if(user == null)
+            throw new WebApplicationException(403);
+
+        return DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword());
     }//deleteUser
 
     /**

@@ -39,13 +39,11 @@ public class DBConnection {
      *   are passed.
      *
      *  If the database does not exist, one will be created
-     *   with the name ClientDB.db and the CreateDB class will
+     *   with the name ServerDB.db and the CreateDB class will
      *   be called to create the tables.
      *
      *  If the connection to the database fails the SQL message
      *   will be printed to the console.
-     *
-     * NOT COMPLETE, STILL HAVE TO FIGURE OUT WHAT DIRECTORY TO CREATE THE FILE IN
      *
      * @return connection status
      */
