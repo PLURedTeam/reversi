@@ -6,6 +6,7 @@ import org.joml.Vector4f;
 
 import plu.red.reversi.android.graphics.Graphics3D;
 import plu.red.reversi.android.graphics.Pipeline;
+import plu.red.reversi.core.util.Color;
 
 /**
  * Created by daniel on 3/20/17.
@@ -20,13 +21,27 @@ public class Piece3D extends ColorModel3D {
     public static final float HORIZONTAL_RADIUS = 0.04f;
     public static final float VERTICAL_RADIUS = 0.012f;
 
-    public Piece3D(Graphics3D g3d, Pipeline pipeline) {
+    private Color baseColor;
+    private Color flippedColor;
+
+
+    public Piece3D(Graphics3D g3d, Pipeline pipeline, Color baseColor, Color flippedColor) {
         super(g3d, pipeline);
+
+        this.baseColor = baseColor;
+        this.flippedColor = flippedColor;
+    }
+
+    public Piece3D(Piece3D other) {
+        super(other.getGraphics3D(), other.getPipeline());
+
+        this.baseColor = other.getBaseColor();
+        this.flippedColor = other.getFlippedColor();
     }
 
     @Override
-    public Model3D newInstance(Graphics3D g3d, Pipeline p) {
-        return new Piece3D(g3d, p);
+    Model3D newInstance() {
+        return new Piece3D(this);
     }
 
     @Override
@@ -126,5 +141,13 @@ public class Piece3D extends ColorModel3D {
         }
         else
             setRot(new Quaternionf().rotate(0, 0, 0));
+    }
+
+    public Color getBaseColor() {
+        return baseColor;
+    }
+
+    public Color getFlippedColor() {
+        return flippedColor;
     }
 }

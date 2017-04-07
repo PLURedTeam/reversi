@@ -19,8 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import plu.red.reversi.core.Game;
-import plu.red.reversi.core.util.SettingsMap;
+import plu.red.reversi.core.util.DataMap;
 
 public class GameActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GameListener {
@@ -137,7 +136,7 @@ public class GameActivity extends AppCompatActivity
     }
 
     @Override
-    public void onNewGame(SettingsMap gameSettings) {
+    public void onNewGame(DataMap gameSettings) {
 
     }
 }

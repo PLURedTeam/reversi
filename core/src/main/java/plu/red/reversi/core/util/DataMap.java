@@ -41,7 +41,8 @@ public class DataMap {
     public DataMap(JSONObject json) throws RuntimeException {
         // Iterate through the JSONObject's keys
         Iterator<String> it = json.keys();
-        it.forEachRemaining((key) -> {
+        while(it.hasNext()) {
+            String key = it.next();
             try {
                 // Does this Setting's value extends Comparable?
                 Class clazz = Class.forName(json.getJSONObject(key).getString("class"));
@@ -55,7 +56,7 @@ public class DataMap {
                 // Report any problems in a RuntimeException
                 throw new RuntimeException("Problem when turning JSON into settings: " + ex.getMessage());
             }
-        });
+        }
     }
 
     /**

@@ -19,8 +19,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
-import plu.red.reversi.core.BoardIndex;
-import plu.red.reversi.core.Game;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
 
 /**
@@ -76,9 +76,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     + " must implement GameListener");
         }
 
-        if(mGame != null)
-            mGameView.setGame(mGame);
-        else if(mServiceConnection != null) {
+        if(mServiceConnection != null) {
             mGame = mServiceConnection.getGame();
             mGameView.setGame(mGame);
         }
@@ -90,6 +88,11 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     @Override
     public void onDetach() {
         super.onDetach();
+
+        getContext().unbindService(this);
+
+        mServiceConnection = null;
+
         mListener = null;
     }
 
@@ -116,7 +119,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         else if(v == mConfirmButton) {
             // move confirmed
             mGame.acceptCommand(new MoveCommand(
-                    mGame.getCurrentPlayer().getRole(),
+                    mGame.getCurrentPlayer().getID(),
                     mGameView.getCurrentSelected()
             ));
 

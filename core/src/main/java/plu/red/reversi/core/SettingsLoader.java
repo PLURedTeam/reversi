@@ -3,9 +3,9 @@ package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.listener.ISettingsListener;
+import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -93,7 +93,7 @@ public class SettingsLoader {
 
         settings.checkDefault(GLOBAL_USER_NAME, "Player",
                 "Name to associate user with.");
-        settings.checkDefault(GLOBAL_USER_COLOR, Color.BLACK.getRGB(),
+        settings.checkDefault(GLOBAL_USER_COLOR, Color.BLACK.composite,
                 "Default color to use for user, in an integer representation. Bits are stored as follows: A[31:24]-R[23:16]-G[15:8]-B[7:0]");
 
         return settings;
