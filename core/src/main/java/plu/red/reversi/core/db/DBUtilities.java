@@ -16,6 +16,8 @@ import plu.red.reversi.core.util.Color;
 //import java.awt.*;
 import java.sql.*;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Created by Andrew on 3/9/2017.
@@ -86,6 +88,34 @@ public class DBUtilities {
         }//catch
         return gameID;
     }//createGame
+
+
+    public boolean saveGame(History h, Player[] p, JSONObject s, String n) {
+        boolean gameSaved = false;
+        int gameID;
+
+        //Create a collection from an array
+        Collection<Player> players = new HashSet<Player>();
+        Collections.addAll(players,p);
+
+        gameID = createGame();
+        saveGame(gameID);
+        updateGame(gameID, n);
+        saveGamePlayers(gameID, players);
+        saveGameSettings(gameID, s);
+
+        for(int i = 0; i < h.getNumBoardCommands(); i++)
+            saveMove(gameID, h.getBoardCommand(i));
+
+
+
+
+        return gameSaved;
+    }//saveGame
+
+
+
+
 
     /**
      * Saves the game to the database
@@ -260,8 +290,14 @@ public class DBUtilities {
                 int playerID = rs.getInt("player_color");
                 int row = rs.getInt("move_index_r");
                 int col = rs.getInt("move_index_c");
+                int type = rs.getInt("command_type");
 
-                MoveCommand m = new MoveCommand(playerID, new BoardIndex(row,col));
+                Command m;
+                if(type == 0)
+                    m = new MoveCommand(playerID, new BoardIndex(row,col));
+                else
+                    m = new SetCommand(playerID, new BoardIndex(row,col));
+
                 h.addCommand(m);
             }//while
 
@@ -292,7 +328,7 @@ public class DBUtilities {
             String moveSource = cmd.source.toString();
             int playerID = cmd.playerID;
 
-            //set move = 1
+            //set command = 1
             //move command = 0
             String sql = "select max(move_id) from GAME_HISTORY where game_id=?";
 
