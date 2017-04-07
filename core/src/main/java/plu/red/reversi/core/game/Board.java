@@ -4,7 +4,7 @@ import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
-import plu.red.reversi.core.listener.IFlipListener;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 
 import java.util.*;
 
@@ -21,15 +21,15 @@ public class Board {
 
     // This listener exists only because of the separation of Core and Client packages, which allows for only one-way
     //  communication between classes in different modules
-    protected HashSet<IFlipListener> listenerSetFlips = new HashSet<IFlipListener>();
+    protected HashSet<IBoardUpdateListener> listenerBoardUpdate = new HashSet<>();
 
     /**
      * Registers an IFlipListener that will have signals sent to it when Flips are applied.
      *
      * @param listener IFlipListener to register
      */
-    public void addFlipListener(IFlipListener listener) {
-        listenerSetFlips.add(listener);
+    public void addBoardUpdateListener(IBoardUpdateListener listener) {
+        listenerBoardUpdate.add(listener);
     }
 
     /**
@@ -38,8 +38,8 @@ public class Board {
      *
      * @param listener IFlipListener to unregister
      */
-    public void removeFlipListener(IFlipListener listener) {
-        listenerSetFlips.remove(listener);
+    public void removeBoardUpdateListener(IBoardUpdateListener listener) {
+        listenerBoardUpdate.remove(listener);
     }
 
 
@@ -193,25 +193,6 @@ public class Board {
             }
         }
         return sum;
-
-        /* Old method doesn't work anymore. A fix can be attempted in the future
-        boolean valid = true;
-        int sum = 0;
-        for(int x = 0; x < scoreCache.length; ++x) {
-            if(scoreCache[x] < 0) {
-                valid = false;
-                break;
-            }
-            sum += scoreCache[x];
-        }
-
-        if(valid) return sum;
-
-        sum = 0;
-        for(int x = 0; x < PlayerColor.validPlayerColors.length; ++x)
-            sum += getScore(PlayerColor.validPlayerColors[x]);
-        return sum;
-        */
     }
 
     /**
@@ -221,25 +202,7 @@ public class Board {
      * @param index square of the board move is attempting to be made onto
      */
     public boolean isValidMove(int player, BoardIndex index){
-        //check if the index is out of bounds
-        if(index.row >= size || index.column >= size)
-            return false;
-
-        //check if the index is empty
-        if(board[index.row][index.column] >= 0)
-            return false;
-
-        //This loop calls the private function isValidMove for each direction
-        for(int i = 0; i < 8; i++){
-            int dr = i < 3 ? -1 : ( i > 4 ? 1 : 0);
-            int dc = i % 3 == 0 ? -1 : ( i % 3 == 1 ? 1 : 0);
-            //checks if the move is valid
-            if(isValidMove(player, dr, dc, index)) {
-                return true; //if the move is valid
-            }
-        }//end loop
-
-        return false; //if the move is invalid
+        return at(index) == -1 && !calculateFlipsFromBoard(index, player).isEmpty();
     }
 
     /**
@@ -250,46 +213,6 @@ public class Board {
     public boolean isValidMove(MoveCommand command) {
         return isValidMove(command.playerID, command.position);
     }
-
-    /**
-     * Private method isValidMove handles the loop to check move validity in each direction
-     *
-     * @param player Integer Player ID to check
-     * @param dr change in x
-     * @param dc change in y
-     * @param i original BoardIndex move was played on
-     * @return if the move is valid
-     */
-    private boolean isValidMove(int player, int dr, int dc, BoardIndex i){
-        try {
-            int r = board[i.row + dr][i.column + dc];
-            if (r == player || r < 0)
-                return false;
-        }
-        catch(IndexOutOfBoundsException e){
-            return false;
-        }
-
-        for(int j = 1; j<size; j++){
-            int r = -1;
-            try {
-                r = board[i.row + dr * j][i.column + dc * j];
-            }
-            catch(IndexOutOfBoundsException e){
-                return false;
-            }
-            //if the tile is occupied by a piece of the same color
-            if(r == player) {
-                return true;
-            }
-            //if the tile is occupied by no piece
-            if(r < 0) {
-                return false;
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Find the different moves that could be made and store them into an ArrayList
@@ -316,6 +239,48 @@ public class Board {
 
     }
 
+    /**
+     * Figures out which index would be flipped if a piece was added to the given BoardIndex based on the current board state.
+     * @param origin the board index to add a new piece on the board
+     * @param playerId the player ID of the newly placed piece at the board index
+     * @return the board indexes which should be flipped.
+     */
+    public Collection<BoardIndex> calculateFlipsFromBoard(BoardIndex origin, int playerId) {
+
+        List<BoardIndex> flipped = new LinkedList<>();
+
+        for(int i = 0; i < 8; i++) {
+            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
+            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
+
+            List<BoardIndex> rowFlipped = new LinkedList<>();
+
+            try {
+
+                BoardIndex index = new BoardIndex(origin.row + dr, origin.column + dc);
+                int move = 1;
+
+                while(at(index) != playerId) {
+
+                    if(at(index) == -1)
+                        throw new Throwable();
+
+                    rowFlipped.add(index);
+
+                    move++;
+                    index = new BoardIndex(origin.row + dr * move, origin.column + dc * move);
+                }
+
+                flipped.addAll(rowFlipped);
+            }
+            catch (Throwable e) {
+                // deliberately empty
+            }
+        }
+
+        return flipped;
+    }
+
 
     /**
      * Applies the move made, updating the board
@@ -324,15 +289,19 @@ public class Board {
     public void apply(MoveCommand c) {
         //invalidate the entire cache
         scoreCache.clear();
+
+        Collection<BoardIndex> indexes = calculateFlipsFromBoard(c.position, c.playerID);
+
         //actually set the tile
         board[c.position.row][c.position.column] = c.playerID;
 
-        //flip the tiles as a result of placing this one
-        for(int i = 0; i < 8; i++) {
-            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
-            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
-            //Actually flip tile
-            flipTiles(c, dr, dc, 1);
+        for(IBoardUpdateListener bul : listenerBoardUpdate) {
+            bul.onBoardUpdate(c.position, c.playerID, indexes);
+        }
+
+        // TODO: Update specification. Current UI requires for board state to be updated after, but shoul it be before?
+        for(BoardIndex index : indexes) {
+            board[index.row][index.column] = c.playerID;
         }
     }
 
@@ -341,6 +310,10 @@ public class Board {
         scoreCache.remove(c.playerID);
         //set the tile
         board[c.position.row][c.position.column] = c.playerID;
+
+        for(IBoardUpdateListener bul : listenerBoardUpdate) {
+            bul.onBoardUpdate(c.position, c.playerID, new LinkedList<>());
+        }
     }
 
     public void apply(BoardCommand c){
@@ -349,40 +322,6 @@ public class Board {
         else if(c instanceof  MoveCommand)
             apply((MoveCommand)c);
     }
-
-    /**
-     * Private helper method to check for flippable tiles in each direction flip if valid
-     * @param c gets the move command, index and color
-     * @param dr change in row
-     * @param dc change in column
-     * @param count
-     * @return
-     */
-    private boolean flipTiles(MoveCommand c, int dr, int dc, int count) {
-        int tile = -1;
-        try {
-            tile = board[dr * count + c.position.row][dc * count + c.position.column];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
-        }
-        if (tile == c.playerID) {
-            // Signal our flip animation
-            for(IFlipListener listener : listenerSetFlips)
-                listener.doFlip(
-                        c.position,
-                        new BoardIndex(c.position.row + dr*(count-1), c.position.column + dc*(count-1)),
-                        c.playerID);
-            return true;
-        }
-        if (tile >= 0) {
-            if (flipTiles(c, dr, dc, count + 1)) {
-                board[c.position.row + dr * count][c.position.column + dc * count] = c.playerID;
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     @Override
     public boolean equals(Object o){
@@ -400,7 +339,4 @@ public class Board {
             }
         return true;
     }
-
-
-
 }
