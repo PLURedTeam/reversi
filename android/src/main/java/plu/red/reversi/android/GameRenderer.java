@@ -24,15 +24,18 @@ import plu.red.reversi.android.graphics.SimpleGLVertexShader;
 import plu.red.reversi.android.graphics.VertexShader;
 import plu.red.reversi.android.reversi3d.Board3D;
 import plu.red.reversi.android.reversi3d.Camera;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.listener.ICommandListener;
 
 /**
  * Created by daniel on 3/25/17.
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class GameRenderer implements GLSurfaceView.Renderer {
+public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
 
     private static final String TAG = GameRenderer.class.getSimpleName();
 
@@ -315,5 +318,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         System.out.println("Camera says OGL was " + res);
 
         return mBoard.getIndexAtCoord(res);
+    }
+
+    @Override
+    public void commandApplied(Command cmd) {
+        if(cmd instanceof MoveCommand) {
+             MoveCommand c = (MoveCommand)cmd;
+
+
+        }
     }
 }

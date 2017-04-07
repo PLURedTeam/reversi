@@ -8,8 +8,8 @@ import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
-import plu.red.reversi.core.listener.IFlipListener;
 import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.game.player.Player;
 
@@ -18,15 +18,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends JPanel implements MouseListener, IFlipListener, ICommandListener, IGameOverListener {
+public class BoardView extends JPanel implements MouseListener, IBoardUpdateListener, ICommandListener, IGameOverListener {
 
     /** Used to help with animation */
     private FlipAnimator fAnimator;
@@ -360,23 +358,59 @@ public class BoardView extends JPanel implements MouseListener, IFlipListener, I
         fAnimator.start();
     }
 
-    /**
-     * Indicates that a section of tiles should be flipped.
-     *
-     * @param startPosition BoardIndex representing the starting tile
-     * @param endPosition BoardIndex representing the ending tile
-     * @param playerID Integer ID representing the Player that is being flipped to
-     */
     @Override
-    public void doFlip(BoardIndex startPosition, BoardIndex endPosition, int playerID) {
+    public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
 
         clearHighlights();
 
-        animateFlipSequence(
-                startPosition.row, startPosition.column,
-                endPosition.row, endPosition.column,
-                new Color(game.getPlayer(playerID).getColor().composite),
-                300);
+        // TODO: The only reason this looks ugly here is because the new system will handle this problem of animation much
+        // more elegantly
+
+        // for each of the 8 directions a sequence update can happen in.
+        BoardIndex[] seqMins = new BoardIndex[8];
+        BoardIndex[] seqMaxs = new BoardIndex[8];
+
+        Arrays.fill(seqMins, new BoardIndex(-1, -1));
+        Arrays.fill(seqMaxs, new BoardIndex(-1, -1));
+
+        for(BoardIndex idx : updated) {
+            int dir = 4;
+
+            if(origin.row != idx.row) {
+                dir += ((idx.row - origin.row) / Math.abs(idx.row - origin.row)) * 3;
+            }
+
+            if(origin.column != idx.column)
+                dir += (idx.column - origin.column) / Math.abs(idx.column - origin.column);
+
+            if(dir > 3)
+                dir--;
+
+            if(seqMins[dir].row == -1 ||
+                    Math.hypot(idx.row - origin.row, idx.column - origin.column) < Math.hypot(seqMins[dir].row - origin.row, seqMins[dir].column - origin.column))
+                seqMins[dir] = idx;
+
+            if(seqMaxs[dir].row == -1 ||
+                    Math.hypot(idx.row - origin.row, idx.column - origin.column) > Math.hypot(seqMaxs[dir].row - origin.row, seqMaxs[dir].column - origin.column))
+                seqMaxs[dir] = idx;
+        }
+
+
+        for(int i = 0;i < 8;i++) {
+            if(seqMins[i].row != -1) {
+                animateFlipSequence(
+                        seqMins[i].row, seqMins[i].column,
+                        seqMaxs[i].row, seqMaxs[i].column,
+                        new Color(game.getPlayer(playerId).getColor().composite),
+                        300
+                );
+            }
+        }
+    }
+
+    @Override
+    public void onBoardRefresh() {
+        // TODO: Implement, because I do not see in this class how this would be done?
     }
 
     @Override

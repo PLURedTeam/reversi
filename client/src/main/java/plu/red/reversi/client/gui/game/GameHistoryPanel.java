@@ -51,12 +51,8 @@ public class GameHistoryPanel extends JPanel implements ICommandListener {
 
             BoardCommand command = game.getHistory().getBoardCommand(rowIndex);
 
-            if(command instanceof MoveCommand) {
-
-                MoveCommand moveCommand = (MoveCommand)command;
-
                 if( columnIndex == 0 ) return "" + (rowIndex + 1);
-                else if( columnIndex == 1) return moveCommand.position;
+                else if( columnIndex == 1) return command.position;
                 else if( columnIndex == 2) {
                     // Would be better if player was actually connecting to the actual player object here???
                     //  there is no way to get a reference to the player short of having the game, and that is bad here
@@ -65,15 +61,10 @@ public class GameHistoryPanel extends JPanel implements ICommandListener {
                     // Done! :P There's no reason not to keep a Game reference. The other option would be to
                     //  store the Player reference with the Command, which while doable makes it harder to
                     //  reconstruct Commands from a saved state. -James
-                    return game.getPlayer(moveCommand.playerID).getName();
+                    return game.getPlayer(command.playerID).getName();
                 }
+
                 return null;
-            }
-            else {
-                System.err.println("Undefined command type in command history - please implement: ");
-                System.err.println(command.getClass().getName());
-                return null;
-            }
         }
     }
 
