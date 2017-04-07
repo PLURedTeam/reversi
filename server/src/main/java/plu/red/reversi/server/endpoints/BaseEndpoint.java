@@ -9,6 +9,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /**
@@ -76,7 +77,15 @@ public class BaseEndpoint {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public boolean createUser(User user) {
-        return DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword());
+
+        if(user == null)
+            throw new WebApplicationException(403);
+
+        try {
+            return DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword());
+        } catch(NoSuchAlgorithmException e) {
+            throw new WebApplicationException(500);
+        }//catch
     }//createUser
 
     /**
@@ -94,7 +103,11 @@ public class BaseEndpoint {
         if(user == null)
             throw new WebApplicationException(403);
 
-        return DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword());
+        try {
+            return DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword());
+        } catch(NoSuchAlgorithmException e) {
+            throw new WebApplicationException(500);
+        }//catch
     }//deleteUser
 
     /**
