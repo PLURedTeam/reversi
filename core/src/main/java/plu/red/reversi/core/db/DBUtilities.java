@@ -35,6 +35,8 @@ public class DBUtilities {
      *  and sets the conn field to the connection
      */
     public DBUtilities() {
+        initDB();
+        cleanupGames();
     }//constructor
 
     private void initDB() {
@@ -49,7 +51,6 @@ public class DBUtilities {
 
                 Statement command = conn.createStatement();
                 command.execute(sql);
-                cleanupGames();
             } catch (SQLException e) {
                 e.printStackTrace();
             }//catch
