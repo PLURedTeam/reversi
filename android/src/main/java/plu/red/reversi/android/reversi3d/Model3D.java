@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import plu.red.reversi.android.graphics.Shape;
@@ -170,7 +171,22 @@ public abstract class Model3D extends Shape {
             Vector3f tmp = new Vector3f();
 
             // now that we have all the points, we are going to have to add the normals by using those mapped triangles and calculating their adjacent normals.
-            HashMap<Vector3fc, Vector3f> vertexFaces = new HashMap<>();
+            TreeMap<Vector3fc, Vector3f> vertexFaces = new TreeMap<>(new Comparator<Vector3fc>() {
+                @Override
+                public int compare(Vector3fc v1, Vector3fc v2) {
+                    if(v1.distance(v2) < 1e-4) {
+                        return 0;
+                    }
+
+                    if(Math.abs(v2.x() - v1.x()) > 1e-4)
+                        return v2.x() - v1.x() > 0 ? 1 : -1;
+
+                    if(Math.abs(v2.y() - v1.y()) > 1e-4)
+                        return v2.y() - v1.y() > 0 ? 1 : -1;
+
+                    return v2.z() - v1.z() > 0 ? 1 : -1;
+                }
+            });
             List<Vector3fc> verts = new LinkedList<>();
 
             int count = getFaceCount(sectionId);

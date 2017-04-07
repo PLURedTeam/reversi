@@ -86,3 +86,4 @@ fabric.properties
 *.json
 
 local.properties
+android/.idea/libraries

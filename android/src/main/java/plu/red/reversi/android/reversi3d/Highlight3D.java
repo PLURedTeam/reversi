@@ -27,7 +27,7 @@ public class Highlight3D extends ColorModel3D {
     }
 
     public Highlight3D(Highlight3D other) {
-        super(other.getGraphics3D(), other.getPipeline());
+        super(other.getGraphics3D(), other.getPipeline(), 0.1f);
 
         alphaBlended = other.alphaBlended;
         height = other.height;
