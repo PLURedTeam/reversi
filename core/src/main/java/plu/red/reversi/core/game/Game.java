@@ -371,6 +371,7 @@ public class Game extends Controller {
         // Send Move Commands to the Board object
         if(cmd instanceof BoardCommand) {
             if(!gameRunning) return false;
+            board.apply((BoardCommand)cmd);
             nextTurn();
         }
 
