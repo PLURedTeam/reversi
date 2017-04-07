@@ -100,11 +100,6 @@ public class Client {
 
         DBUtilities.INSTANCE.saveGame(h,p,s,name);
 
-
-
-//        // Update the Game name in the database and save
-//        DBUtilities.INSTANCE.updateGame(gameID, name);
-//        DBUtilities.INSTANCE.saveGameSettings(gameID, game.getSettings().toJSON());
         game.setGameSaved(true);
     }
 }

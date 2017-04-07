@@ -91,6 +91,14 @@ public class DBUtilities {
     }//createGame
 
 
+    /**
+     * New method for saving the game all at once
+     * @param h the history of the game
+     * @param p the players in the game
+     * @param s the settingsMap
+     * @param n the name of the game to be saved
+     * @return true if saved, false otherwise
+     */
     public boolean saveGame(History h, Player[] p, JSONObject s, String n) {
         boolean gameSaved = false;
         int gameID;
@@ -108,15 +116,8 @@ public class DBUtilities {
         for(int i = 0; i < h.getNumBoardCommands(); i++)
             saveMove(gameID, h.getBoardCommand(i));
 
-
-
-
         return gameSaved;
     }//saveGame
-
-
-
-
 
     /**
      * Saves the game to the database
