@@ -76,13 +76,16 @@ public class BaseEndpoint {
     @Path("create-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public boolean createUser(User user) {
+    public Response createUser(User user) {
 
         if(user == null)
-            throw new WebApplicationException(403);
+            throw new WebApplicationException(400);
 
         try {
-            return DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword());
+            if(DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword()))
+                return Response.ok().build();
+            else
+                throw new WebApplicationException(406);
         } catch(NoSuchAlgorithmException e) {
             throw new WebApplicationException(500);
         }//catch

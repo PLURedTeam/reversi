@@ -100,7 +100,15 @@ public class NetworkMenu extends JMenu implements ActionListener {
      * Calls the webUtilities method to create the user on the server
      */
     private void createUser() {
+        JTextField username = new JTextField();
+        JTextField password = new JPasswordField();
+        Object[] message = { "Username:", username, "Password:", password };
 
+        int option = JOptionPane.showConfirmDialog(gui, message, "Create an Online Account", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            //Call the server to check for valid login credentials
+            boolean loggedIn = WebUtilities.INSTANCE.createUser(username.getText(),password.getText());
+        }//if
     }//createUser
 
     /**
@@ -125,9 +133,6 @@ public class NetworkMenu extends JMenu implements ActionListener {
         } else {
             System.out.println("Login canceled");
         }
-
-
-
     }//login
 
     private void logout() {

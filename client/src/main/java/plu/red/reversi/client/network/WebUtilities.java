@@ -24,7 +24,7 @@ public class WebUtilities {
     private Client client;
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
     private int sessionID;
-    private User user;
+    private User user = new User();
     private boolean loggedIn = false;
 
     /**
@@ -44,30 +44,37 @@ public class WebUtilities {
      * @return true if valid credentials, false otherwise
      */
     public boolean login(String username, String password) {
-        //Create User
-        user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
+        if(!loggedIn) { //Check to see if currently logged in
 
-        try {
-            //Create target and call server
-            WebTarget target = client.target(baseURI + "login");
-            Response response = target.request().post(Entity.json(user));
+            //Create User
+            user.setUsername(username);
+            user.setPassword(password);
 
-            //If invalid credentials, return false
-            if (response.getStatus() == 403) return false;
-            user = response.readEntity(User.class);
-            sessionID = user.getSessionID();
-            loggedIn = true;
+            try {
+                //Create target and call server
+                WebTarget target = client.target(baseURI + "login");
+                Response response = target.request().post(Entity.json(user));
 
-            new PollingMachine(this, client, user);
-            return true;
-        } catch (Exception e) {
+                //If invalid credentials, return false
+                if (response.getStatus() == 403) return false;
+                user = response.readEntity(User.class);
+                sessionID = user.getSessionID();
+                loggedIn = true;
+
+                new PollingMachine(this, client, user);
+                return true;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                        "The server is currently unreachable. Please try again later.",
+                        "Login Error", 2);
+                return false;
+            }//catch
+        } else {
             JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Login Error",2);
+                    "You are currently logged in. You must logout first",
+                    "Login Error", 2);
             return false;
-        }//catch
+        }//else
     }//login
 
     /**
@@ -119,17 +126,22 @@ public class WebUtilities {
         WebTarget target = client.target(baseURI + "create-user");
         Response response = target.request().post(Entity.json(user));
 
-        if(response.getStatus() == 201) return true;
+        if(response.getStatus() == 200) {
+            JOptionPane.showMessageDialog(null,
+                    "Your online account was successfully created.",
+                    "Online Account Created", 1);
+            return true;
+        }//if
         if(response.getStatus() == 406) {
             JOptionPane.showMessageDialog(null,
                     "That username already exists, please try again with a different username.",
                     "Create User Error", 2);
-            return false;
         }//if
-
-        JOptionPane.showMessageDialog(null,
-                "A server error occurred. Please try again later.",
-                "Server Error",2);
+        if(response.getStatus() == 500) {
+            JOptionPane.showMessageDialog(null,
+                    "A server error occurred. Please try again later.",
+                    "Server Error", 2);
+        }
 
         return false;
 
