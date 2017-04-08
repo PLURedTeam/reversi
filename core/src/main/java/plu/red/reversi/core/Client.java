@@ -1,7 +1,10 @@
 package plu.red.reversi.core;
 
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.History;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.lobby.Lobby;
 
 /**
@@ -90,9 +93,18 @@ public class Client {
         Game game = (Game)core;
         int gameID = game.getGameID();
 
-        // Update the Game name in the database and save
-        DBUtilities.INSTANCE.updateGame(gameID, name);
-        DBUtilities.INSTANCE.saveGameSettings(gameID, game.getSettings().toJSON());
+
+        History h = game.getHistory();
+        Player[] p = game.getAllPlayers();
+        JSONObject s = game.getSettings().toJSON();
+
+        DBUtilities.INSTANCE.saveGame(h,p,s,name);
+
+
+
+//        // Update the Game name in the database and save
+//        DBUtilities.INSTANCE.updateGame(gameID, name);
+//        DBUtilities.INSTANCE.saveGameSettings(gameID, game.getSettings().toJSON());
         game.setGameSaved(true);
     }
 }

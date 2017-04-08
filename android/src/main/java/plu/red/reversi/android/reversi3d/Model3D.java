@@ -198,15 +198,21 @@ public abstract class Model3D extends Shape {
                 Vector3f[] face = getFace(sectionId, i);
 
                 face[1].sub(face[0], norm);
-                face[face.length - 1].sub(face[0], tmp);
+                face[2].sub(face[0], tmp);
 
                 norm.cross(tmp).normalize();
+
+                if(this instanceof Piece3D) {
+                    System.out.println("Size: " + face.length);
+                    System.out.println("Generate norm: " + norm);
+                    System.out.println("From " + face[0] + ", " + face[1] + ", " + face[2]);
+                }
 
                 if(Float.isNaN(norm.length())) {
                     Vector3f tmp2 = new Vector3f();
                     Vector3f tmp3 = new Vector3f();
                     face[1].sub(face[0], tmp2);
-                    face[face.length - 1].sub(face[0], tmp3);
+                    face[2].sub(face[0], tmp3);
                     System.out.println("Got NaN from Cross: " + tmp2 + ", " + tmp3);
                     for(int j = 0;j < face.length;j++)
                         System.out.println("FV: " + face[j]);
@@ -245,6 +251,9 @@ public abstract class Model3D extends Shape {
                 if(Float.isNaN(n.length())) {
                     System.out.println("NaN vector!");
                 }
+
+                //System.out.println("Add normal: " + new Vector3f(n).normalize());
+                //System.out.println("For vertex: " + v);
 
                 normals.add(new Vector3f(n).normalize());
             }

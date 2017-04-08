@@ -196,22 +196,16 @@ public class Game extends Controller {
 
         board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
 
-        // Ensure a GameID exists
-        if(gameID < 0) {
-            gameID = DBUtilities.INSTANCE.createGame();
-            DBUtilities.INSTANCE.saveGame(gameID);
-            DBUtilities.INSTANCE.saveGamePlayers(gameID, players.values());
-        }
-
         // Ensure a History exists and setup the Board
         if(history == null) {
 
             history = new History();
-            board.applyCommands(Board.getSetupCommands(this));
+            LinkedList<BoardCommand> setupCommands = Board.getSetupCommands(this);
+            board.applyCommands(setupCommands);
 
-            // Save the initial setup
-            List<BoardCommand> setup = Board.getSetupCommands(this);
-            for(BoardCommand cmd : setup) DBUtilities.INSTANCE.saveMove(gameID, cmd);
+            //Add setupCommands to history
+            for(BoardCommand c: setupCommands)
+                history.addCommand(c);
 
             // Get first player
             currentPlayer = getNextPlayerID(-1, players.keySet());
@@ -378,7 +372,6 @@ public class Game extends Controller {
         if(cmd instanceof BoardCommand) {
             if(!gameRunning) return false;
             board.apply((BoardCommand)cmd);
-            DBUtilities.INSTANCE.saveMove(gameID, (BoardCommand)cmd);
             nextTurn();
         }
 

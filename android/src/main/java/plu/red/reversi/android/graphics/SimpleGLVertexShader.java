@@ -34,7 +34,7 @@ public class SimpleGLVertexShader extends VertexShader {
                 "\n" +
                 "void main()\n" +
                 "{\n" +
-                "  fNormal = normalize((modelMatrix * vec4(vNormal, 1)).xyz);\n" +
+                "  fNormal = normalize((transpose(inverse(modelMatrix)) * vec4(vNormal, 0)).xyz);\n" +
                 "  vec4 pos = modelMatrix * vPosition;\n" +
                 "  fPosition = pos.xyz;\n" +
                 "  fAlbedo = vAlbedo;\n" +

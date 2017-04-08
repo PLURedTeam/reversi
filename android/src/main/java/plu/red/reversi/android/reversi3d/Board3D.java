@@ -78,7 +78,7 @@ public class Board3D extends ColorModel3D {
             int c = i % size;
             Piece3D p = (Piece3D)piece.clone();
 
-            Vector3f pos = new Vector3f(PIECE_SIZE * c + PIECE_SIZE / 2, PIECE_SIZE * r + PIECE_SIZE / 2, Piece3D.VERTICAL_RADIUS / 2).add(origin);
+            Vector3f pos = new Vector3f(PIECE_SIZE * c + PIECE_SIZE / 2, PIECE_SIZE * r + PIECE_SIZE / 2, Piece3D.VERTICAL_RADIUS).add(origin);
 
             p.setPos(pos);
 
