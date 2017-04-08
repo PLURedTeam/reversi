@@ -152,6 +152,8 @@ public class Camera {
 
         targetState.cameraDir.x = targetState.cameraDir.x % (2 * (float)Math.PI);
 
+        targetState.cameraDir.y = (float)Math.max(0, Math.min(Math.PI / 2, targetState.cameraDir.y));
+
         recalculateViewMatrix();
 
         return this;
