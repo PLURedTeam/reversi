@@ -6,7 +6,6 @@ import org.joml.Vector4f;
 
 import plu.red.reversi.android.easing.EaseType;
 import plu.red.reversi.android.easing.PolynomialEasing;
-import plu.red.reversi.android.easing.YankEasing;
 import plu.red.reversi.android.graphics.Graphics3D;
 import plu.red.reversi.android.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
