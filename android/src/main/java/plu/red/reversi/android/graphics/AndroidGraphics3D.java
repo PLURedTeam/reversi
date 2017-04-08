@@ -108,7 +108,9 @@ public class AndroidGraphics3D extends Graphics3D {
                 throw new UnsupportedOperationException("Shader type is not available in GLES");
         }
 
-        GLES30.glShaderSource(handle, shader.getSource());
+        String source = shader.getSource();
+
+        GLES30.glShaderSource(handle, source);
         GLES30.glCompileShader(handle);
 
         int[] buf = new int[1];
@@ -119,7 +121,7 @@ public class AndroidGraphics3D extends Graphics3D {
             // shader failed to compile, get more info
             String message = GLES30.glGetShaderInfoLog(handle);
 
-            throw new ShaderCompileException(message);
+            throw new ShaderCompileException(message, source);
         }
 
         shader.setHandle(this, handle);
@@ -169,7 +171,7 @@ public class AndroidGraphics3D extends Graphics3D {
             // program failed to link, get more info
             String message = GLES30.glGetProgramInfoLog(handle);
 
-            throw new ShaderCompileException(message);
+            throw new ShaderCompileException(message, "");
         }
 
         pipeline.setHandle(this, handle);

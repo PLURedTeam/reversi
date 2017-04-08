@@ -266,7 +266,8 @@ public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
 
         // it is possible for this function to be called before init. So make sure we are not processing before that.
         if(mBoard != null) {
-            result = mBoard.update(++mTick) || mCamera.update(mTick);
+            result = mBoard.update(++mTick);
+            result = mCamera.update(mTick) || result;
 
             if(mAutoRotate) {
 

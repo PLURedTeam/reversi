@@ -16,7 +16,7 @@ import plu.red.reversi.core.util.Color;
 public class Piece3D extends ColorModel3D {
 
     public static final int LONGITUDE_DETAIL = 20;
-    public static final int LATITUDE_DETAIL = 10;
+    public static final int LATITUDE_DETAIL = 20;
 
     public static final float HORIZONTAL_RADIUS = 0.04f;
     public static final float VERTICAL_RADIUS = 0.012f;
@@ -62,15 +62,19 @@ public class Piece3D extends ColorModel3D {
      */
     private Vector3f getCurvePoint(float lat, float lng) {
 
-        lat *= Math.PI * 2;
+        lat *= Math.PI;
         lng *= Math.PI * 2;
 
-        double r = Math.cos(lat);
+        double r = Math.sin(lat);
+
+        System.out.println(lat);
+
+        System.out.println(r);
 
         return new Vector3f(
                 (float)(r * Math.cos(lng)) * HORIZONTAL_RADIUS,
                 (float)(r * Math.sin(lng)) * HORIZONTAL_RADIUS,
-                (float)(r * Math.tan(lat)) * VERTICAL_RADIUS
+                (float)(Math.cos(lat)) * VERTICAL_RADIUS
         );
     }
 
@@ -83,20 +87,35 @@ public class Piece3D extends ColorModel3D {
         final float rowSize = 1.0f / LATITUDE_DETAIL;
         final float columnSize = 1.0f / LONGITUDE_DETAIL;
 
-        float lat0 = sectionIndex == 0 ? rowSize * row : 1.0f - rowSize * row;
-        float lat1 = sectionIndex == 0 ? rowSize * (1 + row) : 1.0f - rowSize * (1 + row);
+        float lat0 = rowSize * row;
+        float lat1 = rowSize * (1 + row);
 
         float lng0 = column * columnSize;
         float lng1 = (column + 1) * columnSize;
 
-        System.out.println("Calculated lats: " + lat0 + ", " + lat1);
-        System.out.println("Calculated lngs: " + lng0 + ", " + lng1);
+        /*if(faceIndex < getFaceCount(0) / 2) {
+            lng0 = -lng0;
+            lng1 = -lng1;
+            //lat0 = -lat0;
+            //lat1 = -lat1;
+        }*/
+
+        /*if(sectionIndex == 1) {
+            lng0 = -lng0;
+            lng1 = -lng1;
+        }*/
 
         if(row == 0)
             return new Vector3f[]{
                     getCurvePoint(lat0, lng0),
-                    getCurvePoint(lat1, lng1),
-                    getCurvePoint(lat1, lng0)
+                    getCurvePoint(lat1, lng0),
+                    getCurvePoint(lat1, lng1)
+            };
+        if(row == LATITUDE_DETAIL - 1)
+            return new Vector3f[]{
+                    getCurvePoint(lat1, lng0),
+                    getCurvePoint(lat0, lng1),
+                    getCurvePoint(lat0, lng0)
             };
         else
             return new Vector3f[]{
@@ -119,6 +138,13 @@ public class Piece3D extends ColorModel3D {
         }
 
         if(faceIndex < LONGITUDE_DETAIL) {
+            return new Vector4f[]{
+                    color,
+                    color,
+                    color
+            };
+        }
+        if(getFaceCount(0) - faceIndex - 1 < LONGITUDE_DETAIL) {
             return new Vector4f[]{
                     color,
                     color,
