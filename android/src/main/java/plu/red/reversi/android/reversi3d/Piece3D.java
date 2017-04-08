@@ -4,6 +4,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import plu.red.reversi.android.easing.EaseType;
+import plu.red.reversi.android.easing.PolynomialEasing;
+import plu.red.reversi.android.easing.YankEasing;
 import plu.red.reversi.android.graphics.Graphics3D;
 import plu.red.reversi.android.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
@@ -21,8 +24,18 @@ public class Piece3D extends ColorModel3D {
     public static final float HORIZONTAL_RADIUS = 0.04f;
     public static final float VERTICAL_RADIUS = 0.012f;
 
+    public static final float ANIMATION_FLIP_JUMP = 0.2f;
+    public static final int ANIMATION_FLIP_ROTATIONS = 5;
+    public static final int ANIMATION_FLIP_DURATION = 60; // 1.0 seconds in ticks
+
+    public static final PolynomialEasing FLIP_EASER = new PolynomialEasing(3, EaseType.EASE_OUT);
+
     private Color baseColor;
     private Color flippedColor;
+
+    private boolean flipped;
+
+    private int animFlipStart;
 
 
     public Piece3D(Graphics3D g3d, Pipeline pipeline, Color baseColor, Color flippedColor) {
@@ -30,6 +43,9 @@ public class Piece3D extends ColorModel3D {
 
         this.baseColor = baseColor;
         this.flippedColor = flippedColor;
+
+        flipped = false;
+        animFlipStart = -1;
     }
 
     public Piece3D(Piece3D other) {
@@ -37,6 +53,9 @@ public class Piece3D extends ColorModel3D {
 
         this.baseColor = other.getBaseColor();
         this.flippedColor = other.getFlippedColor();
+
+        flipped = false;
+        animFlipStart = -1;
     }
 
     @Override
@@ -136,11 +155,63 @@ public class Piece3D extends ColorModel3D {
     }
 
     public void setFlipped(boolean b) {
+
+        flipped = b;
+
         if(b) {
             setRot(new Quaternionf().rotate((float)Math.PI, 0, 0));
         }
         else
             setRot(new Quaternionf().rotate(0, 0, 0));
+    }
+
+    public void animateFlip(boolean b, int atTick) {
+        if(flipped != b)
+            animFlipStart = atTick;
+    }
+
+    @Override
+    public boolean update(int tick) {
+        super.update(tick);
+
+        if(animFlipStart != -1 && animFlipStart < tick) {
+
+            if(animFlipStart + ANIMATION_FLIP_DURATION < tick) {
+                setFlipped(!flipped);
+
+                setPos(new Vector3f(
+                        getPos().x(),
+                        getPos().y(),
+                        VERTICAL_RADIUS
+                ));
+
+                animFlipStart = -1;
+            }
+            else {
+                // we are at some intermediate state
+                float tickoff = tick - animFlipStart;
+                float portion = tickoff / ANIMATION_FLIP_DURATION;
+
+                // the piece is flown up quadratically from the board
+                float newz = tickoff * (ANIMATION_FLIP_DURATION - tickoff) / (float)Math.pow(ANIMATION_FLIP_DURATION / 2, 2) * ANIMATION_FLIP_JUMP;
+
+                setPos(new Vector3f(
+                        getPos().x(),
+                        getPos().y(),
+                        newz
+                ));
+
+                // the piece is going to flip a certain number of times before returning to the board
+                Quaternionf rot = new Quaternionf();
+                rot.rotateAxis((flipped ? (float)Math.PI : 0) + FLIP_EASER.ease(portion, 0.0f, (float)Math.PI * ANIMATION_FLIP_ROTATIONS, 1.0f), 0, 1, 0);
+
+                setRot(rot);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public Color getBaseColor() {

@@ -14,9 +14,12 @@ import android.widget.Scroller;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
+import java.util.Collection;
+
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
 
 /**
@@ -24,7 +27,7 @@ import plu.red.reversi.core.listener.ICommandListener;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, ICommandListener {
+public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, IBoardUpdateListener {
 
     private static final int FRAMERATE = 60;
 
@@ -343,23 +346,24 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         // TODO: Some applications let you fling the scale; that might be nice here.
     }
 
-    /**
-     * Called when a Command is being passed through Game and has been validated.
-     *
-     * @param cmd Command object that is being applied
-     */
     @Override
-    public void commandApplied(Command cmd) {
-
+    public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.clearBoardHighlights();
-                mRenderer.updateBoardState();
+                mRenderer.onBoardUpdate(origin, playerId, updated);
             }
         });
+    }
 
-        requestRender();
+    @Override
+    public void onBoardRefresh() {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.onBoardRefresh();
+            }
+        });
     }
 
     private class UpdateTask implements Runnable {
@@ -395,7 +399,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public void setGame(Game game) {
         mGame = game;
 
-        mGame.addListener(this);
+        mGame.getBoard().addBoardUpdateListener(this);
 
         queueEvent(new Runnable() {
             @Override

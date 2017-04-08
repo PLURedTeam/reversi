@@ -87,3 +87,4 @@ fabric.properties
 
 local.properties
 android/.idea/libraries
+android/.idea/workspace.xml

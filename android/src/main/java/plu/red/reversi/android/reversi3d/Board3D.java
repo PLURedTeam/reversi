@@ -2,11 +2,17 @@ package plu.red.reversi.android.reversi3d;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import plu.red.reversi.android.graphics.Graphics3D;
 import plu.red.reversi.android.graphics.Pipeline;
@@ -27,16 +33,27 @@ public class Board3D extends ColorModel3D {
     public static final float PIECE_BORDER_SIZE = 0.005f;
     public static final float BORDER_SIZE = 0.08f;
 
+    public static final int ANIMATION_QUEUE_DELAY = 20;
+
     private Piece3D[] pieces;
     private Highlight3D[] highlights;
 
+    private Deque<BoardUpdate> boardUpdates;
+    private BoardUpdate currentBoardUpdate;
+
     private int size;
+
+    private Game game;
 
     public Board3D(Graphics3D g3d, Pipeline pipeline, Game game) {
 
         super(g3d, pipeline);
 
+        this.game = game;
+
         this.size = game.getBoard().size;
+
+        boardUpdates = new LinkedList<>();
 
         pieces = new Piece3D[(int)Math.pow(size, 2)];
         highlights = new Highlight3D[(int)Math.pow(size, 2)];
@@ -227,7 +244,67 @@ public class Board3D extends ColorModel3D {
 
     public void highlightAt(BoardIndex index) {
 
-        addChild(highlights[index.row * size + (size - index.column - 1)]);
+        Vector2ic rc = toBoardCoords(index, size);
+
+        addChild(highlights[indexFromCoord(rc, size)]);
+    }
+
+    @Override
+    public boolean update(int tick) {
+
+
+        if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
+            currentBoardUpdate = null;
+        }
+
+        if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
+            currentBoardUpdate = boardUpdates.poll();
+            currentBoardUpdate.dispatch();
+        }
+
+        return super.update(tick);
+    }
+
+    public void animBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+
+        System.out.println("animBoardUpdate " + origin + ", " + playerId + ", " + updated);
+
+        int triggerTime = getLastTick();
+
+        if(boardUpdates.peekLast() != null)
+            triggerTime = boardUpdates.peekLast().triggerTick + boardUpdates.peekLast().duration + ANIMATION_QUEUE_DELAY;
+        else if(currentBoardUpdate != null)
+            triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
+
+        System.out.println(boardUpdates.peekLast());
+        System.out.println(currentBoardUpdate);
+        System.out.println("triggerTime " + triggerTime);
+
+        boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
+    }
+
+    public void setPiece(Game game, BoardIndex index, int playerId) {
+        Player p = game.getPlayer(playerId);
+
+        Color color = null;
+
+        if(p != null)
+            color = p.getColor();
+
+        Vector2ic coords = toBoardCoords(index, size);
+        int i  = indexFromCoord(coords, size);
+
+        if(color == null) {
+            removeChild(pieces[i]);
+        }
+        else if(color.equals(pieces[i].getBaseColor())) {
+            addChild(pieces[i]);
+            pieces[i].setFlipped(false);
+        }
+        else {
+            addChild(pieces[i]);
+            pieces[i].setFlipped(true);
+        }
     }
 
     public void setBoard(Game game) {
@@ -238,28 +315,11 @@ public class Board3D extends ColorModel3D {
         for(int r = 0;r < size;r++) {
             for(int c = 0;c < size;c++) {
 
-                int i = r * size + c;
+                int i = indexFromCoord(new Vector2i(r, c), size);
 
-                BoardIndex idx = new BoardIndex(r, size - c - 1);
+                BoardIndex idx = fromBoardCoords(new Vector2i(r, c), size);
 
-                Player p = game.getPlayer(game.getBoard().at(idx));
-
-                Color color = null;
-
-                if(p != null)
-                    color = p.getColor();
-
-                if(color == null) {
-                    removeChild(pieces[i]);
-                }
-                else if(color.equals(pieces[i].getBaseColor())) {
-                    addChild(pieces[i]);
-                    pieces[i].setFlipped(false);
-                }
-                else {
-                    addChild(pieces[i]);
-                    pieces[i].setFlipped(true);
-                }
+                setPiece(game, idx, game.getBoard().at(idx));
             }
         }
     }
@@ -270,11 +330,78 @@ public class Board3D extends ColorModel3D {
 
         pos.sub(offset, offset);
 
-        // find row and column
-        int c = (int)(offset.x / PIECE_SIZE);
-        int r = (int)(offset.y / PIECE_SIZE);
+        return fromBoardCoords(new Vector2i(
+                (int)(offset.x / PIECE_SIZE),
+                (int)(offset.y / PIECE_SIZE)
+        ), size);
+    }
 
+    public static BoardIndex fromBoardCoords(Vector2ic coords, int size) {
+        return new BoardIndex(size - coords.x() - 1, coords.y());
+    }
 
-        return new BoardIndex(r, size - c - 1);
+    public static Vector2i toBoardCoords(BoardIndex idx, int size) {
+        return new Vector2i(
+                size - idx.row - 1,
+                idx.column
+        );
+    }
+
+    public static int indexFromCoord(Vector2ic coords, int size) {
+        return size * size - (size - coords.y() - 1) * size - (size - coords.x() - 1) - 1;
+    }
+
+    public static Vector2ic indexToCoord(int i, int size) {
+
+        i = size * size - i - 1;
+
+        return new Vector2i(
+                size - (i % size) - 1,
+                size - (i / size) - 1
+        );
+    }
+
+    private class BoardUpdate {
+        public BoardIndex origin;
+        public int playerId;
+        public Collection<BoardIndex> updates;
+
+        public int triggerTick;
+
+        public int duration;
+
+        public BoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updates, int triggerTick) {
+            this.origin = origin;
+            this.playerId = playerId;
+            this.updates = updates;
+            this.triggerTick = triggerTick;
+
+            duration = 0;
+
+            for(BoardIndex idx : updates)
+                duration = Math.max(duration, delayForPiece(idx) + Piece3D.ANIMATION_FLIP_DURATION);
+        }
+
+        public int delayForPiece(BoardIndex idx) {
+            final float POWER = 1.3f;
+            final int START_DELAY = 20; // in ticks
+
+            return (int)(Math.pow(Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1), POWER) * START_DELAY);
+        }
+
+        private void dispatch() {
+            setPiece(game, origin, playerId);
+
+            for(BoardIndex index : updates) {
+                Vector2ic coords = toBoardCoords(index, size);
+
+                int i = indexFromCoord(coords, size);
+
+                boolean flipped = pieces[0].getFlippedColor() == game.getPlayer(playerId).getColor();
+
+                // flips are delayed dramatically (see the power delay function above)
+                pieces[i].animateFlip(flipped, getLastTick() + delayForPiece(index));
+            }
+        }
     }
 }

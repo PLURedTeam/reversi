@@ -59,6 +59,8 @@ public abstract class Model3D extends Shape {
 
     private Model3D parent;
 
+    private int lastTick;
+
 
     public VertexBufferObject<Vector4fc> vertices;
     public VertexBufferObject<Vector3fc> normals;
@@ -258,6 +260,8 @@ public abstract class Model3D extends Shape {
     @CallSuper
     public boolean update(int tick) {
 
+        lastTick = tick;
+
         boolean updated = false;
 
         for(Model3D child : children)
@@ -425,6 +429,10 @@ public abstract class Model3D extends Shape {
 
     protected Graphics3D getGraphics3D() {
         return g3d;
+    }
+
+    protected int getLastTick() {
+        return lastTick;
     }
 
     @Override
