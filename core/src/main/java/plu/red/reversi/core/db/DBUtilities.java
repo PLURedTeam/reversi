@@ -90,7 +90,6 @@ public class DBUtilities {
         return gameID;
     }//createGame
 
-
     /**
      * New method for saving the game all at once
      * @param h the history of the game
@@ -314,6 +313,12 @@ public class DBUtilities {
         return h;
     }//loadGame
 
+    /**
+     * Saves a move from a game in the database
+     * @param gameID the id of the game being played
+     * @param cmd the command that was played
+     * @return true if saved, false otherwise
+     */
     public boolean saveMove(int gameID, BoardCommand cmd) {
 
         initDB();

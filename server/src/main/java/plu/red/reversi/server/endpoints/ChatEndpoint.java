@@ -26,7 +26,7 @@ public class ChatEndpoint {
     ChatHandler globalChat = new ChatHandler();
 
     /**
-     * Posts a message to the ChatHandler that was recieved from the client
+     * Posts a message to the ChatHandler that was received from the client
      * @param message
      */
     @Path("global")
@@ -36,10 +36,7 @@ public class ChatEndpoint {
         globalChat.postMessage(message);
     }//postMessage
 
-    /**
-     * Gets the current status of the leaderboard
-     * @return A JSON Object of the current leaderboard
-     */
+
     @Path("global/{user}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)

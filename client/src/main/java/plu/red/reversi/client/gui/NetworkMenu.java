@@ -1,6 +1,8 @@
 package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.network.WebUtilities;
+import plu.red.reversi.core.util.User;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +10,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 /**
  * This is a menu that displays the network items for the game. This menu
@@ -106,8 +109,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
         int option = JOptionPane.showConfirmDialog(gui, message, "Create an Online Account", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            //Call the server to check for valid login credentials
-            boolean loggedIn = WebUtilities.INSTANCE.createUser(username.getText(),password.getText());
+            WebUtilities.INSTANCE.createUser(username.getText(),password.getText());
         }//if
     }//createUser
 
@@ -115,24 +117,32 @@ public class NetworkMenu extends JMenu implements ActionListener {
      * Calls the server to login with user credentials
      */
     private void login() {
-        JTextField username = new JTextField();
-        JTextField password = new JPasswordField();
-        Object[] message = { "Username:", username, "Password:", password };
 
-        int option = JOptionPane.showConfirmDialog(gui, message, "Login", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
+        if(!WebUtilities.INSTANCE.loggedIn()) {
 
-            //Call the server to check for valid login credentials
-            boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(),password.getText());
+            JTextField username = new JTextField();
+            JTextField password = new JPasswordField();
+            Object[] message = {"Username:", username, "Password:", password};
 
-            if (loggedIn) {
-                System.out.println("Login successful");
+            int option = JOptionPane.showConfirmDialog(gui, message, "Login", JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+
+                //Call the server to check for valid login credentials
+                boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(), password.getText());
+
+                if (loggedIn) {
+                    System.out.println("Login successful");
+                } else {
+                    System.out.println("login failed");
+                }
             } else {
-                System.out.println("login failed");
-            }
+                System.out.println("Login canceled");
+            }//else
         } else {
-            System.out.println("Login canceled");
-        }
+            JOptionPane.showMessageDialog(null,
+                    "You are logged in. You must logout first before you can log in to another account.",
+                    "Login Error", 2);
+        }//else
     }//login
 
     private void logout() {
@@ -145,6 +155,14 @@ public class NetworkMenu extends JMenu implements ActionListener {
      * Calls the server to delete the user from the server
      */
     private void deleteUser() {
+        JTextField username = new JTextField();
+        JTextField password = new JPasswordField();
+        Object[] message = { "Username:", username, "Password:", password };
+
+        int option = JOptionPane.showConfirmDialog(gui, message, "Delete Your Online Account", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            WebUtilities.INSTANCE.deleteUser(username.getText(),password.getText());
+        }//if
     }//deleteUser
 
     /**
@@ -154,13 +172,32 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
     }//seeRanking
 
-
     /**
      * Calls the server to get the current users online
      */
     private void getOnlineUsers() {
         //Just for testing
-        WebUtilities.INSTANCE.getOnlineUsers();
+        ArrayList<User> users = WebUtilities.INSTANCE.getOnlineUsers();
+
+        if(users != null) {
+
+            Object[][] rows = new Object[users.size()][3];
+
+            for (int i = 0; i < users.size(); i++) {
+                rows[i][0] = users.get(i).getUsername();
+                rows[i][1] = users.get(i).getStatus();
+                rows[i][2] = users.get(i).getRank();
+            }//for
+
+            Object[] cols = {"Username", "Status", "Ranking"};
+            JTable table = new JTable(rows, cols);
+            JOptionPane.showMessageDialog(null, new JScrollPane(table), "Online Users", 1);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    "There are currently 0 users online",
+                    "", 1);
+
+        }//else
     }//getOnlineUsers
 
 }//NetworkMenu

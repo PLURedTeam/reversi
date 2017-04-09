@@ -56,7 +56,17 @@ public class WebUtilities {
                 Response response = target.request().post(Entity.json(user));
 
                 //If invalid credentials, return false
-                if (response.getStatus() == 403) return false;
+                if (response.getStatus() == 403) {
+                    JOptionPane.showMessageDialog(null,
+                            "That username and/or password was incorrect.",
+                            "Login Error", 2);
+                    return false;
+                }
+
+                JOptionPane.showMessageDialog(null,
+                        "Successfully logged in.",
+                        "Login Successful", 1);
+
                 user = response.readEntity(User.class);
                 sessionID = user.getSessionID();
                 loggedIn = true;
@@ -153,8 +163,51 @@ public class WebUtilities {
         }//catch
     }//createUser
 
+    /**
+     * Calls the server to delete a network user account
+     * @param username the requested username for the player
+     * @param password the password for the player in SHA256 format
+     * @return true if user is deleted, false otherwise
+     */
+    public boolean deleteUser(String username, String password) {
 
+        //Logout the current user
+        if(loggedIn) logout();
 
+        //Create a user object
+        user.setUsername(username);
+        user.setPassword(password);
+
+        try {
+            WebTarget target = client.target(baseURI + "delete-user");
+            Response response = target.request().post(Entity.json(user));
+
+            if(response.getStatus() == 200) {
+                JOptionPane.showMessageDialog(null,
+                        "Your online account was successfully deleted.",
+                        "Online Account Deleted", 1);
+                return true;
+            }//if
+            if(response.getStatus() == 406) {
+                JOptionPane.showMessageDialog(null,
+                        "That username and/or password was incorrect.",
+                        "Delete User Error", 2);
+            }//if
+            if(response.getStatus() == 500) {
+                JOptionPane.showMessageDialog(null,
+                        "A server error occurred. Please try again later.",
+                        "Server Error", 2);
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Delete User Error",2);
+            return false;
+        }//catch
+    }//deleteUser
 
 
     /**
@@ -162,12 +215,21 @@ public class WebUtilities {
      * @return An arraylist of users logged in
      */
     public ArrayList<User> getOnlineUsers() {
-        WebTarget target = client.target(baseURI + "online-users");
-        Response response = target.request(MediaType.APPLICATION_JSON).get();
 
-        ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>(){});
+        try {
+            WebTarget target = client.target(baseURI + "online-users");
+            Response response = target.request(MediaType.APPLICATION_JSON).get();
 
-        return users;
+            ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>() {
+            });
+
+            return users;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Delete User Error", 2);
+            return null;
+        }//catch
     }//getOnlineUsers
 
     /**

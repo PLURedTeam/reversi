@@ -13,6 +13,7 @@ public class User {
     private String password;
     private String status;
     private int sessionID;
+    private int ranking;
 
     public User() {}//DefaultConstructor
 
@@ -25,4 +26,6 @@ public class User {
     public void setSessionID(int s) { sessionID = s; }
     public String getStatus() { return status; }
     public void setStatus(String s) { status = s; }
+    public int getRank() { return ranking; }
+    public void setRank(int r) { ranking = r; }
 }//User

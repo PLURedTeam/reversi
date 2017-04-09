@@ -1,5 +1,6 @@
 package plu.red.reversi.server.endpoints;
 
+import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.*;
@@ -10,47 +11,37 @@ import javax.ws.rs.core.Response;
  * Created by Andrew on 3/23/17.
  * Glory to the Red Team.
  *
- * A set of endpoints that will be accessed from the base URI
- * These endpoints are not user specific and are to be used for
- * basic server interactions (i.e. non game or chat functions)
+ * A set of endpoints that will be accessed from the game URI
+ * with a path parameter that includes the game id.
  */
 @Path("game")
 public class GameEndpoint {
 
     /**
-     * Login method to authenticate the users credentials
-     * @param user A user object that holds the username and password
-     * @return User object that will include true if correct credentials and also the
-     *         session id, will be false if incorrect credentials and null for
-     *         the session id.
+     * Adds the move that is sent from a client into the game with the
+     * id from the path parameter
+     * @param id the game id
+     * @param c the command to be applied
+     * @return true if applied to game, false otherwise
      */
-    @Path("login")
+    @Path("{id}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public User login(User user) {
+    public boolean sendMove(@PathParam("id") int id, Command c) {
 
-        System.out.print("I AM IN LOGIN");
-
-        if(user.getUsername().equals("MajorSlime") && user.getPassword().equals("ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae")) {
-            user.setSessionID(1);
-            user.setPassword("");
-        } else {
-            throw new WebApplicationException(403);
-        }//else
-
-        return user;
-    }//login
+        return true;
+    }//sendMove
 
     /**
-     * Logout method to logout the user from the server
-     * @param user A user object that holds the username, and sessionID
-     * @return true if users is logged out, false otherwise
+     * Returns a move that has been played by another player in the game
+     * @param id the game id to get the move from
+     * @return the Command that has been played by a network player
      */
-    @Path("logout")
-    @POST
+    @Path("{id}")
+    @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String logout(User user) {
-        return "true";
-    }//logout
+    public Command getMove(@PathParam("id") int id) {
 
+        return null;
+    }//getMove
 }//BaseEndpoint

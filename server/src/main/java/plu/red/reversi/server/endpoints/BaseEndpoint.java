@@ -33,21 +33,24 @@ public class BaseEndpoint {
     @Path("login")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public User login(User user) {
+    public Response login(User user) {
         if(user == null) throw new WebApplicationException(403);
 
-        //Just for testing
-        // TODO: Connect to database
-        if(!user.getUsername().isEmpty()) {
-            user.setPassword("");
-        } else {
-            throw new WebApplicationException(403);
-        }//else
+        try {
+            if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
+                user.setPassword("");
+            } else {
+                throw new WebApplicationException(403);
+            }//else
+        } catch (NoSuchAlgorithmException e) {
+            throw new WebApplicationException(500);
+        }//catch
 
+        user.setStatus("In Lobby");
         UserManager.INSTANCE.addUser(user);
         user.setSessionID(SessionManager.INSTANCE.addSession());
 
-        return user;
+        return Response.ok().entity(user).build();
     }//login
 
     /**
@@ -101,13 +104,16 @@ public class BaseEndpoint {
     @Path("delete-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public boolean deleteUser(User user) {
+    public Response deleteUser(User user) {
 
         if(user == null)
-            throw new WebApplicationException(403);
+            throw new WebApplicationException(400);
 
         try {
-            return DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword());
+            if(DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword()))
+                return Response.ok().build();
+            else
+                throw new WebApplicationException(406);
         } catch(NoSuchAlgorithmException e) {
             throw new WebApplicationException(500);
         }//catch
@@ -134,6 +140,7 @@ public class BaseEndpoint {
     /**
      * Gets the current status of the leaderboard
      * @return A JSON Object of the current leaderboard
+     * TODO: Implement this once the ranking system is in place
      */
     @Path("leaderboard")
     @GET
@@ -151,5 +158,4 @@ public class BaseEndpoint {
         SessionManager.INSTANCE.keepSessionAlive(sessionID);
         return Response.ok().build();
     }//keepSessionAlive
-
 }//BaseEndpoint

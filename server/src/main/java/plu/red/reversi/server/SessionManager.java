@@ -28,9 +28,7 @@ public class SessionManager implements Runnable {
         int session = sessionIncrementer;
         sessions.put(session, System.currentTimeMillis());
         sessionIncrementer++;
-
         System.out.println("Adding Session: " + session);
-
         return session;
     }//addSession
 
@@ -39,6 +37,7 @@ public class SessionManager implements Runnable {
      * @param sessionID the session id to remove
      */
     public void removeSession(int sessionID) {
+        System.out.println("Removing Session: " + sessionID);
         sessions.remove(sessionID);
     }//sessionID
 
@@ -56,8 +55,6 @@ public class SessionManager implements Runnable {
     public void run() {
 
         while(true) {
-            System.out.println("I am looping through sessions " + System.currentTimeMillis());
-
             for(Integer sessionID: sessions.keySet()) {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 30000) {
                     sessions.remove(sessionID);
