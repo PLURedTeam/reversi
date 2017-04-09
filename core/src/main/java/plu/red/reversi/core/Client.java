@@ -10,14 +10,14 @@ import plu.red.reversi.core.lobby.Lobby;
 /**
  * Glory to the Red Team.
  *
- * Master Controller for client-side operations. The Client class controls all sub-Controllers and Models that are used
+ * Master Coordinator for client-side operations. The Client class controls all sub-Controllers and Models that are used
  * in the client side of the program. Main operations such as starting or loading a Game take place through this class.
  */
 public class Client {
 
     public final IMainGUI gui;
 
-    protected Controller core = null;
+    protected Coordinator core = null;
 
 
 
@@ -27,20 +27,20 @@ public class Client {
         setCore(new Lobby(gui));
     }
 
-    public Client(IMainGUI gui, Controller core) {
+    public Client(IMainGUI gui, Coordinator core) {
         this.gui = gui;
         gui.setClient(this);
         setCore(core);
     }
 
 
-    protected final void setCore(Controller core) {
+    protected final void setCore(Coordinator core) {
         if(this.core != null) this.core.cleanup();
         this.core = core;
         gui.updateGUIMajor();
     }
 
-    public Controller getCore() { return core; }
+    public Coordinator getCore() { return core; }
 
 
 

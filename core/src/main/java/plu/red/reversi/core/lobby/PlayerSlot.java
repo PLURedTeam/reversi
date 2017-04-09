@@ -28,7 +28,7 @@ public class PlayerSlot {
     protected int aiDifficulty = 5;
 
     /**
-     * Reference to parent Lobby Controller
+     * Reference to parent Lobby Coordinator
      */
     public final Lobby lobby;
 
@@ -36,7 +36,7 @@ public class PlayerSlot {
      * Basic Constructor. Constructs a new PlayerSlot with a given <code>type</code> and <code>color</code>, and a
      * <code>name</code> generated based on that type.
      *
-     * @param lobby Parent Lobby Controller
+     * @param lobby Parent Lobby Coordinator
      * @param type SlotType <code>type</code> of this PlayerSlot
      * @param color Color <code>color</code> of this PlayerSlot
      */
@@ -61,7 +61,7 @@ public class PlayerSlot {
      * Full Constructor. Constructs a new PlayerSlot with a given <code>type</code>, <code>color</code> and
      * <code>name</code>.
      *
-     * @param lobby Parent Lobby Controller
+     * @param lobby Parent Lobby Coordinator
      * @param type SlotType <code>type</code> of this PlayerSlot
      * @param color Color <code>color</code> of this PlayerSlot
      * @param name String <code>name</code> of this PlayerSlot

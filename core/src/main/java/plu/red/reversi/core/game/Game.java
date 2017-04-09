@@ -1,6 +1,6 @@
 package plu.red.reversi.core.game;
 
-import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.*;
@@ -16,10 +16,10 @@ import java.util.*;
  * Glory to the Red Team.
  *
  * Game object to represent the Reversi game as a whole. Contains references to all other objects
- * required to play a game of Reversi, such as Players, the Board, and Settings. As as a Controller
+ * required to play a game of Reversi, such as Players, the Board, and Settings. As as a Coordinator
  * object for a running game.
  */
-public class Game extends Controller {
+public class Game extends Coordinator {
 
     /**
      * Notifies that the Game has ended. Iterates through and tells every IGameOverListener that has been
