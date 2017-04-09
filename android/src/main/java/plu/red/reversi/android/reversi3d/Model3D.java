@@ -202,12 +202,6 @@ public abstract class Model3D extends Shape {
 
                 norm.cross(tmp).normalize();
 
-                if(this instanceof Piece3D) {
-                    System.out.println("Size: " + face.length);
-                    System.out.println("Generate norm: " + norm);
-                    System.out.println("From " + face[0] + ", " + face[1] + ", " + face[2]);
-                }
-
                 if(Float.isNaN(norm.length())) {
                     Vector3f tmp2 = new Vector3f();
                     Vector3f tmp3 = new Vector3f();

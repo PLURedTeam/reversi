@@ -315,7 +315,6 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
 
     public BoardIndex getTappedIndex(Vector2fc loc) {
         // ask the camera to convert pixels to board coord
-
         Vector2f res = mCamera.pixelToPosition(loc);
 
         System.out.println("Camera says OGL was " + res);

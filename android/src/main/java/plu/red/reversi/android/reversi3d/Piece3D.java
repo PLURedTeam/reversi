@@ -85,10 +85,6 @@ public class Piece3D extends ColorModel3D {
 
         double r = Math.sin(lat);
 
-        System.out.println(lat);
-
-        System.out.println(r);
-
         return new Vector3f(
                 (float)(r * Math.cos(lng)) * HORIZONTAL_RADIUS,
                 (float)(r * Math.sin(lng)) * HORIZONTAL_RADIUS,

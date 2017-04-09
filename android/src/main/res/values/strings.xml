@@ -30,4 +30,11 @@
     <string name="button_confirm_move">Confirm Move</string>
     <string name="title_game_service_crashed">Oh no! The game crashed.</string>
     <string name="msg_game_service_crashed">It seems that the game has crashed. Your progress is autosaved, however. If you would like to submit a bug report, please click below.</string>
+    <string name="drawer_item_saves">Saves/Replays</string>
+    <string name="label_sp_against_ai">Play Against Bot</string>
+    <string name="button_sp_difficulty_easy">Easy</string>
+    <string name="button_sp_difficulty_medium">Medium</string>
+    <string name="button_sp_difficulty_hard">Hard</string>
+    <string name="dialog_replace_title">Replace Current Game?</string>
+    <string name="dialog_replace_message">The game is automatically saved.</string>
 </resources>

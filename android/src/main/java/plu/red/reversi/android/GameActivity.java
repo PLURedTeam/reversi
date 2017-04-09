@@ -1,12 +1,17 @@
 package plu.red.reversi.android;
 
+import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,10 +24,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import org.jvnet.hk2.annotations.Service;
+
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.DataMap;
 
 public class GameActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GameListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GameListener, ServiceConnection {
 
     public static final String PREF_COMPLETED_INTRO = "completedIntro";
 
@@ -31,6 +40,9 @@ public class GameActivity extends AppCompatActivity
     PlayFragment mPlayFragment;
     SingleplayerFragment mSingleplayerFragment;
     MultiplayerFragment mMultiplayerFragment;
+    SavedGamesFragment mSavesFragment;
+
+    GameService.LocalBinder mServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +66,7 @@ public class GameActivity extends AppCompatActivity
         mPlayFragment = new PlayFragment();
         mSingleplayerFragment = new SingleplayerFragment();
         mMultiplayerFragment = new MultiplayerFragment();
+        mSavesFragment = new SavedGamesFragment();
 
         mContentFrame = (FrameLayout) findViewById(R.id.content_frame);
 
@@ -61,8 +74,9 @@ public class GameActivity extends AppCompatActivity
         // manually fire this because it does not for the method above
         onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_play));
 
-        // start the game service
+        // start (and bind) the game service
         startService(new Intent(this, GameService.class));
+        bindService(new Intent(this, GameService.class), this, 0);
 
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
 
@@ -112,6 +126,13 @@ public class GameActivity extends AppCompatActivity
                     .replace(R.id.content_frame, mMultiplayerFragment)
                     .commit();
 
+        } else if (id == R.id.nav_saves) {
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_frame, mSavesFragment)
+                    .commit();
+
         } else if (id == R.id.nav_settings) {
 
         } else if (id == R.id.nav_about) {
@@ -136,7 +157,68 @@ public class GameActivity extends AppCompatActivity
     }
 
     @Override
-    public void onNewGame(DataMap gameSettings) {
+    public void onNewGame(Game game) {
+        if(mServiceConnection != null) {
+            if(mServiceConnection.shouldWarnGameReplace()) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_replace_title)
+                        .setMessage(R.string.dialog_replace_message)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mServiceConnection.setGame(game);
 
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.content_frame, mPlayFragment)
+                                        .commit();
+                            }
+                        })
+                        .show();
+            }
+            else {
+                mServiceConnection.setGame(game);
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.content_frame, mPlayFragment)
+                        .commit();
+
+                ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
+            }
+        }
+        else {
+            // TODO: Not sure how to handle this issue; should only happen if the service connection dies really
+        }
+    }
+
+    /**
+     * Called when a connection to the Service has been established, with
+     * the {@link IBinder} of the communication channel to the
+     * Service.
+     *
+     * @param name    The concrete component name of the service that has
+     *                been connected.
+     * @param service The IBinder of the Service's communication channel,
+     */
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        mServiceConnection = ((GameService.LocalBinder) service);
+    }
+
+    /**
+     * Called when a connection to the Service has been lost.  This typically
+     * happens when the process hosting the service has crashed or been killed.
+     * This does <em>not</em> remove the ServiceConnection itself -- this
+     * binding to the service will remain active, and you will receive a call
+     * to {@link #onServiceConnected} when the Service is next running.
+     *
+     * @param name The concrete component name of the service whose
+     *             connection has been lost.
+     */
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        mServiceConnection = null;
     }
 }

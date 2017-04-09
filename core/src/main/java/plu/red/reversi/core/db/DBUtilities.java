@@ -90,8 +90,7 @@ public class DBUtilities {
     }//createGame
 
 
-    public boolean saveGame(History h, Player[] p, JSONObject s, String n) {
-        boolean gameSaved = false;
+    public int saveGame(History h, Player[] p, JSONObject s, String n) {
         int gameID;
 
         //Create a collection from an array
@@ -110,11 +109,26 @@ public class DBUtilities {
 
 
 
-        return gameSaved;
+        return gameID;
     }//saveGame
 
 
+    public int saveGame(int gameID, History h, Player[] p, JSONObject s, String n) {
 
+        //Create a collection from an array
+        Collection<Player> players = new HashSet<Player>();
+        Collections.addAll(players,p);
+
+        saveGame(gameID);
+        updateGame(gameID, n);
+        saveGamePlayers(gameID, players);
+        saveGameSettings(gameID, s);
+
+        for(int i = 0; i < h.getNumBoardCommands(); i++)
+            saveMove(gameID, h.getBoardCommand(i));
+
+        return gameID;
+    }//saveGame
 
 
     /**
