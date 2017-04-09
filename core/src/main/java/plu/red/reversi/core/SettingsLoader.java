@@ -17,6 +17,8 @@ public class SettingsLoader {
     public static final String GAME_ALLOW_TURN_SKIPPING = "AllowTurnSkipping";
     public static final String GAME_BOARD_SIZE = "BoardSize";
     public static final String GAME_PLAYER_COUNT = "PlayerCount";
+    public static final String GAME_TIME_LIMIT = "TimeLimit";
+    public static final String GAME_TIME_BONUS = "TimeBonus";
 
     public static final String GLOBAL_USER_NAME = "username";
     public static final String GLOBAL_USER_COLOR = "usercolor";
@@ -71,6 +73,10 @@ public class SettingsLoader {
                 "The size of the Board. Defaults to 8.");
         settings.checkDefault(GAME_PLAYER_COUNT, 2,
                 "How many Players are playing. Defaults to 2.");
+        settings.checkDefault(GAME_TIME_LIMIT, 0,
+                "Give the game a time limit (in seconds). Each player will have a time that counts down on their turn. A value of 0 means no limit.");
+        settings.checkDefault(GAME_TIME_BONUS, 0,
+                "Give each player bonus time when they complete a turn (in seconds).");
 
 
         return settings;
