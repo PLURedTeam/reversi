@@ -11,6 +11,8 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 
+import java.util.Collection;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -28,14 +30,14 @@ import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 
 /**
  * Created by daniel on 3/25/17.
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
+public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListener {
 
     private static final String TAG = GameRenderer.class.getSimpleName();
 
@@ -216,7 +218,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
 
                 mCamera.beginDrag(60);
                 mCamera.setPos(new Vector2f(0, 0));
-                mCamera.setDir(new Vector2f(-0.00f * (float)Math.PI, 0.5f * (float)Math.PI));
+                mCamera.setDir(new Vector2f(0.00f * (float)Math.PI, 0.5f * (float)Math.PI));
                 mCamera.setZoom(mPlayZoom);
             }
         }
@@ -266,7 +268,8 @@ public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
 
         // it is possible for this function to be called before init. So make sure we are not processing before that.
         if(mBoard != null) {
-            result = mBoard.update(++mTick) || mCamera.update(mTick);
+            result = mBoard.update(++mTick);
+            result = mCamera.update(mTick) || result;
 
             if(mAutoRotate) {
 
@@ -312,7 +315,6 @@ public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
 
     public BoardIndex getTappedIndex(Vector2fc loc) {
         // ask the camera to convert pixels to board coord
-
         Vector2f res = mCamera.pixelToPosition(loc);
 
         System.out.println("Camera says OGL was " + res);
@@ -320,12 +322,19 @@ public class GameRenderer implements GLSurfaceView.Renderer, ICommandListener {
         return mBoard.getIndexAtCoord(res);
     }
 
+
     @Override
-    public void commandApplied(Command cmd) {
-        if(cmd instanceof MoveCommand) {
-             MoveCommand c = (MoveCommand)cmd;
+    public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+        mBoard.clearHighlights();
+        mBoard.animBoardUpdate(origin, playerId, updated);
+    }
 
+    @Override
+    public void onBoardRefresh() {
+        mBoard.setBoard(mGame);
+    }
 
-        }
+    public Board3D getBoard() {
+        return mBoard;
     }
 }

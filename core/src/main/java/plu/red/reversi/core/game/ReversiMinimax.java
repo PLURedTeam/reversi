@@ -82,7 +82,7 @@ public class ReversiMinimax implements Runnable {
             if(childScore > bestScore) {
                 bestScore = childScore;
                 bestMove = i;
-                alpha = Integer.max(alpha, childScore);
+                alpha = Math.max(alpha, childScore);
             }
 
             if(beta <= alpha) break; //will not ever happen in this location
@@ -148,11 +148,11 @@ public class ReversiMinimax implements Runnable {
             final int childScore = getBestPlay(subBoard, game.getNextPlayerID(player), alpha, beta, depth + 1);
             if(maximize && childScore > bestScore) {
                 bestScore = childScore;
-                alpha = Integer.max(alpha, childScore);
+                alpha = Math.max(alpha, childScore);
             }
             else if(!maximize && childScore < bestScore) {
                 bestScore = childScore;
-                beta = Integer.min(beta, childScore);
+                beta = Math.min(beta, childScore);
             }
 
             if(beta <= alpha) break;

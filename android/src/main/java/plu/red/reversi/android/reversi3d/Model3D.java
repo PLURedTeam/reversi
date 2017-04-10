@@ -59,6 +59,8 @@ public abstract class Model3D extends Shape {
 
     private Model3D parent;
 
+    private int lastTick;
+
 
     public VertexBufferObject<Vector4fc> vertices;
     public VertexBufferObject<Vector3fc> normals;
@@ -196,7 +198,7 @@ public abstract class Model3D extends Shape {
                 Vector3f[] face = getFace(sectionId, i);
 
                 face[1].sub(face[0], norm);
-                face[face.length - 1].sub(face[0], tmp);
+                face[2].sub(face[0], tmp);
 
                 norm.cross(tmp).normalize();
 
@@ -204,7 +206,7 @@ public abstract class Model3D extends Shape {
                     Vector3f tmp2 = new Vector3f();
                     Vector3f tmp3 = new Vector3f();
                     face[1].sub(face[0], tmp2);
-                    face[face.length - 1].sub(face[0], tmp3);
+                    face[2].sub(face[0], tmp3);
                     System.out.println("Got NaN from Cross: " + tmp2 + ", " + tmp3);
                     for(int j = 0;j < face.length;j++)
                         System.out.println("FV: " + face[j]);
@@ -244,6 +246,9 @@ public abstract class Model3D extends Shape {
                     System.out.println("NaN vector!");
                 }
 
+                //System.out.println("Add normal: " + new Vector3f(n).normalize());
+                //System.out.println("For vertex: " + v);
+
                 normals.add(new Vector3f(n).normalize());
             }
         }
@@ -257,6 +262,8 @@ public abstract class Model3D extends Shape {
 
     @CallSuper
     public boolean update(int tick) {
+
+        lastTick = tick;
 
         boolean updated = false;
 
@@ -321,6 +328,14 @@ public abstract class Model3D extends Shape {
         child.offsetPos = new Vector3f();
         child.offsetRot = new Quaternionf();
         child.offsetScale = new Vector3f();
+    }
+
+    public Model3D getParent() {
+        return parent;
+    }
+
+    public boolean isChild(Model3D model) {
+        return children.contains(model);
     }
 
     public Vector3f getWorldPosition() {
@@ -425,6 +440,10 @@ public abstract class Model3D extends Shape {
 
     protected Graphics3D getGraphics3D() {
         return g3d;
+    }
+
+    protected int getLastTick() {
+        return lastTick;
     }
 
     @Override

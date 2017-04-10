@@ -1,5 +1,7 @@
 package plu.red.reversi.android;
 
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.DataMap;
 
 /**
@@ -8,5 +10,5 @@ import plu.red.reversi.core.util.DataMap;
  */
 
 public interface GameListener {
-    void onNewGame(DataMap gameSettings);
+    void onNewGame(Game game);
 }

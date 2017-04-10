@@ -8,6 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.db.DBUtilities;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.BotPlayer;
+import plu.red.reversi.core.game.player.NullPlayer;
+import plu.red.reversi.core.util.Color;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -60,17 +67,38 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
      */
     @Override
     public void onClick(View v) {
+
+        Game game = new Game(null);
+
+        game.setSettings(SettingsLoader.INSTANCE.createGameSettings());
+
         switch(v.getId()) {
             case R.id.button_sp_with_easy_ai:
 
+                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
+
                 break;
             case R.id.button_sp_with_medium_ai:
+
+                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
 
                 break;
 
             case R.id.button_sp_with_hard_ai:
 
+                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
+
                 break;
         }
+
+        // this is required to do (for some reason)
+        game.setGameID(DBUtilities.INSTANCE.createGame());
+
+        game.initialize();
+
+        mListener.onNewGame(game);
     }
 }

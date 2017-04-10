@@ -1,7 +1,7 @@
 package plu.red.reversi.core.command;
 
 import plu.red.reversi.core.game.BoardIndex;
-import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.Game;
 
 /**
@@ -39,15 +39,15 @@ public class SetCommand extends BoardCommand {
     public SetCommand(MoveCommand cmd) { this(cmd.source, cmd.playerID, cmd.position); }
 
     /**
-     * Uses data from a Controller object to determine whether or not this Command is valid. IE: Whether a move played
+     * Uses data from a Coordinator object to determine whether or not this Command is valid. IE: Whether a move played
      * by a player is on a valid position of a board.
      *
-     * @param controller Controller object to pull data from
+     * @param controller Coordinator object to pull data from
      * @return true if this Command is valid, false otherwise
      */
     @Override
-    public boolean isValid(Controller controller) {
-        // Is the Controller a Game Controller
+    public boolean isValid(Coordinator controller) {
+        // Is the Coordinator a Game Coordinator
         return controller instanceof Game;
     }
 }

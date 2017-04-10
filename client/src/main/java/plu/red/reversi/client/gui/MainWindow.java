@@ -19,7 +19,7 @@ import java.awt.event.WindowListener;
 /**
  * Glory to the Red Team.
  *
- * The main game window, acts as a Controller for the GUI. Will have one center panel at all times, whether that panel
+ * The main game window, acts as a Coordinator for the GUI. Will have one center panel at all times, whether that panel
  * is the game, a lobby screen, or a server browser.
  */
 public class MainWindow extends JFrame implements WindowListener, IMainGUI {
@@ -91,12 +91,12 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
 
     /**
      * GUI Display Updater. Called from a Client object when the Client object has changed significantly and the GUI
-     * needs to be updated to accommodate. Example usages include when the <code>core</code> Controller of a Client
+     * needs to be updated to accommodate. Example usages include when the <code>core</code> Coordinator of a Client
      * object is swapped out. Causes the entire GUI to be recreated.
      */
     @Override
     public void updateGUIMajor() {
-        Controller core = client.getCore();
+        Coordinator core = client.getCore();
 
         if(core instanceof Game) {
             populate(new GamePanel(this, (Game)core));

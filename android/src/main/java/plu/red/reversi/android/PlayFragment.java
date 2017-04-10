@@ -7,21 +7,32 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.util.Locale;
 
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.player.Player;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,6 +46,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private RelativeLayout mGameInfoPanel;
     private RelativeLayout mGameActionPanel;
 
+    private LinearLayout mGameScorePanel;
+
     private Button mConfirmButton;
     private ImageButton mSwitchCameraButton;
 
@@ -43,6 +56,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private Game mGame;
 
     private GameService.LocalBinder mServiceConnection;
+
+    private Handler mHandler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,13 +69,16 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameView.setListener(this);
 
         mGameInfoPanel = (RelativeLayout)v.findViewById(R.id.panel_game_info);
-        mGameActionPanel = (RelativeLayout)v.findViewById(R.id.panel_game_actions);
+        mGameScorePanel = (LinearLayout)mGameInfoPanel.findViewById(R.id.panel_player_scores);
 
+        mGameActionPanel = (RelativeLayout)v.findViewById(R.id.panel_game_actions);
         mSwitchCameraButton = (ImageButton)mGameActionPanel.findViewById(R.id.button_switch_camera_mode);
         mConfirmButton = (Button)mGameActionPanel.findViewById(R.id.button_confirm_move);
 
         mSwitchCameraButton.setOnClickListener(this);
         mConfirmButton.setOnClickListener(this);
+
+        mHandler = new Handler(Looper.myLooper());
 
         return v;
     }
@@ -76,12 +94,82 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     + " must implement GameListener");
         }
 
-        if(mServiceConnection != null) {
+        if(mServiceConnection != null && mServiceConnection.getGame() != mGame) {
             mGame = mServiceConnection.getGame();
             mGameView.setGame(mGame);
+
+            prepareScorePanel();
         }
         else {
             getContext().bindService(new Intent(getContext(), GameService.class), this, 0);
+        }
+    }
+
+    private void prepareScorePanel() {
+        mGameScorePanel.removeAllViewsInLayout();
+
+        Player[] players = mGame.getAllPlayers();
+
+        for(Player player : players) {
+
+            LinearLayout layout = new LinearLayout(getContext());
+            layout.setGravity(Gravity.CENTER_VERTICAL);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+
+            params.setMargins(10, 10, 10 ,10);
+
+            layout.setLayoutParams(params);
+            layout.setTag(player);
+
+            ImageView image = new ImageView(getContext());
+            image.setImageDrawable(new ColorDrawable(player.getColor().composite));
+            image.setMinimumWidth(50);
+            image.setMinimumHeight(50);
+            layout.addView(image);
+
+            params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(10, 0, 0, 0);
+
+            TextView name = new TextView(getContext());
+            name.setText(player.getName());
+            name.setTextColor(Color.WHITE);
+            name.setLayoutParams(params);
+            layout.addView(name);
+
+            TextView score = new TextView(getContext());
+            score.setText(String.format(
+                    Locale.getDefault(),
+                    "%d",
+                    mGameView.getPlayerScore(player.getID())));
+            score.setTextColor(Color.WHITE);
+            score.setTypeface(Typeface.DEFAULT_BOLD);
+            score.setLayoutParams(params);
+            layout.addView(score);
+
+            mGameScorePanel.addView(layout);
+        }
+    }
+
+    private void updateScorePanel() {
+
+        Player[] players = mGame.getAllPlayers();
+
+        for(int i = 0;i < players.length;i++) {
+            LinearLayout layout = (LinearLayout)mGameScorePanel.findViewWithTag(players[i]);
+
+            ((TextView)layout.getChildAt(2))
+                    .setText(String.format(
+                            Locale.getDefault(),
+                            "%d",
+                            mGameView.getPlayerScore(players[i].getID())
+                    ));
         }
     }
 
@@ -124,12 +212,25 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
             ));
 
             mConfirmButton.setVisibility(View.GONE);
+
+            // prevent the user from moving until all the animations are done
+            mGameView.disablePlayer();
         }
     }
 
     @Override
     public void onBoardSelected(BoardIndex index) {
         mConfirmButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onBoardScoreChanged() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateScorePanel();
+            }
+        });
     }
 
     /**
@@ -150,6 +251,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGame = mServiceConnection.getGame();
 
         mGameView.setGame(mGame);
+
+        prepareScorePanel();
     }
 
     /**

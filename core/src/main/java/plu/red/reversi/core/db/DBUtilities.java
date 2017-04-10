@@ -96,10 +96,9 @@ public class DBUtilities {
      * @param p the players in the game
      * @param s the settingsMap
      * @param n the name of the game to be saved
-     * @return true if saved, false otherwise
+     * @return the gameID
      */
-    public boolean saveGame(History h, Player[] p, JSONObject s, String n) {
-        boolean gameSaved = false;
+    public int saveGame(History h, Player[] p, JSONObject s, String n) {
         int gameID;
 
         //Create a collection from an array
@@ -115,9 +114,27 @@ public class DBUtilities {
         for(int i = 0; i < h.getNumBoardCommands(); i++)
             saveMove(gameID, h.getBoardCommand(i));
 
-        return gameSaved;
+        return gameID;
     }//saveGame
 
+
+    public int saveGame(int gameID, History h, Player[] p, JSONObject s, String n) {
+
+        //Create a collection from an array
+        Collection<Player> players = new HashSet<Player>();
+        Collections.addAll(players,p);
+
+        saveGame(gameID);
+        updateGame(gameID, n);
+        saveGamePlayers(gameID, players);
+        saveGameSettings(gameID, s);
+
+        for(int i = 0; i < h.getNumBoardCommands(); i++)
+            saveMove(gameID, h.getBoardCommand(i));
+
+        return gameID;
+    }//saveGame
+    
     /**
      * Saves the game to the database
      * @param gameID the id of the game

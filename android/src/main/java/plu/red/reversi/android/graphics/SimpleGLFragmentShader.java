@@ -33,7 +33,7 @@ public class SimpleGLFragmentShader extends PixelShader {
 
         if(def.directionalLightCount > 0)
             s += "uniform vec3 fDirectionalLights[" + def.directionalLightCount + "];\n" +
-                    "uniform vec4 fDirectionalLightColors[" + def.directionalLightCount + "];\n";
+                    "uniform vec3 fDirectionalLightColors[" + def.directionalLightCount + "];\n";
 
         s +=
                 "\n" +
@@ -42,14 +42,14 @@ public class SimpleGLFragmentShader extends PixelShader {
                 "void main()\n" +
                 "{\n" +
                         "  vec3 normal = normalize(fNormal);\n" +
-                        "  float diffuse = 0.0;\n" +
-                        "  float specular = 0.0;\n";
+                        "  vec3 diffuse = vec3(0);\n" +
+                        "  vec3 specular = vec3(0);\n";
 
         if(def.directionalLightCount > 0) {
             s +=
                     "  for(int i = 0;i < " + def.directionalLightCount + ";i++) {\n" +
                             "    if(length(fDirectionalLightColors[i]) == 0.0)\n" +
-                            "      diffuse += max(dot(fDirectionalLights[i], fNormal), 0.0);\n" +
+                            "      diffuse += vec3(max(dot(fDirectionalLights[i], fNormal), 0.0));\n" +
                             "    else\n" +
                             "      diffuse += max(dot(fDirectionalLights[i], fNormal), 0.0) * fDirectionalLightColors[i];\n" +
                             "  }\n";
@@ -70,7 +70,7 @@ public class SimpleGLFragmentShader extends PixelShader {
         }
 
         s +=
-                "  vec4 gammaCorrected = pow(diffuse * fAlbedo, vec4(1.0 / screenGamma, 1.0 / screenGamma, 1.0 / screenGamma, 1.0));" +
+                "  vec4 gammaCorrected = pow(vec4(diffuse, 1.0) * fAlbedo, vec4(1.0 / screenGamma, 1.0 / screenGamma, 1.0 / screenGamma, 1.0));" +
                         "  gammaCorrected.w = fAlbedo.w;" +
                         "  oColor = gammaCorrected;\n" +
                         "}";

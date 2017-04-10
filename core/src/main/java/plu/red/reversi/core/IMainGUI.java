@@ -18,7 +18,7 @@ public interface IMainGUI {
 
     /**
      * GUI Display Updater. Called from a Client object when the Client object has changed significantly and the GUI
-     * needs to be updated to accommodate. Example usages include when the <code>core</code> Controller of a Client
+     * needs to be updated to accommodate. Example usages include when the <code>core</code> Coordinator of a Client
      * object is swapped out. Causes the entire GUI to be recreated.
      */
     void updateGUIMajor();
