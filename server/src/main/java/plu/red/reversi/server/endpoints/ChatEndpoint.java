@@ -20,10 +20,8 @@ import java.util.ArrayList;
  * These endpoints are not user specific and are to be used for
  * basic server interactions (i.e. non game or chat functions)
  */
-@Path("chat")
+@Path("/chat")
 public class ChatEndpoint {
-
-    ChatHandler globalChat = new ChatHandler();
 
     /**
      * Posts a message to the ChatHandler that was received from the client
@@ -31,11 +29,14 @@ public class ChatEndpoint {
      */
     @Path("global")
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public void postMessage(ChatMessage message) {
-        globalChat.postMessage(message);
-    }//postMessage
+    public String postMessage(ChatMessage message) {
+        System.out.println("In Post Message");
 
+        LocalServer.globalChat.postMessage(message);
+
+
+        return "testing";
+    }//postMessage
 
     @Path("global/{user}")
     @GET
@@ -43,8 +44,8 @@ public class ChatEndpoint {
     public JSONObject getMessages(@PathParam("user") String username) {
 
         if(UserManager.INSTANCE.loggedIn(username) == false) throw new WebApplicationException(404);
-        if(globalChat.getMessages(username) == null) throw new WebApplicationException(404);
+        if(LocalServer.globalChat.getMessages(username) == null) throw new WebApplicationException(404);
         return null;
-    }//getLeaderboard
+    }//getMessages
 
 }//BaseEndpoint

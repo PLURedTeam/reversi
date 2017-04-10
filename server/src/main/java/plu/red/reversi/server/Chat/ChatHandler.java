@@ -8,28 +8,34 @@ import java.util.HashMap;
 /**
  * Created by Andrew on 3/25/2017.
  */
-public class ChatHandler implements Runnable {
+public class ChatHandler {
 
-    private HashMap<Long, ChatMessage> messages;
+    private HashMap<String, ArrayList<ChatMessage>> messages;
 
     public ChatHandler() {
-        messages = new HashMap<Long, ChatMessage>();
+        messages = new HashMap<String, ArrayList<ChatMessage>>();
     }//chatHandler
 
     /**
-     * Iterates through the Hashmap removing messages older than five seconds
+     * Adds a new user to the chatHandler
+     * @param username the username of the user
      */
-    public void run() {
+    public void addUser(String username) {
 
-        while(true) {
-            for(Long time: messages.keySet()) {
-                if(time > System.currentTimeMillis() + 2000)
-                    messages.remove(time);
-            }//for
-            try { Thread.sleep(1000);}
-            catch (InterruptedException e) { e.printStackTrace();}
-        }//true
-    }//run
+        System.out.println("Adding user to chat handler");
+
+        ArrayList<ChatMessage> blank = new ArrayList<ChatMessage>();
+        messages.put(username, blank);
+    }//addUser
+
+    /**
+     * Removes a user from the chatHandler
+     * @param username the username of the user
+     */
+    public void removeUser(String username) {
+        messages.remove(username);
+    }//removeUser
+
 
     /**
      * Retrieves messages from the hash map
@@ -38,10 +44,10 @@ public class ChatHandler implements Runnable {
      */
     public ArrayList<ChatMessage> getMessages(String username) {
         ArrayList<ChatMessage> m = new ArrayList<ChatMessage>();
+        ArrayList<ChatMessage> blank = new ArrayList<ChatMessage>();
 
-        for(Long key: messages.keySet()) {
-            m.add(messages.get(key));
-        }//for
+        m = messages.get(username);
+        messages.put(username, blank);
 
         return m;
     }//getMessages
@@ -51,10 +57,11 @@ public class ChatHandler implements Runnable {
      * @param message
      */
     public void postMessage(ChatMessage message) {
-        messages.put(System.currentTimeMillis(),message);
+        System.out.println("Adding a new message");
+
+        for(String key: messages.keySet()) {
+            if(!key.equals(message.username))
+                messages.get(key).add(message);
+        }//for
     }//postMessage
-
-
-
-
 }//chatHandler

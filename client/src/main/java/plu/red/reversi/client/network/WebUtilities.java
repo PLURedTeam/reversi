@@ -1,6 +1,7 @@
 package plu.red.reversi.client.network;
 
 import org.codehaus.jettison.json.JSONArray;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
 import javax.swing.*;
@@ -209,7 +210,6 @@ public class WebUtilities {
         }//catch
     }//deleteUser
 
-
     /**
      * Gets a list of the users currently logged in to the server
      * @return An arraylist of users logged in
@@ -239,4 +239,22 @@ public class WebUtilities {
     public boolean loggedIn() {
         return loggedIn;
     }//loggedIn
+
+
+    /**
+     * Sends a chat message to the server
+     * @param m the message to send to the server
+     */
+    public void sendChat(ChatMessage m) {
+
+        WebTarget target = client.target(baseURI + "chat/global");
+        Response response = target.request().post(Entity.json(m));
+
+
+        System.out.println(response.readEntity(String.class));
+
+    }//sendChat
+
+
+
 }//webUtilities

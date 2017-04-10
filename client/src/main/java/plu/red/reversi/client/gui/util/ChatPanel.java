@@ -1,6 +1,7 @@
 package plu.red.reversi.client.gui.util;
 
 
+import plu.red.reversi.client.network.WebUtilities;
 import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;

@@ -35,7 +35,7 @@ public class PollingMachine {
         //start polling threads
         new Thread(new SessionPoll()).start();
         new Thread(new ChatPoll()).start();
-        new Thread(new MovePoll()).start();
+        new Thread(new GamePoll()).start();
     }//constructor
 
     /**
@@ -62,39 +62,22 @@ public class PollingMachine {
     private class ChatPoll implements Runnable {
         public void run() {
 
+
+
+
+
+
         }//run
-    }//SessionPoll
+    }//ChatPoll
 
     /**
      * Polls the server in a new thread to get new moves
      * that have been played during a game
      */
-    private class MovePoll implements Runnable {
+    private class GamePoll implements Runnable {
         public void run() {
 
         }//run
-    }//SessionPoll
-
-
-
-
-
-
-
-    /**
-     * Keeps the current session alive by pinging the database to tell
-     * the server that the user is still there
-     */
-    public void run() {
-
-
-
-
-    }//run
-
-
-
-
-
+    }//GamePoll
 
 }//pollingMachine
