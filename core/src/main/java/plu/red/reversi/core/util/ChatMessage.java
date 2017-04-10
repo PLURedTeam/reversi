@@ -49,6 +49,19 @@ public class ChatMessage implements Comparable<ChatMessage> {
     public final Color usercolor;
 
     /**
+     * Create a blank ChatMesssage object. The <code>username</code> and <code>message</code> is defaulted to blank,
+     * <code>channel</code> is defaulted to GLOBAL, <code>usercolor</code> is defaulted to BLACK, and a
+     * <code>timestamp</code> is generated.
+     */
+    public ChatMessage() {
+        this.message = "";
+        this.channel = Channel.GLOBAL;
+        this.usercolor = Color.BLACK;
+        this.username = "";
+        this.timestamp = ZonedDateTime.now();
+    }
+
+    /**
      * Create a new ChatMessage object. The player name color is defaulted to black, and a timestamp is generated on
      * creation.
      *

@@ -8,10 +8,10 @@ import java.util.HashSet;
 /**
  * Glory to the Red Team.
  *
- * Abstract Controller Concept. The abstract Controller class is the base for all Controller-type objects. It contains
- * method stubs for Controller-specific actions as well as basic methods to be used in all Controllers.
+ * Abstract Coordinator Concept. The abstract Coordinator class is the base for all Coordinator-type objects. It contains
+ * method stubs for Coordinator-specific actions as well as basic methods to be used in all Controllers.
  */
-public abstract class Controller {
+public abstract class Coordinator {
 
     // ****************
     //  Listener Logic
@@ -21,8 +21,8 @@ public abstract class Controller {
     protected final HashSet<IListener> listenerSet = new HashSet<>();
 
     /**
-     * Registers a <code>listener</code> to this Controller. All <code>listeners</code> that are registered to this
-     * Controller will receive signals via their individual methods when certain actions happen, dependending on the
+     * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
+     * Coordinator will receive signals via their individual methods when certain actions happen, dependending on the
      * specific <code>listener</code>.
      *
      * @param listener Object that implements an extension of IListener
@@ -32,9 +32,9 @@ public abstract class Controller {
     }
 
     /**
-     * Unregisters a specified <code>listener</code> from this Controller. The <code>listener</code> object that is
+     * Unregisters a specified <code>listener</code> from this Coordinator. The <code>listener</code> object that is
      * unregistered will no longer receive signals when events happen. If the given <code>listener</code> object is
-     * not currently registered to this Controller, nothing happens.
+     * not currently registered to this Coordinator, nothing happens.
      *
      * @param listener Object that implements an extension of IListener
      */
@@ -44,7 +44,7 @@ public abstract class Controller {
 
     /**
      * Notifies that a Command has been accepted. Iterates through and tells every ICommandListener that has been
-     * registered to this Controller that a Command has been validated and accepted.
+     * registered to this Coordinator that a Command has been validated and accepted.
      *
      * @param cmd Command object that was accepted
      */
@@ -117,11 +117,11 @@ public abstract class Controller {
     public final IMainGUI gui;
 
     /**
-     * Abstract Constructor. Base constructor that accepts an IMainGUI object that this Controller can manipulate.
+     * Abstract Constructor. Base constructor that accepts an IMainGUI object that this Coordinator can manipulate.
      *
      * @param gui IMainGUI object that displays for the program
      */
-    public Controller(IMainGUI gui) {
+    public Coordinator(IMainGUI gui) {
         this.gui = gui == null ? new NullGUI() : gui;
     }
 

@@ -1,6 +1,6 @@
 package plu.red.reversi.core.lobby;
 
-import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
@@ -18,10 +18,10 @@ import java.util.Collection;
 /**
  * Glory to the Red Team.
  *
- * Lobby Controller. Object used as a Controller when setting up a game. A Lobby Controller contains all data and Model
+ * Lobby Coordinator. Object used as a Coordinator when setting up a game. A Lobby Coordinator contains all data and Model
  * objects relevant to setting up a game, and make them available to a GUI in order to display and change said data.
  */
-public class Lobby extends Controller implements ISettingsListener {
+public class Lobby extends Coordinator implements ISettingsListener {
 
     // ******************
     //  Member Variables

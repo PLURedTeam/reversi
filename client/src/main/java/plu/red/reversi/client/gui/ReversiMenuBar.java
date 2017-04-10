@@ -2,7 +2,7 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.gui.game.GamePanel;
-import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.ReversiMinimax;
@@ -143,7 +143,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        Controller core = gui.getClient().getCore();
+        Coordinator core = gui.getClient().getCore();
         if(core instanceof Game) {
             Game game = (Game)core;
 

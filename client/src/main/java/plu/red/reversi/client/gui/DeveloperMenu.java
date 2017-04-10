@@ -1,6 +1,6 @@
 package plu.red.reversi.client.gui;
 
-import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.Game;
 
 import javax.swing.*;
@@ -93,7 +93,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void swapActivePlayer() {
-        Controller core = gui.getClient().getCore();
+        Coordinator core = gui.getClient().getCore();
         if(core instanceof Game) {
             Game game = (Game)core;
             game.nextTurn();
@@ -106,7 +106,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void endGame() {
-        Controller core = gui.getClient().getCore();
+        Coordinator core = gui.getClient().getCore();
         if(core instanceof Game) {
             Game game = (Game)core;
             game.endGame();
