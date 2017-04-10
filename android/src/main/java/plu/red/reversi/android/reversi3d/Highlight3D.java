@@ -2,6 +2,7 @@ package plu.red.reversi.android.reversi3d;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import plu.red.reversi.android.graphics.Graphics3D;
@@ -19,11 +20,15 @@ public class Highlight3D extends ColorModel3D {
 
     private float height;
 
+    private Vector3fc color;
+
     public Highlight3D(Graphics3D g3d, Pipeline pipeline) {
         super(g3d, pipeline, 0.1f);
 
         alphaBlended = true;
         height = 0;
+
+        this.color = new Vector3f(1.0f, 1.0f, 0.0f);
     }
 
     public Highlight3D(Highlight3D other) {
@@ -39,10 +44,10 @@ public class Highlight3D extends ColorModel3D {
         Vector4f c;
 
         if(sectionIndex < 2) {
-            c = new Vector4f(1.0f, 1.0f, 0.0f, 1.0f);
+            c = new Vector4f(color, 1.0f);
         }
         else
-            c = new Vector4f(1.0f, 1.0f, 0.0f, 0.5f);
+            c = new Vector4f(color, 0.5f);
 
         return new Vector4f[] {c, c, c, c};
     }
@@ -109,5 +114,16 @@ public class Highlight3D extends ColorModel3D {
         pos.z = height;
 
         setPos(pos);
+    }
+
+    public void setColor(Vector3fc color) {
+        this.color = color;
+
+        // unfortunately current pipeline expectations require complete buffer refresh
+        recalculate(-1);
+    }
+
+    public Vector3fc getColor() {
+        return color;
     }
 }

@@ -96,7 +96,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             //addChild(p);
             pieces[i] = p;
 
-            Highlight3D h = (Highlight3D)highlight.clone();
+            Highlight3D h = new Highlight3D(g3d, pipeline);
 
             h.setHeight(0.002f);
 
@@ -253,11 +253,13 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
-    public void highlightAt(BoardIndex index) {
+    public void highlightAt(BoardIndex index, Vector3fc color) {
 
-        Vector2ic rc = toBoardCoords(index, size);
+        int i = indexFromCoord(toBoardCoords(index, size), size);
 
-        addChild(highlights[indexFromCoord(rc, size)]);
+        highlights[i].setColor(color);
+
+        addChild(highlights[i]);
     }
 
     @Override

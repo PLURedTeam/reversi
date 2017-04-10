@@ -37,4 +37,6 @@
     <string name="button_sp_difficulty_hard">Hard</string>
     <string name="dialog_replace_title">Replace Current Game?</string>
     <string name="dialog_replace_message">The game is automatically saved.</string>
+    <string name="menu_show_possible_moves">Toggle Possible Moves</string>
+    <string name="menu_show_best_move">Toggle Best Move</string>
 </resources>

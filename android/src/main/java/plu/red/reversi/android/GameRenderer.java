@@ -10,6 +10,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.Collection;
 
@@ -304,8 +305,8 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
         }
     }
 
-    public void highlightBoard(BoardIndex index) {
-        mBoard.highlightAt(index);
+    public void highlightBoard(BoardIndex index, Vector3fc color) {
+        mBoard.highlightAt(index, color);
     }
 
     public void clearBoardHighlights() {

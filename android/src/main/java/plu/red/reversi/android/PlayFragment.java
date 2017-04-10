@@ -27,8 +27,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+
 import java.util.Locale;
 
+import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
@@ -40,6 +44,10 @@ import plu.red.reversi.core.game.player.Player;
  * to handle interaction events.
  */
 public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
+
+    public static final Vector3fc MOVE_SELECT_COLOR = new Vector3f(1.0f, 1.0f, 0.0f);
+    public static final Vector3fc LAST_MOVE_COLOR = new Vector3f(1.0f, 0.2f, 0.2f);
+    public static final Vector3fc POSSIBLE_MOVES_COLOR = new Vector3f(0.0f, 1.0f, 0.0f);
 
     private GameListener mListener;
 
@@ -54,6 +62,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private GameSurfaceView mGameView;
 
     private Game mGame;
+
+    private HighlightMode mHighlightMode;
 
     private GameService.LocalBinder mServiceConnection;
 
@@ -220,6 +230,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
     @Override
     public void onBoardSelected(BoardIndex index) {
+        doHighlights();
         mConfirmButton.setVisibility(View.VISIBLE);
     }
 
@@ -229,6 +240,58 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
             @Override
             public void run() {
                 updateScorePanel();
+            }
+        });
+    }
+
+    @Override
+    public void onPlayerStateChanged() {
+        if(mGameView.isPlayerEnabled())
+            doHighlights();
+    }
+
+    public void setHighlightMode(HighlightMode mode) {
+        mHighlightMode = mode;
+
+        doHighlights();
+    }
+
+    public HighlightMode getHighlightMode() {
+        return mHighlightMode;
+    }
+
+    private void doHighlights() {
+
+        mGameView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+
+                System.out.println("Time to highlight: player enabled = " + mGameView.isPlayerEnabled());
+
+                mGameView.getRenderer().clearBoardHighlights();
+
+                if(mGameView.isPlayerEnabled()) {
+                    if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
+                        // we can use the game board because GUI will be caught up animation wise
+                        for(BoardIndex index : mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getID())) {
+                            mGameView.getRenderer().highlightBoard(index, POSSIBLE_MOVES_COLOR);
+                        }
+                    }
+                    else if(mHighlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
+                        // TODO
+                    }
+
+                    BoardCommand lastMove = mGame.getHistory().getBoardCommand(mGame.getHistory().getNumBoardCommands() - 1);
+
+                    if(lastMove instanceof MoveCommand) {
+                        mGameView.getRenderer().highlightBoard(lastMove.position, LAST_MOVE_COLOR);
+                    }
+
+                    if(mGameView.getCurrentSelected() != null)
+                        mGameView.getRenderer().highlightBoard(mGameView.getCurrentSelected(), MOVE_SELECT_COLOR);
+
+                    mGameView.requestRender();
+                }
             }
         });
     }
@@ -269,17 +332,11 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     public void onServiceDisconnected(ComponentName name) {
 
         getActivity().finish();
+    }
 
-        // uh oh! show a message
-        /*new AlertDialog.Builder(getContext())
-                .setTitle(R.string.title_game_service_crashed)
-                .setMessage(R.string.msg_game_service_crashed)
-                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().finish();
-                    }
-                })
-                .show();*/
+    public enum HighlightMode {
+        HIGHLIGHT_NONE,
+        HIGHLIGHT_POSSIBLE_MOVES,
+        HIGHLIGHT_BEST_MOVE;
     }
 }

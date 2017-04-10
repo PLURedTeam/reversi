@@ -13,6 +13,7 @@ import android.widget.Scroller;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.joml.Vector3f;
 
 import java.util.Collection;
 
@@ -157,16 +158,16 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             if(index.row < 0 || index.column < 0 || index.row >= mGame.getBoard().size || index.column >= mGame.getBoard().size)
                 return false; // not a valid row index
 
-            queueEvent(new Runnable() {
+            /*queueEvent(new Runnable() {
                 @Override
                 public void run() {
 
-                    mRenderer.clearBoardHighlights();
-                    mRenderer.highlightBoard(index);
+                    //mRenderer.clearBoardHighlights();
+                    //mRenderer.highlightBoard(index, new Vector3f(1.0f, 1.0f, 0.0f));
 
                     requestRender();
                 }
-            });
+            });*/
 
             mSelectedIndex = index;
 
@@ -382,7 +383,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public void onAnimationsDone(Board3D board) {
         // enable the ability to control again
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            mCanDoCommand = true;
+            setPlayerEnabled(true);
     }
 
     private class UpdateTask implements Runnable {
@@ -421,7 +422,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mGame.getBoard().addBoardUpdateListener(this);
 
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            mCanDoCommand = true;
+            setPlayerEnabled(true);
 
         queueEvent(new Runnable() {
             @Override
@@ -430,8 +431,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                 mRenderer.setGame(game);
 
 
-                if(mRenderer.getBoard() == null)
+                if(mRenderer.getBoard() == null) {
                     queueEvent(this); // TODO: Improve synchronization? I do not have a solution for this atm.
+                    return;
+                }
 
                 mRenderer.getBoard().addListener(GameSurfaceView.this);
 
@@ -445,7 +448,24 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public void disablePlayer() {
-        mCanDoCommand = false;
+        setPlayerEnabled(false);
+
+        mSelectedIndex = null;
+    }
+
+    private void setPlayerEnabled(boolean enabled) {
+
+        if(mCanDoCommand != enabled) {
+
+            mCanDoCommand = enabled;
+
+            if(mListener != null)
+                mListener.onPlayerStateChanged();
+        }
+    }
+
+    public boolean isPlayerEnabled() {
+        return mCanDoCommand;
     }
 
     public int getPlayerScore(int playerId) {
@@ -458,5 +478,6 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public interface GameSurfaceViewListener {
         void onBoardSelected(BoardIndex index);
         void onBoardScoreChanged();
+        void onPlayerStateChanged();
     }
 }

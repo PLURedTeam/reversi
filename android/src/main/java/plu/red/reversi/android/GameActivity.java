@@ -5,13 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.ActionBar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,19 +20,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import org.jvnet.hk2.annotations.Service;
-
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.game.player.Player;
-import plu.red.reversi.core.util.DataMap;
 
 public class GameActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GameListener, ServiceConnection {
 
     public static final String PREF_COMPLETED_INTRO = "completedIntro";
+    private static final String CONTENT_FRAGMENT_TAG = "GAME_CONTENT_FRAGMENT";
 
     FrameLayout mContentFrame;
 
@@ -41,6 +36,8 @@ public class GameActivity extends AppCompatActivity
     SingleplayerFragment mSingleplayerFragment;
     MultiplayerFragment mMultiplayerFragment;
     SavedGamesFragment mSavesFragment;
+
+    Fragment currentFragment;
 
     GameService.LocalBinder mServiceConnection;
 
@@ -107,39 +104,30 @@ public class GameActivity extends AppCompatActivity
         }
     }
 
+    private void showFragment(Fragment frag) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_frame, frag, CONTENT_FRAGMENT_TAG)
+                .commit();
+
+        currentFragment = frag;
+
+        invalidateOptionsMenu();
+    }
+
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_play) {
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_frame, mPlayFragment)
-                    .commit();
-
+            showFragment(mPlayFragment);
         } else if (id == R.id.nav_singleplayer) {
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_frame, mSingleplayerFragment)
-                    .commit();
-
+            showFragment(mSingleplayerFragment);
         } else if (id == R.id.nav_multiplayer) {
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_frame, mMultiplayerFragment)
-                    .commit();
-
+            showFragment(mMultiplayerFragment);
         } else if (id == R.id.nav_saves) {
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_frame, mSavesFragment)
-                    .commit();
-
+            showFragment(mSavesFragment);
         } else if (id == R.id.nav_settings) {
 
         } else if (id == R.id.nav_about) {
@@ -149,6 +137,41 @@ public class GameActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+
+        menu.clear();
+
+        if(currentFragment == mPlayFragment) {
+            getMenuInflater().inflate(R.menu.fragment_play_menu, menu);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.menu_show_possible_moves:
+
+                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == PlayFragment.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES ?
+                        PlayFragment.HighlightMode.HIGHLIGHT_NONE :
+                        PlayFragment.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
+
+                return true;
+            case R.id.menu_show_best_move:
+
+                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == PlayFragment.HighlightMode.HIGHLIGHT_BEST_MOVE ?
+                        PlayFragment.HighlightMode.HIGHLIGHT_NONE :
+                        PlayFragment.HighlightMode.HIGHLIGHT_BEST_MOVE);
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void runIntro() {
@@ -176,10 +199,9 @@ public class GameActivity extends AppCompatActivity
                             public void onClick(DialogInterface dialog, int which) {
                                 mServiceConnection.setGame(game);
 
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.content_frame, mPlayFragment)
-                                        .commit();
+                                showFragment(mPlayFragment);
+
+                                ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
                             }
                         })
                         .show();
@@ -187,10 +209,7 @@ public class GameActivity extends AppCompatActivity
             else {
                 mServiceConnection.setGame(game);
 
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.content_frame, mPlayFragment)
-                        .commit();
+                showFragment(mPlayFragment);
 
                 ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
             }
