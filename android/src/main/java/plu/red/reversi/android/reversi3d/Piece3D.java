@@ -4,6 +4,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import plu.red.reversi.android.easing.EaseType;
 import plu.red.reversi.android.easing.PolynomialEasing;
 import plu.red.reversi.android.graphics.Graphics3D;
@@ -29,6 +32,8 @@ public class Piece3D extends ColorModel3D {
 
     public static final PolynomialEasing FLIP_EASER = new PolynomialEasing(3, EaseType.EASE_OUT);
 
+    private Collection<Piece3DListener> listeners;
+
     private Color baseColor;
     private Color flippedColor;
 
@@ -40,6 +45,8 @@ public class Piece3D extends ColorModel3D {
     public Piece3D(Graphics3D g3d, Pipeline pipeline, Color baseColor, Color flippedColor) {
         super(g3d, pipeline);
 
+        listeners = new HashSet<>();
+
         this.baseColor = baseColor;
         this.flippedColor = flippedColor;
 
@@ -49,6 +56,8 @@ public class Piece3D extends ColorModel3D {
 
     public Piece3D(Piece3D other) {
         super(other.getGraphics3D(), other.getPipeline());
+
+        listeners = new HashSet<>();
 
         this.baseColor = other.getBaseColor();
         this.flippedColor = other.getFlippedColor();
@@ -184,6 +193,9 @@ public class Piece3D extends ColorModel3D {
         }
         else
             setRot(new Quaternionf().rotate(0, 0, 0));
+
+        for(Piece3DListener listener : listeners)
+            listener.onFlipped(this);
     }
 
     public void animateFlip(boolean b, int atTick) {
@@ -241,5 +253,31 @@ public class Piece3D extends ColorModel3D {
 
     public Color getFlippedColor() {
         return flippedColor;
+    }
+
+    public boolean isFlipped() {
+        // this can be a point of contention.
+        // at this time, return the value the piece is flipping -> to for sure
+        // otherwise sync issues could happen and this just makes score counting a bit simpler
+        // (to the alternative of assuming it was the previous)
+
+        if(animFlipStart != -1)
+            return !flipped;
+
+        return flipped;
+    }
+
+    public void addListener(Piece3DListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(Piece3DListener listener) {
+        listeners.remove(listener);
+    }
+
+    public interface Piece3DListener {
+        void onFlipped(Piece3D piece);
+
+        void onAnimationsDone(Piece3D piece);
     }
 }

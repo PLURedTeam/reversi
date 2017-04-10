@@ -330,6 +330,14 @@ public abstract class Model3D extends Shape {
         child.offsetScale = new Vector3f();
     }
 
+    public Model3D getParent() {
+        return parent;
+    }
+
+    public boolean isChild(Model3D model) {
+        return children.contains(model);
+    }
+
     public Vector3f getWorldPosition() {
         return worldPos;
     }

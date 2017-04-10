@@ -77,8 +77,8 @@ public class GameService extends Service implements ICommandListener {
 
         game.setSettings(instance.createGameSettings());
 
-        new BotPlayer(game, Color.RED, 2);
-        new BotPlayer(game, Color.BLUE, 2);
+        new BotPlayer(game, Color.BLUE, 2).setName("Bot 2");
+        new BotPlayer(game, Color.RED, 2).setName("Bot 1");
 
         game.initialize();
 

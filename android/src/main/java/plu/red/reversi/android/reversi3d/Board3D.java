@@ -9,9 +9,13 @@ import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import plu.red.reversi.android.graphics.Graphics3D;
@@ -27,7 +31,7 @@ import plu.red.reversi.core.util.Color;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class Board3D extends ColorModel3D {
+public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
     public static final float PIECE_SIZE = 0.1f;
     public static final float PIECE_BORDER_SIZE = 0.005f;
@@ -35,11 +39,15 @@ public class Board3D extends ColorModel3D {
 
     public static final int ANIMATION_QUEUE_DELAY = 20;
 
+    private Collection<Board3DListener> listeners;
+
     private Piece3D[] pieces;
     private Highlight3D[] highlights;
 
     private Deque<BoardUpdate> boardUpdates;
     private BoardUpdate currentBoardUpdate;
+
+    private Map<Integer, Integer> scores;
 
     private int size;
 
@@ -48,6 +56,9 @@ public class Board3D extends ColorModel3D {
     public Board3D(Graphics3D g3d, Pipeline pipeline, Game game) {
 
         super(g3d, pipeline);
+
+        listeners = new HashSet<>();
+        scores = new HashMap<>();
 
         this.game = game;
 
@@ -252,33 +263,82 @@ public class Board3D extends ColorModel3D {
     @Override
     public boolean update(int tick) {
 
+        boolean updated = super.update(tick);
+
+        boolean done = false;
 
         if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
             currentBoardUpdate = null;
+
+            done = true;
         }
 
         if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
             currentBoardUpdate = boardUpdates.poll();
             currentBoardUpdate.dispatch();
+
+            // after a board update has been applied, update the cached scores
+            refreshScores();
+
+            for(Board3DListener listener : listeners)
+                listener.onScoreChange(this);
+
+            done = false;
         }
 
-        return super.update(tick);
+        if(done && boardUpdates.isEmpty())
+            for(Board3DListener listener : listeners)
+                listener.onAnimationsDone(this);
+
+        return updated;
+    }
+
+    private void refreshScores() {
+
+        Player[] players = game.getAllPlayers();
+
+        if(players[0].getColor() != pieces[0].getBaseColor()) {
+            Player tmp = players[0];
+            players[0] = players[1];
+            players[1] = tmp;
+        }
+
+        int bc = players[0].getID();
+        int fc = players[1].getID();
+
+        scores.clear();
+
+        for(int i = 0;i < pieces.length;i++) {
+            //noinspection StatementWithEmptyBody
+            if(!isChild(pieces[i]));
+            else if(!pieces[i].isFlipped()) {
+                if(!scores.containsKey(bc))
+                    scores.put(bc, 0);
+
+                scores.put(bc, scores.get(bc) + 1);
+            }
+            else {
+                if(!scores.containsKey(fc))
+                    scores.put(fc, 0);
+
+                scores.put(fc, scores.get(fc) + 1);
+            }
+        }
+    }
+
+    public int getScore(int playerId) {
+        if(scores.get(playerId) == null)
+            return 0;
+        return scores.get(playerId);
     }
 
     public void animBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
-
-        System.out.println("animBoardUpdate " + origin + ", " + playerId + ", " + updated);
-
         int triggerTime = getLastTick();
 
         if(boardUpdates.peekLast() != null)
             triggerTime = boardUpdates.peekLast().triggerTick + boardUpdates.peekLast().duration + ANIMATION_QUEUE_DELAY;
         else if(currentBoardUpdate != null)
             triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
-
-        System.out.println(boardUpdates.peekLast());
-        System.out.println(currentBoardUpdate);
-        System.out.println("triggerTime " + triggerTime);
 
         boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
     }
@@ -322,6 +382,11 @@ public class Board3D extends ColorModel3D {
                 setPiece(game, idx, game.getBoard().at(idx));
             }
         }
+
+        refreshScores();
+
+        for(Board3DListener listener : listeners)
+            listener.onScoreChange(this);
     }
 
     public BoardIndex getIndexAtCoord(Vector2fc pos) {
@@ -359,6 +424,24 @@ public class Board3D extends ColorModel3D {
                 size - (i % size) - 1,
                 size - (i / size) - 1
         );
+    }
+
+    @Override
+    public void onFlipped(Piece3D piece) {
+        // for right now we do not do anything with this
+    }
+
+    @Override
+    public void onAnimationsDone(Piece3D piece) {
+        // for right now we do not do anything with this
+    }
+
+    public void addListener(Board3DListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(Board3DListener listener) {
+        listeners.remove(listener);
     }
 
     private class BoardUpdate {
@@ -403,5 +486,10 @@ public class Board3D extends ColorModel3D {
                 pieces[i].animateFlip(flipped, getLastTick() + delayForPiece(index));
             }
         }
+    }
+
+    public interface Board3DListener {
+        void onScoreChange(Board3D board);
+        void onAnimationsDone(Board3D board);
     }
 }

@@ -75,21 +75,21 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
         switch(v.getId()) {
             case R.id.button_sp_with_easy_ai:
 
-                new NullPlayer(game, Color.RED);
-                new BotPlayer(game, Color.BLUE, 2);
+                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
 
                 break;
             case R.id.button_sp_with_medium_ai:
 
-                new NullPlayer(game, Color.RED);
-                new BotPlayer(game, Color.BLUE, 4);
+                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
 
                 break;
 
             case R.id.button_sp_with_hard_ai:
 
-                new NullPlayer(game, Color.RED);
-                new BotPlayer(game, Color.BLUE, 6);
+                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new NullPlayer(game, Color.RED).setName("Player");
 
                 break;
         }

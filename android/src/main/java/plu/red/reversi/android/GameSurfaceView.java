@@ -16,9 +16,11 @@ import org.joml.Vector2fc;
 
 import java.util.Collection;
 
+import plu.red.reversi.android.reversi3d.Board3D;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
 
@@ -27,7 +29,7 @@ import plu.red.reversi.core.listener.ICommandListener;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, IBoardUpdateListener {
+public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, IBoardUpdateListener, Board3D.Board3DListener {
 
     private static final int FRAMERATE = 60;
 
@@ -51,6 +53,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     private GameSurfaceViewListener mListener;
 
     private Game mGame;
+
+    private boolean mCanDoCommand;
 
     public GameSurfaceView(Context context) {
         super(context);
@@ -138,6 +142,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
      */
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
+
+        if(!mCanDoCommand)
+            return true;
 
         BoardIndex index = mRenderer.getTappedIndex(new Vector2f(e.getX(), e.getY()));
 
@@ -366,6 +373,18 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         });
     }
 
+    @Override
+    public void onScoreChange(Board3D board) {
+        mListener.onBoardScoreChanged();
+    }
+
+    @Override
+    public void onAnimationsDone(Board3D board) {
+        // enable the ability to control again
+        if(mGame.getCurrentPlayer() instanceof NullPlayer)
+            mCanDoCommand = true;
+    }
+
     private class UpdateTask implements Runnable {
 
         @Override
@@ -401,10 +420,22 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
         mGame.getBoard().addBoardUpdateListener(this);
 
+        if(mGame.getCurrentPlayer() instanceof NullPlayer)
+            mCanDoCommand = true;
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
+
                 mRenderer.setGame(game);
+
+
+                if(mRenderer.getBoard() == null)
+                    queueEvent(this); // TODO: Improve synchronization? I do not have a solution for this atm.
+
+                mRenderer.getBoard().addListener(GameSurfaceView.this);
+
+                mListener.onBoardScoreChanged();
             }
         });
     }
@@ -413,7 +444,19 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         return mSelectedIndex;
     }
 
+    public void disablePlayer() {
+        mCanDoCommand = false;
+    }
+
+    public int getPlayerScore(int playerId) {
+        if(mRenderer.getBoard() != null)
+            return mRenderer.getBoard().getScore(playerId);
+
+        return 0;
+    }
+
     public interface GameSurfaceViewListener {
         void onBoardSelected(BoardIndex index);
+        void onBoardScoreChanged();
     }
 }

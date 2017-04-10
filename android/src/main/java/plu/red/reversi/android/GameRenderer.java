@@ -333,4 +333,8 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
     public void onBoardRefresh() {
         mBoard.setBoard(mGame);
     }
+
+    public Board3D getBoard() {
+        return mBoard;
+    }
 }
