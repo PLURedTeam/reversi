@@ -326,8 +326,10 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
 
     @Override
     public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
-        mBoard.clearHighlights();
-        mBoard.animBoardUpdate(origin, playerId, updated);
+        if(mBoard != null) {
+            mBoard.clearHighlights();
+            mBoard.animBoardUpdate(origin, playerId, updated);
+        }
     }
 
     @Override

@@ -266,6 +266,9 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
             @Override
             public void run() {
 
+                if(mGameView.getRenderer().getBoard() == null)
+                    return; // cant do anything yet.
+
                 System.out.println("Time to highlight: player enabled = " + mGameView.isPlayerEnabled());
 
                 mGameView.getRenderer().clearBoardHighlights();
