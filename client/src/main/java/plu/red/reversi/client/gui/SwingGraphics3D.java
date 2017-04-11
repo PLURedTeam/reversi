@@ -295,16 +295,21 @@ public class SwingGraphics3D extends Graphics3D {
             gl.glUniform2fv(uniformHandle, 1, buf);
         }
         else if(data instanceof Vector3fc) {
-            FloatBuffer buf = FloatBuffer.allocate(3);
-            ((Vector3fc) data).get(buf);
-            buf.position(0);
-            gl.glUniform3fv(uniformHandle, 1, buf);
+            float[] buf = new float[3];
+            buf[0] = ((Vector3fc) data).x();
+            buf[1] = ((Vector3fc) data).y();
+            buf[2] = ((Vector3fc) data).z();
+
+            gl.glUniform3fv(uniformHandle, 1, buf, 0);
         }
         else if(data instanceof Vector4fc) {
-            FloatBuffer buf = FloatBuffer.allocate(4);
-            ((Vector4fc) data).get(buf);
-            buf.position(0);
-            gl.glUniform4fv(uniformHandle, 1, buf);
+            float[] buf = new float[4];
+            buf[0] = ((Vector4fc) data).x();
+            buf[1] = ((Vector4fc) data).y();
+            buf[2] = ((Vector4fc) data).z();
+            buf[3] = ((Vector4fc) data).w();
+
+            gl.glUniform4fv(uniformHandle, 1, buf, 0);
         }
         else if(data instanceof Matrix3fc) {
             FloatBuffer buf = FloatBuffer.allocate(9);

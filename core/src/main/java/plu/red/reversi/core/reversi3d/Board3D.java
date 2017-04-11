@@ -107,6 +107,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             //    addChild(h);
             highlights[i] = h;
         }
+
+        // since we have the game
+        // TODO: Remove argument
+        setBoard(game);
     }
 
     // TODO: Needs testing (even though this method will probobly never be used)
