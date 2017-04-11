@@ -5,6 +5,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLJPanel;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import org.joml.Vector2f;
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The JPanel containing the board and its edges.
  */
-public class BoardView extends GLCanvas implements MouseListener, GLEventListener, IBoardUpdateListener, ICommandListener, IGameOverListener {
+public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateListener, ICommandListener, IGameOverListener {
 
     public static final Vector3fc LAST_MOVE_COLOR = new Vector3f(1.0f, 0.2f, 0.2f);
     public static final Vector3fc POSSIBLE_MOVES_COLOR = new Vector3f(0.0f, 1.0f, 0.0f);
@@ -63,7 +64,9 @@ public class BoardView extends GLCanvas implements MouseListener, GLEventListene
      * @param game Game object to pull data from
      */
     public BoardView(Game game) {
-        super(new GLCapabilities(GLProfile.getDefault()));
+        super(new GLCapabilities(GLProfile.get(GLProfile.GL3)));
+
+        //System.out.println("New board view has been started");
 
         this.game = game;
 
@@ -72,6 +75,10 @@ public class BoardView extends GLCanvas implements MouseListener, GLEventListene
         this.setPreferredSize(new Dimension(500,500) );
 
         this.addMouseListener(this);
+
+        addGLEventListener(new EventHandler());
+
+        setVisible(true);
     }
 
     public void setHighlightMode(HighlightMode highlightMode) {
@@ -154,46 +161,61 @@ public class BoardView extends GLCanvas implements MouseListener, GLEventListene
         board.setBoard(game);
     }
 
-    @Override
-    public void init(GLAutoDrawable drawable) {
-        g3d = new SwingGraphics3D(drawable.getGL().getGL3());
+    private class EventHandler implements GLEventListener {
 
-        PipelineDefinition def = new PipelineDefinition();
 
-        def.directionalLightCount = 4;
+        @Override
+        public void init(GLAutoDrawable drawable) {
 
-        pipeline = new Pipeline(def, new SimpleGLVertexShader(def), new SimpleGLFragmentShader(def));
+            //System.out.println("Init claled: " + drawable);
 
-        board = new Board3D(g3d, pipeline, game);
+            g3d = new SwingGraphics3D(drawable.getGL().getGL3());
 
-        camera = new Camera();
-    }
+            PipelineDefinition def = new PipelineDefinition();
 
-    @Override
-    public void dispose(GLAutoDrawable drawable) {
-        // TODO: Implement disposal in the Model3D stuff because I did not think about that until now.
-    }
+            def.directionalLightCount = 4;
 
-    @Override
-    public void display(GLAutoDrawable drawable) {
-        // TODO: This method is automatically called by JOGL at the refresh rate of the screen. In most cases, this is 60fps, but it could be different. Examine.
-        tick++;
+            pipeline = new Pipeline(def, new SimpleGLVertexShader(def), new SimpleGLFragmentShader(def));
 
-        board.update(tick);
-        camera.update(tick);
+            g3d.createPipeline(pipeline);
 
-        // regardless of if anything actually changed, we render on the computer because its a computer
-        g3d.bindPipelineUniform("viewMatrix", pipeline, camera.getViewMatrix());
-        g3d.bindPipelineUniform("projectionMatrix", pipeline, camera.getProjectionMatrix());
+            board = new Board3D(g3d, pipeline, game);
 
-        board.draw();
-    }
+            camera = new Camera();
+        }
 
-    @Override
-    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-        camera.setViewport(new Vector2f(width, height));
+        @Override
+        public void dispose(GLAutoDrawable drawable) {
+            // TODO: Implement disposal in the Model3D stuff because I did not think about that until now.
+        }
 
-        camera.setZoom(Math.min(width, height) / board.getBoardRadius());
+        @Override
+        public void display(GLAutoDrawable drawable) {
+
+            //System.out.println("Displaying tick " + tick);
+
+            // TODO: This method is automatically called by JOGL at the refresh rate of the screen. In most cases, this is 60fps, but it could be different. Examine.
+            tick++;
+
+            board.update(tick);
+            camera.update(tick);
+
+            // regardless of if anything actually changed, we render on the computer because its a computer
+            g3d.bindPipelineUniform("viewMatrix", pipeline, camera.getViewMatrix());
+            g3d.bindPipelineUniform("projectionMatrix", pipeline, camera.getProjectionMatrix());
+
+            board.draw();
+        }
+
+        @Override
+        public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+
+            //System.out.println("Got reshape");
+
+            camera.setViewport(new Vector2f(width, height));
+
+            camera.setZoom(Math.min(width, height) / board.getBoardRadius());
+        }
     }
 
     public enum HighlightMode {
