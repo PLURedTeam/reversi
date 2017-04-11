@@ -313,10 +313,11 @@ public class SwingGraphics3D extends Graphics3D {
             gl.glUniformMatrix3fv(uniformHandle, 1, false, buf);
         }
         else if(data instanceof Matrix4fc) {
-            FloatBuffer buf = FloatBuffer.allocate(16);
+            //FloatBuffer buf = FloatBuffer.allocate(16);
+            float[] buf = new float[16];
             ((Matrix4fc) data).get(buf);
-            buf.position(0);
-            gl.glUniformMatrix4fv(uniformHandle, 1, false, buf);
+            //buf.position(0);
+            gl.glUniformMatrix4fv(uniformHandle, 1, false, buf, 0);
         }
         else if(data instanceof Integer)
             gl.glUniform1iv(uniformHandle, 1, new int[]{(Integer)data}, 0);

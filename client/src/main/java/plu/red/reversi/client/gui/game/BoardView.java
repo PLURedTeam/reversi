@@ -192,6 +192,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         @Override
         public void display(GLAutoDrawable drawable) {
 
+            System.out.println("Displayin");
+
+            g3d.setPipeline(pipeline);
+
             //System.out.println("Displaying tick " + tick);
 
             // TODO: This method is automatically called by JOGL at the refresh rate of the screen. In most cases, this is 60fps, but it could be different. Examine.

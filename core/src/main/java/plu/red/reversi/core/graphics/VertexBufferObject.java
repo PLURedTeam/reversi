@@ -149,24 +149,29 @@ public class VertexBufferObject<T> extends ArrayList<T> {
             return fb;
         }
         else if(getRawType() == Vector3fc.class) {
-            FloatBuffer fb = FloatBuffer.allocate(3 * size());
+            float[] fb = new float[3 * size()];
 
-            for(Object f : this) {
-                ((Vector3fc)f).get(fb);
-                fb.position(fb.position() + 3);
+            for(int i = 0;i < size();i++) {
+                Vector3fc v = ((Vector3fc)get(i));
+                fb[3 * i]     = v.x();
+                fb[3 * i + 1] = v.y();
+                fb[3 * i + 2] = v.z();
             }
 
-            return fb;
+            return FloatBuffer.wrap(fb);
         }
         else if(getRawType() == Vector4fc.class) {
-            FloatBuffer fb = FloatBuffer.allocate(4 * size());
+            float[] fb = new float[4 * size()];
 
-            for(Object f : this) {
-                ((Vector4fc)f).get(fb);
-                fb.position(fb.position() + 4);
+            for(int i = 0;i < size();i++) {
+                Vector4fc v = ((Vector4fc)get(i));
+                fb[4 * i]     = v.x();
+                fb[4 * i + 1] = v.y();
+                fb[4 * i + 2] = v.z();
+                fb[4 * i + 3] = v.w();
             }
 
-            return fb;
+            return FloatBuffer.wrap(fb);
         }
         else if(getRawType() == Vector2dc.class) {
             DoubleBuffer fb = DoubleBuffer.allocate(2 * size());
