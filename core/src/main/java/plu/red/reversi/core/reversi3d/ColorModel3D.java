@@ -82,10 +82,6 @@ public abstract class ColorModel3D extends Model3D {
         else albedos.clear();
 
         super.recalculate(sectionId);
-
-        if(this instanceof Piece3D) {
-            System.out.println("Color size: " + albedos.size());
-        }
     }
 
     @Override

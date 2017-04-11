@@ -178,8 +178,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void onAnimationsDone(Board3D board) {
-        System.out.println(game.getCurrentPlayer());
-
         if(game.getCurrentPlayer() instanceof HumanPlayer)
             canPlay = true;
 
@@ -247,14 +245,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
             board.draw();
 
-            //if(tick % 60 == 0)
-            //    System.out.println("One second of ticks");
         }
 
         @Override
         public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-
-            //System.out.println("Got reshape");
 
             camera.setViewport(new Vector2f(width, height));
 
