@@ -154,10 +154,10 @@ public class Piece3D extends ColorModel3D {
         Vector4f color;
 
         if(faceIndex < getFaceCount(0) / 2) {
-            color = new Vector4f(0.9f, 0.1f, 0.1f, 1.0f);
+            color = baseColor.toVec4();
         }
         else {
-            color = new Vector4f(0.1f, 0.1f, 0.9f, 1.0f);
+            color = flippedColor.toVec4();
         }
 
         if(faceIndex < LONGITUDE_DETAIL) {
