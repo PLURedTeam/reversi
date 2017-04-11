@@ -158,19 +158,20 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 CorePanel cp = gui.getCorePanel();
                 if(cp instanceof GamePanel) {
                     BoardView bv = ((GamePanel)cp).getBoardView();
-                    bv.setShowPossibleMoves(!bv.getShowPossibleMoves());
+
+                    bv.setHighlightMode(BoardView.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
                 }
             }
 
             if(e.getSource() == bestMoveMenuItem) {
 
-                // TODO: Show a loading indicator of some kind
-                // TODO: Cancel minimax result if play is performed, or disable ability to play on board
-                ReversiMinimax minimax = new ReversiMinimax(game,
-                        game.getCurrentPlayer().getID(),
-                        5);
 
-                new Thread(minimax).start();
+                CorePanel cp = gui.getCorePanel();
+                if(cp instanceof GamePanel) {
+                    BoardView bv = ((GamePanel)cp).getBoardView();
+
+                    bv.setHighlightMode(BoardView.HighlightMode.HIGHLIGHT_BEST_MOVE);
+                }
             }
         }
 
