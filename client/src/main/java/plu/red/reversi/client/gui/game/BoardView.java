@@ -163,7 +163,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
-        board.animBoardUpdate(origin, playerId, updated);
+        if(board != null) {
+            board.animBoardUpdate(origin, playerId, updated);
+        }
+        // the board is not initialized yet, meaning it will be set to be the correct anyway.
     }
 
     @Override
