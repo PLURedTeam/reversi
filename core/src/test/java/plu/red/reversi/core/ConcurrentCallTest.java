@@ -120,13 +120,13 @@ public class ConcurrentCallTest {
         public String val3 = "NoResult";
         public int val4 = 0;
 
-        @ResultMethod(true)
+        @ResultMethod(InvokeType.SYNC)
         public void resultA(@ResultParameter(42) boolean val1, @ResultParameter(96) int val2) {
             this.val1 = val1;
             this.val2 = val2;
         }
 
-        @ResultMethod(true)
+        @ResultMethod(InvokeType.SYNC)
         public void resultB(@ResultParameter(101) String val3, @ResultParameter(96) int val4) {
             this.val3 = val3;
             this.val4 = val4;
