@@ -203,6 +203,14 @@ public class Piece3D extends ColorModel3D {
             animFlipStart = atTick;
     }
 
+    public void clearAnimations() {
+        if(animFlipStart != -1) {
+            animFlipStart = -1;
+
+            setFlipped(!flipped);
+        }
+    }
+
     @Override
     public boolean update(int tick) {
         super.update(tick);

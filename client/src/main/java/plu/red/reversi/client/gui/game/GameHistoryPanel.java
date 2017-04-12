@@ -7,6 +7,8 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.listener.ICommandListener;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
@@ -19,12 +21,16 @@ import java.awt.*;
  * doesn't belong here.  I suggest moving that over to a model subsystem
  * because it is something many subsystems might be interested in.
  */
-public class GameHistoryPanel extends JPanel implements ICommandListener {
+public class GameHistoryPanel extends JPanel implements ICommandListener, ListSelectionListener {
 
     private JTable historyTable;
     private CommandHistoryTableModel tableModel;
 
     public final Game game;
+
+    private HistoryPanelListener listener;
+
+    private int selectedIndex;
 
     private class CommandHistoryTableModel extends AbstractTableModel {
         @Override
@@ -95,6 +101,8 @@ public class GameHistoryPanel extends JPanel implements ICommandListener {
         cmod.getColumn(1).setPreferredWidth(20);
         historyTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
+        historyTable.getSelectionModel().addListSelectionListener(this);
+
         JPanel borderPanel = new JPanel(new GridLayout(1,0));
         borderPanel.setBorder(BorderFactory.createTitledBorder("History"));
         borderPanel.add(scrollPane);
@@ -109,8 +117,39 @@ public class GameHistoryPanel extends JPanel implements ICommandListener {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                historyTable.changeSelection(historyTable.getRowCount(), 0, false, false);
+                historyTable.setRowSelectionInterval(selectedIndex, selectedIndex);
             }
         });
+    }
+
+    public int getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void setSelectedIndex(int index) {
+        selectedIndex = index;
+
+        historyTable.setRowSelectionInterval(index, index);
+    }
+
+    public void setListener(HistoryPanelListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent listSelectionEvent) {
+
+        if(selectedIndex != historyTable.getSelectedRow() && historyTable.getSelectedRow() != -1) {
+
+            selectedIndex = historyTable.getSelectedRow();
+
+            if(listener != null) {
+                listener.onHistoryPanelSelected();
+            }
+        }
+    }
+
+    public interface HistoryPanelListener {
+        void onHistoryPanelSelected();
     }
 }

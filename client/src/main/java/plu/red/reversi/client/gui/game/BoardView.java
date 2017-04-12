@@ -15,6 +15,7 @@ import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.graphics.*;
@@ -56,6 +57,12 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     private Queue<Runnable> renderqueue;
 
+    private BoardViewStateListener listener;
+
+    private BoardIterator boardIterator;
+
+    private boolean autoFollow;
+
     /**
      * Constructs a new BoardView.
      *
@@ -68,6 +75,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
         this.game = game;
 
+        boardIterator = new BoardIterator(game.getHistory(), game.getBoard());
+
         renderqueue = new LinkedList<>();
 
         game.addListener(this);
@@ -79,6 +88,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         addGLEventListener(new EventHandler());
 
         setVisible(true);
+
+        autoFollow = true;
 
         animator = new Animator(this);
 
@@ -101,7 +112,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                 if(canPlay) {
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
-                        for(BoardIndex index : game.getBoard().getPossibleMoves(game.getCurrentPlayer().getID())) {
+                        for(BoardIndex index :
+                                getCurrentBoard().getPossibleMoves(game.getNextPlayerID(
+                                        game.getHistory().getBoardCommand(boardIterator.getPos()).playerID
+                                ))) {
                             board.highlightAt(index, POSSIBLE_MOVES_COLOR);
                         }
                     }
@@ -109,9 +123,9 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                         // TODO
                     }
 
-                    BoardCommand lastMove = game.getHistory().getBoardCommand(game.getHistory().getNumBoardCommands() - 1);
+                    BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
 
-                    if(lastMove instanceof MoveCommand) {
+                    if (lastMove instanceof MoveCommand) {
                         board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
                     }
                 }
@@ -126,13 +140,16 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-        BoardIndex index = board.getIndexAtCoord(
-                camera.pixelToPosition(new Vector2f(mouseEvent.getX(), mouseEvent.getY()))
-        );
+        // must be on the latest move to issue command on board
+        if(autoFollow) {
+            BoardIndex index = board.getIndexAtCoord(
+                    camera.pixelToPosition(new Vector2f(mouseEvent.getX(), mouseEvent.getY()))
+            );
 
-        game.getCurrentPlayer().boardClicked(index);
+            game.getCurrentPlayer().boardClicked(index);
 
-        canPlay = false;
+            canPlay = false;
+        }
     }
 
     @Override
@@ -163,7 +180,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
-        if(board != null) {
+        if(board != null && autoFollow) {
             board.animBoardUpdate(origin, playerId, updated);
         }
         // the board is not initialized yet, meaning it will be set to be the correct anyway.
@@ -171,7 +188,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void onBoardRefresh() {
-        board.setBoard(game);
+        board.setBoard(game.getBoard());
     }
 
     @Override
@@ -185,6 +202,15 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             canPlay = true;
 
         updateHighlights();
+    }
+
+    @Override
+    public void onAnimationStepDone(Board3D board) {
+        // keep our board iterator synced
+        System.out.println("Board iterator inc");
+        boardIterator.next();
+
+        listener.onBoardStateChanged(this);
     }
 
     private class EventHandler implements GLEventListener {
@@ -210,6 +236,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             g3d.bindPipelineUniform("fDirectionalLights[1]", pipeline, new Vector3f(0.6f, -0.25f, 1.0f).normalize());
 
             board = new Board3D(g3d, pipeline, game);
+            boardIterator.goTo(game.getHistory().getNumBoardCommands() - 1);
 
             board.addListener(BoardView.this);
 
@@ -259,13 +286,44 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         }
     }
 
+    public Board getCurrentBoard() {
+        return boardIterator.board;
+    }
+
+    public int getCurrentMoveIndex() {
+        return boardIterator.getPos();
+    }
+
+    public void setMoveIndex(int index) {
+
+        boardIterator.goTo(index);
+
+        board.setBoard(boardIterator.board);
+
+        autoFollow = index == game.getHistory().getNumBoardCommands() - 1;
+        canPlay = true; // always true because animation will no longer be in progress.
+
+        updateHighlights();
+
+        if(listener != null)
+            listener.onBoardStateChanged(this);
+    }
+
     public void queueEvent(Runnable r) {
         renderqueue.add(r);
+    }
+
+    public void setBoardViewListener(BoardViewStateListener listener) {
+        this.listener = listener;
     }
 
     public enum HighlightMode {
         HIGHLIGHT_NONE,
         HIGHLIGHT_POSSIBLE_MOVES,
         HIGHLIGHT_BEST_MOVE;
+    }
+
+    public interface BoardViewStateListener {
+        void onBoardStateChanged(BoardView view);
     }
 }
