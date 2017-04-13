@@ -6,7 +6,6 @@ import android.opengl.GLSurfaceView;
 import android.support.annotation.IntegerRes;
 import android.util.Log;
 
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
@@ -17,21 +16,20 @@ import java.util.Collection;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import plu.red.reversi.android.graphics.AndroidGraphics3D;
-import plu.red.reversi.android.graphics.Graphics3D;
-import plu.red.reversi.android.graphics.Pipeline;
-import plu.red.reversi.android.graphics.PipelineDefinition;
-import plu.red.reversi.android.graphics.PixelShader;
-import plu.red.reversi.android.graphics.SimpleGLFragmentShader;
-import plu.red.reversi.android.graphics.SimpleGLVertexShader;
-import plu.red.reversi.android.graphics.VertexShader;
-import plu.red.reversi.android.reversi3d.Board3D;
-import plu.red.reversi.android.reversi3d.Camera;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.PipelineDefinition;
+import plu.red.reversi.core.graphics.PixelShader;
+import plu.red.reversi.core.graphics.SimpleGLFragmentShader;
+import plu.red.reversi.core.graphics.SimpleGLVertexShader;
+import plu.red.reversi.core.graphics.VertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
+import plu.red.reversi.core.reversi3d.Board3D;
+import plu.red.reversi.core.reversi3d.Camera;
 
 /**
  * Created by daniel on 3/25/17.
@@ -306,7 +304,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
     public void updateBoardState() {
         if(mBoard != null) {
             System.out.println("Update board state");
-            mBoard.setBoard(mGame);
+            mBoard.setBoard(mGame.getBoard());
         }
     }
 
@@ -339,7 +337,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
 
     @Override
     public void onBoardRefresh() {
-        mBoard.setBoard(mGame);
+        mBoard.setBoard(mGame.getBoard());
     }
 
     public Board3D getBoard() {

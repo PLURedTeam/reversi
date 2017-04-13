@@ -17,13 +17,13 @@ import org.joml.Vector3f;
 
 import java.util.Collection;
 
-import plu.red.reversi.android.reversi3d.Board3D;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.reversi3d.Board3D;
 
 /**
  * Created by daniel on 3/18/17.
@@ -385,6 +385,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         // enable the ability to control again
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
             setPlayerEnabled(true);
+    }
+
+    @Override
+    public void onAnimationStepDone(Board3D board) {
+
     }
 
     private class UpdateTask implements Runnable {
