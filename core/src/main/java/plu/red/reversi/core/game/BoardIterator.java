@@ -59,5 +59,7 @@ public class BoardIterator {
         return this;
     }
 
-
+    public int getPos() {
+        return pos;
+    }
 }

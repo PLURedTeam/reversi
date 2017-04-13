@@ -60,6 +60,8 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
 
     private boolean mGLIsAvailable;
 
+    private Board3D.Board3DListener mBoardListener;
+
     public GameRenderer() {
         mTick = 0;
         mPlayZoom = 3600;
@@ -290,6 +292,9 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
         if(mGLIsAvailable) {
             mBoard = new Board3D(g3d, mPipeline, mGame);
 
+            if(mBoardListener != null)
+                mBoard.addListener(mBoardListener);
+
             float r = mBoard.getBoardRadius();
 
             mCamera.setMoveBounds(new Vector2f(-r, -r), new Vector2f(r, r));
@@ -339,5 +344,9 @@ public class GameRenderer implements GLSurfaceView.Renderer, IBoardUpdateListene
 
     public Board3D getBoard() {
         return mBoard;
+    }
+
+    public void setBoardListener(Board3D.Board3DListener listener) {
+        mBoardListener = listener;
     }
 }

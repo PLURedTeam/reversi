@@ -73,6 +73,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         setEGLContextClientVersion(3);
 
         mRenderer = new GameRenderer();
+        mRenderer.setBoardListener(this);
         setRenderer(mRenderer);
 
         setRenderMode(RENDERMODE_WHEN_DIRTY);
@@ -429,14 +430,6 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             public void run() {
 
                 mRenderer.setGame(game);
-
-
-                if(mRenderer.getBoard() == null) {
-                    queueEvent(this); // TODO: Improve synchronization? I do not have a solution for this atm.
-                    return;
-                }
-
-                mRenderer.getBoard().addListener(GameSurfaceView.this);
 
                 mListener.onBoardScoreChanged();
             }

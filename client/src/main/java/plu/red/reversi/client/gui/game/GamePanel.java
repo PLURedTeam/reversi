@@ -17,7 +17,7 @@ import java.awt.*;
  * GamePanel that controls the GUI side of a Game. Acts as a sub-controller for the MainWindow, and controls all
  * in-game related GUI components.
  */
-public class GamePanel extends CorePanel {
+public class GamePanel extends CorePanel implements BoardView.BoardViewStateListener, GameHistoryPanel.HistoryPanelListener {
 
     protected final Game game;
     public Game getGame() { return game; }
@@ -74,6 +74,9 @@ public class GamePanel extends CorePanel {
 
         this.add(chatPanel, BorderLayout.SOUTH);
 
+        boardView.setBoardViewListener(this);
+        historyPanel.setListener(this);
+
         this.revalidate();
     }
 
@@ -97,5 +100,17 @@ public class GamePanel extends CorePanel {
         // Unregister PlayerInfoPanel ISettingsListener to avoid reference leaks
         SettingsLoader.INSTANCE.removeSettingsListener(playerInfoPanel);
         game.cleanup();
+    }
+
+    @Override
+    public void onBoardStateChanged(BoardView view) {
+        playerInfoPanel.setCurrentBoard(view.getCurrentBoard());
+
+        historyPanel.setSelectedIndex(view.getCurrentMoveIndex());
+    }
+
+    @Override
+    public void onHistoryPanelSelected() {
+        boardView.setMoveIndex(historyPanel.getSelectedIndex());
     }
 }

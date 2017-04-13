@@ -2,21 +2,26 @@ package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Color;
 import java.util.Map;
 
 public class ScoreIcon extends JPanel {
 
     private Color chipColor, fontColor;
     private static Font font = new Font("SansSerif", Font.PLAIN, 14);
-    private final Player player;
 
-    public ScoreIcon(Player player) {
-        this.player = player;
-        this.chipColor = new Color(player.getColor().composite);
-        this.fontColor = ((player.getColor().red + player.getColor().green + player.getColor().blue) / 3) > 128 ? Color.BLACK : Color.WHITE;
+    private int score;
+
+    public ScoreIcon(plu.red.reversi.core.util.Color color, int score) {
+
+        this.score = score;
+
+        this.chipColor = new Color(color.composite);
+        this.fontColor = ((color.red + color.green + color.blue) / 3) > 128 ? Color.BLACK : Color.WHITE;
         this.setPreferredSize(new Dimension(37,37));
         this.setOpaque(false);
     }
@@ -45,10 +50,15 @@ public class ScoreIcon extends JPanel {
             g2d.drawImage(
                 Utilities.getColoredTile(chipColor),
                 0, 0, w, h, null);
-        String label = "" + player.getScore();
+        String label = "" + score;
         g2d.setColor(fontColor);
         g2d.setFont(font);
         Utilities.drawCenteredString(g2d, label, new Rectangle(0, 0, w, h));
     }
 
+    public void setScore(int score) {
+        this.score = score;
+
+        repaint();
+    }
 }
