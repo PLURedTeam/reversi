@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../server/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../server/src/main/resources" type="java-resource" />
     </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: net.java.timingframework:timingframework-swing:7.3.1" level="project" />
     <orderEntry type="module" module-name="core_main" />

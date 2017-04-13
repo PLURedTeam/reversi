@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../client/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../client/src/test/resources" type="java-test-resource" />
     </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="client_main" />
     <orderEntry type="module" module-name="core_main" />
