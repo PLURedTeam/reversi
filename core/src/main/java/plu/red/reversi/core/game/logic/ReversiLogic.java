@@ -20,6 +20,7 @@ import java.util.*;
 public class ReversiLogic extends GameLogic {
     protected final HashMap<Integer, Integer> scoreCache = new HashMap<>();
 
+
     /**
      * Constructs a new ReversiLogic Unit to be able to play a game of reversi.
      * @param board Board used for this game.
@@ -27,6 +28,7 @@ public class ReversiLogic extends GameLogic {
     public ReversiLogic(Board board) {
         super(board);
     }
+
 
     /**
      * Make a move on the board.
@@ -38,7 +40,7 @@ public class ReversiLogic extends GameLogic {
         Collection<BoardIndex> indexes = calculateFlipsFromBoard(command.position, command.playerID);
 
         if(indexes.isEmpty())
-            throw new InvalidParameterException("Invalid play by player " + command.playerID);
+            throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
 
         this.invalidateCache();
 
@@ -50,6 +52,7 @@ public class ReversiLogic extends GameLogic {
 
         updateBoardListeners(command.position, command.playerID, indexes);
     }
+
 
     /**
      * Checks the board to see if the move attempted is valid. Prefer calling play and
@@ -64,6 +67,7 @@ public class ReversiLogic extends GameLogic {
             !calculateFlipsFromBoard(command.position, command.playerID).isEmpty()
         );
     }
+
 
     /**
      * Find the different moves that could be made and return them.
@@ -86,6 +90,7 @@ public class ReversiLogic extends GameLogic {
 
         return moves;
     }
+
 
     /**
      * Returns the score of the Player ID passed in
@@ -110,6 +115,7 @@ public class ReversiLogic extends GameLogic {
         }
         return score;
     }
+
 
     /**
      * Retrieve the initial setup commands based on the specific game logic.
@@ -149,6 +155,7 @@ public class ReversiLogic extends GameLogic {
         return list;
     }
 
+
     /**
      * In the event board is changed outside of this class, this function will invalidate
      * the cache and force it to be regenerated given the current board state. Do not rely
@@ -171,30 +178,23 @@ public class ReversiLogic extends GameLogic {
         List<BoardIndex> flipped = new LinkedList<>();
 
         for(int i = 0; i < 8; i++) {
-            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);
-            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0);
-
             List<BoardIndex> rowFlipped = new LinkedList<>();
+            int dr = i < 3 ? -1 : (i > 4 ? 1 : 0);  //change in row
+            int dc = i % 3 == 0 ? -1 : (i % 3 == 1 ? 1 : 0); //change in column
 
             try {
-
-                BoardIndex index = new BoardIndex(origin.row + dr, origin.column + dc);
                 int move = 1;
-
+                BoardIndex index = new BoardIndex(origin.row + dr, origin.column + dc);
                 while(board.at(index) != playerId) {
-
                     if(board.at(index) == -1)
                         throw new Throwable();
-
                     rowFlipped.add(index);
-
                     move++;
                     index = new BoardIndex(origin.row + dr * move, origin.column + dc * move);
                 }
-
                 flipped.addAll(rowFlipped);
             }
-            catch (Throwable e) {
+            catch(Throwable e) {
                 // deliberately empty
             }
         }

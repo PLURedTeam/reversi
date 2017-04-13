@@ -54,7 +54,7 @@ public class Board {
 
 
     /**
-     * Basic Constructor. Constructs a new Board object with the given <code>size</code>.
+     * Basic Constructor. Constructs a new Board object with the given size.
      *
      * @param size Integer size of the Board
      */
@@ -98,6 +98,7 @@ public class Board {
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
      *
+     * @deprecated Use GameLogic instead.
      * @param usedPlayers Array of Integer Player IDs used in this setup
      * @param size Size of the board to setup
      */
@@ -149,10 +150,10 @@ public class Board {
      * Finds the value at a specific place of the board
      *
      * @param index being searched for
-     * @return PlayerID at <code>index</code>
+     * @return PlayerID at index
      * @throws IndexOutOfBoundsException if the index that is passed in is out of bounds
      */
-    public final int at(BoardIndex index) throws IndexOutOfBoundsException{
+    public int at(BoardIndex index) throws IndexOutOfBoundsException{
         return board[index.row][index.column];
     }
 

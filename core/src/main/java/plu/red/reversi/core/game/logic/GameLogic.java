@@ -69,7 +69,7 @@ public abstract class GameLogic {
     }
 
     /**
-     * Apply multiple commands at once.
+     * Apply multiple commands at once. Used when you have a saved game state you wish to restore.
      * @param commands List of commands to be applied in order.
      */
     public void initBoard(Collection<BoardCommand> commands) {
@@ -82,7 +82,7 @@ public abstract class GameLogic {
     }
 
     /**
-     * Initialize the board with the appropriate initial game state.
+     * Initialize the board with the appropriate initial game state. Used for new games.
      * @param players Array of the player ids used in current game in order.
      */
     public void initBoard(int[] players) {
