@@ -87,6 +87,7 @@ public class Board {
     /**
      * Method to setup the initial board position. Usually called from the initialization method of Game.
      *
+     * @deprecated Use GameLogic instead.
      * @param game Game object this board is attached to during setup; generally used to determine player colors and size.
      */
     public static LinkedList<BoardCommand> getSetupCommands(Game game) {
@@ -133,6 +134,7 @@ public class Board {
     /**
      * Apply multiple commands at once.
      * @param commands List of commands to be applied in order.
+     * @deprecated use GameLogic instead
      */
     public void applyCommands(LinkedList<BoardCommand> commands) {
         for(BoardCommand c : commands) {
@@ -157,6 +159,7 @@ public class Board {
     /**
      * Returns the score of the Player ID passed in
      *
+     * @deprecated Use GameLogic instead.
      * @param player Integer Player ID
      * @return Integer score representing the number of instances of the Player ID on the board
      */
@@ -183,7 +186,6 @@ public class Board {
      * @return Total pieces on board.
      */
     public int getTotalPieces() {
-
         int sum = 0;
         for(int r = 0; r < size; r++){
             for(int c = 0; c < size; c++){
@@ -198,6 +200,7 @@ public class Board {
     /**
      * Checks the board to see if the move attempted is valid
      *
+     * @deprecated Use GameLogic instead.
      * @param player Integer Player ID to check
      * @param index square of the board move is attempting to be made onto
      */
@@ -207,6 +210,8 @@ public class Board {
 
     /**
      * Checks the board to see if the move attempted is valid
+     *
+     * @deprecated Use GameLogic instead.
      * @param command Checks to see if this move is valid.
      * @return True if it is a valid move, otherwise false.
      */
@@ -217,10 +222,11 @@ public class Board {
     /**
      * Find the different moves that could be made and store them into an ArrayList
      *
+     * @deprecated Use GameLogic instead.
      * @param player Integer Player ID to check for
      * @return ArrayList moves
      */
-    public Set<BoardIndex> getPossibleMoves(int player ){
+    public Set<BoardIndex> getPossibleMoves(int player){
         //declare an array for possible moves method
         HashSet<BoardIndex> moves = new HashSet<>();
 
@@ -236,11 +242,11 @@ public class Board {
             }
         }//end loop
         return moves;
-
     }
 
     /**
      * Figures out which index would be flipped if a piece was added to the given BoardIndex based on the current board state.
+     * @deprecated Use GameLogic instead.
      * @param origin the board index to add a new piece on the board
      * @param playerId the player ID of the newly placed piece at the board index
      * @return the board indexes which should be flipped.
@@ -284,6 +290,7 @@ public class Board {
 
     /**
      * Applies the move made, updating the board
+     * @deprecated Use GameLogic instead
      * @param c command made
      */
     public void apply(MoveCommand c) {
@@ -305,6 +312,11 @@ public class Board {
         }
     }
 
+    /**
+     * Used to set a piece on the board. Do this through the Board's GameLogic class
+     * if this board has been attached to one.
+     * @param c Command specifying a location and its new player value.
+     */
     public void apply(SetCommand c) {
         //invalidate the cache for this player
         scoreCache.remove(c.playerID);
@@ -316,6 +328,17 @@ public class Board {
         }
     }
 
+    /**
+     * Apply multiple commands at once.
+     * @param commands Collection of commands to be applied.
+     */
+    public void applyAll(Collection<SetCommand> commands) {
+        for(SetCommand c : commands) apply(c);
+    }
+
+    /**
+     * @deprecated Use GameLogic instead
+     */
     public void apply(BoardCommand c){
         if(c instanceof SetCommand)
             apply((SetCommand)c);
