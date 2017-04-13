@@ -17,6 +17,11 @@ import java.util.List;
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
+/**
+ * Extends model3d by providing functionality that allows for the uploading of albedos along with face data.
+ *
+ * Will also select a shader which supports this type of shading automatically.
+ */
 public abstract class ColorModel3D extends Model3D {
 
     private VertexBufferObject<Vector4fc> albedos;

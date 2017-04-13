@@ -96,12 +96,25 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         animator.start();
     }
 
+    /**
+     * Specifies how highlighting should be done. For example, should we just highlight the previous move, or should the
+     * board also be highlighted to show possible moves or the best move?
+     *
+     * This method will automatically update the highlighting after the mode has been changed.
+     *
+     * @param highlightMode the highlighting type.
+     */
     public void setHighlightMode(HighlightMode highlightMode) {
         this.highlightMode = highlightMode;
 
         updateHighlights();
     }
 
+    /**
+     * Applies the specified highlighting mode to the board highlights. Called every time an update to the highlighting may occur.
+     *
+     * Note that highlights will generally not be shown unless canPlay is true.
+     */
     private void updateHighlights() {
 
         queueEvent(new Runnable() {
@@ -286,14 +299,26 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         }
     }
 
+    /**
+     * Get the board object representing the current state of the board as it graphically appears to the user (independant of the game state)
+     * @return the board object representing the current state graphically
+     */
     public Board getCurrentBoard() {
         return boardIterator.board;
     }
 
+    /**
+     * Gets the move index of the current game representing the current BoardCommand index.
+     * @return the index of the currently shown BoardCommand in the sequence.
+     */
     public int getCurrentMoveIndex() {
         return boardIterator.getPos();
     }
 
+    /**
+     * Sets the board to show a different move index.
+     * @param index the BoardCommand index to show the board state of.
+     */
     public void setMoveIndex(int index) {
 
         boardIterator.goTo(index);
@@ -309,21 +334,41 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             listener.onBoardStateChanged(this);
     }
 
+    /**
+     * Adds a new event to be executed on the next update() loop of rendering. Required if you want to do anything
+     * that may result in a g3d call.
+     * @param r the code to execute in the graphics context.
+     */
     public void queueEvent(Runnable r) {
         renderqueue.add(r);
     }
 
+    /**
+     * Specifies a delegate object which will listen to events defined in BoardViewStateListener.
+     *
+     * Will replace any previously existing listener.
+     *
+     * @param listener the new listener object.
+     */
     public void setBoardViewListener(BoardViewStateListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Defines general highlighting preferences for the board view.
+     */
     public enum HighlightMode {
-        HIGHLIGHT_NONE,
-        HIGHLIGHT_POSSIBLE_MOVES,
-        HIGHLIGHT_BEST_MOVE;
+        HIGHLIGHT_NONE,           /// only highlights the last played move in red
+        HIGHLIGHT_POSSIBLE_MOVES, /// highlights all moves whcih can be played by the player as well as the last played move
+        HIGHLIGHT_BEST_MOVE;      /// highlights only the best move as calculated by the minimax algorithm and the last played move.
     }
 
     public interface BoardViewStateListener {
+        /**
+         * Called when the BoardView object has changed the current move in which the board is displaying, either through
+         * an animation or by explicit call to #setMoveIndex
+         * @param view the board view which initiated this call.
+         */
         void onBoardStateChanged(BoardView view);
     }
 }
