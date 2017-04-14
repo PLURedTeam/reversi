@@ -6,8 +6,6 @@
       <module name="client_test" target="1.8" />
       <module name="core_main" target="1.8" />
       <module name="core_test" target="1.8" />
-      <module name="reversi_main" target="1.8" />
-      <module name="reversi_test" target="1.8" />
       <module name="server_main" target="1.8" />
       <module name="server_test" target="1.8" />
     </bytecodeTargetLevel>
