@@ -5,7 +5,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
@@ -44,6 +46,7 @@ public class GameService extends Service implements ICommandListener {
     private LocalBinder mBinder;
 
     private Game mGame;
+    private int mMoveIndex;
 
     public GameService() {
         mGame = null;
@@ -85,6 +88,18 @@ public class GameService extends Service implements ICommandListener {
         mBinder.setGame(game);
 
         onGameStateUpdate();
+
+
+
+        final Handler handler = new Handler(Looper.myLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                plu.red.reversi.core.util.Looper.getLooper(Thread.currentThread()).run();
+
+                handler.postDelayed(this, 100);
+            }
+        }, 100);
     }
 
     @Override
@@ -196,7 +211,22 @@ public class GameService extends Service implements ICommandListener {
 
             mGame.addListener(GameService.this);
 
+            if(mGame.isGameOver()) {
+                // start with the beginning by default
+                mMoveIndex = 0;
+            }
+            else
+                mMoveIndex = mGame.getHistory().getNumBoardCommands() - 1;
+
             return mGame;
+        }
+
+        public int getMoveIndex() {
+            return mMoveIndex;
+        }
+
+        public void setMoveIndex(int index) {
+            mMoveIndex = index;
         }
 
         public boolean shouldWarnGameReplace() {

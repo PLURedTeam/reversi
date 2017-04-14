@@ -74,4 +74,16 @@ public class History {
         list.addAll(moves.subList(0, i));
         return list;
     }
+
+    /**
+     * Used to retrieve all commands made after a certain point in the game.
+     * @param i Index of the first command (exclusive).
+     * @return List containing indicies [i, size()).
+     * @throws IndexOutOfBoundsException If the requested index is invalid.
+     */
+    public LinkedList<BoardCommand> getMoveCommandsAfter(int i) throws IndexOutOfBoundsException {
+        LinkedList<BoardCommand> list = new LinkedList<>();
+        list.addAll(moves.subList(i, moves.size()));
+        return list;
+    }
 }

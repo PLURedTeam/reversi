@@ -19,6 +19,12 @@ public class BoardIterator {
         pos = 0;
     }
 
+    public BoardIterator(BoardIterator other) {
+        hist = other.hist;
+        board = new Board(other.board);
+        pos = other.pos;
+    }
+
     /**
      * This method applies the move in history at a certain point
      * @param i index of the history

@@ -277,15 +277,12 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
             done = true;
 
-            System.out.println("Informing listeners");
-
             for(Board3DListener listener : listeners) {
                 listener.onAnimationStepDone(this);
             }
         }
 
         if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
-            System.out.println("Poll for board update: " + boardUpdates.size());
             currentBoardUpdate = boardUpdates.pop();
             currentBoardUpdate.dispatch();
 
@@ -363,6 +360,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                 pieces[indexFromCoord(toBoardCoords(index, size), size)].clearAnimations();
 
             currentBoardUpdate = null;
+
+            // technically we just completed an animation step, just earlier htan expected.
+            for(Board3DListener listener : listeners)
+                listener.onAnimationStepDone(this);
         }
     }
 
