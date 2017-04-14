@@ -176,7 +176,6 @@ public class Tournament {
         public User first;
         public User second;
         public Pair(User first, User second) {
-            super();
             this.first = first;
             this.second = second;
         }
