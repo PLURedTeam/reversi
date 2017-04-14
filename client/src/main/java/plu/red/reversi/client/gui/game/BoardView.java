@@ -207,7 +207,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     @Override
     public void onAnimationStepDone(Board3D board) {
         // keep our board iterator synced
-        System.out.println("Board iterator inc");
         boardIterator.next();
 
         listener.onBoardStateChanged(this);
