@@ -17,6 +17,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.graphics.*;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
@@ -30,6 +31,7 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -51,17 +53,11 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     private Camera camera;
 
     private HighlightMode highlightMode;
-
     private boolean canPlay;
-
     private long startTime;
-
     private Queue<Runnable> renderqueue;
-
     private BoardViewStateListener listener;
-
     private BoardIterator boardIterator;
-
     private boolean autoFollow;
 
     private static GLCapabilities getCapabilities() {
@@ -83,29 +79,17 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
      */
     public BoardView(Game game) {
         super(getCapabilities());
-
         startTime = System.currentTimeMillis();
-
         this.game = game;
-
-        boardIterator = new BoardIterator(game.getHistory(), game.getBoard());
-
+        boardIterator = new BoardIterator(game.getHistory(), game.getGameLogic(), game.getBoard().size);
         renderqueue = new LinkedList<>();
-
         game.addListener(this);
-
         this.setPreferredSize(new Dimension(500,500) );
-
         this.addMouseListener(this);
-
         addGLEventListener(new EventHandler());
-
         setVisible(true);
-
         autoFollow = true;
-
         animator = new Animator(this);
-
         animator.start();
     }
 
@@ -129,12 +113,20 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                 if(canPlay) {
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
-                        for(BoardIndex index :
-                                getCurrentBoard().getPossibleMoves(game.getNextPlayerID(
-                                        game.getHistory().getBoardCommand(boardIterator.getPos()).playerID
-                                ))) {
+
+                        Set<BoardIndex> validMoves = (
+                            game.getGameLogic()
+                                .getValidMoves(
+                                    game.getNextPlayerID (
+                                        game.getHistory()
+                                            .getBoardCommand(boardIterator.getPos()).playerID
+                                    ),
+                                    boardIterator.board
+                                )
+                        );
+
+                        for(BoardIndex index : validMoves)
                             board.highlightAt(index, POSSIBLE_MOVES_COLOR);
-                        }
                     }
                     else if(highlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
                         // TODO
@@ -142,9 +134,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
                     BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
 
-                    if (lastMove instanceof MoveCommand) {
+                    if(lastMove instanceof MoveCommand)
                         board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
-                    }
                 }
             }
         });
@@ -225,7 +216,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     public void onAnimationStepDone(Board3D board) {
         // keep our board iterator synced
         boardIterator.next();
-
         listener.onBoardStateChanged(this);
     }
 

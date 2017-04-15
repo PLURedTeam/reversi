@@ -275,7 +275,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
             currentBoardUpdate = null;
-
             done = true;
 
             for(Board3DListener listener : listeners) {

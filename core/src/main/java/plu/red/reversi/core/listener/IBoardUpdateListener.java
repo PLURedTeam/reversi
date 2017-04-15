@@ -5,11 +5,6 @@ import java.util.Collection;
 import plu.red.reversi.core.game.BoardIndex;
 
 /**
- * Created by daniel on 4/6/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
-/**
  * In order to facilitate board updates in a way that allows for better queueing/state management,
  */
 public interface IBoardUpdateListener {
@@ -24,7 +19,7 @@ public interface IBoardUpdateListener {
      * Sending tile updates in this way is useful for animation queueing on a GUI.
      *
      * @param origin The index of the board where a piece has been set to a new value
-     * @param playerId the new value of the piece at BoardIndex (could be -1 to indicate the piece was removed)
+     * @param playerId The new value of the piece at BoardIndex (could be -1 to indicate the piece was removed)
      * @param updated A collection of tiles which have been updated to match origin as a result of the change at origin
      */
     void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated);
