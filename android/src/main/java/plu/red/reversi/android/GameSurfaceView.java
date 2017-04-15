@@ -714,6 +714,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
             PipelineDefinition def = new PipelineDefinition();
 
+            def.isES = true;
             def.directionalLightCount = 2;
 
             VertexShader vs = new SimpleGLVertexShader(def);
