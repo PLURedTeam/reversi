@@ -32,6 +32,7 @@ public class Board {
         }
     }
 
+
     /**
      * Copy Constructor. Constructs a new Board object that is a copy of an existing Board object.
      *
@@ -48,6 +49,7 @@ public class Board {
 
         // Can't copy the scoreCache because of ConcurrentModificationExceptions
     }
+
 
     /**
      * Finds the value at a specific place of the board
@@ -77,15 +79,27 @@ public class Board {
         return sum;
     }
 
+
     /**
      * Used to set a piece on the board. Do this through the Board's GameLogic class
      * if this board has been attached to one.
      * @param c Command specifying a location and its new player value.
      */
     public void apply(SetCommand c) {
-        //set the tile
-        board[c.position.row][c.position.column] = c.playerID;
+        apply(c.position, c.playerID);
     }
+
+
+    /**
+     * Used to set a piece on the board. Do this through the Board's GameLogic class
+     * if this board has been attached to one.
+     * @param index Location on the board to change
+     * @param value Value to set the location to
+     */
+    public void apply(BoardIndex index, int value) {
+        board[index.row][index.column] = value;
+    }
+
 
     /**
      * Apply multiple commands at once.
@@ -93,6 +107,16 @@ public class Board {
      */
     public void applyAll(Collection<SetCommand> commands) {
         for(SetCommand c : commands) apply(c);
+    }
+
+
+    /**
+     * Set the value for multiple indices at once.
+     * @param indices Places to change the value of.
+     * @param value Value to change them to.
+     */
+    public void applyAll(Collection<BoardIndex> indices, int value) {
+        for(BoardIndex index : indices) apply(index, value);
     }
 
 

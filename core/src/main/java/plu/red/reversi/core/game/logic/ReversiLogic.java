@@ -5,6 +5,8 @@ import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
+import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -61,7 +63,13 @@ public class ReversiLogic extends GameLogic {
             apply(new SetCommand(command.playerID, index), board, false, false);
         }
 
-        if(notify) updateBoardListeners(command.position, command.playerID, indexes);
+        if(notify) {
+            BoardUpdate update = new BoardUpdate();
+            update.player = command.playerID;
+            update.flipped = indexes;
+            update.added.add(command.position);
+            updateBoardListeners(update);
+        }
         if(record) game.getHistory().addCommand(command);
 
         return this;

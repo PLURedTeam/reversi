@@ -7,6 +7,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
+import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -17,7 +18,7 @@ import java.util.*;
  *
  * This is designed as a semi-singleton class, it has to have instances to support inheritance,
  * but you should not need to construct GameLogic class except at the beginning of a new game.
- * This class will update histroy with new changes, and update listeners as needed. Pay
+ * This class will update history with new changes, and update listeners as needed. Pay
  * attention to the defaults, and how it will automatically reference Game.
  *
  * This will hold a reference to board. All modifications to board (after initialization)
@@ -76,14 +77,12 @@ public abstract class GameLogic {
     /**
      * Calls update on all the board listeners...
      * @see IBoardUpdateListener
-     * @param origin The index of the board where a piece has been set to a new value
-     * @param playerId The new value of the piece at BoardIndex (could be -1 to indicate the piece was removed)
-     * @param update A collection of tiles which have been updated to match origin as a result of the change at origin
+     * @see BoardUpdate
      * @return This object for chaining.
      */
-    protected final GameLogic updateBoardListeners(BoardIndex origin, int playerId, Collection<BoardIndex> update) {
+    protected final GameLogic updateBoardListeners(BoardUpdate update) {
         for (IBoardUpdateListener i : boardUpdateListeners)
-            i.onBoardUpdate(origin, playerId, update);
+            i.onBoardUpdate(update);
 
         return this;
     }
@@ -166,7 +165,13 @@ public abstract class GameLogic {
      */
     public final GameLogic apply(SetCommand command, Board board, boolean notify, boolean record) {
         board.apply(command);
-        if(notify) updateBoardListeners(command.position, command.playerID, new LinkedList<>());
+
+        if(notify) {
+            BoardUpdate update = new BoardUpdate();
+            update.player = command.playerID;
+            update.added.add(command.position);
+            updateBoardListeners(update);
+        }
         if(record) game.getHistory().addCommand(command);
 
         return this;

@@ -1,6 +1,8 @@
 package plu.red.reversi.core.listener;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import plu.red.reversi.core.game.BoardIndex;
 
@@ -18,11 +20,10 @@ public interface IBoardUpdateListener {
      *
      * Sending tile updates in this way is useful for animation queueing on a GUI.
      *
-     * @param origin The index of the board where a piece has been set to a new value
-     * @param playerId The new value of the piece at BoardIndex (could be -1 to indicate the piece was removed)
-     * @param updated A collection of tiles which have been updated to match origin as a result of the change at origin
+     * @param update Information about the changes made.
+     * @see BoardUpdate
      */
-    void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated);
+    void onBoardUpdate(BoardUpdate update);
 
     /**
      * Called by Board when the state has been altered so dramatically that all board contents should
@@ -33,4 +34,39 @@ public interface IBoardUpdateListener {
      *
      */
     void onBoardRefresh();
+
+
+    /**
+     * Board update structure which contains information relevent to onBoardUpdate calls.
+     */
+    public static class BoardUpdate {
+        /// Player that tiles will be set to. (the new player id)
+        public int player;
+        /// New tiles which are put onto the board.
+        public Collection<BoardIndex> added = new LinkedList<>();
+        /// Tiles which change to the new player value.
+        public Collection<BoardIndex> flipped = new LinkedList<>();
+        /// Pieces which are taken off of the board.
+        public Collection<BoardIndex> removed = new LinkedList<>();
+        /// Ordered list of pieces which change position.
+        public List<Jump> jumped = new LinkedList<>();
+
+        public BoardUpdate() {}
+
+        /**
+         * Basic copy constructor. Not a deep copy.
+         */
+        public BoardUpdate(BoardUpdate other) {
+            player = other.player;
+            added = other.added;
+            flipped = other.flipped;
+            removed = other.removed;
+            jumped = other.jumped;
+        }
+
+        public static class Jump {
+            public BoardIndex from;
+            public BoardIndex to;
+        }
+    }
 }

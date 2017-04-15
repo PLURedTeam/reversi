@@ -24,12 +24,9 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.util.Color;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
 
 /**
  * Represents a board of game pieces, a square of the given size in the constructor. These pieces can be
@@ -373,11 +370,11 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * Apply an update to the board. If multiple updates have already been provided, then the update
      * will be added to a queue and executed later. Order matters in this function call!
      *
-     * @param origin the piece which is to be set by this board update
-     * @param playerId the player which is playing the new piece to be set
-     * @param updated the pieces which will be changed to match the specified playerId as a result of the new origin.
+     * @param update Information about the update
+     * @see IBoardUpdateListener.BoardUpdate
      */
-    public void animBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+    public void animBoardUpdate(IBoardUpdateListener.BoardUpdate update) {
+        //TODO: handle all of the update types
         int triggerTime = getLastTick();
 
         if(boardUpdates.peekLast() != null)
@@ -385,10 +382,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         else if(currentBoardUpdate != null)
             triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
 
-        if(updated == null)
-            updated = new ArrayList<BoardIndex>();
-
-        boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
+        boardUpdates.add(new BoardUpdate(update, triggerTime));
     }
 
     /**
@@ -399,7 +393,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         boardUpdates.clear();
 
         if(currentBoardUpdate != null) {
-            for(BoardIndex index : currentBoardUpdate.updates)
+            for(BoardIndex index : currentBoardUpdate.flipped)
                 pieces[indexFromCoord(toBoardCoords(index, size), size)].clearAnimations();
 
             currentBoardUpdate = null;
@@ -568,24 +562,17 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * which is important for animation queueing.
      *
      */
-    private class BoardUpdate {
-        public BoardIndex origin;
-        public int playerId;
-        public Collection<BoardIndex> updates;
-
+    private class BoardUpdate extends IBoardUpdateListener.BoardUpdate {
         public int triggerTick;
-
         public int duration;
 
-        public BoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updates, int triggerTick) {
-            this.origin = origin;
-            this.playerId = playerId;
-            this.updates = updates;
+        public BoardUpdate(IBoardUpdateListener.BoardUpdate update, int triggerTick) {
+            super(update);
             this.triggerTick = triggerTick;
 
             duration = 0;
 
-            for(BoardIndex idx : updates)
+            for(BoardIndex idx : flipped)
                 duration = Math.max(duration, delayForPiece(idx) + Piece3D.ANIMATION_FLIP_DURATION);
         }
 
@@ -598,6 +585,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             final float POWER = 1.3f;
             final int START_DELAY = 20; // in ticks
 
+            final BoardIndex origin = added.iterator().next();
             return (int)(Math.pow(Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1), POWER) * START_DELAY);
         }
 
@@ -605,14 +593,15 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
          * Run the animation on the board
          */
         private void dispatch() {
-            setPiece(origin, playerId);
+            final BoardIndex origin = added.iterator().next();
+            setPiece(origin, player);
 
-            for(BoardIndex index : updates) {
+            for(BoardIndex index : flipped) {
                 Vector2ic coords = toBoardCoords(index, size);
 
                 int i = indexFromCoord(coords, size);
 
-                boolean flipped = pieces[0].getFlippedColor() == game.getPlayer(playerId).getColor();
+                boolean flipped = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
 
                 // flips are delayed dramatically (see the power delay function above)
                 pieces[i].animateFlip(flipped, getLastTick() + delayForPiece(index));
