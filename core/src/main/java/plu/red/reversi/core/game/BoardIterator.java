@@ -17,12 +17,12 @@ public class BoardIterator {
      * Constructor
      * @param h history
      * @param l logic
-     * @param b board
+     * @param boardsize Size of the board
      */
-    public BoardIterator(History h, GameLogic l, Board b){
+    public BoardIterator(History h, GameLogic l, int boardsize){
         hist = h;
         logic = l;
-        board = b;
+        board = new Board(boardsize);
         pos = 0;
     }
 
@@ -33,7 +33,7 @@ public class BoardIterator {
     public void goTo(int i){
         pos = i;
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(i+1), board, true, false);
+        logic.initBoard(hist.getMoveCommandsUntil(i+1), board, false, false);
     }
 
     /**
@@ -42,7 +42,7 @@ public class BoardIterator {
      */
     public BoardIterator previous(){
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(pos), board, true, false);
+        logic.initBoard(hist.getMoveCommandsUntil(pos), board, false, false);
         pos--;
         return this;
     }
@@ -54,9 +54,9 @@ public class BoardIterator {
     public BoardIterator next() {
         BoardCommand c = hist.getBoardCommand(++pos);
         if(c instanceof SetCommand)
-            logic.apply((SetCommand)c, board, true, false);
+            logic.apply((SetCommand)c, board, false, false);
         else
-            logic.play((MoveCommand)c, board, true, false);
+            logic.play((MoveCommand)c, board, false, false);
         return this;
     }
 
@@ -64,9 +64,9 @@ public class BoardIterator {
      * Applies all the moves in the history to the board
      * @return the BoardIterator at the index with all commands applied
      */
-    public BoardIterator end(){
+    public BoardIterator end() {
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(hist.getNumBoardCommands()), board, true, false);
+        logic.initBoard(hist.getMoveCommandsUntil(hist.getNumBoardCommands()), board, false, false);
         return this;
     }
 

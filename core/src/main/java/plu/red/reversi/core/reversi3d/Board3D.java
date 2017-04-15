@@ -274,10 +274,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
             currentBoardUpdate = null;
-
             done = true;
-
-            System.out.println("Informing listeners");
 
             for(Board3DListener listener : listeners) {
                 listener.onAnimationStepDone(this);
@@ -285,7 +282,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
 
         if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
-            System.out.println("Poll for board update: " + boardUpdates.size());
             currentBoardUpdate = boardUpdates.pop();
             currentBoardUpdate.dispatch();
 

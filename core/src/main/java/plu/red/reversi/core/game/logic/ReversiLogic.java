@@ -50,9 +50,9 @@ public class ReversiLogic extends GameLogic {
             throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
 
         //set tiles
-        apply(new SetCommand(command), board, notify, record);
+        apply(new SetCommand(command), board, false, false);
         for(BoardIndex index : indexes) {
-            apply(new SetCommand(command.playerID, index), board, notify, record);
+            apply(new SetCommand(command.playerID, index), board, false, false);
         }
 
         if(notify) updateBoardListeners(command.position, command.playerID, indexes);

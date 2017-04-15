@@ -30,6 +30,7 @@ import plu.red.reversi.core.reversi3d.Camera;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -67,7 +68,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         super(new GLCapabilities(GLProfile.get(GLProfile.GL3)));
         startTime = System.currentTimeMillis();
         this.game = game;
-        boardIterator = new BoardIterator(game.getHistory(), game.getGameLogic(), game.getBoard());
+        boardIterator = new BoardIterator(game.getHistory(), game.getGameLogic(), game.getBoard().size);
         renderqueue = new LinkedList<>();
         game.addListener(this);
         this.setPreferredSize(new Dimension(500,500) );
@@ -197,9 +198,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     @Override
     public void onAnimationStepDone(Board3D board) {
         // keep our board iterator synced
-        System.out.println("Board iterator inc");
         boardIterator.next();
-
         listener.onBoardStateChanged(this);
     }
 
