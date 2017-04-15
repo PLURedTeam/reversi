@@ -9,6 +9,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
@@ -160,10 +161,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(sectionIndex < 6) {
 
-            color = new Vector4f(0.2f, 0.2f, 0.2f, 1.0f);
+            color = new Vector4f(0.15f, 0.15f, 0.15f, 1.0f);
         }
         else {
-            color = new Vector4f(0.2f, 0.7f, 0.2f, 1.0f);
+            color = new Vector4f(0.1f, 0.55f, 0.1f, 1.0f);
         }
 
         return new Vector4f[]{
@@ -348,6 +349,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             triggerTime = boardUpdates.peekLast().triggerTick + boardUpdates.peekLast().duration + ANIMATION_QUEUE_DELAY;
         else if(currentBoardUpdate != null)
             triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
+
+        if(updated == null)
+            updated = new ArrayList<BoardIndex>();
 
         boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
     }

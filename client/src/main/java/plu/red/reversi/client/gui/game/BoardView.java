@@ -64,13 +64,25 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     private boolean autoFollow;
 
+    private static GLCapabilities getCapabilities() {
+
+        GLProfile profile = GLProfile.get(GLProfile.GL3);
+
+        GLCapabilities caps = new GLCapabilities(profile);
+
+        caps.setSampleBuffers(true);
+        caps.setNumSamples(4);
+
+        return caps;
+    }
+
     /**
      * Constructs a new BoardView.
      *
      * @param game Game object to pull data from
      */
     public BoardView(Game game) {
-        super(new GLCapabilities(GLProfile.get(GLProfile.GL3)));
+        super(getCapabilities());
 
         startTime = System.currentTimeMillis();
 
