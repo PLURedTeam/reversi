@@ -17,7 +17,7 @@ public class SessionHandler implements Runnable, INetworkListener {
     private Client client;
     private User user;
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
-    private boolean loggedIn;
+    private boolean loggedIn = true;
 
     /**
      * Constucts a new SessionHandler instance

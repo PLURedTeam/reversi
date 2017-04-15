@@ -5,15 +5,12 @@ import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.listener.IChatListener;
-import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import java.util.HashSet;
 
 /**
  * Created by Andrew on 4/13/2017.
@@ -23,7 +20,7 @@ public class ChatHandler implements Runnable, INetworkListener {
     //fields
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
     private WebUtilities util;
-    private boolean loggedIn;
+    private boolean loggedIn = true;
 
     /**
      * Default Constructor

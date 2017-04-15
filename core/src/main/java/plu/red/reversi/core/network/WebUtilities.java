@@ -3,6 +3,7 @@ package plu.red.reversi.core.network;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
@@ -76,6 +77,7 @@ public class WebUtilities {
                 user = response.readEntity(User.class);
                 sessionID = user.getSessionID();
                 loggedIn = true;
+                plu.red.reversi.core.Client.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                 //Start the session thread
                 Thread session = new Thread(new SessionHandler(this, client, user));
@@ -253,6 +255,17 @@ public class WebUtilities {
     public boolean loggedIn() {
         return loggedIn;
     }//loggedIn
+
+    /**
+     * Returns the User object when the user is loggedIn
+     * @return the User object
+     */
+    public User getUser() {
+        if(loggedIn)
+            return user;
+        else
+            return null;
+    }//getUser
 
 
     /**

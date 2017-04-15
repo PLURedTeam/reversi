@@ -4,6 +4,7 @@ import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Andrew on 3/22/2017.
@@ -13,13 +14,13 @@ public class UserManager {
 
     public static UserManager INSTANCE = new UserManager();
 
-    private HashMap<String, User> onlineUsers;
+    private ConcurrentHashMap<String, User> onlineUsers;
 
     /**
      * Constructor for the UserManager
      */
     public UserManager() {
-        onlineUsers = new HashMap<String, User>();
+        onlineUsers = new ConcurrentHashMap<String, User>();
     }//constructor
 
     /**
