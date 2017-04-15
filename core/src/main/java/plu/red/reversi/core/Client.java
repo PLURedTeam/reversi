@@ -15,6 +15,23 @@ import plu.red.reversi.core.lobby.Lobby;
  */
 public class Client {
 
+    // not public final because it needs to be initialized
+    private static Client INSTANCE = null;
+
+    /**
+     * Initialize the Client Controller with a IMainGUI reference.
+     *
+     * @param gui IMainGUI reference to init with
+     */
+    public static void init(IMainGUI gui) { INSTANCE = new Client(gui); }
+
+    /**
+     * Gets the global instance of the Client controller.
+     *
+     * @return Global Client instance
+     */
+    public static Client getInstance() { return INSTANCE; }
+
     public final IMainGUI gui;
 
     protected Coordinator core = null;

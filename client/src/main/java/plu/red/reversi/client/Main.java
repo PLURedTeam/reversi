@@ -25,7 +25,7 @@ public class Main {
         ts.init();
 
         // Create the Client
-        client = new Client(new MainWindow());
+        Client.init(new MainWindow());
 
         // looper call (feel free to move/adjust)
         // but recall that looper is actually used to call the API because it is necessary by android
