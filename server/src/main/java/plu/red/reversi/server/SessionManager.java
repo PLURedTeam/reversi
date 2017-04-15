@@ -56,7 +56,7 @@ public class SessionManager implements Runnable {
 
         while(true) {
             for(Integer sessionID: sessions.keySet()) {
-                if(sessions.get(sessionID) < System.currentTimeMillis() - 30000) {
+                if(sessions.get(sessionID) < System.currentTimeMillis() - 65000) {
                     sessions.remove(sessionID);
                     UserManager.INSTANCE.timedOut(sessionID);
                     System.out.println("Removing Session: " + sessionID);

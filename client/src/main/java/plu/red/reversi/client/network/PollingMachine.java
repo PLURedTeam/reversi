@@ -1,8 +1,13 @@
 package plu.red.reversi.client.network;
 
+import org.glassfish.jersey.media.sse.EventInput;
+import org.glassfish.jersey.media.sse.InboundEvent;
+import org.glassfish.jersey.media.sse.SseFeature;
+import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -62,8 +67,29 @@ public class PollingMachine {
     private class ChatPoll implements Runnable {
         public void run() {
 
+            System.out.println("The chat poll is running");
 
 
+            Client chatClient = ClientBuilder.newBuilder().register(SseFeature.class).build();
+            WebTarget target = chatClient.target(baseURI + "chat/global");
+
+            EventInput eventInput = target.request().get(EventInput.class);
+
+            System.out.println("Before the fucking loop");
+            System.out.println("EventInput: " + eventInput.isClosed());
+
+            while(!eventInput.isClosed()) {
+                System.out.println("I am in the loop");
+
+                final InboundEvent inboundEvent = eventInput.read();
+
+                System.out.println("I got a god damn message");
+
+                if(inboundEvent == null) break;
+                System.out.println("Got " + inboundEvent.readData(String.class) + " from broadcast");
+            }//while
+
+            System.out.println("OUT OF THE LOOP");
 
 
 

@@ -1,6 +1,10 @@
 package plu.red.reversi.client.network;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
@@ -14,6 +18,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by Andrew on 3/15/2017.
@@ -35,6 +40,7 @@ public class WebUtilities {
     public WebUtilities() {
         //create the client
         client = ClientBuilder.newClient();
+
     }//webUtilities
 
     /**
@@ -62,7 +68,7 @@ public class WebUtilities {
                             "That username and/or password was incorrect.",
                             "Login Error", 2);
                     return false;
-                }
+                }//if
 
                 JOptionPane.showMessageDialog(null,
                         "Successfully logged in.",
@@ -72,7 +78,13 @@ public class WebUtilities {
                 sessionID = user.getSessionID();
                 loggedIn = true;
 
-                new PollingMachine(this, client, user);
+                //Start the session thread
+                Thread session = new Thread(new SessionHandler(this, client, user));
+                session.start();
+
+                Thread chat = new Thread(new ChatHandler(this));
+                chat.start();
+
                 return true;
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null,
@@ -106,6 +118,8 @@ public class WebUtilities {
         user.setUsername(null);
         user.setPassword(null);
         user.setSessionID(-1);
+
+        notifyLoggedInListeners(loggedIn);
 
         return true;
 
@@ -246,14 +260,59 @@ public class WebUtilities {
      * @param m the message to send to the server
      */
     public void sendChat(ChatMessage m) {
-
+        JSONObject message = null;
+        try {message = m.toJSON();}
+        catch (JSONException e) {e.printStackTrace();}
         WebTarget target = client.target(baseURI + "chat/global");
-        Response response = target.request().post(Entity.json(m));
-
-
-        System.out.println(response.readEntity(String.class));
-
+        Response response = target.request().post(Entity.text(message.toString()));
     }//sendChat
+
+
+
+
+    // ****************
+    //  Listener Logic
+    // ****************
+
+    // A Set of all available Listeners
+    protected final HashSet<IListener> listenerSet = new HashSet<>();
+
+    /**
+     * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
+     * Coordinator will receive signals via their individual methods when certain actions happen, dependending on the
+     * specific <code>listener</code>.
+     *
+     * @param listener Object that implements an extension of IListener
+     */
+    public void addListener(IListener listener) {
+        listenerSet.add(listener);
+    }
+
+    /**
+     * Unregisters a specified <code>listener</code> from this Coordinator. The <code>listener</code> object that is
+     * unregistered will no longer receive signals when events happen. If the given <code>listener</code> object is
+     * not currently registered to this Coordinator, nothing happens.
+     *
+     * @param listener Object that implements an extension of IListener
+     */
+    public void removeListener(IListener listener) {
+        listenerSet.remove(listener);
+    }
+
+    /**
+     * Notifies that a the user has logged out of the server. Iterates through and tells every INetworkListener
+     * that has been registered to this handler that the loggedIn status has changed.
+     *
+     * @param loggedIn If the user is logged in to the server
+     */
+    protected final void notifyLoggedInListeners(boolean loggedIn) {
+        for(IListener listener : listenerSet)
+            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
+    }//notifyChatListeners
+
+
+
+
 
 
 

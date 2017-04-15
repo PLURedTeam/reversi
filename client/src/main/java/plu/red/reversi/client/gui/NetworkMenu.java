@@ -53,7 +53,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
         this.add(logout);
 
         //Create the Create an account menu item
-        createUser = new JMenuItem("Create an online account" );
+        createUser = new JMenuItem("Create an online account");
         createUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_MASK));
         createUser.addActionListener(this);
         this.add(createUser);
@@ -81,22 +81,23 @@ public class NetworkMenu extends JMenu implements ActionListener {
     /**
      * Responds to the users action of clicking a menu item
      * in the network menu and calls the appropriate method
+     *
      * @param e the menu item that was clicked
      */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == createUser) {
             createUser();
-        } else if(e.getSource() == deleteUser) {
+        } else if (e.getSource() == deleteUser) {
             deleteUser();
-        } else if(e.getSource() == seeRanking) {
+        } else if (e.getSource() == seeRanking) {
             seeRanking();
-        } else if(e.getSource() == login) {
+        } else if (e.getSource() == login) {
             login();
-        } else if(e.getSource() == onlineUsers) {
+        } else if (e.getSource() == onlineUsers) {
             getOnlineUsers();
-        } else if(e.getSource() == logout) {
+        } else if (e.getSource() == logout) {
             logout();
-        }//logout
+        }//if
     }//actionPerformed
 
     /**
@@ -105,11 +106,11 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private void createUser() {
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
-        Object[] message = { "Username:", username, "Password:", password };
+        Object[] message = {"Username:", username, "Password:", password};
 
         int option = JOptionPane.showConfirmDialog(gui, message, "Create an Online Account", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            WebUtilities.INSTANCE.createUser(username.getText(),password.getText());
+            WebUtilities.INSTANCE.createUser(username.getText(), password.getText());
         }//if
     }//createUser
 
@@ -118,7 +119,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
      */
     private void login() {
 
-        if(!WebUtilities.INSTANCE.loggedIn()) {
+        if (!WebUtilities.INSTANCE.loggedIn()) {
 
             JTextField username = new JTextField();
             JTextField password = new JPasswordField();
@@ -126,18 +127,10 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
             int option = JOptionPane.showConfirmDialog(gui, message, "Login", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
-
                 //Call the server to check for valid login credentials
                 boolean loggedIn = WebUtilities.INSTANCE.login(username.getText(), password.getText());
+            }//if
 
-                if (loggedIn) {
-                    System.out.println("Login successful");
-                } else {
-                    System.out.println("login failed");
-                }
-            } else {
-                System.out.println("Login canceled");
-            }//else
         } else {
             JOptionPane.showMessageDialog(null,
                     "You are logged in. You must logout first before you can log in to another account.",
@@ -150,18 +143,17 @@ public class NetworkMenu extends JMenu implements ActionListener {
     }//logout
 
 
-
     /**
      * Calls the server to delete the user from the server
      */
     private void deleteUser() {
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
-        Object[] message = { "Username:", username, "Password:", password };
+        Object[] message = {"Username:", username, "Password:", password};
 
         int option = JOptionPane.showConfirmDialog(gui, message, "Delete Your Online Account", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            WebUtilities.INSTANCE.deleteUser(username.getText(),password.getText());
+            WebUtilities.INSTANCE.deleteUser(username.getText(), password.getText());
         }//if
     }//deleteUser
 
@@ -179,7 +171,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
         //Just for testing
         ArrayList<User> users = WebUtilities.INSTANCE.getOnlineUsers();
 
-        if(users != null) {
+        if (users != null) {
 
             Object[][] rows = new Object[users.size()][3];
 
@@ -199,5 +191,4 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
         }//else
     }//getOnlineUsers
-
 }//NetworkMenu

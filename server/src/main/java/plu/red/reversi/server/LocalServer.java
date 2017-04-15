@@ -2,6 +2,7 @@ package plu.red.reversi.server;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.sse.SseFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.server.Chat.ChatHandler;
@@ -25,7 +26,7 @@ public class LocalServer {
      * @return the HttpServer Object
      */
     public static HttpServer startServer() {
-        final ResourceConfig rc = new ResourceConfig().packages("plu.red.reversi.server.endpoints");
+        final ResourceConfig rc = new ResourceConfig(SseFeature.class).packages("plu.red.reversi.server.endpoints");
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
     }//startServer
 

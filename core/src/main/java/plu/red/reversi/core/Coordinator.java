@@ -54,6 +54,17 @@ public abstract class Coordinator {
         }
     }
 
+    /**
+     * Notifies that a the user has logged out of the server. Iterates through and tells every INetworkListener
+     * that has been registered to this handler that the loggedIn status has changed.
+     *
+     * @param loggedIn If the user is logged in to the server
+     */
+    public final void notifyLoggedInListeners(boolean loggedIn) {
+        for(IListener listener : listenerSet)
+            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
+    }//notifyChatListeners
+
 
 
     // ***************
