@@ -1,5 +1,6 @@
-package plu.red.reversi.client.network;
+package plu.red.reversi.core.network;
 
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.User;
 
@@ -29,7 +30,7 @@ public class SessionHandler implements Runnable, INetworkListener {
         this.util = util;
         this.client = client;
         this.user = user;
-        util.addListener(this);
+        Coordinator.addListenerStatic(this);
     }//constructor
 
     /**

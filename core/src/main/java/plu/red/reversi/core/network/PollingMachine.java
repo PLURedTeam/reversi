@@ -1,4 +1,4 @@
-package plu.red.reversi.client.network;
+package plu.red.reversi.core.network;
 
 import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;

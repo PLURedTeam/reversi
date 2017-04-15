@@ -1,9 +1,10 @@
-package plu.red.reversi.client.network;
+package plu.red.reversi.core.network;
 
 import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
+import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.core.listener.INetworkListener;
@@ -29,7 +30,7 @@ public class ChatHandler implements Runnable, INetworkListener {
      */
     public ChatHandler(WebUtilities u) {
         util = u;
-        u.addListener(this);
+        Coordinator.addListenerStatic(this);
     }//constructor
 
     /**
@@ -56,7 +57,7 @@ public class ChatHandler implements Runnable, INetworkListener {
                 continue; //Don't notify listeners
             }//catch
 
-            notifyChatListeners(message);
+            plu.red.reversi.core.Client.getInstance().getCore().notifyChatListeners(message);
             System.out.println("Got [" + message.message + "] from broadcast");
         }//while
 
@@ -68,49 +69,6 @@ public class ChatHandler implements Runnable, INetworkListener {
         this.loggedIn = loggedIn;
     }//onLogout
 
-
-
-
-
-    // ****************
-    //  Listener Logic
-    // ****************
-
-    // A Set of all available Listeners
-    protected final HashSet<IListener> listenerSet = new HashSet<>();
-
-    /**
-     * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
-     * Coordinator will receive signals via their individual methods when certain actions happen, dependending on the
-     * specific <code>listener</code>.
-     *
-     * @param listener Object that implements an extension of IListener
-     */
-    public void addListener(IListener listener) {
-        listenerSet.add(listener);
-    }
-
-    /**
-     * Unregisters a specified <code>listener</code> from this Coordinator. The <code>listener</code> object that is
-     * unregistered will no longer receive signals when events happen. If the given <code>listener</code> object is
-     * not currently registered to this Coordinator, nothing happens.
-     *
-     * @param listener Object that implements an extension of IListener
-     */
-    public void removeListener(IListener listener) {
-        listenerSet.remove(listener);
-    }
-
-    /**
-     * Notifies that a ChatMessage has been received. Iterates through and tells every IChatListener that has been
-     * registered to this handler that a ChatMessage has been received.
-     *
-     * @param message ChatMessage received from the server
-     */
-    protected final void notifyChatListeners(ChatMessage message) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof IChatListener) ((IChatListener)listener).onChat(message);
-    }//notifyChatListeners
 
 
 

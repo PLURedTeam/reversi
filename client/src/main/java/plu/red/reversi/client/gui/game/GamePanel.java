@@ -61,6 +61,7 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
 
         historyPanel = new GameHistoryPanel(game);
         chatPanel = new ChatPanel(ChatMessage.Channel.game(""+game.getGameID()));
+        game.addListener(chatPanel);
 
         // The board panel goes in the center
         this.add(boardPanel, BorderLayout.CENTER);

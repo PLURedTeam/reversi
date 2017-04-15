@@ -1,4 +1,4 @@
-package plu.red.reversi.client.network;
+package plu.red.reversi.core.network;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -13,7 +13,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
@@ -119,7 +118,8 @@ public class WebUtilities {
         user.setPassword(null);
         user.setSessionID(-1);
 
-        notifyLoggedInListeners(loggedIn);
+        // Lol full package name because network Client
+        plu.red.reversi.core.Client.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
         return true;
 
@@ -266,54 +266,5 @@ public class WebUtilities {
         WebTarget target = client.target(baseURI + "chat/global");
         Response response = target.request().post(Entity.text(message.toString()));
     }//sendChat
-
-
-
-
-    // ****************
-    //  Listener Logic
-    // ****************
-
-    // A Set of all available Listeners
-    protected final HashSet<IListener> listenerSet = new HashSet<>();
-
-    /**
-     * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
-     * Coordinator will receive signals via their individual methods when certain actions happen, dependending on the
-     * specific <code>listener</code>.
-     *
-     * @param listener Object that implements an extension of IListener
-     */
-    public void addListener(IListener listener) {
-        listenerSet.add(listener);
-    }
-
-    /**
-     * Unregisters a specified <code>listener</code> from this Coordinator. The <code>listener</code> object that is
-     * unregistered will no longer receive signals when events happen. If the given <code>listener</code> object is
-     * not currently registered to this Coordinator, nothing happens.
-     *
-     * @param listener Object that implements an extension of IListener
-     */
-    public void removeListener(IListener listener) {
-        listenerSet.remove(listener);
-    }
-
-    /**
-     * Notifies that a the user has logged out of the server. Iterates through and tells every INetworkListener
-     * that has been registered to this handler that the loggedIn status has changed.
-     *
-     * @param loggedIn If the user is logged in to the server
-     */
-    protected final void notifyLoggedInListeners(boolean loggedIn) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
-    }//notifyChatListeners
-
-
-
-
-
-
 
 }//webUtilities

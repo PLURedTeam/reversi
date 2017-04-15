@@ -104,6 +104,7 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
 
         // Create the Chat Panel
         panelChat = new ChatPanel(ChatMessage.Channel.LOBBY_PREFIX);
+        lobby.addListener(panelChat);
         this.add(panelChat, BorderLayout.SOUTH);
 
         // Create the Player Slots

@@ -1,8 +1,9 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.network.WebUtilities;
 
 import java.util.HashSet;
 
@@ -18,8 +19,11 @@ public abstract class Coordinator {
     //  Listener Logic
     // ****************
 
-    // A Set of all available Listeners
+    // A Set of all available Listeners, persistent on a Coordinator level
     protected final HashSet<IListener> listenerSet = new HashSet<>();
+
+    // A Set of all available Listeners, persistent on a global level
+    protected static final HashSet<IListener> listenerSetStatic = new HashSet<>();
 
     /**
      * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
@@ -30,6 +34,17 @@ public abstract class Coordinator {
      */
     public void addListener(IListener listener) {
         listenerSet.add(listener);
+    }
+
+    /**
+     * Registers a <code>listener</code> to the global list. All <code>listeners</code> that are registered to the
+     * global list will receive signals whenever any Coordinators send signals. The static list will remain constant
+     * even when Coordinators are swapped out of the main Controller.
+     *
+     * @param listener Object that implements an extension of IListener
+     */
+    public static void addListenerStatic(IListener listener) {
+        listenerSetStatic.add(listener);
     }
 
     /**
@@ -44,15 +59,27 @@ public abstract class Coordinator {
     }
 
     /**
+     * Unregisters a specified <code>listener</code> from the global list. The <code>listener</code> object that is
+     * unregistered will no longer receive signals when events happen. If the given <code>listener</code> object is not
+     * currently registered to the global list, nothing happens.
+     *
+     * @param listener Object that implements an extension of Ilistener
+     */
+    public static void removeListenerStatic(IListener listener) {
+        listenerSetStatic.remove(listener);
+    }
+
+    /**
      * Notifies that a Command has been accepted. Iterates through and tells every ICommandListener that has been
      * registered to this Coordinator that a Command has been validated and accepted.
      *
      * @param cmd Command object that was accepted
      */
     protected final void notifyCommandListeners(Command cmd) {
-        for(IListener listener : listenerSet) {
+        for(IListener listener : listenerSet)
             if(listener instanceof ICommandListener) ((ICommandListener)listener).commandApplied(cmd);
-        }
+        for(IListener listener : listenerSetStatic)
+            if(listener instanceof ICommandListener) ((ICommandListener)listener).commandApplied(cmd);
     }
 
     /**
@@ -64,6 +91,8 @@ public abstract class Coordinator {
     public final void notifyLoggedInListeners(boolean loggedIn) {
         for(IListener listener : listenerSet)
             if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
+        for(IListener listener : listenerSetStatic)
+            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
     }//notifyChatListeners
 
     /* Notifies that a ChatMessage has been received from the server. Iterates through and tells every IChatListener
@@ -72,9 +101,10 @@ public abstract class Coordinator {
      * @param msg ChatMessage object that was received
      */
     public final void notifyChatListeners(ChatMessage msg) {
-        for(IListener listener : listenerSet) {
+        for(IListener listener : listenerSet)
             if(listener instanceof IChatListener) ((IChatListener)listener).onChat(msg);
-        }
+        for(IListener listener : listenerSetStatic)
+            if(listener instanceof IChatListener) ((IChatListener)listener).onChat(msg);
     }
 
 
@@ -100,6 +130,11 @@ public abstract class Coordinator {
             case CLIENTSIDE_ONLY:
             case CLIENT: // Came from the Client; validate it
                 if(!cmd.isValid(this)) return false;
+        }
+
+        if(cmd instanceof ChatCommand && cmd.source == Command.Source.CLIENT) {
+            // Propagate chat command to the Server
+            WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
         }
 
         // Perform the Command's action/s

@@ -1,8 +1,11 @@
 package plu.red.reversi.client.gui.util;
 
 
-import plu.red.reversi.client.network.WebUtilities;
+import plu.red.reversi.core.Client;
+import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.listener.IChatListener;
+import plu.red.reversi.core.listener.INetworkListener;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;
 
@@ -13,7 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class ChatPanel extends JPanel implements KeyListener, ActionListener, IChatListener {
+public class ChatPanel extends JPanel implements KeyListener, ActionListener, IChatListener, INetworkListener {
 
     public final JList<ChatMessage> chatHistoryList;
     public final ChatLog chatLog;
@@ -42,6 +45,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         // Create the Entry Button
         this.chatEntryButton = new JButton("Chat");
         this.chatEntryButton.addActionListener(this);
+        this.chatEntryButton.setEnabled(WebUtilities.INSTANCE.loggedIn());
 
         this.setLayout(new BorderLayout());
         this.add(new JScrollPane(chatHistoryList,
@@ -59,7 +63,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getSource() == chatEntryField && e.getKeyCode() == KeyEvent.VK_ENTER) {
-            chatEntryButton.doClick();
+            if(chatEntryButton.isEnabled()) chatEntryButton.doClick();
         }
     }
 
@@ -73,10 +77,8 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         if(e.getSource() == chatEntryButton) {
             if(chatEntryField.getText().length() > 0) {
                 ChatMessage message = new ChatMessage(ChatMessage.Channel.GLOBAL, "A User", chatEntryField.getText());
-                addChat(message);
-                WebUtilities.INSTANCE.sendChat(message);
                 chatEntryField.setText("");
-
+                Client.getInstance().getCore().acceptCommand(new ChatCommand(message));
             }
         }
     }
@@ -85,6 +87,13 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     public void onChat(ChatMessage message) {
         if(message.channel.equals(channel))
             addChat(message);
+    }
+
+    @Override
+    public void onLogout(boolean loggedIn) {
+        chatEntryButton.setEnabled(loggedIn);
+        this.revalidate();
+        this.repaint();
     }
 
     void addChat(ChatMessage message) {
