@@ -44,6 +44,6 @@ public class MoveCommand extends BoardCommand {
         // Is it this Player's turn and is the position valid on the board
         return controller instanceof Game &&
                 ((Game)controller).getCurrentPlayer().getID() == playerID &&
-                ((Game)controller).getBoard().isValidMove(playerID, position);
+                ((Game)controller).getGameLogic().isValidMove(new MoveCommand(playerID, position));
     }
 }

@@ -25,7 +25,7 @@ public class Board {
 
     /**
      * Registers an IFlipListener that will have signals sent to it when Flips are applied.
-     *
+     * @deprecated Use GameLogic instead
      * @param listener IFlipListener to register
      */
     public void addBoardUpdateListener(IBoardUpdateListener listener) {
@@ -36,6 +36,7 @@ public class Board {
      * Unregisters an existing IFlipListener that has previously been registered. Does nothing if the specified
      * IFlipListener has not previously been registered.
      *
+     * @deprecated Use GameLogic instead
      * @param listener IFlipListener to unregister
      */
     public void removeBoardUpdateListener(IBoardUpdateListener listener) {

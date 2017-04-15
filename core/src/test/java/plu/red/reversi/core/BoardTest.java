@@ -7,6 +7,7 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 
@@ -33,15 +34,6 @@ public class BoardTest {
     public void testEquals() {
         Board b1 = new Board(8);
         Board b2 = new Board(b1);
-        assertEquals(b1, b2);
-
-        GameLogic logic = new ReversiLogic(b1);
-        Collection<SetCommand> setup = logic.getSetupCommands(new int[]{0, 1});
-        b1.applyAll(setup);
-
-        assertNotEquals(b1, b2);
-
-        b2.applyAll(setup);
         assertEquals(b1, b2);
 
         b1.apply(new SetCommand(1, new BoardIndex(2, 4)));

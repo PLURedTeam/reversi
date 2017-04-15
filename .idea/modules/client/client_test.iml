@@ -33,27 +33,27 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-solaris-i586:2.3.2" level="project" />
     <orderEntry type="library" name="Gradle: com.surelogic:promises:4.4.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-amd64:2.3.2" level="project" />
-    <orderEntry type="library" name="Gradle: javax.ws.rs:javax.ws.rs-api:2.0.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-i586:2.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: javax.ws.rs:javax.ws.rs-api:2.0.1" level="project" />
     <orderEntry type="library" name="Gradle: javax.annotation:javax.annotation-api:1.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-aarch64:2.3.2" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.jersey.bundles.repackaged:jersey-guava:2.25.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-armv6:2.3.2" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.hk2:hk2-api:2.5.0-b32" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-armv6:2.3.2" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.hk2.external:javax.inject:2.5.0-b32" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-amd64:2.3.2" level="project" />
-    <orderEntry type="library" name="Gradle: org.glassfish.hk2:hk2-locator:2.5.0-b32" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-armv6:2.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.glassfish.hk2:hk2-locator:2.5.0-b32" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.hk2:osgi-resource-locator:1.0.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-armv6hf:2.3.2" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.hk2:hk2-utils:2.5.0-b32" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-i586:2.3.2" level="project" />
-    <orderEntry type="library" name="Gradle: org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-macosx-universal:2.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.glassfish.hk2.external:aopalliance-repackaged:2.5.0-b32" level="project" />
     <orderEntry type="library" name="Gradle: org.javassist:javassist:3.20.0-GA" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-amd64:2.3.2" level="project" />
-    <orderEntry type="library" name="Gradle: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-i586:2.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-windows-amd64:2.3.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jogamp.jogl:jogl-all:natives-windows-i586:2.3.2" level="project" />
   </component>

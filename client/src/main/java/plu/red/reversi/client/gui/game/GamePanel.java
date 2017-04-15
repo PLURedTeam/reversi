@@ -41,7 +41,7 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
         playerInfoPanel = new PlayerInfoPanel(game);
         game.addListener(playerInfoPanel);
         boardView = new BoardView(game);
-        game.getBoard().addBoardUpdateListener(boardView);
+        game.getGameLogic().addBoardUpdateListener(boardView);
         game.addListener(boardView);
 
         // This panel will preserve the aspect ratio of the component within it

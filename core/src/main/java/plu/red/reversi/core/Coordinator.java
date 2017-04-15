@@ -122,16 +122,6 @@ public abstract class Coordinator {
      * @param gui IMainGUI object that displays for the program
      */
     public Coordinator(IMainGUI gui) {
-        this.gui = gui == null ? new NullGUI() : gui;
+        this.gui = gui == null ? new IMainGUI.NullGUI() : gui;
     }
-
-    // Easiest simplest fix
-    private static class NullGUI implements IMainGUI {
-        @Override public void setClient(Client client) {}
-        @Override public void updateGUIMajor() {}
-        @Override public void updateGUIMinor() {}
-        @Override public String showSaveDialog() { return null; }
-        @Override public String showLoadDialog() { return null; }
-    }
-
 }
