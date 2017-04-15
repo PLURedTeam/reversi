@@ -1,4 +1,4 @@
-package plu.red.reversi.android.reversi3d;
+package plu.red.reversi.core.reversi3d;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
@@ -16,14 +16,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
-import plu.red.reversi.android.graphics.Graphics3D;
-import plu.red.reversi.android.graphics.Pipeline;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
 
 /**
@@ -96,7 +95,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             //addChild(p);
             pieces[i] = p;
 
-            Highlight3D h = (Highlight3D)highlight.clone();
+            Highlight3D h = new Highlight3D(g3d, pipeline);
 
             h.setHeight(0.002f);
 
@@ -109,6 +108,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             //    addChild(h);
             highlights[i] = h;
         }
+
+        // since we have the game
+        // TODO: Remove argument
+        setBoard(game.getBoard());
     }
 
     // TODO: Needs testing (even though this method will probobly never be used)
@@ -253,11 +256,13 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
-    public void highlightAt(BoardIndex index) {
+    public void highlightAt(BoardIndex index, Vector3fc color) {
 
-        Vector2ic rc = toBoardCoords(index, size);
+        int i = indexFromCoord(toBoardCoords(index, size), size);
 
-        addChild(highlights[indexFromCoord(rc, size)]);
+        highlights[i].setColor(color);
+
+        addChild(highlights[i]);
     }
 
     @Override
@@ -271,10 +276,14 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             currentBoardUpdate = null;
 
             done = true;
+
+            for(Board3DListener listener : listeners) {
+                listener.onAnimationStepDone(this);
+            }
         }
 
         if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
-            currentBoardUpdate = boardUpdates.poll();
+            currentBoardUpdate = boardUpdates.pop();
             currentBoardUpdate.dispatch();
 
             // after a board update has been applied, update the cached scores
@@ -343,6 +352,21 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
     }
 
+    public void clearAnimations() {
+        boardUpdates.clear();
+
+        if(currentBoardUpdate != null) {
+            for(BoardIndex index : currentBoardUpdate.updates)
+                pieces[indexFromCoord(toBoardCoords(index, size), size)].clearAnimations();
+
+            currentBoardUpdate = null;
+
+            // technically we just completed an animation step, just earlier htan expected.
+            for(Board3DListener listener : listeners)
+                listener.onAnimationStepDone(this);
+        }
+    }
+
     public void setPiece(Game game, BoardIndex index, int playerId) {
         Player p = game.getPlayer(playerId);
 
@@ -367,9 +391,11 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
-    public void setBoard(Game game) {
+    public void setBoard(Board board) {
 
-        if(game.getBoard().size != size)
+        clearAnimations();
+
+        if(board.size != size)
             throw new InvalidParameterException("Board is not the same size as Board3D");
 
         for(int r = 0;r < size;r++) {
@@ -379,7 +405,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
                 BoardIndex idx = fromBoardCoords(new Vector2i(r, c), size);
 
-                setPiece(game, idx, game.getBoard().at(idx));
+                setPiece(game, idx, board.at(idx));
             }
         }
 
@@ -491,5 +517,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
     public interface Board3DListener {
         void onScoreChange(Board3D board);
         void onAnimationsDone(Board3D board);
+        void onAnimationStepDone(Board3D board);
     }
 }

@@ -1,6 +1,4 @@
-package plu.red.reversi.android.reversi3d;
-
-import android.support.annotation.CallSuper;
+package plu.red.reversi.core.reversi3d;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -9,6 +7,9 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.VertexBufferObject;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -22,17 +23,12 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import plu.red.reversi.android.graphics.Shape;
-import plu.red.reversi.android.graphics.Graphics3D;
-import plu.red.reversi.android.graphics.Pipeline;
-import plu.red.reversi.android.graphics.VertexBufferObject;
-
 /**
  * Created by daniel on 3/20/17.
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
-public abstract class Model3D extends Shape {
+public abstract class Model3D {
 
     // IDs are only required here because of the fact that sortedset requires completely unique objects.
     // this makes sure of that.
@@ -113,7 +109,7 @@ public abstract class Model3D extends Shape {
      *
      * @return a new model3d instance with the shared properties
      */
-    @CallSuper
+    // THIS SHOULD CALL SUPER
     public Model3D clone() {
 
         Model3D n = newInstance();
@@ -133,7 +129,6 @@ public abstract class Model3D extends Shape {
 
     abstract Vector3f[] getFace(int sectionIndex, int faceIndex);
 
-    @CallSuper
     public void recalculate(int sectionId) {
 
         if(sectionId == -1) {
@@ -254,13 +249,13 @@ public abstract class Model3D extends Shape {
         }
     }
 
-    @CallSuper
+    // THIS SHOULD CALL SUPER
     protected void uploadBuffers() throws IOException {
         g3d.uploadVBO(vertices);
         g3d.uploadVBO(normals);
     }
 
-    @CallSuper
+    // THIS SHOULD CALL SUPER
     public boolean update(int tick) {
 
         lastTick = tick;
@@ -402,7 +397,6 @@ public abstract class Model3D extends Shape {
             child.rotChanged();
     }
 
-    @CallSuper
     public Object getUniform(String name) {
         switch(name) {
             case "modelMatrix":
@@ -422,7 +416,7 @@ public abstract class Model3D extends Shape {
         return null;
     }
 
-    @CallSuper
+    // THIS SHOULD CALL SUPER
     public VertexBufferObject getExtra(String name) {
         switch(name) {
             case "vPosition":

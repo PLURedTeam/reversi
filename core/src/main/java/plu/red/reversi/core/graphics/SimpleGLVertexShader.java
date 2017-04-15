@@ -1,4 +1,4 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.core.graphics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,12 @@ public class SimpleGLVertexShader extends VertexShader {
     public String getSource() {
         String s = "";
 
-        s +=    "#version 300 es\n" +
+        if(def.isES)
+            s += "#version 300 es\n";
+        else
+            s += "#version 330\n";
+
+        s +=
                 "precision mediump float;\n" +
                 "uniform mat4 modelMatrix;\n" +
                 "uniform mat4 viewMatrix;\n" +

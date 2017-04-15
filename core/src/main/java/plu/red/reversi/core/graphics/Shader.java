@@ -1,4 +1,4 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.core.graphics;
 
 import java.util.List;
 

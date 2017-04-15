@@ -1,4 +1,4 @@
-package plu.red.reversi.android.reversi3d;
+package plu.red.reversi.core.reversi3d;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -7,10 +7,10 @@ import org.joml.Vector4f;
 import java.util.Collection;
 import java.util.HashSet;
 
-import plu.red.reversi.android.easing.EaseType;
-import plu.red.reversi.android.easing.PolynomialEasing;
-import plu.red.reversi.android.graphics.Graphics3D;
-import plu.red.reversi.android.graphics.Pipeline;
+import plu.red.reversi.core.easing.EaseType;
+import plu.red.reversi.core.easing.PolynomialEasing;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
 
 /**
@@ -154,10 +154,10 @@ public class Piece3D extends ColorModel3D {
         Vector4f color;
 
         if(faceIndex < getFaceCount(0) / 2) {
-            color = new Vector4f(0.9f, 0.1f, 0.1f, 1.0f);
+            color = baseColor.toVec4();
         }
         else {
-            color = new Vector4f(0.1f, 0.1f, 0.9f, 1.0f);
+            color = flippedColor.toVec4();
         }
 
         if(faceIndex < LONGITUDE_DETAIL) {
@@ -201,6 +201,14 @@ public class Piece3D extends ColorModel3D {
     public void animateFlip(boolean b, int atTick) {
         if(flipped != b)
             animFlipStart = atTick;
+    }
+
+    public void clearAnimations() {
+        if(animFlipStart != -1) {
+            animFlipStart = -1;
+
+            setFlipped(!flipped);
+        }
     }
 
     @Override

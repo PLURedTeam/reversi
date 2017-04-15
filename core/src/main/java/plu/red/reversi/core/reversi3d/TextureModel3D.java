@@ -1,7 +1,7 @@
-package plu.red.reversi.android.reversi3d;
+package plu.red.reversi.core.reversi3d;
 
-import plu.red.reversi.android.graphics.Graphics3D;
-import plu.red.reversi.android.graphics.Pipeline;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
 
 /**
  * Created by daniel on 3/20/17.

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -27,12 +28,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+
 import java.util.Locale;
 
+import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,6 +46,8 @@ import plu.red.reversi.core.game.player.Player;
  * to handle interaction events.
  */
 public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
+
+    private static final String PREF_AUTO_FOLLOW = "play_autoFollow";
 
     private GameListener mListener;
 
@@ -168,7 +176,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     .setText(String.format(
                             Locale.getDefault(),
                             "%d",
-                            mGameView.getPlayerScore(players[i].getID())
+                            mGameView.getCurrentBoard().getScore(players[i].getID())
                     ));
         }
     }
@@ -182,6 +190,13 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mServiceConnection = null;
 
         mListener = null;
+
+        // save whether or not we should auto follow based on if we were auto following before
+        SharedPreferences.Editor prefs = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+
+        prefs.putBoolean(PREF_AUTO_FOLLOW, mGameView.isAutoFollow());
+
+        prefs.apply();
     }
 
     public void runIntro() {
@@ -197,12 +212,12 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     public void onClick(View v) {
         if(v == mSwitchCameraButton) {
 
-            boolean present = !mGameView.getRenderer().isInPresentationMode();
+            boolean present = !mGameView.isInPresentationMode();
 
             mSwitchCameraButton.getBackground().setColorFilter(
                     present ? Color.WHITE : Color.YELLOW, PorterDuff.Mode.MULTIPLY);
 
-            mGameView.getRenderer().setPresentationMode(present);
+            mGameView.setPresentationMode(present);
         }
         else if(v == mConfirmButton) {
             // move confirmed
@@ -220,6 +235,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
     @Override
     public void onBoardSelected(BoardIndex index) {
+        doHighlights();
         mConfirmButton.setVisibility(View.VISIBLE);
     }
 
@@ -231,6 +247,26 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                 updateScorePanel();
             }
         });
+
+        mServiceConnection.setMoveIndex(mGameView.getCurrentMoveIndex());
+    }
+
+    @Override
+    public void onPlayerStateChanged() {
+        if(mGameView.isPlayerEnabled())
+            doHighlights();
+    }
+
+    public void setHighlightMode(HighlightMode mode) {
+        mGameView.setHighlightMode(mode);
+    }
+
+    public HighlightMode getHighlightMode() {
+        return mGameView.getHighlightMode();
+    }
+
+    private void doHighlights() {
+        mGameView.doHighlights();
     }
 
     /**
@@ -252,6 +288,12 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
         mGameView.setGame(mGame);
 
+        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
+
+        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
+
         prepareScorePanel();
     }
 
@@ -269,17 +311,5 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     public void onServiceDisconnected(ComponentName name) {
 
         getActivity().finish();
-
-        // uh oh! show a message
-        /*new AlertDialog.Builder(getContext())
-                .setTitle(R.string.title_game_service_crashed)
-                .setMessage(R.string.msg_game_service_crashed)
-                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().finish();
-                    }
-                })
-                .show();*/
     }
 }

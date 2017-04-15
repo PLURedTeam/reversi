@@ -2,6 +2,7 @@ package plu.red.reversi.core.game;
 
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.util.Looper;
 
 import java.util.Set;
 
@@ -12,6 +13,8 @@ public class ReversiMinimax implements Runnable {
     private Game game;
     private int aiID;
     public final int MAX_DEPTH;
+
+    private Looper.LooperCall<BoardIndex> callback;
 
     /**
      * Constructs a ReversiMinimax problem to solve.
@@ -25,6 +28,14 @@ public class ReversiMinimax implements Runnable {
         this.MAX_DEPTH = MAX_DEPTH;
     }
 
+    public ReversiMinimax(final Game game, int aiID, int MAX_DEPTH, Looper.LooperCall<BoardIndex> callback) {
+        this.game = game;
+        this.aiID = aiID;
+        this.MAX_DEPTH = MAX_DEPTH;
+
+        this.callback = callback;
+    }
+
     /**
      * Calculate the best move in reversi by using the minimax algorithm.
      *
@@ -35,7 +46,11 @@ public class ReversiMinimax implements Runnable {
     public void run() {
         try {
             MoveCommand command = getBestMoveCommand();
-            game.acceptCommand(command);
+
+            if(callback != null)
+                callback.call(getBestMoveCommand().position);
+            else
+                game.acceptCommand(command);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("AI cannot move.");
         }

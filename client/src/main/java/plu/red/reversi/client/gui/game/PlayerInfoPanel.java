@@ -1,5 +1,6 @@
 package plu.red.reversi.client.gui.game;
 
+import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
@@ -27,15 +28,17 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
     private Border inactiveBorder;
     private Color activeBackgroundColor = new Color(180, 250, 180);
 
+    private Board board;
+
     private class PlayerPanel extends JPanel {
         public final JLabel playerName;
         public final ScoreIcon playerScore;
         public final Player player;
 
-        public PlayerPanel(Player player) {
+        public PlayerPanel(Player player, int score) {
             this.player = player;
             this.playerName = new JLabel(player.getName());
-            this.playerScore = new ScoreIcon(player);
+            this.playerScore = new ScoreIcon(player.getColor(), score);
             this.add(playerName);
             this.add(playerScore);
         }
@@ -46,6 +49,8 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
 
     public PlayerInfoPanel(Game game) {
         this.game = game;
+
+        board = game.getBoard();
 
         final int BORDER_SIZE = 5;
 
@@ -65,12 +70,13 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
 
         // Create an individual score panel for every player in the Game
         for(Player player : game.getAllPlayers()) {
-            PlayerPanel panel = new PlayerPanel(player);
+            PlayerPanel panel = new PlayerPanel(player, board.getScore(player.getID()));
             playerPanelMap.put(player.getID(), panel);
             this.add(panel);
         }
 
         // Set the currently active player to the correct instance
+        // TODO: This should actually be set to who would play next based on the current board play state in this game.
         setActivePlayer(game.getCurrentPlayer().getID());
 
         this.revalidate();
@@ -113,6 +119,12 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
     @Override
     public void onClientSettingsChanged() {
         // Forces a refresh of the entire panel
+        populate();
+    }
+
+    public void setCurrentBoard(Board board) {
+        this.board = board;
+
         populate();
     }
 }

@@ -1,4 +1,4 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.core.graphics;
 
 /**
  * Created by daniel on 3/20/17.
@@ -6,12 +6,18 @@ package plu.red.reversi.android.graphics;
  */
 
 public class PipelineDefinition {
+
+    public boolean isES;
+
     public int pointLightCount;
     public int directionalLightCount;
 
     public boolean usesSampler;
 
     public PipelineDefinition() {
+
+        isES = false;
+
         pointLightCount = 0;
         directionalLightCount = 0;
 
@@ -19,6 +25,9 @@ public class PipelineDefinition {
     }
 
     public PipelineDefinition(PipelineDefinition other) {
+
+        isES = other.isES;
+
         pointLightCount = other.pointLightCount;
         directionalLightCount = other.directionalLightCount;
 

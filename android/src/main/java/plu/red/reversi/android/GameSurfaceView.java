@@ -13,16 +13,32 @@ import android.widget.Scroller;
 
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.Collection;
 
-import plu.red.reversi.android.reversi3d.Board3D;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import plu.red.reversi.core.command.BoardCommand;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.player.NullPlayer;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.PipelineDefinition;
+import plu.red.reversi.core.graphics.PixelShader;
+import plu.red.reversi.core.graphics.SimpleGLFragmentShader;
+import plu.red.reversi.core.graphics.SimpleGLVertexShader;
+import plu.red.reversi.core.graphics.VertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
-import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.reversi3d.Board3D;
+import plu.red.reversi.core.reversi3d.Camera;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 /**
  * Created by daniel on 3/18/17.
@@ -30,6 +46,11 @@ import plu.red.reversi.core.listener.ICommandListener;
  */
 
 public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, IBoardUpdateListener, Board3D.Board3DListener {
+
+
+    public static final Vector3fc MOVE_SELECT_COLOR = new Vector3f(1.0f, 1.0f, 0.0f);
+    public static final Vector3fc LAST_MOVE_COLOR = new Vector3f(1.0f, 0.2f, 0.2f);
+    public static final Vector3fc POSSIBLE_MOVES_COLOR = new Vector3f(0.0f, 1.0f, 0.0f);
 
     private static final int FRAMERATE = 60;
 
@@ -55,6 +76,16 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     private Game mGame;
 
     private boolean mCanDoCommand;
+
+    private boolean mAutoFollow;
+
+    private BoardIterator mBoardIterator;
+
+    private HighlightMode mHighlightMode;
+
+    private boolean mPresentationMode;
+    private boolean mAutoRotate;
+
 
     public GameSurfaceView(Context context) {
         super(context);
@@ -143,7 +174,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
 
-        if(!mCanDoCommand)
+        if(!mCanDoCommand || mGame.getHistory().getNumBoardCommands() - 1 != mBoardIterator.getPos())
             return true;
 
         BoardIndex index = mRenderer.getTappedIndex(new Vector2f(e.getX(), e.getY()));
@@ -151,22 +182,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         // is this a valid play index?
         if(mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getID()).contains(index)) {
 
-
             System.out.println("Got tap at " + index);
 
             if(index.row < 0 || index.column < 0 || index.row >= mGame.getBoard().size || index.column >= mGame.getBoard().size)
                 return false; // not a valid row index
-
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-
-                    mRenderer.clearBoardHighlights();
-                    mRenderer.highlightBoard(index);
-
-                    requestRender();
-                }
-            });
 
             mSelectedIndex = index;
 
@@ -197,9 +216,14 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
         mScroller.forceFinished(true);
 
-        mRenderer.setCameraPos(-distanceX + mRenderer.getCameraPos().x(), -distanceY + mRenderer.getCameraPos().y());
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.setCameraPos(-distanceX + mRenderer.getCameraPos().x(), -distanceY + mRenderer.getCameraPos().y());
 
-        requestRender();
+                requestRender();
+            }
+        });
 
         return true;
     }
@@ -375,14 +399,82 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     @Override
     public void onScoreChange(Board3D board) {
-        mListener.onBoardScoreChanged();
+        if(mListener != null)
+            mListener.onBoardScoreChanged();
     }
 
     @Override
     public void onAnimationsDone(Board3D board) {
         // enable the ability to control again
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            mCanDoCommand = true;
+            setPlayerEnabled(true);
+    }
+
+    @Override
+    public void onAnimationStepDone(Board3D board) {
+
+        mBoardIterator.next();
+
+        if(mListener != null)
+            mListener.onBoardScoreChanged();
+    }
+
+    public void doHighlights() {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mRenderer.mBoard != null) {
+                    mRenderer.mBoard.clearHighlights();
+                    if(mCanDoCommand) {
+                        if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
+                            // we can use the game board because GUI will be caught up animation wise
+                            for(BoardIndex index :
+                                    getCurrentBoard().getPossibleMoves(mGame.getNextPlayerID(
+                                            mGame.getHistory().getBoardCommand(mBoardIterator.getPos()).playerID
+                                    ))) {
+                                mRenderer.mBoard.highlightAt(index, POSSIBLE_MOVES_COLOR);
+                            }
+                        }
+                        else if(mHighlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
+                            // TODO
+                        }
+                        BoardCommand lastMove = mGame.getHistory().getBoardCommand(mBoardIterator.getPos());
+                        if (lastMove instanceof MoveCommand) {
+                            mRenderer.mBoard.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                        }
+
+                        if(mSelectedIndex != null)
+                            mRenderer.mBoard.highlightAt(mSelectedIndex, MOVE_SELECT_COLOR);
+                    }
+
+                    requestRender();
+                }
+            }
+        });
+    }
+
+    public Board getCurrentBoard() {
+        return mBoardIterator.board;
+    }
+
+    public int getCurrentMoveIndex() {
+        return mBoardIterator.getPos();
+    }
+
+    public synchronized void setCurrentMove(int pos) {
+        mBoardIterator.goTo(pos);
+
+        if(mRenderer.mBoard != null) {
+            mRenderer.mBoard.setBoard(mBoardIterator.board);
+        }
+
+        mCanDoCommand = true;
+
+        doHighlights();
+    }
+
+    public HighlightMode getHighlightMode() {
+        return mHighlightMode;
     }
 
     private class UpdateTask implements Runnable {
@@ -411,33 +503,35 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         }
     }
 
-    public GameRenderer getRenderer() {
-        return mRenderer;
-    }
-
     public void setGame(Game game) {
         mGame = game;
 
         mGame.getBoard().addBoardUpdateListener(this);
 
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            mCanDoCommand = true;
+            setPlayerEnabled(true);
 
         queueEvent(new Runnable() {
             @Override
             public void run() {
 
-                mRenderer.setGame(game);
-
-
-                if(mRenderer.getBoard() == null)
-                    queueEvent(this); // TODO: Improve synchronization? I do not have a solution for this atm.
-
-                mRenderer.getBoard().addListener(GameSurfaceView.this);
-
                 mListener.onBoardScoreChanged();
             }
         });
+
+        mBoardIterator = new BoardIterator(mGame.getHistory(), mGame.getBoard());
+
+        if(mRenderer.mGLStarted) {
+            mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
+            mRenderer.mBoard.addListener(this);
+
+            mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
+
+            doHighlights();
+        }
+
+        setCurrentMove(mAutoFollow ? mGame.getHistory().getNumBoardCommands() - 1 : 0);
+
     }
 
     public BoardIndex getCurrentSelected() {
@@ -445,18 +539,375 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public void disablePlayer() {
-        mCanDoCommand = false;
+        setPlayerEnabled(false);
+
+        mSelectedIndex = null;
+    }
+
+    private void setPlayerEnabled(boolean enabled) {
+
+        if(mCanDoCommand != enabled) {
+
+            mCanDoCommand = enabled;
+
+            if(mListener != null)
+                mListener.onPlayerStateChanged();
+        }
+    }
+
+    public boolean isPlayerEnabled() {
+        return mCanDoCommand;
     }
 
     public int getPlayerScore(int playerId) {
-        if(mRenderer.getBoard() != null)
-            return mRenderer.getBoard().getScore(playerId);
+        if(mRenderer.mBoard != null)
+            return mRenderer.mBoard.getScore(playerId);
 
         return 0;
+    }
+
+    public boolean isInPresentationMode() {
+        return mPresentationMode;
     }
 
     public interface GameSurfaceViewListener {
         void onBoardSelected(BoardIndex index);
         void onBoardScoreChanged();
+        void onPlayerStateChanged();
+    }
+
+    public void setPresentationMode(boolean present) {
+        mPresentationMode = present;
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mRenderer.mCamera != null) {
+                    if(present) {
+                        mRenderer.mCamera.beginDrag(60);
+                        mRenderer.mCamera.setPos(new Vector2f(0, 0));
+                        mRenderer.mCamera.setDir(new Vector2f(-0.00f * (float)Math.PI, 0.15f * (float)Math.PI));
+                        mRenderer.mCamera.setZoom(2400);
+                    }
+                    else {
+                        mAutoRotate = false;
+
+                        mRenderer.mCamera.beginDrag(60);
+                        mRenderer.mCamera.setPos(new Vector2f(0, 0));
+                        mRenderer.mCamera.setDir(new Vector2f(0.00f * (float)Math.PI, 0.5f * (float)Math.PI));
+                        mRenderer.mCamera.setZoom(mRenderer.mPlayZoom);
+                    }
+                }
+            }
+        });
+    }
+
+    public void setAutoFollow(boolean follow) {
+        if(follow) {
+            mAutoFollow = true;
+
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    if(mRenderer.mBoard != null && mGame != null) {
+
+                        mRenderer.mBoard.clearAnimations();
+
+                        // queue up all the animations up until the end
+                        BoardIterator iter = new BoardIterator(mBoardIterator);
+
+                        System.out.println("POS: " + mBoardIterator.getPos());
+                        System.out.println("Count: " + mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1).size());
+                        for(BoardCommand cmd : mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1)) {
+
+                            if(cmd instanceof MoveCommand) {
+                                mRenderer.mBoard.animBoardUpdate(
+                                        cmd.position,
+                                        cmd.playerID,
+                                        iter.board.calculateFlipsFromBoard(cmd.position, cmd.playerID)
+                                );
+                            }
+                            else {
+                                mRenderer.mBoard.animBoardUpdate(cmd.position, cmd.playerID, null);
+                            }
+
+                            iter.next();
+                        }
+                    }
+
+                    // just make sure the board appears to be on the latest move instead.
+                    else setCurrentMove(mGame.getHistory().getNumBoardCommands() - 1);
+                }
+            });
+        }
+        else {
+            mAutoFollow = false;
+
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    mRenderer.mBoard.clearAnimations();
+                }
+            });
+        }
+    }
+
+    public boolean isAutoFollow() {
+        return mAutoFollow;
+    }
+
+    public void setHighlightMode(HighlightMode mode) {
+        this.mHighlightMode = mode;
+
+        doHighlights();
+    }
+
+    private class GameRenderer implements Renderer, IBoardUpdateListener {
+
+        public Graphics3D g3d;
+
+        public Pipeline mPipeline;
+
+        public Board3D mBoard;
+        public Camera mCamera;
+
+        public float mPlayZoom;
+
+        public int mTick;
+
+        public boolean mGLStarted;
+
+        public GameRenderer() {
+            mTick = 0;
+            mPlayZoom = 3600;
+        }
+
+        /**
+         * Called when the surface is created or recreated.
+         * <p>
+         * Called when the rendering thread
+         * starts and whenever the EGL context is lost. The EGL context will typically
+         * be lost when the Android device awakes after going to sleep.
+         * <p>
+         * Since this method is called at the beginning of rendering, as well as
+         * every time the EGL context is lost, this method is a convenient place to put
+         * code to create resources that need to be created when the rendering
+         * starts, and that need to be recreated when the EGL context is lost.
+         * Textures are an example of a resource that you might want to create
+         * here.
+         * <p>
+         * Note that when the EGL context is lost, all OpenGL resources associated
+         * with that context will be automatically deleted. You do not need to call
+         * the corresponding "glDelete" methods such as glDeleteTextures to
+         * manually delete these lost resources.
+         * <p>
+         *
+         * @param unused is unused
+         * @param config the EGLConfig of the created surface. Can be used
+         */
+        @Override
+        public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+
+            g3d = new AndroidGraphics3D();
+
+            g3d.setClearColor(new Vector3f(0.2f, 0.2f, 0.2f));
+
+            PipelineDefinition def = new PipelineDefinition();
+
+            def.isES = true;
+            def.directionalLightCount = 2;
+
+            VertexShader vs = new SimpleGLVertexShader(def);
+            PixelShader ps = new SimpleGLFragmentShader(def);
+
+            mPipeline = new Pipeline(def, vs, ps);
+
+            g3d.createPipeline(mPipeline);
+            g3d.setPipeline(mPipeline);
+
+            g3d.bindPipelineUniform("fDirectionalLights[0]", mPipeline, new Vector3f(-0.6f, 0.25f, 1.0f).normalize());
+            g3d.bindPipelineUniform("fDirectionalLights[1]", mPipeline, new Vector3f(0.6f, -0.25f, 1.0f).normalize());
+
+            mCamera = new Camera();
+
+            if(mGame != null) {
+                mBoard = new Board3D(g3d, mPipeline, mGame);
+
+                mBoard.addListener(GameSurfaceView.this);
+
+                mBoard.setBoard(mBoardIterator.board);
+
+                mCamera.setMoveBounds(new Vector2f(-mBoard.getBoardRadius()), new Vector2f(mBoard.getBoardRadius()));
+
+                doHighlights();
+            }
+
+            mGLStarted = true;
+        }
+
+        /**
+         * Called when the surface changed size.
+         * <p>
+         * Called after the surface is created and whenever
+         * the OpenGL ES surface size changes.
+         * <p>
+         * Typically you will set your viewport here. If your camera
+         * is fixed then you could also set your projection matrix here:
+         * <pre class="prettyprint">
+         * void onSurfaceChanged(GL10 gl, int width, int height) {
+         * gl.glViewport(0, 0, width, height);
+         * // for a fixed camera, set the projection too
+         * float ratio = (float) width / height;
+         * gl.glMatrixMode(GL10.GL_PROJECTION);
+         * gl.glLoadIdentity();
+         * gl.glFrustumf(-ratio, ratio, -1, 1, 1, 10);
+         * }
+         * </pre>
+         *
+         * @param unused is unused
+         * @param width the width of the viewport
+         * @param height the height of the viewport
+         */
+        @Override
+        public void onSurfaceChanged(GL10 unused, int width, int height) {
+            g3d.setViewport(0, 0, width, height);
+
+            mCamera.setViewport(new Vector2f(width, height));
+
+            setPresentationMode(mPresentationMode);
+
+            g3d.bindPipelineUniform("projectionMatrix", mPipeline, mCamera.getProjectionMatrix());
+        }
+
+        /**
+         * Called to draw the current frame.
+         * <p>
+         * This method is responsible for drawing the current frame.
+         * <p>
+         * The implementation of this method typically looks like this:
+         * <pre class="prettyprint">
+         * void onDrawFrame(GL10 gl) {
+         * gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+         * //... other gl calls to render the scene ...
+         * }
+         * </pre>
+         *
+         * @param unused is unused
+         */
+        @Override
+        public void onDrawFrame(GL10 unused) {
+
+            g3d.clearBuffers();
+            g3d.bindPipelineUniform("viewMatrix", mPipeline, mCamera.getViewMatrix());
+            g3d.bindPipelineUniform("projectionMatrix", mPipeline, mCamera.getProjectionMatrix());
+
+            if(mGame != null && mBoard != null) {
+                mBoard.draw();
+            }
+        }
+
+        public void setCameraPos(float x, float y) {
+
+            if(!mPresentationMode) {
+                mCamera.setPos(new Vector2f(x, y));
+            }
+            else {
+
+                mCamera.setDir(new Vector2f(-x, y).mul(1.0f / 400));
+            }
+        }
+
+        public Vector2fc getCameraPos() {
+
+            if(mPresentationMode) {
+                Vector2f f = new Vector2f(mCamera.getDir()).mul(400);
+                f.x = -f.x;
+                return f;
+            }
+            else {
+                return mCamera.getPos();
+            }
+        }
+
+        public void setAutoRotate(boolean rotate) {
+            if(rotate) {
+                setPresentationMode(true);
+                mAutoRotate = true;
+            }
+            else mAutoRotate = false;
+        }
+
+        public RectF getScrollBounds() {
+
+            if(mPresentationMode)
+                // return an obnoxiously large number since there is technically no limit
+                return new RectF(Integer.MIN_VALUE, 0.0f, Integer.MAX_VALUE, 0.5f * (float)Math.PI * 400);
+
+            float r = mBoard.getBoardRadius() * mCamera.getZoom();
+
+            return new RectF(-r, -r, r, r);
+        }
+
+        public float getPlayZoom() {
+            return mPlayZoom;
+        }
+
+        public void setPlayZoom(float zoom) {
+            mPlayZoom = zoom;
+
+            if(!mPresentationMode && mCamera != null)
+                mCamera.setZoom(mPlayZoom);
+        }
+
+        public Camera getCamera() {
+            return mCamera;
+        }
+
+        public boolean update() {
+
+            boolean result = false;
+
+            // it is possible for this function to be called before init. So make sure we are not processing before that.
+            if(mBoard != null) {
+                result = mBoard.update(++mTick);
+                result = mCamera.update(mTick) || result;
+
+                if(mAutoRotate) {
+
+                    // automatically rotate the camera's direction
+                    mCamera.setDir(new Vector2f(0.00175f, 0).add(mCamera.getDir()));
+
+                    return true;
+                }
+            }
+
+            return result;
+        }
+
+        public BoardIndex getTappedIndex(Vector2fc loc) {
+            // ask the camera to convert pixels to board coord
+            Vector2f res = mCamera.pixelToPosition(loc);
+
+            System.out.println("Camera says OGL was " + res);
+
+            return mBoard.getIndexAtCoord(res);
+        }
+
+
+        @Override
+        public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+            if(mAutoFollow) {
+                // auto follow
+                if(mBoard != null) {
+                    mBoard.clearHighlights();
+                    mBoard.animBoardUpdate(origin, playerId, updated);
+                }
+            }
+        }
+
+        @Override
+        public void onBoardRefresh() {
+            mBoard.setBoard(mGame.getBoard());
+        }
     }
 }

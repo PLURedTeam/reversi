@@ -1,4 +1,4 @@
-package plu.red.reversi.android.reversi3d;
+package plu.red.reversi.core.reversi3d;
 
 import org.joml.Intersectionf;
 import org.joml.Matrix4f;
@@ -6,10 +6,9 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-
-import plu.red.reversi.android.easing.EaseType;
-import plu.red.reversi.android.easing.Easing;
-import plu.red.reversi.android.easing.PolynomialEasing;
+import plu.red.reversi.core.easing.EaseType;
+import plu.red.reversi.core.easing.Easing;
+import plu.red.reversi.core.easing.PolynomialEasing;
 
 /**
  * Created by daniel on 3/27/17.

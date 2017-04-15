@@ -2,6 +2,7 @@ package plu.red.reversi.core;
 
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.listener.*;
+import plu.red.reversi.core.util.ChatMessage;
 
 import java.util.HashSet;
 
@@ -22,7 +23,7 @@ public abstract class Coordinator {
 
     /**
      * Registers a <code>listener</code> to this Coordinator. All <code>listeners</code> that are registered to this
-     * Coordinator will receive signals via their individual methods when certain actions happen, dependending on the
+     * Coordinator will receive signals via their individual methods when certain actions happen, depending on the
      * specific <code>listener</code>.
      *
      * @param listener Object that implements an extension of IListener
@@ -64,6 +65,17 @@ public abstract class Coordinator {
         for(IListener listener : listenerSet)
             if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
     }//notifyChatListeners
+
+    /* Notifies that a ChatMessage has been received from the server. Iterates through and tells every IChatListener
+     * that has been registered to this Coordinator that a ChatMessage has been received.
+     *
+     * @param msg ChatMessage object that was received
+     */
+    public final void notifyChatListeners(ChatMessage msg) {
+        for(IListener listener : listenerSet) {
+            if(listener instanceof IChatListener) ((IChatListener)listener).onChat(msg);
+        }
+    }
 
 
 

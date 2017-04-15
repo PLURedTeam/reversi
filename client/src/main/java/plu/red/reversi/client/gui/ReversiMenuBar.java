@@ -8,6 +8,7 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -158,19 +159,24 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 CorePanel cp = gui.getCorePanel();
                 if(cp instanceof GamePanel) {
                     BoardView bv = ((GamePanel)cp).getBoardView();
-                    bv.setShowPossibleMoves(!bv.getShowPossibleMoves());
+
+                    bv.setHighlightMode(bv.getHighlightMode() == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES ?
+                            HighlightMode.HIGHLIGHT_NONE :
+                            HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
                 }
             }
 
             if(e.getSource() == bestMoveMenuItem) {
 
-                // TODO: Show a loading indicator of some kind
-                // TODO: Cancel minimax result if play is performed, or disable ability to play on board
-                ReversiMinimax minimax = new ReversiMinimax(game,
-                        game.getCurrentPlayer().getID(),
-                        5);
 
-                new Thread(minimax).start();
+                CorePanel cp = gui.getCorePanel();
+                if(cp instanceof GamePanel) {
+                    BoardView bv = ((GamePanel)cp).getBoardView();
+
+                    bv.setHighlightMode(bv.getHighlightMode() == HighlightMode.HIGHLIGHT_BEST_MOVE ?
+                            HighlightMode.HIGHLIGHT_NONE :
+                            HighlightMode.HIGHLIGHT_BEST_MOVE);
+                }
             }
         }
 

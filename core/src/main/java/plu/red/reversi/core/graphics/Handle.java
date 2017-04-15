@@ -1,4 +1,4 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.core.graphics;
 
 /**
  * Created by daniel on 3/19/17.

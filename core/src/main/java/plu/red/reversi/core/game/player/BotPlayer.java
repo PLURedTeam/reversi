@@ -1,16 +1,19 @@
 package plu.red.reversi.core.game.player;
 
 
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.ReversiMinimax;
 import plu.red.reversi.core.util.Color;
+import plu.red.reversi.core.util.Looper;
 
 /**
  * Glory to the Red Team.
  * An instance of a player which the computer can play as (basically an AI)
  * It utilizes the reversi minimax algorithm to compute the best move, and then execute it.
  */
-public class BotPlayer extends Player {
+public class BotPlayer extends Player implements Looper.LooperCallback<BoardIndex> {
 
     // TODO: Keep track of threads and stop them all if a Game is halted
     private Thread thread;
@@ -27,13 +30,13 @@ public class BotPlayer extends Player {
     public BotPlayer(Game game, Color color, int difficulty) {
         super(game, color);
         thread = null;
-        minimax = new ReversiMinimax(game, getID(), difficulty);
+        minimax = new ReversiMinimax(game, getID(), difficulty, Looper.getLooper(Thread.currentThread()).getCall(this));
     }
 
     public BotPlayer(Game game, int playerID, Color color, int difficulty) {
         super(game, playerID, color);
         thread = null;
-        minimax = new ReversiMinimax(game, getID(), difficulty);
+        minimax = new ReversiMinimax(game, getID(), difficulty, Looper.getLooper(Thread.currentThread()).getCall(this));
     }
 
     /**
@@ -51,5 +54,10 @@ public class BotPlayer extends Player {
 
         thread = new Thread(minimax);
         thread.start();
+    }
+
+    @Override
+    public void onLooperCallback(BoardIndex result) {
+        game.acceptCommand(new MoveCommand(getID(), result));
     }
 }
