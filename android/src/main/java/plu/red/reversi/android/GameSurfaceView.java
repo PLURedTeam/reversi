@@ -180,7 +180,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         BoardIndex index = mRenderer.getTappedIndex(new Vector2f(e.getX(), e.getY()));
 
         // is this a valid play index?
-        if(mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getID()).contains(index)) {
+        if(mGame.getGameLogic().getValidMoves(mGame.getCurrentPlayer().getID()).contains(index)) {
 
             System.out.println("Got tap at " + index);
 
@@ -429,9 +429,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                             // we can use the game board because GUI will be caught up animation wise
                             for(BoardIndex index :
-                                    getCurrentBoard().getPossibleMoves(mGame.getNextPlayerID(
+                                    mGame.getGameLogic().getValidMoves(mGame.getNextPlayerID(
                                             mGame.getHistory().getBoardCommand(mBoardIterator.getPos()).playerID
-                                    ))) {
+                                    ) ,getCurrentBoard())) {
                                 mRenderer.mBoard.highlightAt(index, POSSIBLE_MOVES_COLOR);
                             }
                         }
@@ -506,7 +506,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public void setGame(Game game) {
         mGame = game;
 
-        mGame.getBoard().addBoardUpdateListener(this);
+        mGame.getGameLogic().addBoardUpdateListener(this);
 
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
             setPlayerEnabled(true);
@@ -519,7 +519,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             }
         });
 
-        mBoardIterator = new BoardIterator(mGame.getHistory(), mGame.getBoard());
+        mBoardIterator = new BoardIterator(mGame.getHistory(), mGame.getGameLogic(), mGame.getBoard().size);
 
         if(mRenderer.mGLStarted) {
             mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
@@ -621,11 +621,21 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         for(BoardCommand cmd : mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1)) {
 
                             if(cmd instanceof MoveCommand) {
-                                mRenderer.mBoard.animBoardUpdate(
+
+                                boolean preAutoFollow = mAutoFollow;
+
+                                // hack for right now.
+                                mAutoFollow = true;
+
+                                mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
+
+                                mAutoFollow = preAutoFollow;
+
+                                /*mRenderer.mBoard.animBoardUpdate(
                                         cmd.position,
                                         cmd.playerID,
                                         iter.board.calculateFlipsFromBoard(cmd.position, cmd.playerID)
-                                );
+                                );*/
                             }
                             else {
                                 mRenderer.mBoard.animBoardUpdate(cmd.position, cmd.playerID, null);

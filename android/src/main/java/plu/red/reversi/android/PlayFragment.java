@@ -176,7 +176,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     .setText(String.format(
                             Locale.getDefault(),
                             "%d",
-                            mGameView.getCurrentBoard().getScore(players[i].getID())
+                            mGame.getGameLogic().getScore(players[i].getID(), mGameView.getCurrentBoard())
                     ));
         }
     }

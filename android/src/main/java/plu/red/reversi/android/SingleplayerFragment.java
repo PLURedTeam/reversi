@@ -11,6 +11,7 @@ import android.widget.Button;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.util.Color;
@@ -82,6 +83,9 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
     public void onClick(View v) {
 
         Game game = new Game(null);
+
+
+        game.setLogic(new ReversiLogic(game));
 
         game.setSettings(SettingsLoader.INSTANCE.createGameSettings());
 
