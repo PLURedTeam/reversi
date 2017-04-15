@@ -394,7 +394,10 @@ public abstract class Model3D {
     }
 
     private void posChanged() {
-        parent.worldPos.add(pos, worldPos);
+        if(parent != null)
+            parent.worldPos.add(pos, worldPos);
+        else
+            worldPos = new Vector3f(pos);
 
         for(Model3D child : children)
             child.posChanged();
@@ -419,7 +422,10 @@ public abstract class Model3D {
     }
 
     private void scaleChanged() {
-        parent.worldScale.mul(scale, worldScale);
+        if(parent != null)
+            parent.worldScale.mul(scale, worldScale);
+        else
+            worldScale = new Vector3f(scale);
 
         for(Model3D child : children)
             child.scaleChanged();
