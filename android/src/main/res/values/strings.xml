@@ -51,4 +51,15 @@
     <string name="button_ai_hard_easy">Hard vs. Easy</string>
     <string name="button_ai_hard_medium">Hard vs. Medium</string>
     <string name="button_ai_hard_hard">Hard vs. Hard</string>
+    <string name="about_support_by">Built by the PLU Red Team:</string>
+    <string name="author_daniel">Daniel Beal</string>
+    <string name="author_matthew">Matthew Conover</string>
+    <string name="author_jessica">Jessica Chase</string>
+    <string name="author_james">James DeBroeck</string>
+    <string name="author_andrew">Andrew Gjerness</string>
+    <string name="about_icons8">Thanks to Icons8 for making awesome icons.</string>
+    <string name="unimplemented">Multiplayer support is not ready yet!</string>
+    <string name="pref_p1_color">Player 1 Color (future games)</string>
+    <string name="pref_p1_color_title">Select a color:</string>
+    <string name="pref_p2_color">Player 2 Color (future games)</string>
 </resources>
