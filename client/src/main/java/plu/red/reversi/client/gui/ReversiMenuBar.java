@@ -8,6 +8,7 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.ReversiMinimax;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -159,7 +160,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 if(cp instanceof GamePanel) {
                     BoardView bv = ((GamePanel)cp).getBoardView();
 
-                    bv.setHighlightMode(BoardView.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
+                    bv.setHighlightMode(bv.getHighlightMode() == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES ?
+                            HighlightMode.HIGHLIGHT_NONE :
+                            HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
                 }
             }
 
@@ -170,7 +173,9 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 if(cp instanceof GamePanel) {
                     BoardView bv = ((GamePanel)cp).getBoardView();
 
-                    bv.setHighlightMode(BoardView.HighlightMode.HIGHLIGHT_BEST_MOVE);
+                    bv.setHighlightMode(bv.getHighlightMode() == HighlightMode.HIGHLIGHT_BEST_MOVE ?
+                            HighlightMode.HIGHLIGHT_NONE :
+                            HighlightMode.HIGHLIGHT_BEST_MOVE);
                 }
             }
         }

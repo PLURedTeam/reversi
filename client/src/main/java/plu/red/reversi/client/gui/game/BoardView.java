@@ -25,6 +25,7 @@ import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.reversi3d.Board3D;
 import plu.red.reversi.core.reversi3d.Camera;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -100,6 +101,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         this.highlightMode = highlightMode;
 
         updateHighlights();
+    }
+
+    public HighlightMode getHighlightMode() {
+        return highlightMode;
     }
 
     private void updateHighlights() {
@@ -314,12 +319,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     public void setBoardViewListener(BoardViewStateListener listener) {
         this.listener = listener;
-    }
-
-    public enum HighlightMode {
-        HIGHLIGHT_NONE,
-        HIGHLIGHT_POSSIBLE_MOVES,
-        HIGHLIGHT_BEST_MOVE;
     }
 
     public interface BoardViewStateListener {
