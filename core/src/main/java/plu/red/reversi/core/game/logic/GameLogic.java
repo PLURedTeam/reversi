@@ -15,10 +15,16 @@ import java.util.*;
  * GameLogic is responsible for handling a set of games rules. Each specific game will be
  * a subclass implementing the abstract functions.
  *
+ * This is designed as a semi-singleton class, it has to have instances to support inheritance,
+ * but you should not need to construct GameLogic class except at the beginning of a new game.
+ * This class will update histroy with new changes, and update listeners as needed. Pay
+ * attention to the defaults, and how it will automatically reference Game.
+ *
  * This will hold a reference to board. All modifications to board (after initialization)
  * should go through this class to validate the actions with the game rules.
  *
- * For any change made to the board, the registered IBoardUpdateListeners will be updated.
+ * For any change made to the board, the registered IBoardUpdateListeners will be updated
+ * by default, and you can manually specify otherwise in each case.
  */
 public abstract class GameLogic {
     protected final HashSet<IBoardUpdateListener> boardUpdateListeners = new HashSet<>();
@@ -85,10 +91,12 @@ public abstract class GameLogic {
 
     /**
      * Apply multiple commands at once. Used when you have a saved game state you wish to restore.
+     * NOTE: This will note update history.
      * @param commands List of commands to be applied in order.
      * @return This object for chaining.
      */
     public final GameLogic initBoard(Collection<BoardCommand> commands) {
+        //since the collection will be from a history object, don't update histroy
         return initBoard(commands, game.getBoard(), true, false);
     }
 
