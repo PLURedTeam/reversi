@@ -184,6 +184,10 @@ public class Piece3D extends ColorModel3D {
         }
     }
 
+    /**
+     * Manually set whether or not this piece should be flipped. Automatically updates the rotation accordingly.
+     * @param b is it flipped or not
+     */
     public void setFlipped(boolean b) {
 
         flipped = b;
@@ -198,11 +202,20 @@ public class Piece3D extends ColorModel3D {
             listener.onFlipped(this);
     }
 
+    /**
+     * Change the flip value to be equal to b in an animated way at the specified tick
+     * @param b the new flip value. Will not animate anything if the piece is already flipped to that value.
+     * @param atTick when to start animating the flip.
+     */
     public void animateFlip(boolean b, int atTick) {
         if(flipped != b)
             animFlipStart = atTick;
     }
 
+    /**
+     * Finishes any animation currently in progress immediately. The end result of the animation will
+     * be the actual value applied.
+     */
     public void clearAnimations() {
         if(animFlipStart != -1) {
             animFlipStart = -1;
@@ -255,14 +268,27 @@ public class Piece3D extends ColorModel3D {
         return false;
     }
 
+    /**
+     * gets the color of the top when flipped is false
+     * @return the color
+     */
     public Color getBaseColor() {
         return baseColor;
     }
 
+    /**
+     * Gets the color of the top when flipped is true
+     * @return the color
+     */
     public Color getFlippedColor() {
         return flippedColor;
     }
 
+    /**
+     * Returns whether or not the current tile is currently flipped. If an animation is in progress,
+     * then it will return the end result of the animation (as opposed to the result before)
+     * @return whether or not the piece is flipped
+     */
     public boolean isFlipped() {
         // this can be a point of contention.
         // at this time, return the value the piece is flipping -> to for sure
@@ -275,17 +301,34 @@ public class Piece3D extends ColorModel3D {
         return flipped;
     }
 
+    /**
+     * Add a new event listener
+     * @param listener the listener to add
+     */
     public void addListener(Piece3DListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Remove a event listener
+     * @param listener the listener to remove
+     */
     public void removeListener(Piece3DListener listener) {
         listeners.remove(listener);
     }
 
     public interface Piece3DListener {
+        /**
+         * Whenever the flipped state of the piece completely changes, this method is called.
+         * It executes when setFlipped() is called, or when an animation completes.
+         * @param piece the piece that generated this event
+         */
         void onFlipped(Piece3D piece);
 
+        /**
+         * Whenever the piece has finished animating, this method is called.
+         * @param piece the piece that generated this event
+         */
         void onAnimationsDone(Piece3D piece);
     }
 }

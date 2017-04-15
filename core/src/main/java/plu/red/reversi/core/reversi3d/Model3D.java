@@ -34,37 +34,32 @@ public abstract class Model3D {
     // this makes sure of that.
     private static int nextID = 0;
 
-    private int id;
+    private int id; /// the id for the current object instance, which is ONLY used to distinguish between priorities in the TreeMap.
 
-    private SortedSet<Model3D> children;
+    private SortedSet<Model3D> children; /// the set of children for this object, sorted by priority
 
-    private Vector3f pos;
-    private Vector3f scale;
-    private Quaternionf rot;
+    private Model3D parent; /// the parent model of this object, or null if the object does not  have a parent assigned.
 
-    private Vector3f offsetPos;
-    private Vector3f offsetScale;
-    private Quaternionf offsetRot;
+    private Vector3f pos; /// the current position of this object (relative to parent coordinate space)
+    private Vector3f scale; /// the current scale of this object (relative to the parent coordinate space)
+    private Quaternionf rot; /// the current rotation of this object (relative to the parent coordinate space)
 
-    // temporary vars only!
-    private Vector3f worldPos;
-    private Vector3f worldScale;
-    private Quaternionf worldRot;
+    private Vector3f worldPos; /// the actual position of the model in world coordinates
+    private Vector3f worldScale; /// the actual scale of the model in world coordinates
+    private Quaternionf worldRot; /// the actual rotation of the model in world coordinates
 
-    protected boolean alphaBlended;
+    protected boolean alphaBlended; /// whether or not this object should support transparency. NOTE: this may soon be deprecated because it is silly since alpha is already supported.
 
-    private Model3D parent;
-
-    private int lastTick;
+    private int lastTick; /// keeps track of the last value for 'tick' which was supplied to update()
 
 
-    public VertexBufferObject<Vector4fc> vertices;
-    public VertexBufferObject<Vector3fc> normals;
+    public VertexBufferObject<Vector4fc> vertices; /// the vertex buffer object containing all of the vertices for the current model
+    public VertexBufferObject<Vector3fc> normals;  /// the vertex buffer object containing all of the normal vectors for the current model. This VBO is auto-generated
 
-    private final Graphics3D g3d;
-    private final Pipeline pipeline;
+    private final Graphics3D g3d;    /// the graphics renderer used by this model (should be the same for a whole tree)
+    private final Pipeline pipeline; /// the rendering pipeline used by this model
 
-    private float priority = 1.0f;
+    private float priority = 1.0f; /// the priority of this child to be rendered in front of other children. 1 means defualt priority.
 
     public Model3D(Graphics3D g3d, Pipeline pipeline) {
 
@@ -83,10 +78,6 @@ public abstract class Model3D {
         pos = new Vector3f();
         rot = new Quaternionf();
         scale = new Vector3f(1);
-
-        offsetPos = new Vector3f();
-        offsetRot = new Quaternionf();
-        offsetScale = new Vector3f(1);
 
         worldPos = new Vector3f();
         worldRot = new Quaternionf();
@@ -129,6 +120,13 @@ public abstract class Model3D {
 
     abstract Vector3f[] getFace(int sectionIndex, int faceIndex);
 
+    /**
+     *
+     * Using getFace() abstract method, calculates a set of normals and vertices for the current object. Uploads
+     * the VBOs upon completion.
+     *
+     * @param sectionId -1 to recalculate all sections, otherwise the section id to recalculate.
+     */
     public void recalculate(int sectionId) {
 
         if(sectionId == -1) {
@@ -143,19 +141,6 @@ public abstract class Model3D {
 
             try {
                 uploadBuffers();
-
-                /*if(this instanceof Piece3D) {
-                    System.out.println("Vertices: ");
-                    for(Vector4fc pos : vertices)
-                        System.out.println(pos);
-                    System.out.println("Normals: ");
-                    for(Vector3fc norm : normals)
-                        System.out.println(norm);
-
-                    System.out.println("Pos size: " + vertices.size());
-                    System.out.println("Norm size: " + normals.size());
-                }*/
-
             } catch(IOException e) {
                 // TODO: Better error handling here.
                 e.printStackTrace();
@@ -249,12 +234,22 @@ public abstract class Model3D {
         }
     }
 
+    /**
+     * Forces the vertex and normal matricies to be uploaded. Calling this method is useful if the vertex or normal
+     * buffers were modified outside of recalculate()
+     * @throws IOException if the VBO is invalid
+     */
     // THIS SHOULD CALL SUPER
     protected void uploadBuffers() throws IOException {
         g3d.uploadVBO(vertices);
         g3d.uploadVBO(normals);
     }
 
+    /**
+     * Should be called 60 times per second to allow object to perform changes to itself/animations.
+     * @param tick the current "call count" in a sense. Starts from 0, increments 60 times per second, once per call.
+     * @return whether or not something about the object or its children has been modified that requires a rerender.
+     */
     // THIS SHOULD CALL SUPER
     public boolean update(int tick) {
 
@@ -268,6 +263,14 @@ public abstract class Model3D {
         return updated;
     }
 
+    /**
+     * Draws this model to the screen.
+     *
+     * Calls delegated methods 'getExtra()' and 'getUniform()' to specify vertex rendering data. So put your data there
+     * and make override to specify rendering data.
+     *
+     * This method is deliberately not supposed to be overridden because it uses delegate methods instead.
+     */
     public final void draw() {
 
         //g3d.setPipeline(pipeline);
@@ -304,51 +307,86 @@ public abstract class Model3D {
             child.draw();
     }
 
+    /**
+     * Sets the specified model to be a child of this model.
+     *
+     * If the specified model is already a child of another model, it will be removed from that model.
+     *
+     * @param child the child to add to this model.
+     */
     public void addChild(Model3D child) {
+
+        if(child.parent != null) {
+            child.parent.removeChild(child);
+        }
+
         if(!children.add(child)) {
             //System.out.println("Added duplicate object as child--use clone()!");
             return;
         }
-
-        // these shared references are very helpful here
-        child.offsetPos = worldPos;
-        child.offsetRot = worldRot;
-        child.offsetScale = worldScale;
+        else child.parent = this;
     }
 
     public void removeChild(Model3D child) {
         children.remove(child);
-
-        // ensure no associations
-        child.offsetPos = new Vector3f();
-        child.offsetRot = new Quaternionf();
-        child.offsetScale = new Vector3f();
+        child.parent = null;
     }
 
+    /**
+     * Gets the current parent of this model.
+     * @return the parent model
+     */
     public Model3D getParent() {
         return parent;
     }
 
+    /**
+     * Returns whether or not the provided model is in fact a direct child of this object.
+     * @param model the model to check
+     * @return true if the model is a direct child of this model; false otherwise.
+     */
     public boolean isChild(Model3D model) {
         return children.contains(model);
     }
 
+    /**
+     * Returns the current world position of the model
+     * @return the position in world coordinates
+     */
     public Vector3f getWorldPosition() {
         return worldPos;
     }
 
+    /**
+     * Returns the current world rotation of the model
+     *
+     * @return the rotation in world coordinates
+     */
     public Quaternionf getWorldRotation() {
         return worldRot;
     }
 
+    /**
+     * Returns the current world scale of the model
+     *
+     * @return the scale in world coordinates
+     */
     public Vector3f getWorldScale() {
         return worldScale;
     }
 
+    /**
+     * Returns the current object position relative to its parent
+     * @return the position relative to the parent.
+     */
     public Vector3f getPos() {
         return pos;
     }
 
+    /**
+     * Sets the current object position relative to the parent
+     * @param pos the position of the object relative to parent
+     */
     public void setPos(Vector3f pos) {
         this.pos = new Vector3f(pos);
 
@@ -356,16 +394,24 @@ public abstract class Model3D {
     }
 
     private void posChanged() {
-        offsetPos.add(pos, worldPos);
+        parent.worldPos.add(pos, worldPos);
 
         for(Model3D child : children)
             child.posChanged();
     }
 
+    /**
+     * Returns the current object scale relative to its parent
+     * @return the scale relative to the parent.
+     */
     public Vector3f getScale() {
         return scale;
     }
 
+    /**
+     * Sets the current object scale relative to the parent
+     * @param scale the scale of the object relative to parent
+     */
     public void setScale(Vector3f scale) {
         this.scale = new Vector3f(scale);
 
@@ -373,16 +419,24 @@ public abstract class Model3D {
     }
 
     private void scaleChanged() {
-        offsetScale.mul(scale, worldScale);
+        parent.worldScale.mul(scale, worldScale);
 
         for(Model3D child : children)
             child.scaleChanged();
     }
 
+    /**
+     * Returns the current object rotation relative to its parent
+     * @return the rotation relative to the parent.
+     */
     public Quaternionf getRot() {
         return rot;
     }
 
+    /**
+     * Sets the current object rotation relative to the parent
+     * @param rot the rotation of the object relative to parent
+     */
     public void setRot(Quaternionf rot) {
         this.rot = new Quaternionf(rot);
 
@@ -391,12 +445,18 @@ public abstract class Model3D {
 
     private void rotChanged() {
         // NOTE: Order matters here!
+        // TODO: Fix, does not work as documented technically
         //rot.mul(offsetRot, worldRot);
 
         for(Model3D child : children)
             child.rotChanged();
     }
 
+    /**
+     * Called by #draw() to get a uniform variable requested by the shader pipeline.
+     * @param name the name of the uniform attribute which has been requested
+     * @return some convertable object representing the uniform. A vertex or matrix or primitive, for example.
+     */
     public Object getUniform(String name) {
         switch(name) {
             case "modelMatrix":
@@ -416,6 +476,11 @@ public abstract class Model3D {
         return null;
     }
 
+    /**
+     * Called by #draw() to get a additional vertex attribute which should be used.
+     * @param name the name of the vertex attribute which has been requested
+     * @return a VBO for the shader to use. Should match the type requested in the shader, although not enforced.
+     */
     // THIS SHOULD CALL SUPER
     public VertexBufferObject getExtra(String name) {
         switch(name) {
