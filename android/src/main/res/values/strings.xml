@@ -39,4 +39,27 @@
     <string name="dialog_replace_message">The game is automatically saved.</string>
     <string name="menu_show_possible_moves">Toggle Possible Moves</string>
     <string name="menu_show_best_move">Toggle Best Move</string>
+    <string name="label_sp_against_ai_first">Play Against Bot (Bot Plays First)</string>
+    <string name="label_sp_against_ai_second">Play Against Bot (Bot Plays Last)</string>
+    <string name="label_ai_against_ai">Bot Against Bot</string>
+    <string name="button_ai_easy_easy">Easy vs. Easy</string>
+    <string name="button_ai_easy_medium">Easy vs. Medium</string>
+    <string name="button_ai_easy_hard">Easy vs. Hard</string>
+    <string name="button_ai_medium_easy">Medium vs. Easy</string>
+    <string name="button_ai_medium_medium">Medium vs. Medium</string>
+    <string name="button_ai_medium_hard">Medium vs. Hard</string>
+    <string name="button_ai_hard_easy">Hard vs. Easy</string>
+    <string name="button_ai_hard_medium">Hard vs. Medium</string>
+    <string name="button_ai_hard_hard">Hard vs. Hard</string>
+    <string name="about_support_by">Built by the PLU Red Team:</string>
+    <string name="author_daniel">Daniel Beal</string>
+    <string name="author_matthew">Matthew Conover</string>
+    <string name="author_jessica">Jessica Chase</string>
+    <string name="author_james">James DeBroeck</string>
+    <string name="author_andrew">Andrew Gjerness</string>
+    <string name="about_icons8">Thanks to Icons8 for making awesome icons.</string>
+    <string name="unimplemented">Multiplayer support is not ready yet!</string>
+    <string name="pref_p1_color">Player 1 Color (future games)</string>
+    <string name="pref_p1_color_title">Select a color:</string>
+    <string name="pref_p2_color">Player 2 Color (future games)</string>
 </resources>

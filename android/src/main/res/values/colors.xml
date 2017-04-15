@@ -7,4 +7,10 @@
     <color name="black_overlay">#00000000</color>
 
     <color name="gray_semitransparent">#55333333</color>
+
+    <color name="link_blue">#ff4444ff</color>
+
+    <color name="default_p1_color">#ff0000</color>
+    <color name="default_p2_color">#0000ff</color>
+
 </resources>

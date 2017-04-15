@@ -17,6 +17,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.graphics.*;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
@@ -25,10 +26,12 @@ import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.reversi3d.Board3D;
 import plu.red.reversi.core.reversi3d.Camera;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -50,18 +53,24 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     private Camera camera;
 
     private HighlightMode highlightMode;
-
     private boolean canPlay;
-
     private long startTime;
-
     private Queue<Runnable> renderqueue;
-
     private BoardViewStateListener listener;
-
     private BoardIterator boardIterator;
-
     private boolean autoFollow;
+
+    private static GLCapabilities getCapabilities() {
+
+        GLProfile profile = GLProfile.get(GLProfile.GL3);
+
+        GLCapabilities caps = new GLCapabilities(profile);
+
+        caps.setSampleBuffers(true);
+        caps.setNumSamples(4);
+
+        return caps;
+    }
 
     /**
      * Constructs a new BoardView.
@@ -69,30 +78,18 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
      * @param game Game object to pull data from
      */
     public BoardView(Game game) {
-        super(new GLCapabilities(GLProfile.get(GLProfile.GL3)));
-
+        super(getCapabilities());
         startTime = System.currentTimeMillis();
-
         this.game = game;
-
-        boardIterator = new BoardIterator(game.getHistory(), game.getBoard());
-
+        boardIterator = new BoardIterator(game.getHistory(), game.getGameLogic(), game.getBoard().size);
         renderqueue = new LinkedList<>();
-
         game.addListener(this);
-
         this.setPreferredSize(new Dimension(500,500) );
-
         this.addMouseListener(this);
-
         addGLEventListener(new EventHandler());
-
         setVisible(true);
-
         autoFollow = true;
-
         animator = new Animator(this);
-
         animator.start();
     }
 
@@ -115,6 +112,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
      *
      * Note that highlights will generally not be shown unless canPlay is true.
      */
+    public HighlightMode getHighlightMode() {
+        return highlightMode;
+    }
+
     private void updateHighlights() {
 
         queueEvent(new Runnable() {
@@ -125,12 +126,20 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                 if(canPlay) {
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
-                        for(BoardIndex index :
-                                getCurrentBoard().getPossibleMoves(game.getNextPlayerID(
-                                        game.getHistory().getBoardCommand(boardIterator.getPos()).playerID
-                                ))) {
+
+                        Set<BoardIndex> validMoves = (
+                            game.getGameLogic()
+                                .getValidMoves(
+                                    game.getNextPlayerID (
+                                        game.getHistory()
+                                            .getBoardCommand(boardIterator.getPos()).playerID
+                                    ),
+                                    boardIterator.board
+                                )
+                        );
+
+                        for(BoardIndex index : validMoves)
                             board.highlightAt(index, POSSIBLE_MOVES_COLOR);
-                        }
                     }
                     else if(highlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
                         // TODO
@@ -138,9 +147,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
                     BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
 
-                    if (lastMove instanceof MoveCommand) {
+                    if(lastMove instanceof MoveCommand)
                         board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
-                    }
                 }
             }
         });
@@ -220,9 +228,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     @Override
     public void onAnimationStepDone(Board3D board) {
         // keep our board iterator synced
-        System.out.println("Board iterator inc");
         boardIterator.next();
-
         listener.onBoardStateChanged(this);
     }
 
@@ -352,15 +358,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
      */
     public void setBoardViewListener(BoardViewStateListener listener) {
         this.listener = listener;
-    }
-
-    /**
-     * Defines general highlighting preferences for the board view.
-     */
-    public enum HighlightMode {
-        HIGHLIGHT_NONE,           /// only highlights the last played move in red
-        HIGHLIGHT_POSSIBLE_MOVES, /// highlights all moves whcih can be played by the player as well as the last played move
-        HIGHLIGHT_BEST_MOVE;      /// highlights only the best move as calculated by the minimax algorithm and the last played move.
     }
 
     public interface BoardViewStateListener {

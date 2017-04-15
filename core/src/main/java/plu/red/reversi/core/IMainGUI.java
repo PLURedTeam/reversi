@@ -45,4 +45,13 @@ public interface IMainGUI {
      * @return String name chosen, or null if the user cancelled
      */
     String showLoadDialog();
+
+
+    public static class NullGUI implements IMainGUI {
+        @Override public void setClient(Client client) {}
+        @Override public void updateGUIMajor() {}
+        @Override public void updateGUIMinor() {}
+        @Override public String showSaveDialog() { return null; }
+        @Override public String showLoadDialog() { return null; }
+    }
 }

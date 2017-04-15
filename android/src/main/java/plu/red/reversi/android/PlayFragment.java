@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -37,6 +38,7 @@ import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,9 +47,7 @@ import plu.red.reversi.core.game.player.Player;
  */
 public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
 
-    public static final Vector3fc MOVE_SELECT_COLOR = new Vector3f(1.0f, 1.0f, 0.0f);
-    public static final Vector3fc LAST_MOVE_COLOR = new Vector3f(1.0f, 0.2f, 0.2f);
-    public static final Vector3fc POSSIBLE_MOVES_COLOR = new Vector3f(0.0f, 1.0f, 0.0f);
+    private static final String PREF_AUTO_FOLLOW = "play_autoFollow";
 
     private GameListener mListener;
 
@@ -62,8 +62,6 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private GameSurfaceView mGameView;
 
     private Game mGame;
-
-    private HighlightMode mHighlightMode;
 
     private GameService.LocalBinder mServiceConnection;
 
@@ -178,7 +176,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     .setText(String.format(
                             Locale.getDefault(),
                             "%d",
-                            mGameView.getPlayerScore(players[i].getID())
+                            mGameView.getCurrentBoard().getScore(players[i].getID())
                     ));
         }
     }
@@ -192,6 +190,13 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mServiceConnection = null;
 
         mListener = null;
+
+        // save whether or not we should auto follow based on if we were auto following before
+        SharedPreferences.Editor prefs = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+
+        prefs.putBoolean(PREF_AUTO_FOLLOW, mGameView.isAutoFollow());
+
+        prefs.apply();
     }
 
     public void runIntro() {
@@ -207,12 +212,12 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     public void onClick(View v) {
         if(v == mSwitchCameraButton) {
 
-            boolean present = !mGameView.getRenderer().isInPresentationMode();
+            boolean present = !mGameView.isInPresentationMode();
 
             mSwitchCameraButton.getBackground().setColorFilter(
                     present ? Color.WHITE : Color.YELLOW, PorterDuff.Mode.MULTIPLY);
 
-            mGameView.getRenderer().setPresentationMode(present);
+            mGameView.setPresentationMode(present);
         }
         else if(v == mConfirmButton) {
             // move confirmed
@@ -242,6 +247,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                 updateScorePanel();
             }
         });
+
+        mServiceConnection.setMoveIndex(mGameView.getCurrentMoveIndex());
     }
 
     @Override
@@ -251,52 +258,15 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     }
 
     public void setHighlightMode(HighlightMode mode) {
-        mHighlightMode = mode;
-
-        doHighlights();
+        mGameView.setHighlightMode(mode);
     }
 
     public HighlightMode getHighlightMode() {
-        return mHighlightMode;
+        return mGameView.getHighlightMode();
     }
 
     private void doHighlights() {
-
-        mGameView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mGameView.getRenderer().getBoard() == null)
-                    return; // cant do anything yet.
-
-                System.out.println("Time to highlight: player enabled = " + mGameView.isPlayerEnabled());
-
-                mGameView.getRenderer().clearBoardHighlights();
-
-                if(mGameView.isPlayerEnabled()) {
-                    if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
-                        // we can use the game board because GUI will be caught up animation wise
-                        for(BoardIndex index : mGame.getBoard().getPossibleMoves(mGame.getCurrentPlayer().getID())) {
-                            mGameView.getRenderer().highlightBoard(index, POSSIBLE_MOVES_COLOR);
-                        }
-                    }
-                    else if(mHighlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
-                        // TODO
-                    }
-
-                    BoardCommand lastMove = mGame.getHistory().getBoardCommand(mGame.getHistory().getNumBoardCommands() - 1);
-
-                    if(lastMove instanceof MoveCommand) {
-                        mGameView.getRenderer().highlightBoard(lastMove.position, LAST_MOVE_COLOR);
-                    }
-
-                    if(mGameView.getCurrentSelected() != null)
-                        mGameView.getRenderer().highlightBoard(mGameView.getCurrentSelected(), MOVE_SELECT_COLOR);
-
-                    mGameView.requestRender();
-                }
-            }
-        });
+        mGameView.doHighlights();
     }
 
     /**
@@ -318,6 +288,12 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
         mGameView.setGame(mGame);
 
+        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
+
+        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
+
         prepareScorePanel();
     }
 
@@ -335,11 +311,5 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     public void onServiceDisconnected(ComponentName name) {
 
         getActivity().finish();
-    }
-
-    public enum HighlightMode {
-        HIGHLIGHT_NONE,
-        HIGHLIGHT_POSSIBLE_MOVES,
-        HIGHLIGHT_BEST_MOVE;
     }
 }

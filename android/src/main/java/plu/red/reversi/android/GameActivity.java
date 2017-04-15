@@ -23,6 +23,7 @@ import android.view.Window;
 import android.widget.FrameLayout;
 
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.reversi3d.HighlightMode;
 
 public class GameActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GameListener, ServiceConnection {
@@ -36,6 +37,9 @@ public class GameActivity extends AppCompatActivity
     SingleplayerFragment mSingleplayerFragment;
     MultiplayerFragment mMultiplayerFragment;
     SavedGamesFragment mSavesFragment;
+
+    SettingsFragment mSettingsFragment;
+    AboutFragment mAboutFragment;
 
     Fragment currentFragment;
 
@@ -64,6 +68,9 @@ public class GameActivity extends AppCompatActivity
         mSingleplayerFragment = new SingleplayerFragment();
         mMultiplayerFragment = new MultiplayerFragment();
         mSavesFragment = new SavedGamesFragment();
+
+        mSettingsFragment = new SettingsFragment();
+        mAboutFragment = new AboutFragment();
 
         mContentFrame = (FrameLayout) findViewById(R.id.content_frame);
 
@@ -129,9 +136,9 @@ public class GameActivity extends AppCompatActivity
         } else if (id == R.id.nav_saves) {
             showFragment(mSavesFragment);
         } else if (id == R.id.nav_settings) {
-
+            showFragment(mSettingsFragment);
         } else if (id == R.id.nav_about) {
-
+            showFragment(mAboutFragment);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -157,16 +164,16 @@ public class GameActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.menu_show_possible_moves:
 
-                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == PlayFragment.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES ?
-                        PlayFragment.HighlightMode.HIGHLIGHT_NONE :
-                        PlayFragment.HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
+                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES ?
+                        HighlightMode.HIGHLIGHT_NONE :
+                        HighlightMode.HIGHLIGHT_POSSIBLE_MOVES);
 
                 return true;
             case R.id.menu_show_best_move:
 
-                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == PlayFragment.HighlightMode.HIGHLIGHT_BEST_MOVE ?
-                        PlayFragment.HighlightMode.HIGHLIGHT_NONE :
-                        PlayFragment.HighlightMode.HIGHLIGHT_BEST_MOVE);
+                mPlayFragment.setHighlightMode(mPlayFragment.getHighlightMode() == HighlightMode.HIGHLIGHT_BEST_MOVE ?
+                        HighlightMode.HIGHLIGHT_NONE :
+                        HighlightMode.HIGHLIGHT_BEST_MOVE);
 
                 return true;
             default:

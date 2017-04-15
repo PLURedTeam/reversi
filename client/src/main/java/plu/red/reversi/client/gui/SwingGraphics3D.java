@@ -47,6 +47,7 @@ public class SwingGraphics3D extends Graphics3D {
 
         gl.glEnable(GL3.GL_DEPTH_TEST);
         gl.glEnable(GL3.GL_CULL_FACE);
+        gl.glEnable(GL3.GL_MULTISAMPLE);
         //gl.glEnable(gl.GL_BLEND);
         gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
     }

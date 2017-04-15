@@ -20,7 +20,7 @@ import plu.red.reversi.core.util.Color;
 
 public class Piece3D extends ColorModel3D {
 
-    public static final int LONGITUDE_DETAIL = 20;
+    public static final int LONGITUDE_DETAIL = 60;
     public static final int LATITUDE_DETAIL = 20;
 
     public static final float HORIZONTAL_RADIUS = 0.04f;

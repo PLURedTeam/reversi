@@ -9,6 +9,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
@@ -164,10 +165,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(sectionIndex < 6) {
 
-            color = new Vector4f(0.2f, 0.2f, 0.2f, 1.0f);
+            color = new Vector4f(0.15f, 0.15f, 0.15f, 1.0f);
         }
         else {
-            color = new Vector4f(0.2f, 0.7f, 0.2f, 1.0f);
+            color = new Vector4f(0.1f, 0.55f, 0.1f, 1.0f);
         }
 
         return new Vector4f[]{
@@ -297,10 +298,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
             currentBoardUpdate = null;
-
             done = true;
-
-            System.out.println("Informing listeners");
 
             for(Board3DListener listener : listeners) {
                 listener.onAnimationStepDone(this);
@@ -308,7 +306,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
 
         if(boardUpdates.peek() != null && boardUpdates.peek().triggerTick <= tick) {
-            System.out.println("Poll for board update: " + boardUpdates.size());
             currentBoardUpdate = boardUpdates.pop();
             currentBoardUpdate.dispatch();
 
@@ -388,6 +385,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         else if(currentBoardUpdate != null)
             triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
 
+        if(updated == null)
+            updated = new ArrayList<BoardIndex>();
+
         boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
     }
 
@@ -403,6 +403,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                 pieces[indexFromCoord(toBoardCoords(index, size), size)].clearAnimations();
 
             currentBoardUpdate = null;
+
+            // technically we just completed an animation step, just earlier htan expected.
+            for(Board3DListener listener : listeners)
+                listener.onAnimationStepDone(this);
         }
     }
 

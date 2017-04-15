@@ -18,7 +18,12 @@ public class SimpleGLFragmentShader extends PixelShader {
     public String getSource() {
         String s = "";
 
-        s +=    "#version 300 es\n" +
+        if(def.isES)
+            s += "#version 300 es\n";
+        else
+            s += "#version 330\n";
+
+        s +=
                 "precision mediump float;\n" +
                 "const float screenGamma = 2.2;" +
                 "\n" +

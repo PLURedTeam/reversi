@@ -1,4 +1,4 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.android;
 
 import android.opengl.GLES30;
 import android.util.Log;
@@ -14,24 +14,25 @@ import org.joml.Vector4ic;
 
 import java.io.IOException;
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.security.InvalidParameterException;
-import java.util.Collection;
+
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.Shader;
+import plu.red.reversi.core.graphics.ShaderCompileException;
+import plu.red.reversi.core.graphics.VertexBufferObject;
 
 /**
- * Created by daniel on 3/19/17.
+ * Created by daniel on 4/13/17.
  * Copyright 13013 Inc. All Rights Reserved.
  */
 
 public class AndroidGraphics3D extends Graphics3D {
-
     private static final String TAG = AndroidGraphics3D.class.getSimpleName();
-
     private void checkGLError() {
         int err = GLES30.glGetError();
-
         if(err == GLES30.GL_NO_ERROR) {
             return;
         }
@@ -51,15 +52,12 @@ public class AndroidGraphics3D extends Graphics3D {
             throw new RuntimeException("GL Error: unknown code: " + err);
         }
     }
-
-
     public AndroidGraphics3D() {
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glEnable(GLES30.GL_CULL_FACE);
         //GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
     }
-
     /**
      * Specifies to the rendering backend the viewport drawing dimensions
      *
@@ -72,7 +70,6 @@ public class AndroidGraphics3D extends Graphics3D {
     public void setViewport(int x, int y, int w, int h) {
         GLES30.glViewport(x, y, w, h);
     }
-
     /**
      * Specifies whether or not alpha blending should be enabled or not. This is useful for transparency.
      *
@@ -85,7 +82,6 @@ public class AndroidGraphics3D extends Graphics3D {
         else
             GLES30.glDisable(GLES30.GL_BLEND);
     }
-
     /**
      * Using the specified shader, compile the code returned by getCode() and associate it with the shader using setHandle()
      *
@@ -96,7 +92,6 @@ public class AndroidGraphics3D extends Graphics3D {
     @Override
     public void compileShader(Shader shader) {
         Integer handle = -1;
-
         switch (shader.getType()) {
             case VERTEX:
                 handle = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER);
@@ -107,30 +102,20 @@ public class AndroidGraphics3D extends Graphics3D {
             default:
                 throw new UnsupportedOperationException("Shader type is not available in GLES");
         }
-
         String source = shader.getSource();
-
         GLES30.glShaderSource(handle, source);
         GLES30.glCompileShader(handle);
-
         int[] buf = new int[1];
-
         GLES30.glGetShaderiv(handle, GLES30.GL_COMPILE_STATUS, buf, 0);
-
         if(buf[0] == GLES30.GL_FALSE) {
             // shader failed to compile, get more info
             String message = GLES30.glGetShaderInfoLog(handle);
-
             throw new ShaderCompileException(message, source);
         }
-
         shader.setHandle(this, handle);
-
         checkGLError();
-
         //Log.v(TAG, "Uploaded shader to id " + handle);
     }
-
     /**
      * Generates a rendering pipeline from the given shaders
      * <p>
@@ -143,48 +128,33 @@ public class AndroidGraphics3D extends Graphics3D {
     @Override
     public void createPipeline(Pipeline pipeline) {
         Integer handle = GLES30.glCreateProgram();
-
         for(Shader shader : pipeline.getShaders()) {
-
             if(shader.getHandle() == null)
                 compileShader(shader);
-
             GLES30.glAttachShader(handle, (Integer)shader.getHandle());
         }
-
         // before we link program, make sure opengl knows about the attributes in this shader
         /*int i = 0;
         for(String attr : pipeline.getExtras().keySet()) {
             pipeline.setExtraHandle(attr, i);
             GLES30.glBindAttribLocation(handle, i++, attr);
         }
-
         checkGLError();*/
-
         GLES30.glLinkProgram(handle);
-
         int[] buf = new int[10];
-
         GLES30.glGetProgramiv(handle, GLES30.GL_LINK_STATUS, buf, 0);
-
         if(buf[0] == GLES30.GL_FALSE) {
             // program failed to link, get more info
             String message = GLES30.glGetProgramInfoLog(handle);
-
             throw new ShaderCompileException(message, "");
         }
-
         pipeline.setHandle(this, handle);
-
         GLES30.glGetProgramiv(handle, GLES30.GL_ACTIVE_ATTRIBUTES, buf, 0);
         GLES30.glGetProgramiv(handle, GLES30.GL_ACTIVE_UNIFORMS, buf, 1);
         GLES30.glGetProgramiv(handle, GLES30.GL_ATTACHED_SHADERS, buf, 2);
-
         checkGLError();
-
         //Log.v(TAG, "Linked program to id " + handle + ", " + buf[0] + " active attributes detected, " + buf[1] + " active uniforms, " + buf[2] + " attached shaders.");
     }
-
     /**
      * Sets the currently active pipeline to the one given for future draw commands
      *
@@ -194,12 +164,9 @@ public class AndroidGraphics3D extends Graphics3D {
     @Override
     public void setPipeline(Pipeline pipeline) {
         GLES30.glUseProgram((Integer) pipeline.getHandle());
-
         checkGLError();
-
         //Log.v(TAG, "Set current program to " + pipeline.getHandle());
     }
-
     /**
      * Uploads the specified data as a generic buffer to the graphics card.
      *
@@ -207,32 +174,21 @@ public class AndroidGraphics3D extends Graphics3D {
      */
     @Override
     public void uploadVBO(VertexBufferObject obj) throws IOException {
-
         Integer handle = (Integer)obj.getHandle();
-
         if(obj.getHandle() == null) {
             // there is array associated with this object
             int[] buf = new int[1];
-
             GLES30.glGenBuffers(1, buf, 0);
-
             handle = buf[0];
         }
-
         Buffer buf = obj.getBuffer();
-
         buf.rewind();
-
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle);
         GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, obj.getDataSize() * buf.capacity(), buf, GLES30.GL_STATIC_DRAW);
-
         obj.setHandle(this, handle);
-
         checkGLError();
-
         //Log.v(TAG, "Uploaded VBO data to " + handle + ", " + obj.size());
     }
-
     /**
      * Apply shader uniform to pipeline based on the properties provided for future render commands.
      * <p>
@@ -245,22 +201,17 @@ public class AndroidGraphics3D extends Graphics3D {
     @Override
     public void bindPipelineVBO(String name, Pipeline p, VertexBufferObject obj) {
         Integer handle = (Integer)obj.getHandle();
-
         if(handle == null)
             throw new InvalidParameterException("Buffer for " + name + " should be initialized before binding");
         if(p.getHandle() == null)
             throw new InvalidParameterException("Pipeline for " + name + " must be initialized before binding");
-
         Integer attrHandle = GLES30.glGetAttribLocation((int)p.getHandle(), name);
-
         if(attrHandle == -1)
             return;
-            // it is possible for opengl to decide to drop attributes if they are found to not be used
-                // so this is a noop
-            //throw new InvalidParameterException("Attribute name '" + name + "' does not seem to be valid for the current pipeline.");
-
+        // it is possible for opengl to decide to drop attributes if they are found to not be used
+        // so this is a noop
+        //throw new InvalidParameterException("Attribute name '" + name + "' does not seem to be valid for the current pipeline.");
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle);
-
         if(obj.getPlainType() == Float.class) {
             GLES30.glVertexAttribPointer(attrHandle, obj.getStride(), GLES30.GL_FLOAT, false, 0, 0);
         }
@@ -274,25 +225,18 @@ public class AndroidGraphics3D extends Graphics3D {
         else {
             throw new UnsupportedOperationException("Simple type of VBO must not be " + obj.getPlainType());
         }
-
         GLES30.glEnableVertexAttribArray(attrHandle);
-
         checkGLError();
-
         //Log.v(TAG, "Bound VBO to Pipeline: " + name + " <= " + obj.getHandle() + ". Stride was " + obj.getStride());
     }
-
     @Override
     public void bindPipelineUniform(String name, Pipeline p, Object data) {
         if(p.getHandle() == null)
             throw new InvalidParameterException("Pipeline must be initialized before binding");
-
         int uniformHandle = GLES30.glGetUniformLocation((Integer) p.getHandle(), name);
-
         if(uniformHandle == -1)
             // noop
             return;
-
         if(data instanceof Float)
             GLES30.glUniform1fv(uniformHandle, 1, new float[]{(Float)data}, 0);
         else if(data instanceof Vector2fc) {
@@ -348,40 +292,27 @@ public class AndroidGraphics3D extends Graphics3D {
         else {
             throw new UnsupportedOperationException("Type is not compatible with uniform in OpenGL ES 3.0");
         }
-
         checkGLError();
-
         //Log.v(TAG, "Bound uniform to pipeline: " + name + " <= " + data);
     }
-
     @Override
     public void enablePipelineVerticesVBO(String name, Pipeline p) {
         if(p.getHandle() == null)
             throw new InvalidParameterException("Pipeline must be initialized before binding");
-
         int attrHandle = GLES30.glGetAttribLocation((Integer) p.getHandle(), name);
-
         GLES30.glEnableVertexAttribArray(attrHandle);
-
         checkGLError();
-
         //Log.v(TAG, "Set pipeline vertices VBO to " + name);
     }
-
     @Override
     public void disablePipelineVerticesVBO(String name, Pipeline p) {
         if(p.getHandle() == null)
             throw new InvalidParameterException("Pipeline must be initialized before binding");
-
         int attrHandle = GLES30.glGetAttribLocation((Integer) p.getHandle(), name);
-
         GLES30.glDisableVertexAttribArray(attrHandle);
-
         checkGLError();
-
         //Log.v(TAG, "Unset pipeline vertices VBO from " + name);
     }
-
     /**
      * Sets the color to clear the render buffer to when clearBuffers() is called.
      *
@@ -390,22 +321,17 @@ public class AndroidGraphics3D extends Graphics3D {
     @Override
     public void setClearColor(Vector3fc color) {
         GLES30.glClearColor(color.x(), color.y(), color.z(), 1.0f);
-
         checkGLError();
-
         //Log.v(TAG, "Set clear color to " + color);
     }
-
     /**
      * Clears the color and depth buffers
      */
     @Override
     public void clearBuffers() {
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT | GLES30.GL_COLOR_BUFFER_BIT);
-
         //Log.v(TAG, "Cleared GL buffers");
     }
-
     /**
      * Draw the specified verticies to the screen using the currently active pipeline. Currently only draws triangles.
      *
@@ -414,14 +340,10 @@ public class AndroidGraphics3D extends Graphics3D {
      */
     @Override
     public void drawVertices(int first, int count) {
-
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, first, count);
-
         checkGLError();
-
         //Log.v(TAG, "Draw " + count + " vertices, offset " + first);
     }
-
     /**
      * Similar to draw, but draws indices of the VBO rather than from start to end
      *

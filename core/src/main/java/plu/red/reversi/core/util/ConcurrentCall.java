@@ -1,5 +1,6 @@
 package plu.red.reversi.core.util;
 
+import javax.swing.*;
 import java.lang.annotation.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -41,7 +42,7 @@ import java.util.TreeSet;
 public class ConcurrentCall implements Runnable {
 
     private static final HashMap<CallID, HashSet<ConcurrentCall>> calls = new HashMap<>();
-    private static final HashSet<ResultMethodSyncStruct> syncBuffer = new HashSet<>();
+    private static final HashSet<ResultMethodRunnable> syncBuffer = new HashSet<>();
 
     /**
      * Creates and runs a new ConcurrentCall.
@@ -114,7 +115,7 @@ public class ConcurrentCall implements Runnable {
         for(Method method : methods) {
             if(method.isAnnotationPresent(ResultMethod.class)) {
 
-                boolean sync = method.getDeclaredAnnotation(ResultMethod.class).value();
+                InvokeType sync = method.getDeclaredAnnotation(ResultMethod.class).value();
 
                 // Get ResultParameter IDs
                 Parameter[] params = method.getParameters();
@@ -174,14 +175,8 @@ public class ConcurrentCall implements Runnable {
     public static void syncCalls() {
         synchronized(syncBuffer) {
             // Do all the stored ResultMethod calls
-            for (ResultMethodSyncStruct method : syncBuffer) {
-                try {
-                    method.method.invoke(method.resultObject, method.values);
-                } catch (IllegalAccessException ex) {
-                    throw new IllegalArgumentException("Cannot access ResultMethod " + method.method.getName());
-                } catch (InvocationTargetException ex) {
-                    throw new RuntimeException(ex.getMessage());
-                }
+            for (ResultMethodRunnable method : syncBuffer) {
+                method.run();
             }
             syncBuffer.clear();
         }
@@ -256,20 +251,24 @@ public class ConcurrentCall implements Runnable {
                     }
                 }
 
-                if(method.sync) {
-                    // Cache the ResultMethod for calling later
-                    synchronized(syncBuffer) {
-                        syncBuffer.add(new ResultMethodSyncStruct(values, resultObject, method.method));
-                    }
-                } else {
-                    // Try to invoke ResultMethod
-                    try {
-                        method.method.invoke(resultObject, values);
-                    } catch (IllegalAccessException ex) {
-                        throw new IllegalArgumentException("Cannot access ResultMethod " + method.method.getName());
-                    } catch (InvocationTargetException ex) {
-                        throw new RuntimeException(ex.getMessage());
-                    }
+                ResultMethodRunnable runnable = new ResultMethodRunnable(method.method, resultObject, values);
+
+                switch(method.sync) {
+                    default:
+                    case IMMEDIATE:
+                        // Try to invoke ResultMethod
+                        runnable.run();
+                        break;
+                    case SYNC:
+                        // Cache the ResultMethod for calling later
+                        synchronized(syncBuffer) {
+                            syncBuffer.add(runnable);
+                        }
+                        break;
+                    case SWING:
+                        // Tell Swing to invoke later
+                        SwingUtilities.invokeLater(runnable);
+                        break;
                 }
 
                 // Check for Stop flag
@@ -335,20 +334,32 @@ public class ConcurrentCall implements Runnable {
 
     private static class ResultMethodStruct {
         final int[] ids;
-        final boolean sync;
+        final InvokeType sync;
         final Method method;
-        ResultMethodStruct(int[] ids, boolean sync, Method method) {
+        ResultMethodStruct(int[] ids, InvokeType sync, Method method) {
             this.ids = ids; this.sync = sync; this.method = method;
         }
     }
 
-    private static class ResultMethodSyncStruct {
-        final Object[] values;
-        final Object resultObject;
+    private static class ResultMethodRunnable implements Runnable {
         final Method method;
-        ResultMethodSyncStruct(Object[] values, Object resultObject, Method method) {
-            this.values = values; this.resultObject = resultObject; this.method = method;
+        final Object resultObject;
+        final Object[] resultValues;
+        ResultMethodRunnable(Method method, Object resultObject, Object[] resultValues) {
+            this.method = method; this.resultObject = resultObject; this.resultValues = resultValues;
         }
+
+        @Override
+        public void run() {
+            try {
+                method.invoke(resultObject, resultValues);
+            } catch (IllegalAccessException ex) {
+                throw new IllegalArgumentException("Cannot access ResultMethod " + method.getName());
+            } catch (InvocationTargetException ex) {
+                throw new RuntimeException(ex.getMessage());
+            }
+        }
+
     }
 
     /**
@@ -379,16 +390,28 @@ public class ConcurrentCall implements Runnable {
     }
 
     /**
+     * InvokeType Enumeration. Used to determine when to invoke a ResultMethod. <code>IMMEDIATE</code> will invoke the
+     * ResultMethod as soon as the Call is finished, <code>SYNC</code> will wait to invoke the ResultMethod until
+     * <code>syncCalls()</code> is called, and <code>SWING</code> will schedule the ResultMethod with Swing's
+     * <code>invokeLater()</code>.
+     */
+    public enum InvokeType {
+        IMMEDIATE,
+        SYNC,
+        SWING
+    }
+
+    /**
      * ResultMethod Annotation. This annotation is used to mark a method in the result object as the end target for
      * a result variable/s. By default, a ResultMethod will execute immediately after the ConcurrentCall has run, on
-     * the same thread as the ConcurrentCall. Instead, the <code>sync</code> parameter - which defaults to
-     * <code>false</code> - can be used to specify that the ConcurrentCall will not immediately call the marked
-     * method, but instead wait until the static method <code>ConcurrentCall#syncCalls()</code> is called.
+     * the same thread as the ConcurrentCall. Instead, the <code>value</code> parameter - which defaults to
+     * <code>InvokeType.IMMEDIATE</code> - can be used to specify that the ConcurrentCall will not immediately call the
+     * marked method, but instead wait until a later point in time.
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ResultMethod {
-        boolean value() default false;
+        InvokeType value() default InvokeType.IMMEDIATE;
     }
 
     /**
