@@ -19,6 +19,7 @@ import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.player.HumanPlayer;
+import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.graphics.*;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
@@ -89,6 +90,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         addGLEventListener(new EventHandler());
         setVisible(true);
         autoFollow = true;
+
+        canPlay = game.getCurrentPlayer() instanceof HumanPlayer ||
+                game.getCurrentPlayer() instanceof NullPlayer;
+
         animator = new Animator(this);
         animator.start();
     }
@@ -123,9 +128,16 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             public void run() {
                 board.clearHighlights();
 
+                System.out.println("Updating highlights");
+
                 if(canPlay) {
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
+
+                        System.out.println("NEXT PLAYER: " +
+                                game.getNextPlayerID(game.getHistory().getBoardCommand(boardIterator.getPos()).playerID));
+
+                        System.out.println(boardIterator.getPos());
 
                         Set<BoardIndex> validMoves = (
                             game.getGameLogic()
@@ -262,6 +274,9 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
             camera.setPos(new Vector2f(0,0));
             camera.setDir(new Vector2f(0, 0.5f * (float)Math.PI));
+
+            // TODO: This is a little funky... but its the best way to deal with making sure the correct move is displayed
+            setMoveIndex(game.getHistory().getNumBoardCommands() - 1);
         }
 
         @Override

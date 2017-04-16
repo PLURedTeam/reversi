@@ -169,8 +169,8 @@ public class ReversiLogic extends GameLogic {
         case 2:
             list.add(new SetCommand(players[0], new BoardIndex(size / 2 - 1,size / 2 - 1)));
             list.add(new SetCommand(players[1], new BoardIndex(size / 2 - 1,size / 2)));
-            list.add(new SetCommand(players[1], new BoardIndex(size / 2,size / 2 -1)));
             list.add(new SetCommand(players[0], new BoardIndex(size / 2,size / 2)));
+            list.add(new SetCommand(players[1], new BoardIndex(size / 2,size / 2 -1)));
             break;
         case 4:
             list.add(new SetCommand(players[0], new BoardIndex(size / 2 - 1,size / 2 - 1)));
