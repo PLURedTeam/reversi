@@ -378,11 +378,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     @Override
-    public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+    public void onBoardUpdate(BoardUpdate update) {
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.onBoardUpdate(origin, playerId, updated);
+                mRenderer.onBoardUpdate(update);
             }
         });
     }
@@ -638,7 +638,12 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 );*/
                             }
                             else {
-                                mRenderer.mBoard.animBoardUpdate(cmd.position, cmd.playerID, null);
+                                BoardUpdate update = new BoardUpdate();
+
+                                update.player = cmd.playerID;
+                                update.added.add(cmd.position);
+
+                                mRenderer.mBoard.animBoardUpdate(update);
                             }
 
                             iter.next();
@@ -905,12 +910,12 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
 
         @Override
-        public void onBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+        public void onBoardUpdate(BoardUpdate update) {
             if(mAutoFollow) {
                 // auto follow
                 if(mBoard != null) {
                     mBoard.clearHighlights();
-                    mBoard.animBoardUpdate(origin, playerId, updated);
+                    mBoard.animBoardUpdate(update);
                 }
             }
         }

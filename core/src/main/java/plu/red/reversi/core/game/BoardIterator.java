@@ -28,6 +28,7 @@ public class BoardIterator {
 
     public BoardIterator(BoardIterator other) {
         hist = other.hist;
+        logic = other.logic;
         board = new Board(other.board);
         pos = other.pos;
     }
