@@ -118,25 +118,6 @@ public class ReversiLogic extends GameLogic {
 
 
     /**
-     * Checks if the given player has at least one available move. Prefer using this to getValidMoves as it can be
-     * much more efficient when only checking true/false.
-     *
-     * @param player The player to check.
-     * @param board  Board to apply commands to.
-     * @return True if the player is able to play, else false.
-     */
-    @Override
-    public boolean canPlay(int player, Board board) {
-        BoardIndex index = new BoardIndex();
-        for(index.row = 0; index.row < board.size; index.row++)
-            for(index.column = 0; index.column < board.size; index.column++)
-                if(isValidMove(new MoveCommand(player, index), board))
-                    return true;
-        return false;
-    }
-
-
-    /**
      * Returns the score of the Player ID passed in
      *
      * @param player Integer Player ID.
@@ -159,7 +140,7 @@ public class ReversiLogic extends GameLogic {
      * Retrieve the initial setup commands based on the specific game gameLogic.
      *
      * @param players Array of the player ids used in current game in order.
-     * @size Size of board for which to generate the setup commands for.
+     * @param size of board for which to generate the setup commands for.
      * @return List of the moves to be made to create the initial state.
      */
     @Override
