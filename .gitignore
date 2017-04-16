@@ -34,6 +34,7 @@ gradle-app.setting
 hs_err_pid*
 
 .idea
+reversi.iml
 
 ## File-based project format:
 *.iws
