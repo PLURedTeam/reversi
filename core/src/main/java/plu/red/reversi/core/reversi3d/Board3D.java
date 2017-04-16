@@ -468,7 +468,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * @return the board index which would be at this position
      */
     public BoardIndex getIndexAtCoord(Vector2fc pos) {
-
         Vector2f offset = new Vector2f(getBoardOrigin().x(), getBoardOrigin().y()).add(PIECE_BORDER_SIZE, PIECE_BORDER_SIZE);
 
         pos.sub(offset, offset);
@@ -486,7 +485,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * @return
      */
     public static BoardIndex fromBoardCoords(Vector2ic coords, int size) {
-        return new BoardIndex(size - coords.x() - 1, coords.y());
+        return new BoardIndex(size - coords.y() - 1, coords.x());
     }
 
     /**
@@ -497,8 +496,8 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      */
     public static Vector2i toBoardCoords(BoardIndex idx, int size) {
         return new Vector2i(
-                size - idx.row - 1,
-                idx.column
+                idx.column,
+                size - idx.row - 1
         );
     }
 
@@ -509,7 +508,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * @return the index which would contain the piece/highlight you are looking for at the given board index
      */
     public static int indexFromCoord(Vector2ic coords, int size) {
-        return size * size - (size - coords.y() - 1) * size - (size - coords.x() - 1) - 1;
+        final int y = coords.y();
+        final int x = coords.x();
+        return y*size + x;
     }
 
     /**
@@ -519,13 +520,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
      * @return a board3d coordinate vector at the specified index
      */
     public static Vector2ic indexToCoord(int i, int size) {
-
-        i = size * size - i - 1;
-
-        return new Vector2i(
-                size - (i % size) - 1,
-                size - (i / size) - 1
-        );
+        final int x = i % size;
+        final int y = i / size;
+        return new Vector2i(y, x);
     }
 
     @Override
