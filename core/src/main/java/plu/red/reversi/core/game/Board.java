@@ -7,13 +7,14 @@ import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Glory to the Red Team.
  *
  * Represents the state of the board at a particular instant in time
  */
-public class Board {
+public class Board implements Iterable<BoardIndex> {
     private int[][] board; // 2D array that represents the board. -1 represents an empty space.
     public final int size;
 
@@ -130,10 +131,51 @@ public class Board {
             return false;
 
         for(int r = 0; r < size; r++)
-            for(int c = 0; c < size; c++){
+            for(int c = 0; c < size; c++)
                 if(board[r][c] != b.board[r][c])
                     return false;
-            }
+
         return true;
+    }
+
+    @Override
+    public Iterator<BoardIndex> iterator() {
+        return new BoardIterator(size);
+    }
+
+
+    /**
+     * Iterator for Board used to get each BoardIndex.
+     */
+    public static class BoardIterator implements Iterator<BoardIndex> {
+        private final int size;
+        private int r;
+        private int c;
+
+        /**
+         * Construct a new board iterator.
+         * @param size Size of the board being iterated.
+         */
+        BoardIterator(int size) {
+            this.size = size;
+            r = 0;
+            c = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if(r < size - 1) return true;
+            if(c < size - 1) return true;
+            return false;
+        }
+
+        @Override
+        public BoardIndex next() {
+            if(++c == size) {
+                c = 0;
+                ++r;
+            }
+            return new BoardIndex(r, c);
+        }
     }
 }

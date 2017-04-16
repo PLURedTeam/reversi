@@ -1,5 +1,6 @@
 package plu.red.reversi.core;
 
+import org.junit.Assert;
 import org.junit.Test;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
@@ -55,5 +56,12 @@ public class BoardTest {
 
         b.apply(new SetCommand(1, new BoardIndex(0, 2)));
         assertEquals(2, b.getTotalPieces());
+    }
+
+    @Test
+    public void testIterate() {
+        Board b = new Board(8);
+        for(BoardIndex index : b)
+            assertEquals(-1, b.at(index));
     }
 }
