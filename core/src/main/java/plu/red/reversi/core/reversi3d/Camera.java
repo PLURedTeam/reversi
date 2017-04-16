@@ -234,7 +234,7 @@ public class Camera {
         // now figure out what the offset would be in the world based on the current camera angling
         Vector3f cameraDir = getRealCameraCenter().sub(getRealCameraPos()).normalize();
 
-        Vector3f left = getRealCameraUp().cross(cameraDir);
+        Vector3f left = getRealCameraUp().cross(cameraDir).normalize();
         Vector3f up = new Vector3f();
         cameraDir.cross(left, up);
 
