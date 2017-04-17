@@ -1,6 +1,5 @@
 package plu.red.reversi.server.endpoints;
 
-import plu.red.reversi.server.Chat.ChatHandler;
 import plu.red.reversi.server.LocalServer;
 import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
@@ -51,7 +50,6 @@ public class BaseEndpoint {
         user.setStatus("In Lobby");
         UserManager.INSTANCE.addUser(user);
         user.setSessionID(SessionManager.INSTANCE.addSession());
-        LocalServer.globalChat.addUser(user.getUsername());
 
         return Response.ok().entity(user).build();
     }//login
@@ -71,7 +69,6 @@ public class BaseEndpoint {
 
         UserManager.INSTANCE.removeUser(user);
         SessionManager.INSTANCE.removeSession(user.getSessionID());
-        LocalServer.globalChat.removeUser(user.getUsername());
         return true;
     }//logout
 

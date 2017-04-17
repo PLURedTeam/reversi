@@ -39,7 +39,7 @@ public class ChatHandler implements Runnable, INetworkListener {
 
         //Build the client and set the target
         Client chatClient = ClientBuilder.newBuilder().register(SseFeature.class).build();
-        WebTarget target = chatClient.target(baseURI + "chat/global");
+        WebTarget target = chatClient.target(baseURI + "chat");
 
         //Create the eventInput listener
         EventInput eventInput = target.request().get(EventInput.class);

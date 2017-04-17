@@ -76,7 +76,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == chatEntryButton) {
             if(chatEntryField.getText().length() > 0) {
-                ChatMessage message = new ChatMessage(ChatMessage.Channel.GLOBAL, WebUtilities.INSTANCE.getUser().getUsername(), chatEntryField.getText());
+                ChatMessage message = new ChatMessage(this.channel, WebUtilities.INSTANCE.getUser().getUsername(), chatEntryField.getText());
                 chatEntryField.setText("");
                 Client.getInstance().getCore().acceptCommand(new ChatCommand(message));
             }

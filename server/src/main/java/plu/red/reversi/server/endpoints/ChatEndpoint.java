@@ -30,7 +30,6 @@ public class ChatEndpoint {
      * Posts a message to the ChatHandler that was received from the client
      * @param message
      */
-    @Path("global")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     public void postMessage(String message) {
@@ -42,7 +41,6 @@ public class ChatEndpoint {
         broadcaster.broadcast(event);
     }//postMessage
 
-    @Path("global")
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput listenToBroadcast() {

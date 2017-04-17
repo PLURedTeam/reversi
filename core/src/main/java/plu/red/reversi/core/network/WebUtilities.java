@@ -261,10 +261,7 @@ public class WebUtilities {
      * @return the User object
      */
     public User getUser() {
-        if(loggedIn)
             return user;
-        else
-            return null;
     }//getUser
 
 
@@ -276,7 +273,7 @@ public class WebUtilities {
         JSONObject message = null;
         try {message = m.toJSON();}
         catch (JSONException e) {e.printStackTrace();}
-        WebTarget target = client.target(baseURI + "chat/global");
+        WebTarget target = client.target(baseURI + "chat");
         Response response = target.request().post(Entity.text(message.toString()));
     }//sendChat
 
