@@ -1,6 +1,5 @@
 package plu.red.reversi.server;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,6 +16,7 @@ public class SessionManager implements Runnable {
      * Constructor for the SessionManager
      */
     public SessionManager() {
+        System.out.println("[SESSION MANAGER] SESSION MANAGER STARTED");
         sessions = new ConcurrentHashMap<Integer, Long>();
     }//constructor
 
@@ -28,7 +28,7 @@ public class SessionManager implements Runnable {
         int session = sessionIncrementer;
         sessions.put(session, System.currentTimeMillis());
         sessionIncrementer++;
-        System.out.println("Adding Session: " + session);
+        System.out.println("[SESSION MANAGER] ADDING SESSION: " + session);
         return session;
     }//addSession
 
@@ -37,7 +37,7 @@ public class SessionManager implements Runnable {
      * @param sessionID the session id to remove
      */
     public void removeSession(int sessionID) {
-        System.out.println("Removing Session: " + sessionID);
+        System.out.println("[SESSION MANAGER] REMOVING SESSION: " + sessionID);
         sessions.remove(sessionID);
     }//sessionID
 
@@ -50,7 +50,7 @@ public class SessionManager implements Runnable {
     }//keepSessionAlive
 
     /**
-     * Thread that looks for expired sessions
+     * Thread that looks for expired sessions and removes them
      */
     public void run() {
 
@@ -59,7 +59,8 @@ public class SessionManager implements Runnable {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 65000) {
                     sessions.remove(sessionID);
                     UserManager.INSTANCE.timedOut(sessionID);
-                    System.out.println("Removing Session: " + sessionID);
+                    System.out.println("[SESSION MANAGER] SESSION TIMED OUT: " + sessionID);
+                    removeSession(sessionID);
                 }//if
 
             }//for

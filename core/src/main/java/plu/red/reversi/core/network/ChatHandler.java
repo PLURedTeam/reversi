@@ -14,6 +14,9 @@ import javax.ws.rs.client.WebTarget;
 
 /**
  * Created by Andrew on 4/13/2017.
+ *
+ * Handles the Server Side Events for chat. Notifies the chat listeners when a new chat message is received
+ * from the server.
  */
 public class ChatHandler implements Runnable, INetworkListener {
 
@@ -23,11 +26,11 @@ public class ChatHandler implements Runnable, INetworkListener {
     private boolean loggedIn = true;
 
     /**
-     * Default Constructor
+     * Constructor
      */
     public ChatHandler(WebUtilities u) {
-        util = u;
-        Coordinator.addListenerStatic(this);
+        util = u; //Set the WebUtilities
+        Coordinator.addListenerStatic(this); //Add the listener
     }//constructor
 
     /**
@@ -54,6 +57,7 @@ public class ChatHandler implements Runnable, INetworkListener {
                 continue; //Don't notify listeners
             }//catch
 
+            //Notify listeners
             plu.red.reversi.core.Client.getInstance().getCore().notifyChatListeners(message);
             System.out.println("Got [" + message.message + "] from broadcast");
         }//while
@@ -61,13 +65,13 @@ public class ChatHandler implements Runnable, INetworkListener {
         System.out.println("[CHAT HANDLER]: Thread Finished");
     }//run
 
+    /**
+     * Action listener for when the user logs out.
+     * @param loggedIn if the user is loggedIn
+     */
     @Override
     public void onLogout(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }//onLogout
-
-
-
-
 
 }//class

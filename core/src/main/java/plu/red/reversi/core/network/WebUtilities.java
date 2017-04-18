@@ -80,7 +80,7 @@ public class WebUtilities {
                 plu.red.reversi.core.Client.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                 //Start the session thread
-                Thread session = new Thread(new SessionHandler(this, client, user));
+                Thread session = new Thread(new SessionHandler(client, user));
                 session.start();
 
                 Thread chat = new Thread(new ChatHandler(this));

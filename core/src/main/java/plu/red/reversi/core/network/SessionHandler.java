@@ -9,11 +9,12 @@ import javax.ws.rs.client.WebTarget;
 
 /**
  * Created by Andrew on 4/13/2017.
+ *
+ * Polls the server to keep the user logged in every 60 seconds.
  */
 public class SessionHandler implements Runnable, INetworkListener {
 
     //Fields
-    private WebUtilities util;
     private Client client;
     private User user;
     private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
@@ -21,16 +22,13 @@ public class SessionHandler implements Runnable, INetworkListener {
 
     /**
      * Constucts a new SessionHandler instance
-     * @param util
-     * @param client
-     * @param user
+     * @param client The web client used to call the server
+     * @param user The user object for the current logged in user
      */
-    public SessionHandler(WebUtilities util, Client client, User user) {
-        //set fields for user
-        this.util = util;
+    public SessionHandler(Client client, User user) {
         this.client = client;
         this.user = user;
-        Coordinator.addListenerStatic(this);
+        Coordinator.addListenerStatic(this); //Add the listener
     }//constructor
 
     /**

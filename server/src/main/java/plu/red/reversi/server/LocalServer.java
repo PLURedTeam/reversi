@@ -35,12 +35,7 @@ public class LocalServer {
     public static void main(String[] args) {
 
         //Start the session manager
-        SessionManager.INSTANCE = new SessionManager();
         new Thread(SessionManager.INSTANCE).start();
-
-        //Create the user manager
-        UserManager.INSTANCE = new UserManager();
-        DBUtilities.INSTANCE = new DBUtilities();
 
         //Start the server
         server = startServer();

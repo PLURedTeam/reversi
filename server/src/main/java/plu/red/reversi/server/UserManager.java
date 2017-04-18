@@ -20,6 +20,7 @@ public class UserManager {
      * Constructor for the UserManager
      */
     public UserManager() {
+        System.out.println("[USER MANAGER] USER MANAGER STARTED");
         onlineUsers = new ConcurrentHashMap<String, User>();
     }//constructor
 
@@ -28,6 +29,7 @@ public class UserManager {
      * @param user the user to be added
      */
     public void addUser(User user) {
+        System.out.println("[USER MANAGER] USER LOGGED IN: " + user.getUsername());
         onlineUsers.put(user.getUsername(), user);
     }//addUser
 
@@ -36,6 +38,7 @@ public class UserManager {
      * @param user the user to be removed
      */
     public void removeUser(User user) {
+        System.out.println("[USER MANAGER] USER LOGGED OUT: " + user.getUsername());
         onlineUsers.remove(user.getUsername());
     }//user
 
@@ -45,8 +48,10 @@ public class UserManager {
      */
     public void timedOut(int sessionID) {
         for(String username: onlineUsers.keySet())
-            if(onlineUsers.get(username).getSessionID() == sessionID)
+            if(onlineUsers.get(username).getSessionID() == sessionID) {
                 onlineUsers.remove(username);
+                System.out.println("[USER MANAGER] USER TIMED OUT: " + username);
+            }//for
     }//timedOut
 
     /**
@@ -65,8 +70,13 @@ public class UserManager {
      */
     public ArrayList<User> onlineUsers() {
         ArrayList<User> users = new ArrayList<User>();
-        for(String key: onlineUsers.keySet())
-            users.add(onlineUsers.get(key));
+        for(String key: onlineUsers.keySet()) {
+            User u = new User();
+            u.setUsername(onlineUsers.get(key).getUsername());
+            u.setStatus(onlineUsers.get(key).getStatus());
+            u.setRank(onlineUsers.get(key).getRank());
+            users.add(u);
+        }//for
 
         //Set sessionID and password(should already be null) to null
         for(User u: users) {

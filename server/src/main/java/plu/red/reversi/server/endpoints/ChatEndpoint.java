@@ -28,7 +28,7 @@ public class ChatEndpoint {
 
     /**
      * Posts a message to the ChatHandler that was received from the client
-     * @param message
+     * @param message the chatmessage to broadcast to clients
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
@@ -41,6 +41,10 @@ public class ChatEndpoint {
         broadcaster.broadcast(event);
     }//postMessage
 
+    /**
+     * returns an eventOutput object that the client can use to listen for broadcasted messages
+     * @return eventOutput item for the client
+     */
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput listenToBroadcast() {
