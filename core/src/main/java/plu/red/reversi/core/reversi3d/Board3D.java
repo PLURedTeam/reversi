@@ -579,11 +579,15 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
          * @return
          */
         public int delayForPiece(BoardIndex idx) {
-            final float POWER = 1.3f;
-            final int START_DELAY = 20; // in ticks
+            final float POWER = 1.25f;
+            final int START_DELAY = 15; // in ticks
 
             final BoardIndex origin = added.iterator().next();
-            return (int)(Math.pow(Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1), POWER) * START_DELAY);
+            return Piece3D.ANIMATION_ENTER_DURATION +
+                    (int)(Math.pow(
+                            Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1),
+                            POWER
+                    ) * START_DELAY);
         }
 
         /**
@@ -591,17 +595,20 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
          */
         private void dispatch() {
             final BoardIndex origin = added.iterator().next();
-            setPiece(origin, player);
+
+            final boolean f = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
+
+            int originIndex = indexFromCoord(toBoardCoords(origin, size), size);
+
+            pieces[originIndex].animateEnter(f, getLastTick());
+            addChild(pieces[originIndex]);
 
             for(BoardIndex index : flipped) {
                 Vector2ic coords = toBoardCoords(index, size);
-
                 int i = indexFromCoord(coords, size);
 
-                boolean flipped = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
-
                 // flips are delayed dramatically (see the power delay function above)
-                pieces[i].animateFlip(flipped, getLastTick() + delayForPiece(index));
+                pieces[i].animateFlip(f, getLastTick() + delayForPiece(index));
             }
         }
     }

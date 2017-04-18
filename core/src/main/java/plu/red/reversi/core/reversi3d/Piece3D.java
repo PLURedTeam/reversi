@@ -27,10 +27,16 @@ public class Piece3D extends ColorModel3D {
     public static final float VERTICAL_RADIUS = 0.012f;
 
     public static final float ANIMATION_FLIP_JUMP = 0.2f;
+    public static final float ANIMATION_ENTER_HEIGHT = 0.2f;
     public static final int ANIMATION_FLIP_ROTATIONS = 5;
+    public static final int ANIMATION_ENTER_ROTATIONS = 2;
     public static final int ANIMATION_FLIP_DURATION = 60; // 1.0 seconds in ticks
+    public static final int ANIMATION_ENTER_DURATION = 30; // 0.5 seconds in ticks
 
     public static final PolynomialEasing FLIP_EASER = new PolynomialEasing(3, EaseType.EASE_OUT);
+    public static final PolynomialEasing ENTER_SCALE_EASER = new PolynomialEasing(4, EaseType.EASE_OUT);
+    public static final PolynomialEasing ENTER_ROT_EASER = new PolynomialEasing(3, EaseType.EASE_OUT);
+    public static final PolynomialEasing ENTER_MOVE_EASER = new PolynomialEasing(3, EaseType.EASE_IN);
 
     private Collection<Piece3DListener> listeners;
 
@@ -40,6 +46,7 @@ public class Piece3D extends ColorModel3D {
     private boolean flipped;
 
     private int animFlipStart;
+    private int animEnterStart;
 
 
     public Piece3D(Graphics3D g3d, Pipeline pipeline, Color baseColor, Color flippedColor) {
@@ -213,15 +220,31 @@ public class Piece3D extends ColorModel3D {
     }
 
     /**
+     * Animates the piece from being not visible/gone to visible
+     * @param b the flip state of the piece after the animation has been completed
+     * @param atTick the tick at which the piece should start animated
+     */
+    public void animateEnter(boolean b, int atTick) {
+        setScale(new Vector3f(0));
+
+        flipped = b;
+
+        animEnterStart = atTick;
+    }
+
+    /**
      * Finishes any animation currently in progress immediately. The end result of the animation will
      * be the actual value applied.
      */
     public void clearAnimations() {
+        // flip animations require an extra step to make sure the piece is still flipped properly.
         if(animFlipStart != -1) {
             animFlipStart = -1;
 
             setFlipped(!flipped);
         }
+
+        animEnterStart = -1;
     }
 
     @Override
@@ -229,7 +252,6 @@ public class Piece3D extends ColorModel3D {
         super.update(tick);
 
         if(animFlipStart != -1 && animFlipStart < tick) {
-
             if(animFlipStart + ANIMATION_FLIP_DURATION < tick) {
                 setFlipped(!flipped);
 
@@ -260,6 +282,55 @@ public class Piece3D extends ColorModel3D {
                 rot.rotateAxis((flipped ? (float)Math.PI : 0) + FLIP_EASER.ease(portion, 0.0f, (float)Math.PI * ANIMATION_FLIP_ROTATIONS, 1.0f), 0, 1, 0);
 
                 setRot(rot);
+            }
+
+            return true;
+        }
+
+        if(animEnterStart != -1) {
+            if(animEnterStart + ANIMATION_ENTER_DURATION < tick) {
+                setFlipped(flipped);
+
+                setPos(new Vector3f(
+                        getPos().x(),
+                        getPos().y(),
+                        VERTICAL_RADIUS
+                ));
+            }
+            else {
+                float tickoff = tick - animEnterStart;
+                float portion = tickoff / ANIMATION_ENTER_DURATION;
+
+                // the piece will get bigger over the course of the animation
+                setScale(new Vector3f(ENTER_SCALE_EASER.ease(portion, 0.0f, 1.0f, 1.0f)));
+
+                // the piece will rotate cool over the course of the animation
+                Quaternionf rot = new Quaternionf();
+                rot.rotateAxis(ENTER_ROT_EASER.ease(
+                        portion,
+                        (float)Math.PI * ANIMATION_ENTER_ROTATIONS,
+                        -(float)Math.PI * ANIMATION_ENTER_ROTATIONS,
+                        1.0f),
+                        0, 0, 1);
+                rot.rotateAxis(ENTER_ROT_EASER.ease(
+                        portion,
+                        (float)Math.PI / 2 + (flipped ? (float)Math.PI : 0),
+                        -(float)Math.PI / 2,
+                        1.0f),
+                        1, 0, 0);
+
+                setRot(rot);
+
+                // the piece will begin to drop after the first half of the animation.
+                if(portion > 0.5f) {
+                    setPos(new Vector3f(
+                            getPos().x(),
+                            getPos().y(),
+                            ENTER_MOVE_EASER.ease(portion - 0.5f, ANIMATION_ENTER_HEIGHT, -ANIMATION_ENTER_HEIGHT + VERTICAL_RADIUS, 0.5f)
+                    ));
+                }
+                else
+                    setPos(new Vector3f(getPos().x(), getPos().y(), ANIMATION_ENTER_HEIGHT));
             }
 
             return true;
