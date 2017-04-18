@@ -13,10 +13,11 @@ public class Tournament {
     //  Member Variables
     // ******************
 
-    ArrayList<User> userList;
-    ArrayList<Match> matchList;
-    User winner, loser;
-    int winnerScore, loserScore;
+    private ArrayList<User> userList;
+    private ArrayList<Match> matchList;
+
+    private User winner, loser;
+    private int winnerScore, loserScore;
 
     /**
      * Constructor for the Tournament
@@ -47,6 +48,11 @@ public class Tournament {
         }
 
     }
+
+    public void playTournament(){
+        
+    }
+
 
     /**
      * currentMatch finds the current match based on the id
@@ -163,15 +169,6 @@ public class Tournament {
             usrs = u;
             score1 = s1;
             score2 = s2;
-
-            if(score1>score2) {
-                u.first = winner;
-                u.second = loser;
-            }else {
-                u.second = winner;
-                u.first = loser;
-            }
-
         }
 
 
@@ -189,7 +186,10 @@ public class Tournament {
          * @return the winner
          */
         public User getMatchWinner(){
-            return this.winner;
+            if(score1 > score2)
+                return usrs.first;
+            else
+                return usrs.second;
         }
 
         /**
