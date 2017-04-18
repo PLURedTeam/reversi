@@ -128,8 +128,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             public void run() {
                 board.clearHighlights();
 
-                System.out.println("Updating highlights");
-
                 if(canPlay) {
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
