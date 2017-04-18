@@ -1,10 +1,8 @@
 package plu.red.reversi.core.game;
 
-import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
-
 
 /**
  * Created by JChase on 4/7/17.
@@ -17,7 +15,7 @@ public class Tournament {
 
     ArrayList<User> userList;
     ArrayList<Match> matchList;
-    Match match;
+    History hist;
     User winner, loser;
     int winnerScore, loserScore;
 
@@ -25,9 +23,28 @@ public class Tournament {
      * Constructor for the Tournament
      * @param usrs is an ArrayList of User for a given Tournament
      */
-    public Tournament(ArrayList<User> usrs){
+    public Tournament(ArrayList<User> usrs, History h){
         userList = usrs;
         matchList = new ArrayList<Match>(usrs.size());
+        hist = h;
+
+        int j = matchList.size();
+
+        //pair up users in the matchList
+        for(int i = 0; i < usrs.size(); i++) {
+            //if the list of users is even
+            if (usrs.size() % 2 == 0) {
+                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), hist, 0, 0));
+            }
+            else{
+                //if the list of users isn't even, pair middle one with
+                if(i == usrs.size()/2)
+                    matchList.add(new Match(userList.get(i)));
+                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), hist, 0, 0));
+            }
+            j--;
+        }
+
     }
 
     /**
@@ -130,10 +147,19 @@ public class Tournament {
      */
     public static class Match{
         Pair usrs;
+        User usr;
         History hist;
         int score1, score2;
         User winner;
         User loser;
+
+        /**
+         * Constructor for a match
+         * @param u
+         * @param h
+         * @param s1
+         * @param s2
+         */
         public Match(Pair u, History h, int s1, int s2){
             usrs = u;
             hist = h;
@@ -147,9 +173,15 @@ public class Tournament {
                 u.second = winner;
                 u.first = loser;
             }
-
             int gameID = usrs.first.getSessionID();
+        }
 
+        /**
+         * Constructor or uneven Userlists, if the user is Matched with no one
+         * @param u
+         */
+        public Match(User u){
+            usr = u;
         }
 
         /**
@@ -162,7 +194,7 @@ public class Tournament {
 
         /**
          * This method returns the loser of the current match
-         * @return the loser
+         * @return the loser of the individual match
          */
         public User getMatchLoser(){
             return this.loser;
@@ -175,6 +207,12 @@ public class Tournament {
     public static class Pair {
         public User first;
         public User second;
+
+        /**
+         * Constructor to initialize the first and second User in a Pair to be Used later in Match
+         * @param first
+         * @param second
+         */
         public Pair(User first, User second) {
             this.first = first;
             this.second = second;
