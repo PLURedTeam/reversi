@@ -15,18 +15,17 @@ public class Tournament {
 
     ArrayList<User> userList;
     ArrayList<Match> matchList;
-    History hist;
     User winner, loser;
     int winnerScore, loserScore;
 
     /**
      * Constructor for the Tournament
      * @param usrs is an ArrayList of User for a given Tournament
+     *
      */
-    public Tournament(ArrayList<User> usrs, History h){
+    public Tournament(ArrayList<User> usrs){
         userList = usrs;
         matchList = new ArrayList<Match>(usrs.size());
-        hist = h;
 
         int j = matchList.size();
 
@@ -34,13 +33,13 @@ public class Tournament {
         for(int i = 0; i < usrs.size(); i++) {
             //if the list of users is even
             if (usrs.size() % 2 == 0) {
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), hist, 0, 0));
+//                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
             }
             else{
                 //if the list of users isn't even, pair middle one with
-                if(i == usrs.size()/2)
-                    matchList.add(new Match(userList.get(i)));
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), hist, 0, 0));
+          //      if(i == usrs.size()/2)
+         //           matchList.add(new Match(userList.get(i)));
+           //     matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
             }
             j--;
         }
@@ -148,7 +147,6 @@ public class Tournament {
     public static class Match{
         Pair usrs;
         User usr;
-        History hist;
         int score1, score2;
         User winner;
         User loser;
@@ -156,13 +154,11 @@ public class Tournament {
         /**
          * Constructor for a match
          * @param u
-         * @param h
          * @param s1
          * @param s2
          */
-        public Match(Pair u, History h, int s1, int s2){
+        public Match(Pair u, int s1, int s2){
             usrs = u;
-            hist = h;
             score1 = s1;
             score2 = s2;
 
@@ -173,7 +169,7 @@ public class Tournament {
                 u.second = winner;
                 u.first = loser;
             }
-            int gameID = usrs.first.getSessionID();
+            //int gameID = usrs.first.getSessionID();
         }
 
         /**
