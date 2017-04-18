@@ -458,7 +458,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public int getCurrentMoveIndex() {
-        return mBoardIterator.getPos();
+        if(mBoardIterator != null)
+            return mBoardIterator.getPos();
+
+        return 0;
     }
 
     public synchronized void setCurrentMove(int pos) {
