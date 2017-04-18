@@ -30,19 +30,19 @@ public class Tournament {
         int j = matchList.size();
 
         //pair up users in the matchList
-        for(int i = 0; i < usrs.size(); i++) {
-            //if the list of users is even
-            if (usrs.size() % 2 == 0) {
+//        for(int i = 0; i < usrs.size(); i++) {
+//            //if the list of users is even
+//            if (usrs.size() % 2 == 0) {
 //                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
-            else{
-                //if the list of users isn't even, pair middle one with
-          //      if(i == usrs.size()/2)
-         //           matchList.add(new Match(userList.get(i)));
-           //     matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
-            j--;
-        }
+//            }
+//            else{
+//                //if the list of users isn't even, pair middle one with an one User pair
+//                if(i == usrs.size()/2){
+//                    matchList.add(new Match(userList.get(i))); }
+//                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
+//            }
+//            j--;
+//        }
 
     }
 
@@ -214,5 +214,6 @@ public class Tournament {
             this.second = second;
         }
     }//end class Pair
+
 }
 
