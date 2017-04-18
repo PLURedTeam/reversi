@@ -12,6 +12,7 @@ public class User {
     private String username;
     private String password;
     private int sessionID;
+    private int rank;
 
     /**
      * Constructor for the user class
@@ -23,12 +24,15 @@ public class User {
     public User(String u, String p) {
         username = u;
         password = p;
+        rank = 0;
     }//user
 
     //Accessors and Mutators
     public String getUsername() { return username; }
     public String getPassword() { return password; }
-    public int getSessionID() {return sessionID; }
+    public int getSessionID() { return sessionID; }
+    public int getRank() { return rank; }
     public void setSessionID(int s) { sessionID = s; }
     public void setPassword(String p) { password = p; }
+    public void setRank(int r) { rank = r; }
 }//User
