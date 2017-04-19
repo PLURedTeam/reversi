@@ -7,7 +7,9 @@ import java.util.*;
  * This is a disjoint set data structure which represents multiple non-overlapping sets which will be
  * searched and merged regularly. This implementation uses both ranking and path compression.
  *
- * It keeps track of tree nodes internally to prevent the calling code from having to keep references.
+ * This implementation uses internal handles to keep track of tree nodes and allow the outside program to
+ * have no knowledge of the internal structure used to create and represent the disjoint forest. This prevents
+ * the caller from needing to track handles as things are added.
  *
  * Implementation based on Disjoint-Set Forest pseudocode provided by Introduction to Algorithms Third ed.,
  * T. Cormen, C. Leiserson, R. Rivest, C. Stein. 2009 MIT Press, Cambridge, MA, USA.
