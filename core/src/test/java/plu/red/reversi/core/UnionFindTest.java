@@ -16,6 +16,24 @@ public class UnionFindTest {
     }
 
     @Test
+    public void testUnionFindCopy() {
+        UnionFind<Integer> uf = new UnionFind<>();
+        uf.add(1); uf.add(4); uf.add(0);
+        uf.addAndUnion(2,1);
+        uf.addAndUnion(3, 2);
+
+        UnionFind<Integer> ufc = new UnionFind<>(uf);
+        assertEquals(uf.disjointSets(), ufc.disjointSets());
+        assertEquals(uf.size(), ufc.size());
+
+        for(int x = 0; x < 5; ++x) {
+            assertTrue(ufc.contains(x));
+            for(int y = 0; y < 5; ++y)
+                assertTrue(ufc.inSameSet(x, y) == ufc.inSameSet(x, y));
+        }
+    }
+
+    @Test
     public void testAdd() {
         //add a couple things
         UnionFind<Integer> uf = new UnionFind<>();

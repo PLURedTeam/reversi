@@ -42,12 +42,22 @@ public class UnionFind<T> extends AbstractSet<T> {
 
 
     /**
-     * Constructs an empty union find with the initial capacity and load factor.
-     * @param initialCapacity The initial capacity.
-     * @param loadFactor The load factor.
+     * Constructs a copy of the other UnionFind set of disjoint sets. It will not perform a deep copy of objects it
+     * stores, only its internal structure. This means a copy of can be modified without influencing the original.
+     * This does not grantee the representatives will be the same as the original set.
+     * @param other UnionFind object to copy.
      */
-    public UnionFind(int initialCapacity, float loadFactor) {
-        members = new HashMap<>(initialCapacity, loadFactor);
+    public UnionFind(UnionFind<T> other) {
+        //construct empty hashmap of correct size
+        this((int)(other.size()*1.3));
+
+        //Copy over all of the nodes
+        for(UnionFindNode<T> i : other.members.values())
+            add(i.value);
+
+        //Union the nodes into the same state as before; use other's rep first so that it becomes the rep again
+        for(UnionFindNode<T> i : other.members.values())
+            union(i.value, other.getRep(i.value));
     }
 
 
