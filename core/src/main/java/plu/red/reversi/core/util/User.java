@@ -13,9 +13,25 @@ public class User {
     private String password;
     private String status;
     private int sessionID;
+
     private int ranking;
 
     public User() {}//DefaultConstructor
+
+    private int rank;
+
+    /**
+     * Constructor for the user class
+     * Will always be constructed on the clientside and
+     * passed to the server
+     * @param u username of the player
+     * @param p password of the player stored in SHA256 format
+     */
+    public User(String u, String p) {
+        username = u;
+        password = p;
+        rank = 0;
+    }//user
 
     //Accessors and Mutators
     public String getUsername() { return username; }
@@ -28,4 +44,5 @@ public class User {
     public void setStatus(String s) { status = s; }
     public int getRank() { return ranking; }
     public void setRank(int r) { ranking = r; }
+
 }//User

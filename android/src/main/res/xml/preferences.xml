@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+        android:defaultValue="@color/default_p1_color"
+        android:key="p1_color"
+        android:summary="@string/pref_p1_color"
+        android:title="@string/pref_p1_color_title" />
+
+    <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+        android:defaultValue="@color/default_p2_color"
+        android:key="p2_color"
+        android:summary="@string/pref_p2_color"
+        android:title="@string/pref_p1_color_title" />
+
+</android.support.v7.preference.PreferenceScreen>

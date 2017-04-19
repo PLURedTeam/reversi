@@ -4,6 +4,8 @@ import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.*;
+import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
@@ -61,11 +63,12 @@ public class Game extends Coordinator {
     // Model Objects
     protected DataMap settings = null;
     protected Board board = null;
+    protected GameLogic gameLogic = null;
     protected History history = null;
 
     // Player Data
-    protected final HashMap<Integer, Player> players = new HashMap<>();
     protected int currentPlayer = -1;
+    protected final HashMap<Integer, Player> players = new HashMap<>();
     protected final HashSet<Integer> surrenderedPlayers = new HashSet<>();
 
     // State Flags
@@ -139,6 +142,17 @@ public class Game extends Coordinator {
     public Game(IMainGUI gui) { super(gui); }
 
     /**
+     * Set this Game's GameLoic to the given object. Used to specifiy what type of game is being played. e.g. reversi.
+     * @param logic Logic class to be used for the game.
+     * @return Reference to this Game object for chain-construction.
+     */
+    public Game setLogic(GameLogic logic) {
+        assertNotInitialized();
+        gameLogic = logic;
+        return this;
+    }
+
+    /**
      * Sets this Game's <code>settings</code> to the given DataMap object. This operation must be performed before a
      * Game can be initialized, and cannot be performed afterwards.
      *
@@ -193,27 +207,22 @@ public class Game extends Coordinator {
     public void initialize() throws IllegalStateException {
 
         if(settings == null) throw new IllegalStateException("A DataMap has not been set!");
+        if(gameLogic == null) throw new IllegalStateException("GameLogic has not been determined!");
         if(players.isEmpty()) throw new IllegalStateException("No Players have been registered!");
 
         board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
 
         // Ensure a History exists and setup the Board
+        //History after these if conditions will be updated by GameLogic
         if(history == null) {
-
             history = new History();
-            LinkedList<BoardCommand> setupCommands = Board.getSetupCommands(this);
-            board.applyCommands(setupCommands);
-
-            //Add setupCommands to history
-            for(BoardCommand c: setupCommands)
-                history.addCommand(c);
+            gameLogic.initBoard();
 
             // Get first player
             currentPlayer = getNextPlayerID(-1, players.keySet());
-
         } else {
             LinkedList<BoardCommand> cmds = history.getMoveCommandsUntil(history.getNumBoardCommands());
-            board.applyCommands(cmds);
+            gameLogic.initBoard(cmds);
             currentPlayer = getNextPlayerID(cmds.getLast().playerID);
         }
 
@@ -236,6 +245,13 @@ public class Game extends Coordinator {
      * @return this Game's Board
      */
     public Board getBoard() { return board; }
+
+    /**
+     * Retrieves the GameLogic by which the current game is operating by.
+     *
+     * @return this Game's GameLogic
+     */
+    public GameLogic getGameLogic() { return gameLogic; }
 
     /**
      * Retrieves the History that this Game object is using.
@@ -349,7 +365,7 @@ public class Game extends Coordinator {
         if(surrenderedPlayers.contains(currentPlayer)) nextTurn(skipCount + 1);
 
         // Check if its even possible for this Player to play
-        else if (board.getPossibleMoves(currentPlayer).isEmpty()) {
+        else if(!gameLogic.canPlay(currentPlayer)) {
             if (settings.get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class))
                 nextTurn(skipCount + 1); // Skip to the next Player's turn
             else endGame();
@@ -370,9 +386,9 @@ public class Game extends Coordinator {
     protected boolean parseCommand(Command cmd) {
 
         // Send Move Commands to the Board object
-        if(cmd instanceof BoardCommand) {
+        if(cmd instanceof MoveCommand) {
             if(!gameRunning) return false;
-            board.apply((BoardCommand)cmd);
+            gameLogic.play((MoveCommand)cmd);
             nextTurn();
         }
 
@@ -383,10 +399,8 @@ public class Game extends Coordinator {
             surrenderedPlayers.add(player);
             if(players.size() - surrenderedPlayers.size() < 2) endGame(); // End the Game if theres only one player left
             else if(player == currentPlayer) nextTurn();
+            history.addCommand(cmd);
         }
-
-        // Register the Command in History
-        history.addCommand(cmd);
 
         return true;
     }
@@ -402,7 +416,7 @@ public class Game extends Coordinator {
         for(int player : players.keySet()) {
             // Surrendered Players aren't in the running for winning :P
             if(surrenderedPlayers.contains(player)) continue;
-            int ss = board.getScore(player);
+            int ss = gameLogic.getScore(player);
             if(ss > score) {
                 score = ss;
                 winner = player;

@@ -7,6 +7,7 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.ReversiMinimax;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.Color;
@@ -33,7 +34,8 @@ public class ReversiMinimaxTest {
     public void setup() {
         settingsMap = SettingsLoader.INSTANCE.loadGameSettingsFromJSON(new JSONObject());
         game = new Game(new NullGUI());
-        game.setSettings(settingsMap);
+        game.setSettings(settingsMap).setLogic(new ReversiLogic(game));
+
         Player p;
         p = new NullPlayer(game, Color.BLACK);
         p = new NullPlayer(game, Color.WHITE);
@@ -51,7 +53,7 @@ public class ReversiMinimaxTest {
     public void testGetBestPlay() {
         ReversiMinimax reversiMinimax = new ReversiMinimax(game, 1, 5);
         BoardIndex bp = reversiMinimax.getBestPlay();
-        assertTrue(game.getBoard().isValidMove(1, bp));
+        assertTrue(game.getGameLogic().isValidMove(new MoveCommand(1, bp)));
     }
 
     @Test
@@ -61,19 +63,19 @@ public class ReversiMinimaxTest {
         //run until there are no more moves
         while(true) {
             // apply white move
-            Iterator<BoardIndex> possible = game.getBoard().getPossibleMoves(1).iterator();
+            Iterator<BoardIndex> possible = game.getGameLogic().getValidMoves(1).iterator();
             if(!possible.hasNext()) break;
 
             //Have the algorithm update
             assertTrue(reversiMinimax.canPlay());
-            assertTrue(game.getBoard().isValidMove(reversiMinimax.getBestMoveCommand()));
+            assertTrue(game.getGameLogic().isValidMove(reversiMinimax.getBestMoveCommand()));
 
-            game.getBoard().apply(new MoveCommand(1, possible.next()));
+            game.getGameLogic().play(new MoveCommand(1, possible.next()));
 
             //apply black move
-            possible = game.getBoard().getPossibleMoves(0).iterator();
+            possible = game.getGameLogic().getValidMoves(0).iterator();
             if(!possible.hasNext()) continue;
-            game.getBoard().apply(new MoveCommand(0, possible.next()));
+            game.getGameLogic().play(new MoveCommand(0, possible.next()));
         }
 
         assertFalse(reversiMinimax.canPlay());

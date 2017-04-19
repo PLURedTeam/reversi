@@ -70,7 +70,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
 
         // Create an individual score panel for every player in the Game
         for(Player player : game.getAllPlayers()) {
-            PlayerPanel panel = new PlayerPanel(player, board.getScore(player.getID()));
+            PlayerPanel panel = new PlayerPanel(player, game.getGameLogic().getScore(player.getID()));
             playerPanelMap.put(player.getID(), panel);
             this.add(panel);
         }

@@ -38,6 +38,9 @@ public class GameActivity extends AppCompatActivity
     MultiplayerFragment mMultiplayerFragment;
     SavedGamesFragment mSavesFragment;
 
+    SettingsFragment mSettingsFragment;
+    AboutFragment mAboutFragment;
+
     Fragment currentFragment;
 
     GameService.LocalBinder mServiceConnection;
@@ -65,6 +68,9 @@ public class GameActivity extends AppCompatActivity
         mSingleplayerFragment = new SingleplayerFragment();
         mMultiplayerFragment = new MultiplayerFragment();
         mSavesFragment = new SavedGamesFragment();
+
+        mSettingsFragment = new SettingsFragment();
+        mAboutFragment = new AboutFragment();
 
         mContentFrame = (FrameLayout) findViewById(R.id.content_frame);
 
@@ -130,9 +136,9 @@ public class GameActivity extends AppCompatActivity
         } else if (id == R.id.nav_saves) {
             showFragment(mSavesFragment);
         } else if (id == R.id.nav_settings) {
-
+            showFragment(mSettingsFragment);
         } else if (id == R.id.nav_about) {
-
+            showFragment(mAboutFragment);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

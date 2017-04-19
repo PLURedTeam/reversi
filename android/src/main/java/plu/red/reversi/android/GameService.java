@@ -26,6 +26,7 @@ import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.db.DBConnection;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
@@ -82,6 +83,8 @@ public class GameService extends Service implements ICommandListener {
 
         new BotPlayer(game, Color.BLUE, 2).setName("Bot 2");
         new BotPlayer(game, Color.RED, 2).setName("Bot 1");
+
+        game.setLogic(new ReversiLogic(game));
 
         game.initialize();
 

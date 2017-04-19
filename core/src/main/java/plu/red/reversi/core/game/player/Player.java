@@ -83,7 +83,7 @@ public abstract class Player {
      * @return this Player's score
      */
     public int getScore() {
-        return game.getBoard().getScore(playerID.get());
+        return game.getGameLogic().getScore(playerID.get());
     }
 
     /**

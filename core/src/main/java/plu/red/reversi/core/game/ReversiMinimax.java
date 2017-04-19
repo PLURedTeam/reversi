@@ -3,8 +3,13 @@ package plu.red.reversi.core.game;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.util.Looper;
+import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 
 import java.util.Set;
+
+//TODO: cache player score and pass it along to reduce the computation requirement
+//TODO: use iterative search to improve efficiency and allow cutting it off part-way through
 
 /**
  * Using the minimax algorithm, calculate the optimal move for a particular currentPlayer given the specified currentState.
@@ -62,7 +67,7 @@ public class ReversiMinimax implements Runnable {
      * @return True if a move can be made, otherwise false.
      */
     public boolean canPlay() {
-        if(game.getBoard().getPossibleMoves(aiID).isEmpty()) return false;
+        if(!game.getGameLogic().canPlay(aiID)) return false;
         return true;
     }
 
@@ -82,8 +87,12 @@ public class ReversiMinimax implements Runnable {
      * @throws IndexOutOfBoundsException If no moves can be made.
      */
     public BoardIndex getBestPlay() {
-        Board board = game.getBoard();
-        Set<BoardIndex> possibleMoves = board.getPossibleMoves(aiID);
+        final Board board = game.getBoard();
+
+        final ReversiLogic logic = (ReversiLogic)game.getGameLogic();
+        if(logic == null) throw new IllegalStateException("Must be a game of reversi to use reversi-minimax.");
+
+        Set<BoardIndex> possibleMoves = logic.getValidMoves(aiID);
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
         int bestScore = Integer.MIN_VALUE;
@@ -91,7 +100,7 @@ public class ReversiMinimax implements Runnable {
         BoardIndex bestMove = null;
         for(BoardIndex i : possibleMoves) {
             Board subBoard = new Board(board);
-            subBoard.apply(new MoveCommand(aiID, i));
+            logic.play(new MoveCommand(aiID, i), subBoard, false, false);
 
             final int childScore = getBestPlay(subBoard, game.getNextPlayerID(aiID), alpha, beta, 1);
             if(childScore > bestScore) {
@@ -112,8 +121,10 @@ public class ReversiMinimax implements Runnable {
      * @return Score for the game state.
      */
     private int heuristicScore(Board board, boolean endgame) {
+        final GameLogic logic = game.getGameLogic();
+
         //ours - (all - ours) == ours * 2 - all
-        int score = (board.getScore(aiID) * 2) - board.getTotalPieces();
+        int score = (logic.getScore(aiID, board) * 2) - board.getTotalPieces();
 
         if(!endgame) {
             int player = board.at(new BoardIndex(0, 0));
@@ -142,13 +153,15 @@ public class ReversiMinimax implements Runnable {
         if(depth >= MAX_DEPTH)
             return heuristicScore(board, false);
 
+        final GameLogic logic = game.getGameLogic();
         final boolean turn_skipping = game.getSettings().get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class);
         final int start_player = player;
-        Set<BoardIndex> possibleMoves = board.getPossibleMoves(player);
+
+        Set<BoardIndex> possibleMoves = logic.getValidMoves(player, board);
         while(possibleMoves.isEmpty()) { //can't move
             player = game.getNextPlayerID(player);
             if(player != start_player) //inc. player and make sure we have not looped
-                possibleMoves = board.getPossibleMoves(player);
+                possibleMoves = logic.getValidMoves(player, board);
             else
                 return heuristicScore(board, true);
         }
@@ -158,7 +171,7 @@ public class ReversiMinimax implements Runnable {
 
         for(BoardIndex i : possibleMoves) {
             Board subBoard = new Board(board);
-            subBoard.apply(new MoveCommand(player, i));
+            logic.play(new MoveCommand(player, i), subBoard, false, false);
 
             final int childScore = getBestPlay(subBoard, game.getNextPlayerID(player), alpha, beta, depth + 1);
             if(maximize && childScore > bestScore) {

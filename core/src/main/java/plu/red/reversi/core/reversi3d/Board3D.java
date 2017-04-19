@@ -9,6 +9,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
@@ -23,34 +24,35 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.util.Color;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
 
+/**
+ * Represents a board of game pieces, a square of the given size in the constructor. These pieces can be
+ * set using the #setBoard or #animBoardUpdate methods.
+ */
 public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
-    public static final float PIECE_SIZE = 0.1f;
-    public static final float PIECE_BORDER_SIZE = 0.005f;
-    public static final float BORDER_SIZE = 0.08f;
+    public static final float PIECE_SIZE = 0.1f;           /// the size of a single tile on the board (including the border below)
+    public static final float PIECE_BORDER_SIZE = 0.005f;  /// the size of the space between tiles on the board
+    public static final float BORDER_SIZE = 0.08f;         /// the amount of extra space to put on the edge of the board around the tiles
 
-    public static final int ANIMATION_QUEUE_DELAY = 20;
+    public static final int ANIMATION_QUEUE_DELAY = 20;    /// the amount of ticks to wait after an animation has been queued has been played
 
     private Collection<Board3DListener> listeners;
 
-    private Piece3D[] pieces;
-    private Highlight3D[] highlights;
+    private Piece3D[] pieces;                              /// an array of all the pieces on the board. Map indexes using #indexFromCoord() method.
+    private Highlight3D[] highlights;                      /// an array of all the highlights which can be shown on the board.
 
-    private Deque<BoardUpdate> boardUpdates;
-    private BoardUpdate currentBoardUpdate;
+    private Deque<BoardUpdate> boardUpdates;               /// the queue of animations which should be performed
+    private BoardUpdate currentBoardUpdate;                /// the animation which is currently in progress.
 
-    private Map<Integer, Integer> scores;
+    private Map<Integer, Integer> scores;                  /// a cache of the board score for each piece (by player id)
 
-    private int size;
+    private int size;                                      /// the size of one side of the board (the board is a square)
 
-    private Game game;
+    private Game game;                                     /// the game object this board is showing (though not necessarily showing the latest state of)
 
     public Board3D(Graphics3D g3d, Pipeline pipeline, Game game) {
 
@@ -160,10 +162,10 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(sectionIndex < 6) {
 
-            color = new Vector4f(0.2f, 0.2f, 0.2f, 1.0f);
+            color = new Vector4f(0.15f, 0.15f, 0.15f, 1.0f);
         }
         else {
-            color = new Vector4f(0.2f, 0.7f, 0.2f, 1.0f);
+            color = new Vector4f(0.1f, 0.55f, 0.1f, 1.0f);
         }
 
         return new Vector4f[]{
@@ -242,20 +244,39 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         return null;
     }
 
+    /**
+     * Returns the position of the lower left corner of piece 0 on the board; the minimum coordinate of the pieces in a sense
+     * @return a vector in 3d space representing the place (in board coordinates, so offset from board center, regardless of board transforms)
+     */
     protected Vector3f getBoardOrigin() {
         return new Vector3f(-PIECE_SIZE * (float)size / 2, -PIECE_SIZE * (float)size / 2, 0.001f);
     }
 
+    /**
+     * Returns the distance from the center to the edge of the furthest piece away from the center
+     * @return the distance in GL coordinates from the center to the edge.
+     */
     public float getBoardRadius() {
         return PIECE_SIZE * size / 4;
     }
 
+    /**
+     * Disables rendering of all highlighting models
+     */
     public void clearHighlights() {
         for(int i = 0;i < highlights.length;i++) {
             removeChild(highlights[i]);
         }
     }
 
+    /**
+     * Enables highlighting at the specified board index with the specified color.
+     *
+     * If a highlight was already present, it will be overridden by this call.
+     *
+     * @param index the board index to highlight
+     * @param color the color of the highlighted board index.
+     */
     public void highlightAt(BoardIndex index, Vector3fc color) {
 
         int i = indexFromCoord(toBoardCoords(index, size), size);
@@ -274,7 +295,6 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         if(currentBoardUpdate != null && currentBoardUpdate.triggerTick + currentBoardUpdate.duration <= tick) {
             currentBoardUpdate = null;
-
             done = true;
 
             for(Board3DListener listener : listeners) {
@@ -335,13 +355,26 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
+    /**
+     * Gets the currently displayed score for the specified player id
+     * @param playerId the player to get the score for
+     * @return the currently displayed score.
+     */
     public int getScore(int playerId) {
         if(scores.get(playerId) == null)
             return 0;
         return scores.get(playerId);
     }
 
-    public void animBoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updated) {
+    /**
+     * Apply an update to the board. If multiple updates have already been provided, then the update
+     * will be added to a queue and executed later. Order matters in this function call!
+     *
+     * @param update Information about the update
+     * @see IBoardUpdateListener.BoardUpdate
+     */
+    public void animBoardUpdate(IBoardUpdateListener.BoardUpdate update) {
+        //TODO: handle all of the update types
         int triggerTime = getLastTick();
 
         if(boardUpdates.peekLast() != null)
@@ -349,14 +382,18 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         else if(currentBoardUpdate != null)
             triggerTime = currentBoardUpdate.triggerTick + currentBoardUpdate.duration + ANIMATION_QUEUE_DELAY;
 
-        boardUpdates.add(new BoardUpdate(origin, playerId, updated, triggerTime));
+        boardUpdates.add(new BoardUpdate(update, triggerTime));
     }
 
+    /**
+     * Immediately stops any running animations and clears the board update queue. the board will be left in a state
+     * which reflects what would be visible after the current board update animation has finished completing.
+     */
     public void clearAnimations() {
         boardUpdates.clear();
 
         if(currentBoardUpdate != null) {
-            for(BoardIndex index : currentBoardUpdate.updates)
+            for(BoardIndex index : currentBoardUpdate.flipped)
                 pieces[indexFromCoord(toBoardCoords(index, size), size)].clearAnimations();
 
             currentBoardUpdate = null;
@@ -367,7 +404,12 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
-    public void setPiece(Game game, BoardIndex index, int playerId) {
+    /**
+     * Manually set a piece to be the specified playerId at board index
+     * @param index the board index to set
+     * @param playerId the new value of player id, or -1 if the piece is not supposed to be set to that.
+     */
+    public void setPiece(BoardIndex index, int playerId) {
         Player p = game.getPlayer(playerId);
 
         Color color = null;
@@ -391,6 +433,11 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         }
     }
 
+    /**
+     * Manually set the current board state to be equivalent to the given board.
+     * @param board the data to set
+     * @throws InvalidParameterException if the board size is not the same as the size used to make the board3d in constructor
+     */
     public void setBoard(Board board) {
 
         clearAnimations();
@@ -405,7 +452,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
                 BoardIndex idx = fromBoardCoords(new Vector2i(r, c), size);
 
-                setPiece(game, idx, board.at(idx));
+                setPiece(idx, board.at(idx));
             }
         }
 
@@ -415,8 +462,12 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             listener.onScoreChange(this);
     }
 
+    /**
+     * Calculate the board index which corresponds to the given G3D coordinates
+     * @param pos the position in the X Y relative to the center of the board to find the center for
+     * @return the board index which would be at this position
+     */
     public BoardIndex getIndexAtCoord(Vector2fc pos) {
-
         Vector2f offset = new Vector2f(getBoardOrigin().x(), getBoardOrigin().y()).add(PIECE_BORDER_SIZE, PIECE_BORDER_SIZE);
 
         pos.sub(offset, offset);
@@ -427,29 +478,51 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         ), size);
     }
 
+    /**
+     * Calculate the board index from the given board3d coordinate vector.
+     * @param coords the coordinates to convert
+     * @param size the size of the board to convert for
+     * @return
+     */
     public static BoardIndex fromBoardCoords(Vector2ic coords, int size) {
-        return new BoardIndex(size - coords.x() - 1, coords.y());
+        return new BoardIndex(size - coords.y() - 1, coords.x());
     }
 
+    /**
+     * Calculate the board3d coordinate vector from a board index
+     * @param idx the index to get the coordinate vector for
+     * @param size the size of the board
+     * @return the board3d coordinate vector
+     */
     public static Vector2i toBoardCoords(BoardIndex idx, int size) {
         return new Vector2i(
-                size - idx.row - 1,
-                idx.column
+                idx.column,
+                size - idx.row - 1
         );
     }
 
+    /**
+     * Calculate the index (for pieces or highlights array) which corresponds to the given board3d coordinate vector
+     * @param coords the board3d coordinate vector to get the index for
+     * @param size the size of the board
+     * @return the index which would contain the piece/highlight you are looking for at the given board index
+     */
     public static int indexFromCoord(Vector2ic coords, int size) {
-        return size * size - (size - coords.y() - 1) * size - (size - coords.x() - 1) - 1;
+        final int y = coords.y();
+        final int x = coords.x();
+        return y*size + x;
     }
 
+    /**
+     * Calculate the coordinate at which the given index would reside. Opposite of #indexFromCoord()
+     * @param i the index of a peice or highlight
+     * @param size the size of the board
+     * @return a board3d coordinate vector at the specified index
+     */
     public static Vector2ic indexToCoord(int i, int size) {
-
-        i = size * size - i - 1;
-
-        return new Vector2i(
-                size - (i % size) - 1,
-                size - (i / size) - 1
-        );
+        final int x = i % size;
+        final int y = i / size;
+        return new Vector2i(y, x);
     }
 
     @Override
@@ -462,61 +535,103 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         // for right now we do not do anything with this
     }
 
+    /**
+     * Add a new event listener to this board object
+     * @param listener the listener to add
+     */
     public void addListener(Board3DListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Remove an existing event listener from this board object
+     * @param listener the listener to remove
+     */
     public void removeListener(Board3DListener listener) {
         listeners.remove(listener);
     }
 
-    private class BoardUpdate {
-        public BoardIndex origin;
-        public int playerId;
-        public Collection<BoardIndex> updates;
-
+    /**
+     * Defines a future animated change which will be applied to the board. Contains a method dispatch() which actually
+     * performs the update.
+     *
+     * Also calculates some helper variables such as duration which specify how long the animation can be expected to last,
+     * which is important for animation queueing.
+     *
+     */
+    private class BoardUpdate extends IBoardUpdateListener.BoardUpdate {
         public int triggerTick;
-
         public int duration;
 
-        public BoardUpdate(BoardIndex origin, int playerId, Collection<BoardIndex> updates, int triggerTick) {
-            this.origin = origin;
-            this.playerId = playerId;
-            this.updates = updates;
+        public BoardUpdate(IBoardUpdateListener.BoardUpdate update, int triggerTick) {
+            super(update);
             this.triggerTick = triggerTick;
 
             duration = 0;
 
-            for(BoardIndex idx : updates)
+            for(BoardIndex idx : flipped)
                 duration = Math.max(duration, delayForPiece(idx) + Piece3D.ANIMATION_FLIP_DURATION);
         }
 
+        /**
+         * Calculates the amount of time to wait from the trigger to start flipping the given piece
+         * @param idx the index at which to calculate the time for (relative from the origin in this case)
+         * @return
+         */
         public int delayForPiece(BoardIndex idx) {
-            final float POWER = 1.3f;
-            final int START_DELAY = 20; // in ticks
+            final float POWER = 1.25f;
+            final int START_DELAY = 15; // in ticks
 
-            return (int)(Math.pow(Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1), POWER) * START_DELAY);
+            final BoardIndex origin = added.iterator().next();
+            return Piece3D.ANIMATION_ENTER_DURATION +
+                    (int)(Math.pow(
+                            Math.max(Math.abs(idx.row - origin.row) - 1, Math.abs(idx.column - origin.column) - 1),
+                            POWER
+                    ) * START_DELAY);
         }
 
+        /**
+         * Run the animation on the board
+         */
         private void dispatch() {
-            setPiece(game, origin, playerId);
+            final BoardIndex origin = added.iterator().next();
 
-            for(BoardIndex index : updates) {
+            final boolean f = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
+
+            int originIndex = indexFromCoord(toBoardCoords(origin, size), size);
+
+            pieces[originIndex].animateEnter(f, getLastTick());
+            addChild(pieces[originIndex]);
+
+            for(BoardIndex index : flipped) {
                 Vector2ic coords = toBoardCoords(index, size);
-
                 int i = indexFromCoord(coords, size);
 
-                boolean flipped = pieces[0].getFlippedColor() == game.getPlayer(playerId).getColor();
-
                 // flips are delayed dramatically (see the power delay function above)
-                pieces[i].animateFlip(flipped, getLastTick() + delayForPiece(index));
+                pieces[i].animateFlip(f, getLastTick() + delayForPiece(index));
             }
         }
     }
 
     public interface Board3DListener {
+        /**
+         * Called when the board was updated in such a way that the scores of each of the displayed players
+         * has changed
+         * @param board the board which generated this event
+         */
         void onScoreChange(Board3D board);
+
+        /**
+         * Called when the board has completed all animations and has reached the latest state that it knows about.
+         * @param board the board which generated this event
+         */
         void onAnimationsDone(Board3D board);
+
+        /**
+         * Called when a single board update has been completed. You can expect to receive exactly one of these
+         * calls per call to #animBoardUpdate() after the animation has completed.
+         * @param board
+         */
         void onAnimationStepDone(Board3D board);
     }
 }

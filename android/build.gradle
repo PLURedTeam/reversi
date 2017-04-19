@@ -6,12 +6,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha5'
+        classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
     }
 }
 
 repositories {
     mavenCentral()
+
+    maven { url "https://jitpack.io" }
 }
 
 android {
@@ -50,10 +52,13 @@ dependencies {
         exclude module: 'javax.inject'
     }
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:preference-v7:25.3.1'
+    compile 'com.android.support:preference-v14:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     compile 'org.sqldroid:sqldroid:1.0.3'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.github.kizitonwose.colorpreference:support:1.0.2'
 }

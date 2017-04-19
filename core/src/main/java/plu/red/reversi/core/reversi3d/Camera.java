@@ -10,11 +10,6 @@ import plu.red.reversi.core.easing.EaseType;
 import plu.red.reversi.core.easing.Easing;
 import plu.red.reversi.core.easing.PolynomialEasing;
 
-/**
- * Created by daniel on 3/27/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class Camera {
 
     /**
@@ -148,13 +143,10 @@ public class Camera {
 
     public Camera setDir(Vector2fc dir) {
         targetState.cameraDir.set(dir);
-
         targetState.cameraDir.x = targetState.cameraDir.x % (2 * (float)Math.PI);
-
         targetState.cameraDir.y = (float)Math.max(0, Math.min(Math.PI / 2, targetState.cameraDir.y));
 
         recalculateViewMatrix();
-
         return this;
     }
 
@@ -194,8 +186,8 @@ public class Camera {
     }
 
     public Vector3f getRealCameraUp() {
-        float cx = (float)Math.cos(currentState.cameraDir.x - Math.PI / 2); // we sub PI over 4 here because otherwise the calcs will not be relative to negative y
-        float cy = (float)Math.sin(currentState.cameraDir.x - Math.PI / 2);
+        float cx = -(float)Math.cos(currentState.cameraDir.x + Math.PI / 2); // we sub PI over 4 here because otherwise the calcs will not be relative to negative y
+        float cy = -(float)Math.sin(currentState.cameraDir.x + Math.PI / 2);
         return new Vector3f(cx, cy, 1);
     }
 
@@ -242,7 +234,7 @@ public class Camera {
         // now figure out what the offset would be in the world based on the current camera angling
         Vector3f cameraDir = getRealCameraCenter().sub(getRealCameraPos()).normalize();
 
-        Vector3f left = getRealCameraUp().cross(cameraDir);
+        Vector3f left = getRealCameraUp().cross(cameraDir).normalize();
         Vector3f up = new Vector3f();
         cameraDir.cross(left, up);
 
