@@ -47,11 +47,51 @@ public class Tournament {
             j--;
         }
 
+        //delete losers
+        for(int k = 0; k < matchList.size(); k++){
+            if( matchList.get(k).score1 > matchList.get(k).score2 )
+                userList.remove(matchList.get(k).usrs.second);
+            else
+                userList.remove(matchList.get(k).usrs.first);
+
+        }
+
+        this.worker(userList);
     }
 
-    public void playTournament(){
+    /**
+     *
+     */
+    public void worker(ArrayList<User> usrLs){
+        int j = usrLs.size()-1;
 
+        //pair up users in the matchList
+        for(int i = 0; i < j; i++) {
+            //if the list of users is even
+            if (usrLs.size() % 2 == 0) {
+                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
+            }
+            else{
+                //if the list of users isn't even, pair middle one with an one User pair
+                if(i == usrLs.size()/2){
+                    matchList.add(new Match(userList.get(i)));
+                    return;
+                }
+                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
+            }
+            j--;
+        }
+
+        //delete losers
+        for(int k = 0; k < matchList.size(); k++){
+            if( matchList.get(k).score1 > matchList.get(k).score2 )
+                userList.remove(matchList.get(k).usrs.second);
+            else
+                userList.remove(matchList.get(k).usrs.first);
+
+        }
     }
+
 
 
     /**
