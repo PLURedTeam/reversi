@@ -94,4 +94,22 @@ public class UnionFindTest {
         assertEquals(1, uf.size());
         assertEquals(1, uf.disjointSets());
     }
+
+    @Test
+    public void testRemoveSet() {
+        UnionFind<Integer> uf = new UnionFind<>();
+        uf.add(1);
+        uf.addAndUnion(2, 1);
+        uf.addAndUnion(3, 2);
+        uf.add(4);
+
+        uf.removeSet(2);
+        assertEquals(1, uf.size());
+        assertEquals(1, uf.disjointSets());
+        assertFalse(uf.contains(1));
+        assertFalse(uf.contains(2));
+        assertFalse(uf.contains(3));
+        assertTrue(uf.contains(4));
+
+    }
 }
