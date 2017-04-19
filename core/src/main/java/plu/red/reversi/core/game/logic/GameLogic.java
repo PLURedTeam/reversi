@@ -52,6 +52,13 @@ public abstract class GameLogic {
 
 
     /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    public abstract GameLogicCache createCache();
+
+
+    /**
      * Registers an iFlipListener that will have signal sent to it when Flips are applied.
      * @param listener IFlipListener to register.
      * @return This object for chaining.

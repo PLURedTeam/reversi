@@ -4,6 +4,7 @@ import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
@@ -24,6 +25,31 @@ import java.util.*;
  * by default, and you can manually specify otherwise in each case.
  */
 public class GoLogic extends GameLogic {
+    /**
+     * Constructs a new GoLogic Unit to be able to play a game of Go.
+     * @param game Game this logic is used for.
+     */
+    public GoLogic(Game game) {
+        super(game);
+    }
+
+
+    /**
+     * This constructor should only be used for testing.
+     */
+    public GoLogic() {super();}
+
+
+    /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    @Override
+    public GameLogicCache createCache() {
+        return new GoLogicCache();
+    }
+
+
     /**
      * Make a move on the board.
      *
@@ -77,6 +103,8 @@ public class GoLogic extends GameLogic {
         //TODO: use caching to speed this up
         Group group = new Group(board, command.position, command.playerID);
         return group.hasLiberty(board);
+
+        //TODO: now check if after removing other groups which will no longer have liberties makes it valid
     }
 
 
@@ -108,6 +136,7 @@ public class GoLogic extends GameLogic {
      */
     @Override
     public int getScore(int player, Board board) {
+        //TODO: calculate this
         return 0;
     }
 
@@ -134,7 +163,7 @@ public class GoLogic extends GameLogic {
      * @return A board of group ids which line up with the main game board.
      */
     private Set<Group> getGroups(Board board) {
-        Board groupb = new Board(board); //TODO: replace with union-find
+        Board groupb = new Board(board); //TODO: replace with union-getRep
         HashSet<Group> groups = new HashSet<>();
 
         int groupID = 0;
@@ -213,7 +242,7 @@ public class GoLogic extends GameLogic {
 
 
         /**
-         * Use breadth first search to find the set of all group members given a specific starting tile.
+         * Use breadth first search to getRep the set of all group members given a specific starting tile.
          * Note, this will not check the first tile for player validity so it can be used to check for what group
          * there would be if a piece were played there.
          * @param index Origin point of the search.

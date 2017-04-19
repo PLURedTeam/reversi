@@ -35,10 +35,21 @@ public class ReversiLogic extends GameLogic {
         super(game);
     }
 
+
     /**
      * This constructor should only be used for testing.
      */
     public  ReversiLogic() {super();}
+
+
+    /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    @Override
+    public GameLogicCache createCache() {
+        return new ReversiLogicCache();
+    }
 
 
     /**
