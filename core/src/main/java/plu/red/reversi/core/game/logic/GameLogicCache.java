@@ -33,6 +33,15 @@ public abstract class GameLogicCache {
 
 
     /**
+     * Invalidate the cache. Clears it out and forces it to be regenerated. Use this if the board is changed outside
+     * of a game logic function.
+     */
+    public void invalidate() {
+        score.clear();
+    }
+
+
+    /**
      * Creates a copy of the current game logic which extends to the data structures, but not what they contain.
      * For example, if an array of BoardIndexes were cached, it would copy the array so both caches can be modified
      * independently, but it would not clone the board indexes with the assumption that they will only be replaced,

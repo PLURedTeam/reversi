@@ -215,7 +215,7 @@ public abstract class Model3D {
 
                 if(n == null) {
                     // something went wrong
-                    System.out.println("Could not find preexisting vertex for normal!!!");
+                    System.out.println("Could not getRep preexisting vertex for normal!!!");
                 }
 
                 if(n.length() == 0) {

@@ -5,6 +5,7 @@ import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
@@ -63,6 +64,7 @@ public class Game extends Coordinator {
     protected DataMap settings = null;
     protected Board board = null;
     protected GameLogic gameLogic = null;
+    protected GameLogicCache gameCache = null;
     protected History history = null;
 
     // Player Data
@@ -210,6 +212,7 @@ public class Game extends Coordinator {
         if(players.isEmpty()) throw new IllegalStateException("No Players have been registered!");
 
         board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+        gameCache = gameLogic.createCache();
 
         // Ensure a History exists and setup the Board
         //History after these if conditions will be updated by GameLogic
@@ -251,6 +254,13 @@ public class Game extends Coordinator {
      * @return this Game's GameLogic
      */
     public GameLogic getGameLogic() { return gameLogic; }
+
+    /**
+     * Retrieves the GameLogicCache which holds information about the current game state.
+     *
+     * @return this Game's GameLogicCache
+     */
+    public GameLogicCache getGameCache() { return gameCache; }
 
     /**
      * Retrieves the History that this Game object is using.

@@ -25,6 +25,7 @@ public class ReversiLogicCache extends GameLogicCache {
         super(other);
     }
 
+
     /**
      * Creates a copy of the current game logic which extends to the data structures, but not what they contain.
      * For example, if an array of BoardIndexes were cached, it would copy the array so both caches can be modified

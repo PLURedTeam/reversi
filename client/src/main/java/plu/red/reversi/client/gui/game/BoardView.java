@@ -140,11 +140,12 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                         Set<BoardIndex> validMoves = (
                             game.getGameLogic()
                                 .getValidMoves(
+                                    boardIterator.cache,
+                                    boardIterator.board,
                                     game.getNextPlayerID (
                                         game.getHistory()
                                             .getBoardCommand(boardIterator.getPos()).playerID
-                                    ),
-                                    boardIterator.board
+                                    )
                                 )
                         );
 

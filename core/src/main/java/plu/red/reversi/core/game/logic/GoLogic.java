@@ -1,5 +1,6 @@
 package plu.red.reversi.core.game.logic;
 
+import jersey.repackaged.com.google.common.cache.CacheLoader;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
@@ -61,7 +62,7 @@ public class GoLogic extends GameLogic {
      * @throws InvalidParameterException If it is an invalid move, no move will be made.
      */
     @Override
-    public GameLogic play(MoveCommand command, Board board, boolean notify, boolean record) throws InvalidParameterException {
+    public GameLogic play(GameLogicCache cache, Board board, MoveCommand command, boolean notify, boolean record) throws InvalidParameterException {
         if(!isValidMove(command)) //TODO: calculate as a result of other things to increase efficiency
             throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
 
@@ -77,7 +78,7 @@ public class GoLogic extends GameLogic {
         for(Group group : groups) {
             if(group.hasLiberty(board)) continue;
             for(BoardIndex index : group) {
-                apply(new SetCommand(-1, command.position), board, false, false);
+                apply(cache, board, new SetCommand(-1, command.position), false, false);
                 if(notify) update.removed.add(index);
             }
         }
@@ -97,7 +98,7 @@ public class GoLogic extends GameLogic {
      * @param board   Board to apply commands to.
      */
     @Override
-    public boolean isValidMove(MoveCommand command, Board board) {
+    public boolean isValidMove(GameLogicCache cache, Board board, MoveCommand command) {
         if(tileHasLiberty(board, command.position)) return true;
 
         //TODO: use caching to speed this up
@@ -116,7 +117,7 @@ public class GoLogic extends GameLogic {
      * @return ArrayList moves
      */
     @Override
-    public Set<BoardIndex> getValidMoves(int player, Board board) {
+    public Set<BoardIndex> getValidMoves(GameLogicCache cache, Board board, int player) {
         Set<BoardIndex> moves = new HashSet<>();
 
         for(BoardIndex i : board)
@@ -135,9 +136,11 @@ public class GoLogic extends GameLogic {
      * @return Score for the given player.
      */
     @Override
-    public int getScore(int player, Board board) {
-        //TODO: calculate this
-        return 0;
+    public int getScore(GameLogicCache cache, Board board, int player) {
+        GoLogicCache c = (GoLogicCache)cache;
+        if(c == null) throw new InvalidParameterException("Incorrect cache type for Go's getScore.");
+        Integer score = c.score.get(player);
+        return score == null ? 0 : score;
     }
 
 
