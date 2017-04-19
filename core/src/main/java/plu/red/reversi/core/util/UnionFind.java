@@ -55,12 +55,18 @@ public class UnionFind<T> extends AbstractSet<T> {
      * Will do nothing if either x or y are not in the forest.
      * @param x First value in the forest.
      * @param y Second value in the forest.
+     * @return True if the union was successful, false if no action occurred.
      */
-    public void union(T x, T y) throws InvalidParameterException {
+    public boolean union(T x, T y) throws InvalidParameterException {
         UnionFindNode<T> a = members.get(x);
-        UnionFindNode<T> b = members.get(x);
-        if(a == null || b == null) return;
-        link(getRep(a), getRep(b));
+        UnionFindNode<T> b = members.get(y);
+        if(a == null || b == null) return false;
+        return link(getRep(a), getRep(b));
+    }
+
+
+    public boolean inSameSet(T x, T y) {
+        return getRep(x) == getRep(y);
     }
 
 
@@ -73,6 +79,29 @@ public class UnionFind<T> extends AbstractSet<T> {
         UnionFindNode<T> t = members.get(x);
         if(t == null) return null;
         return getRep(t).value;
+    }
+
+
+    /**
+     * Retrieves the entire disjoint set containing v. Note that this runs O(n). Will return null
+     * if the input is not contained in the set.
+     * @param v The value find the set of.
+     * @return The entire disjoint set containing v, or null if v is not within any set.
+     */
+    public Set<T> getSet(T v) {
+        if(v == null) return null;
+        UnionFindNode<T> x = members.get(v);
+        if(x == null) return null;
+
+        //Get rep so we know if something else is in the same set
+        x = getRep(x);
+
+        //discover the disjoint set
+        HashSet<T> collection = new HashSet<T>();
+        for(UnionFindNode<T> i : members.values())
+            if(getRep(i) == x) collection.add(i.value);
+
+        return collection;
     }
 
 
@@ -133,15 +162,29 @@ public class UnionFind<T> extends AbstractSet<T> {
 
 
     /**
-     * Adds a new set containing x to the superset and unions it with y. If x already exists this will perform
-     * no action, and if y does not exist in the superset, x will be in its own set.
-     * @param x The value to add.
-     * @param y A member of the set to union with x.
+     * Add all items in the collection as their own individual sets.
+     * @param collection Collection of values to add.
+     * @return True if any modifications were made, otherwise false.
+     */
+    public boolean addAll(Collection<? extends T> collection) {
+        boolean changed = false;
+        for(T i : collection)
+            changed = add(i) || changed;
+
+        return true;
+    }
+
+
+    /**
+     * Adds a new set containing toAdd to the superset and unions it with toUnion. If toAdd already exists this
+     * will perform no action, and if toUnion does not exist in the superset, toAdd will be in its own set.
+     * @param toAdd The value to add.
+     * @param toUnion A member of the set to union with toAdd.
      * @return True if the add was successful, false if the element was already in the superset.
      */
-    public boolean addAndUnion(T x, T y) {
-        if(!add(x)) return false;
-        union(x, y);
+    public boolean addAndUnion(T toAdd, T toUnion) {
+        if(!add(toAdd)) return false;
+        union(toAdd, toUnion);
         return true;
     }
 
@@ -188,17 +231,10 @@ public class UnionFind<T> extends AbstractSet<T> {
      * @return True if it removes the set, false if v is not in any set.
      */
     public boolean removeSet(T v) {
-        if(v == null) return false;
-        UnionFindNode<T> x = members.get(v);
-        if(x == null) return false;
-
-        //Get rep so we know if something else is in the same set
-        x = getRep(x);
-
         //create list of things to remove and then remove them
-        LinkedList<T> toRemove = new LinkedList<>();
-        for(UnionFindNode<T> i : members.values())
-            if(getRep(i) == x) toRemove.add(i.value);
+        Collection<T> toRemove = getSet(v);
+        if(toRemove == null) return false;
+
         for(T i : toRemove)
             members.remove(i);
 
@@ -224,7 +260,9 @@ public class UnionFind<T> extends AbstractSet<T> {
      */
     private UnionFindNode<T> getRep(UnionFindNode<T> x) {
         if(x != x.parent)
-            x.parent = getRep(x.parent);
+            //update the parent, and then set return value to representative
+            x = x.parent = getRep(x.parent);
+
         return x;
     }
 
@@ -234,9 +272,10 @@ public class UnionFind<T> extends AbstractSet<T> {
      * If x and y are the same, it will perform no action.
      * @param x A root node in the forest.
      * @param y A root node in the forest.
+     * @return True if successful, false if no action occurred.
      */
-    private void link(UnionFindNode<T> x, UnionFindNode<T> y) {
-        if(x == y) return; //check if references are same
+    private boolean link(UnionFindNode<T> x, UnionFindNode<T> y) {
+        if(x == null || y == null || x == y) return false;
         if(x.rank > y.rank)
             y.parent = x;
         else {
@@ -245,6 +284,7 @@ public class UnionFind<T> extends AbstractSet<T> {
                 y.rank++;
         }
         disjointSets--;
+        return true;
     }
 
 
