@@ -171,7 +171,12 @@ public abstract class GameLogic {
      * @return This object for chaining.
      */
     public final GameLogic apply(GameLogicCache cache, Board board, SetCommand command, boolean notify, boolean record) {
+        ReversiLogicCache rcache = (ReversiLogicCache)cache;
+        if(rcache == null) throw new InvalidParameterException("Invalid cache passed to apply in ReversiLogic.");
+
+        rcache.addToScore(board.at(command.position), -1); //decrement score of old player
         board.apply(command);
+        rcache.addToScore(command.playerID, 1); //inc new player score
 
         if(notify) {
             BoardUpdate update = new BoardUpdate();

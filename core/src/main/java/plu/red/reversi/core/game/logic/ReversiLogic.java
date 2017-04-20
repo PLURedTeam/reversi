@@ -139,13 +139,23 @@ public class ReversiLogic extends GameLogic {
      */
     @Override
     public int getScore(GameLogicCache cache, Board board, int player) {
-        int score = 0;
-        //look for the instances of the role on the board
-        for(int r = 0; r < board.size; r++)
-            for(int c = 0; c < board.size; c++)
-                if(board.at(new BoardIndex(r, c)) == player)
-                    score++;
-        return score;
+        //check cache
+        ReversiLogicCache rcache = (ReversiLogicCache)cache;
+        if(rcache == null) throw new InvalidParameterException("Invalid cache passed to getScore in ReversiLogic.");
+
+        //see if the cache has the score
+        Integer value = rcache.score.get(player);
+        if(value != null) return value;
+        //make sure we set the value to prevent searching with future calls even if the tile does not exist
+        cache.score.put(player, 0);
+
+        //go ahead and calculate the score for all players
+        for(BoardIndex i : board) {
+            int v = board.at(i); //read value at board
+            if(v < 0) continue; //skip if invalid
+            rcache.addToScore(v, 1);
+        }
+        return cache.score.get(player);
     }
 
 

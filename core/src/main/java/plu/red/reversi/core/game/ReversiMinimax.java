@@ -9,7 +9,6 @@ import plu.red.reversi.core.game.logic.ReversiLogic;
 
 import java.util.Set;
 
-//TODO: cache player score and pass it along to reduce the computation requirement
 //TODO: use iterative search to improve efficiency and allow cutting it off part-way through
 
 /**
