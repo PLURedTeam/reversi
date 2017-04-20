@@ -132,11 +132,6 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
 
-                        System.out.println("NEXT PLAYER: " +
-                                game.getNextPlayerID(game.getHistory().getBoardCommand(boardIterator.getPos()).playerID));
-
-                        System.out.println(boardIterator.getPos());
-
                         Set<BoardIndex> validMoves = (
                             game.getGameLogic()
                                 .getValidMoves(
