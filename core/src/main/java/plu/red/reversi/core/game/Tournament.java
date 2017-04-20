@@ -191,6 +191,7 @@ public class Tournament {
 
     /**
      * Static inner class Match to keep track of the match being played
+     * //TODO: I want to extend Game so that I can access the score of each player and winner and loser of each game
      */
     public static class Match{
         Pair usrs;
