@@ -17,14 +17,16 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
-import plu.red.reversi.core.graphics.*;
+import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.PipelineDefinition;
+import plu.red.reversi.core.graphics.SimpleGLFragmentShader;
+import plu.red.reversi.core.graphics.SimpleGLVertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
-import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.reversi3d.Board3D;
 import plu.red.reversi.core.reversi3d.Camera;
 import plu.red.reversi.core.reversi3d.HighlightMode;
@@ -32,8 +34,9 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * The JPanel containing the board and its edges.
@@ -201,9 +204,11 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     }
 
     @Override
-    public void onGameOver(Player player, int score) {
+    public void onGameOver(Player player, int score){
         // TODO
     }
+
+
 
     @Override
     public void onBoardUpdate(BoardUpdate update) {
