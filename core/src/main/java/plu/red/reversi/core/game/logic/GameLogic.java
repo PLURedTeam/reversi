@@ -254,7 +254,17 @@ public abstract class GameLogic {
      * @param board Board to apply commands to.
      * @return ArrayList moves
      */
-    public abstract Set<BoardIndex> getValidMoves(GameLogicCache cache, Board board, int player);
+    public Set<BoardIndex> getValidMoves(GameLogicCache cache, Board board, int player) {
+        //declare an array for possible moves method
+        HashSet<BoardIndex> moves = new HashSet<>();
+
+        //Add all valid moves to the set
+        for(BoardIndex index : board)
+            if(isValidMove(cache, board, new MoveCommand(player, index)))
+                moves.add(index); //adds the valid move into the array of moves
+
+        return moves;
+    }
 
 
     /**

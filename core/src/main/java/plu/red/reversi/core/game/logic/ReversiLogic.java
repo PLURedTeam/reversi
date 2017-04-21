@@ -107,30 +107,6 @@ public class ReversiLogic extends GameLogic {
 
 
     /**
-     * Find the different moves that could be made and return them.
-     *
-     * @param player Integer Player ID to check for
-     * @param board  Board to apply commands to.
-     * @return ArrayList moves
-     */
-    @Override
-    public Set<BoardIndex> getValidMoves(GameLogicCache cache, Board board, int player) {
-        //declare an array for possible moves method
-        HashSet<BoardIndex> moves = new HashSet<>();
-
-        BoardIndex index = new BoardIndex();
-
-        //Add all valid moves to the set
-        for(index.row = 0; index.row < board.size; index.row++)
-            for(index.column = 0; index.column < board.size; index.column++)
-                if(isValidMove(cache, board, new MoveCommand(player, index)))
-                    moves.add(new BoardIndex(index)); //adds the valid move into the array of moves
-
-        return moves;
-    }
-
-
-    /**
      * Returns the score of the Player ID passed in
      *
      * @param player Integer Player ID.
