@@ -68,6 +68,10 @@ public class GoLogic extends GameLogic {
         GoLogicCache gcache = (GoLogicCache)cache;
         if(gcache == null) throw new InvalidParameterException("Incorrect cache type for Go's play.");
 
+        //if a tile is already there, it cannot be valid
+        if(board.at(command.position) >= 0)
+            throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
+
         //This will be updated as we progress, and set to true if it is valid.
         // Basically catch right before final actions if it is not a valid play.
         boolean validPlay = tileHasLiberty(board, command.position);
@@ -114,6 +118,10 @@ public class GoLogic extends GameLogic {
             //this will remove the set and add all that was removed to the update
             gcache.groups.removeSet(index, boardUpdate.removed);
 
+        //actually remove the pieces from the board
+        for(BoardIndex index : boardUpdate.removed)
+            apply(cache, board, new SetCommand(-1, index), false, false);
+
         cache.addToScore(command.playerID, boardUpdate.removed.size());
 
         if(record)
@@ -137,6 +145,9 @@ public class GoLogic extends GameLogic {
     public boolean isValidMove(GameLogicCache cache, Board board, MoveCommand command) {
         GoLogicCache gcache = (GoLogicCache)cache;
         if(gcache == null) throw new InvalidParameterException("Incorrect cache type for Go's isValidMove.");
+
+        //if a tile is already there, it cannot be valid
+        if(board.at(command.position) >= 0) return false;
 
         //Process in order of least intensive to most intensive checks, and stop when we know it must be valid
         //Check if the tile has liberties
@@ -243,11 +254,14 @@ public class GoLogic extends GameLogic {
     private static boolean tileHasLiberty(Board board, BoardIndex index) {
         for(int i = 0; i < 4; ++i) {
             //Get vector of direction
-            final int dr = i < 2 ? -1 : 1;
-            final int dc = i % 2 == 0 ? -1 : 1;
+            final int dr = getdr(i);
+            final int dc = getdc(i);
 
             final BoardIndex p = new BoardIndex(index.row + dr, index.column + dc);
-            if(board.at(p) < 0) return true;
+            try {
+                if (board.at(p) < 0) return true;
+            } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
+
         }
 
         return false;
@@ -262,11 +276,13 @@ public class GoLogic extends GameLogic {
         for(BoardIndex tile : tiles) {
             for(int i = 0; i < 4; ++i) {
                 //Get vector of direction
-                final int dr = i < 2 ? -1 : 1;
-                final int dc = i % 2 == 0 ? -1 : 1;
+                final int dr = getdr(i);
+                final int dc = getdc(i);
 
                 final BoardIndex t = new BoardIndex(tile.row + dr, tile.column + dc);
-                if(board.at(t) < 0 && !t.equals(ignore)) return true;
+                try {
+                    if (board.at(t) < 0 && !t.equals(ignore)) return true;
+                } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
             }
         }
         return false;
@@ -285,8 +301,8 @@ public class GoLogic extends GameLogic {
         Set<BoardIndex> groups = new TreeSet<>();
         for(int i = 0; i < 4; ++i) {
             //Get vector of direction
-            final int dr = i < 2 ? -1 : 1;
-            final int dc = i % 2 == 0 ? -1 : 1;
+            final int dr = getdr(i);
+            final int dc = getdc(i);
 
             //tile to check
             BoardIndex index = new BoardIndex(
@@ -294,10 +310,29 @@ public class GoLogic extends GameLogic {
                 location.column + dc
             );
 
-            //if there is a piece of same player, find group representative
-            if(board.at(index) >= 0)
-                groups.add(cache.groups.getRep(index));
+            try {
+                //if there is a piece of same player, find group representative
+                if(board.at(index) >= 0)
+                    groups.add(cache.groups.getRep(index));
+            } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
         }
         return groups;
+    }
+
+
+    private static int getdr(int i) {
+        switch(i) {
+            case 0: return 1;
+            case 1: return -1;
+            default: return 0;
+        }
+    }
+
+    private static int getdc(int i) {
+        switch(i) {
+            case 2: return 1;
+            case 3: return -1;
+            default: return 0;
+        }
     }
 }

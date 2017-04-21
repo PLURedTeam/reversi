@@ -55,6 +55,27 @@ public class ReversiLogic extends GameLogic {
 
 
     /**
+     * Sets a tile on the board without considering legality or playing out the move.
+     * @param command Command specifying a location and its new player value.
+     * @param board Board to apply commands to.
+     * @param notify True if this should notify subscribed listeners.
+     * @param record True if this should update the game history.
+     * @return This object for chaining.
+     */
+    @Override
+    public GameLogic apply(GameLogicCache cache, Board board, SetCommand command, boolean notify, boolean record) {
+        //handle score change before calling superclass
+        ReversiLogicCache rcache = (ReversiLogicCache)cache;
+        if(rcache == null) throw new InvalidParameterException("Invalid cache passed to apply in ReversiLogic.");
+
+        rcache.addToScore(board.at(command.position), -1); //decrement score of old player
+        rcache.addToScore(command.playerID, 1); //inc new player score
+
+        return super.apply(cache, board, command, notify, record);
+    }
+
+
+    /**
      * Make a move on the board.
      *
      * @param command Represents the move which is to be played.
