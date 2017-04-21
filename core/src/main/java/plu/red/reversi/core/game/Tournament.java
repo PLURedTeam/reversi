@@ -1,5 +1,7 @@
 package plu.red.reversi.core.game;
 
+import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.IGameOverListener;
 import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
@@ -21,64 +23,42 @@ public class Tournament {
 
     /**
      * Constructor for the Tournament
-     * @param usrs is an ArrayList of User for a given Tournament
+     * @param usrs is an ArrayList of User for a given Tournament, can only be powers of 2
      *
      */
     public Tournament(ArrayList<User> usrs){
         userList = usrs;
-        matchList = new ArrayList<Match>(usrs.size());
+        matchList = new ArrayList<Match>(usrs.size()-1);
 
+        //we assume the matchList will always be (userList.size()-1) / 2
         int j = usrs.size()-1;
-
         //pair up users in the matchList
         for(int i = 0; i < j; i++) {
-            //if the list of users is even
-            if (usrs.size() % 2 == 0) {
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
-            else{
-                //if the list of users isn't even, pair middle one with an one User pair
-                if(i == usrs.size()/2){
-                    matchList.add(new Match(userList.get(i)));
-                    return;
-                }
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
+            matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
             j--;
         }
 
-        //delete losers
+        //delete losers from the userList
         for(int k = 0; k < matchList.size(); k++){
             if( matchList.get(k).score1 > matchList.get(k).score2 )
                 userList.remove(matchList.get(k).usrs.second);
             else
                 userList.remove(matchList.get(k).usrs.first);
-
         }
 
         this.worker(userList);
     }
 
     /**
-     *
+     * This method is used to modify the userList after the Constructor has initially populated
+     * the match list
      */
     public void worker(ArrayList<User> usrLs){
-        int j = usrLs.size()-1;
 
+        int j = usrLs.size()-1;
         //pair up users in the matchList
         for(int i = 0; i < j; i++) {
-            //if the list of users is even
-            if (usrLs.size() % 2 == 0) {
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
-            else{
-                //if the list of users isn't even, pair middle one with an one User pair
-                if(i == usrLs.size()/2){
-                    matchList.add(new Match(userList.get(i)));
-                    return;
-                }
-                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            }
+            matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
             j--;
         }
 
@@ -191,14 +171,14 @@ public class Tournament {
 
     /**
      * Static inner class Match to keep track of the match being played
-     * //TODO: I want to extend Game so that I can access the score of each player and winner and loser of each game
+     *
      */
-    public static class Match{
+    public static class Match implements IGameOverListener {
         Pair usrs;
         User usr;
-        int score1, score2;
         User winner;
         User loser;
+        int score1, score2;
 
         /**
          * Constructor for a match
@@ -208,40 +188,31 @@ public class Tournament {
          */
         public Match(Pair u, int s1, int s2){
             usrs = u;
-            score1 = s1;
-            score2 = s2;
+            score1=s1;
+            score2=s2;
+
         }
 
-
-        /**
-         * Constructor or uneven Userlists, if the user is Matched with no one
-         * @param u
-         */
-        public Match(User u){
-            usr = u;
-            u = winner;
-        }
 
         /**
          * This method returns the winner of the current match
          * @return the winner
          */
-        public User getMatchWinner(){
-            if(score1 > score2)
-                return usrs.first;
-            else
-                return usrs.second;
-        }
+        public User getMatchWinner(){ return winner; }
 
         /**
          * This method returns the loser of the current match
          * @return the loser of the individual match
          */
         public User getMatchLoser(){
-            return this.loser;
+            return loser;
         }
 
 
+        @Override
+        public void onGameOver(Player player, int score){
+
+        }
     }//end class Match
 
     /**
