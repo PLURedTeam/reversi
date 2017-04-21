@@ -33,8 +33,8 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     private SettingsWindow settingsWindow = null;
     public SettingsWindow getSettingsWindow() { return settingsWindow; }
 
-    private Client client = null;
-    public Client getClient() { return client; }
+    private Controller master = null;
+    public Controller getController() { return master; }
 
     private BorderLayout layout = new BorderLayout();
 
@@ -96,7 +96,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      */
     @Override
     public void updateGUIMajor() {
-        Coordinator core = client.getCore();
+        Coordinator core = master.getCore();
 
         if(core instanceof Game) {
             populate(new GamePanel(this, (Game)core));
@@ -118,14 +118,14 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     }
 
     /**
-     * Client Setter. Sets what Client master controller this GUI is displaying for. Usually only used by the Client
+     * Controller Setter. Sets what master Controller this GUI is displaying for. Usually only used by the Controller
      * class's constructor.
      *
-     * @param client Client object to set
+     * @param controller Controller object to set
      */
     @Override
-    public void setClient(Client client) {
-        this.client = client;
+    public void setController(Controller controller) {
+        this.master = controller;
     }
 
     /**
@@ -166,14 +166,14 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      * Creates a new game panel and starts the game
      */
     public void startGame() {
-        client.startGame();
+        master.startGame();
     }
 
     /**
      * Creates a new game panel
      */
     public void createNewGame() {
-        client.createIntoLobby();
+        master.createIntoLobby();
     }
 
     /**
@@ -181,7 +181,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      * Then loads and creates the game
      */
     public void loadGame() {
-        client.loadIntoLobby();
+        master.loadIntoLobby();
     }
 
     /**
@@ -190,7 +190,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      */
     public void saveGame() {
         try {
-            client.saveGame();
+            master.saveGame();
         } catch(IllegalStateException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Save Game", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -217,14 +217,14 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     @Override
     public void windowClosing(WindowEvent e) {
         // Ask about saving
-        if(e.getSource() == this && client.getCore() instanceof Game) {
-            Game game = (Game)client.getCore();
+        if(e.getSource() == this && master.getCore() instanceof Game) {
+            Game game = (Game) master.getCore();
             if(!game.getGameSaved()) { //If game has been saved, do not show prompt
                 if (JOptionPane.showConfirmDialog(this,
                         "Do you want to save this game?", "Save",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
                         == JOptionPane.YES_OPTION) {
-                    client.saveGame();
+                    master.saveGame();
                 }
             }
         }

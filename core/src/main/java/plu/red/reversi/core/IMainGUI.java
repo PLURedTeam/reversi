@@ -9,12 +9,12 @@ package plu.red.reversi.core;
 public interface IMainGUI {
 
     /**
-     * Client Setter. Sets what Client master controller this GUI is displaying for. Usually only used by the Client
+     * Controller Setter. Sets what master Controller this GUI is displaying for. Usually only used by the Controller
      * class's constructor.
      *
-     * @param client Client object to set
+     * @param controller Controller object to set
      */
-    void setClient(Client client);
+    void setController(Controller controller);
 
     /**
      * GUI Display Updater. Called from a Client object when the Client object has changed significantly and the GUI
@@ -48,7 +48,7 @@ public interface IMainGUI {
 
 
     public static class NullGUI implements IMainGUI {
-        @Override public void setClient(Client client) {}
+        @Override public void setController(Controller controller) {}
         @Override public void updateGUIMajor() {}
         @Override public void updateGUIMinor() {}
         @Override public String showSaveDialog() { return null; }

@@ -22,18 +22,11 @@ public class ReversiMinimaxTest {
     private DataMap settingsMap;
     private Game game;
 
-    private class NullGUI implements IMainGUI {
-        @Override public void setClient(Client client) {}
-        @Override public void updateGUIMajor() {}
-        @Override public void updateGUIMinor() {}
-        @Override public String showSaveDialog() { return null; }
-        @Override public String showLoadDialog() { return null; }
-    }
-
     @Before
     public void setup() {
+        Controller.init(new Client(new IMainGUI.NullGUI()));
         settingsMap = SettingsLoader.INSTANCE.loadGameSettingsFromJSON(new JSONObject());
-        game = new Game(new NullGUI());
+        game = new Game(Controller.getInstance(), new IMainGUI.NullGUI());
         game.setSettings(settingsMap).setLogic(new ReversiLogic(game));
 
         Player p;

@@ -62,6 +62,7 @@ public class ChatHandler implements Runnable, INetworkListener {
             System.out.println("Got [" + message.message + "] from broadcast");
         }//while
 
+        Coordinator.removeListenerStatic(this);
         System.out.println("[CHAT HANDLER]: Thread Finished");
     }//run
 

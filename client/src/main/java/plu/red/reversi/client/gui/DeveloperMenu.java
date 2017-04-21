@@ -93,7 +93,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void swapActivePlayer() {
-        Coordinator core = gui.getClient().getCore();
+        Coordinator core = gui.getController().getCore();
         if(core instanceof Game) {
             Game game = (Game)core;
             game.nextTurn();
@@ -106,7 +106,7 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     private void endGame() {
-        Coordinator core = gui.getClient().getCore();
+        Coordinator core = gui.getController().getCore();
         if(core instanceof Game) {
             Game game = (Game)core;
             game.endGame();

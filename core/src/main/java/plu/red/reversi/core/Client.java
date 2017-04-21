@@ -6,6 +6,7 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.util.ChatLog;
 
 /**
  * Glory to the Red Team.
@@ -13,58 +14,14 @@ import plu.red.reversi.core.lobby.Lobby;
  * Master Coordinator for client-side operations. The Client class controls all sub-Controllers and Models that are used
  * in the client side of the program. Main operations such as starting or loading a Game take place through this class.
  */
-public class Client {
+public class Client extends Controller {
 
-    // not public final because it needs to be initialized
-    private static Client INSTANCE = null;
-
-    /**
-     * Initialize the Client Controller with a IMainGUI reference.
-     *
-     * @param gui IMainGUI reference to init with
-     */
-    public static void init(IMainGUI gui) { INSTANCE = new Client(gui); }
-
-    /**
-     * Gets the global instance of the Client controller.
-     *
-     * @return Global Client instance
-     */
-    public static Client getInstance() { return INSTANCE; }
-
-    public final IMainGUI gui;
-
-    protected Coordinator core = null;
-
-
-
-    public Client(IMainGUI gui) {
-        this.gui = gui;
-        gui.setClient(this);
-        setCore(new Lobby(gui));
-    }
-
-    public Client(IMainGUI gui, Coordinator core) {
-        this.gui = gui;
-        gui.setClient(this);
-        setCore(core);
-    }
-
-
-    protected final void setCore(Coordinator core) {
-        if(this.core != null) this.core.cleanup();
-        this.core = core;
-        gui.updateGUIMajor();
-    }
-
-    public Coordinator getCore() { return core; }
-
-
-
+    public Client(IMainGUI gui) { super(gui); }
+    public Client(IMainGUI gui, Coordinator core) { super(gui, core); }
 
     public void createIntoLobby() {
 
-        setCore(new Lobby(gui));
+        setCore(new Lobby(this, gui));
     }
 
     public void loadIntoLobby() {
@@ -86,7 +43,7 @@ public class Client {
         Game game = Game.loadGameFromDatabase(gui, gameID);
         game.setGameSaved(true); //Sets that the game has been saved before and has a name
 
-        setCore(new Lobby(gui, game));
+        setCore(new Lobby(this, gui, game));
     }
 
     public void startGame() throws IllegalStateException {

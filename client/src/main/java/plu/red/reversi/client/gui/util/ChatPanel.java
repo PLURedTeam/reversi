@@ -15,28 +15,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
 public class ChatPanel extends JPanel implements KeyListener, ActionListener, IChatListener, INetworkListener {
 
-    public final JList<ChatMessage> chatHistoryList;
-    public final ChatLog chatLog;
+    //public final JList<ChatMessage> chatHistoryList;
+    public final JTabbedPane tabPane;
+    protected ArrayList<JList<ChatMessage>> tabList;
+    protected ChatLog chat;
     public final JTextField chatEntryField;
     public final JButton chatEntryButton;
 
-    public final String channel;
+    public ChatPanel(ChatLog chat) {
 
-    public ChatPanel(String channel) {
-        this.channel = channel;
-
-        // Create the History
-        this.chatLog = new ChatLog();
-        this.chatHistoryList = new JList<>(this.chatLog);
-        this.chatHistoryList.setSelectionModel(new DefaultListSelectionModel() {
-            @Override public void setSelectionInterval(int i0, int i1) {
-                super.setSelectionInterval(-1, -1);
-            }
-        });
-        this.chatHistoryList.setCellRenderer(new ChatCellRenderer());
+        // Create the Tabbed Pane
+        tabPane = new JTabbedPane();
+        tabList = new ArrayList<>();
 
         // Create the Entry Field
         this.chatEntryField = new JTextField();
@@ -48,11 +42,28 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         this.chatEntryButton.setEnabled(WebUtilities.INSTANCE.loggedIn());
 
         this.setLayout(new BorderLayout());
-        this.add(new JScrollPane(chatHistoryList,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.NORTH);
+        this.add(tabPane, BorderLayout.NORTH);
         this.add(chatEntryField, BorderLayout.CENTER);
         this.add(chatEntryButton, BorderLayout.EAST);
+
+        setChat(chat);
+    }
+
+    public void setChat(ChatLog chat) {
+        this.chat = chat;
+        tabPane.removeAll();
+        tabList.clear();
+        for(ChatLog.ChannelLog channel : chat) {
+            JList<ChatMessage> list = new JList<>(channel);
+            list.setSelectionModel(new ChatListSelectionModel());
+            list.setCellRenderer(new ChatCellRenderer());
+            tabPane.add(channel.channel, new JScrollPane(list,
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+            tabList.add(list);
+        }
+        this.revalidate();
+        this.repaint();
     }
 
     @Override
@@ -76,17 +87,19 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == chatEntryButton) {
             if(chatEntryField.getText().length() > 0) {
-                ChatMessage message = new ChatMessage(this.channel, WebUtilities.INSTANCE.getUser().getUsername(), chatEntryField.getText());
-                chatEntryField.setText("");
-                Client.getInstance().getCore().acceptCommand(new ChatCommand(message));
+                int i = tabPane.getSelectedIndex();
+                if(i >= 0) {
+                    ChatMessage message = new ChatMessage(((ChatLog.ChannelLog)tabList.get(i).getModel()).channel, WebUtilities.INSTANCE.getUser().getUsername(), chatEntryField.getText());
+                    chatEntryField.setText("");
+                    Client.getInstance().getCore().acceptCommand(new ChatCommand(message));
+                }
             }
         }
     }
 
     @Override
     public void onChat(ChatMessage message) {
-        if(message.channel.equals(channel))
-            addChat(message);
+        addChat(message);
     }
 
     @Override
@@ -97,11 +110,22 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     }
 
     void addChat(ChatMessage message) {
-        chatLog.add(message);
-        chatHistoryList.ensureIndexIsVisible(chatLog.getSize()-1);
+        chat.offer(message);
+        int index = tabPane.getSelectedIndex();
+        if(index > -1) {
+            JList<ChatMessage> list = tabList.get(index);
+            if(list.getModel() == chat.get(message.channel))
+                list.ensureIndexIsVisible(list.getModel().getSize()-1);
+        }
     }
 
-    protected static final class ChatCellRenderer extends JPanel implements ListCellRenderer<ChatMessage> {
+    private static final class ChatListSelectionModel extends DefaultListSelectionModel {
+        @Override public void setSelectionInterval(int i0, int i1) {
+            super.setSelectionInterval(-1, -1);
+        }
+    }
+
+    private static final class ChatCellRenderer extends JPanel implements ListCellRenderer<ChatMessage> {
 
         private void populate(ChatMessage msg, boolean isSmall) {
             if(msg == null) return;

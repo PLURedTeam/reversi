@@ -8,7 +8,6 @@ import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.lobby.PlayerSlot;
-import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
@@ -103,7 +102,7 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
         this.add(rightPanel, BorderLayout.EAST);
 
         // Create the Chat Panel
-        panelChat = new ChatPanel(ChatMessage.Channel.LOBBY_PREFIX);
+        panelChat = new ChatPanel(gui.getController().getChat());
         lobby.addListener(panelChat);
         this.add(panelChat, BorderLayout.SOUTH);
 

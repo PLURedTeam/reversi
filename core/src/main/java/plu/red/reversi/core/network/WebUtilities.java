@@ -1,11 +1,7 @@
 package plu.red.reversi.core.network;
 
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.listener.IListener;
-import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
@@ -18,7 +14,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Created by Andrew on 3/15/2017.

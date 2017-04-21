@@ -175,11 +175,18 @@ public abstract class Coordinator {
     public final IMainGUI gui;
 
     /**
+     * Reference to the master Controller that is being used for this program.
+     */
+    public final Controller master;
+
+    /**
      * Abstract Constructor. Base constructor that accepts an IMainGUI object that this Coordinator can manipulate.
      *
+     * @param master Controller object that is the master Controller for this program
      * @param gui IMainGUI object that displays for the program
      */
-    public Coordinator(IMainGUI gui) {
+    public Coordinator(Controller master, IMainGUI gui) {
+        this.master = master;
         this.gui = gui == null ? new IMainGUI.NullGUI() : gui;
     }
 }

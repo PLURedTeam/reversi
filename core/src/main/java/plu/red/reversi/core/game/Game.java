@@ -1,14 +1,12 @@
 package plu.red.reversi.core.game;
 
-import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.IMainGUI;
-import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
-import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.db.DBUtilities;
 
@@ -45,7 +43,7 @@ public class Game extends Coordinator {
      * @return New Game object
      */
     public static Game loadGameFromDatabase(IMainGUI gui, int gameID) {
-        Game game = new Game(gui);
+        Game game = new Game(Controller.getInstance(), gui);
         game
                 .setGameID(gameID)
                 .setHistory(DBUtilities.INSTANCE.loadGame(gameID))
@@ -137,9 +135,10 @@ public class Game extends Coordinator {
      * Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
      * DataMap and Players) and then be initialized.
      *
+     * @param master Controller object that is the master Controller for this program
      * @param gui IMainGUI object that displays for the program
      */
-    public Game(IMainGUI gui) { super(gui); }
+    public Game(Controller master, IMainGUI gui) { super(master, gui); }
 
     /**
      * Set this Game's GameLoic to the given object. Used to specifiy what type of game is being played. e.g. reversi.
@@ -225,6 +224,9 @@ public class Game extends Coordinator {
             gameLogic.initBoard(cmds);
             currentPlayer = getNextPlayerID(cmds.getLast().playerID);
         }
+
+        // Create Game Chat
+        master.getChat().create(ChatMessage.Channel.game(""+gameID));
 
         gameInitialized = true;
 
@@ -473,6 +475,9 @@ public class Game extends Coordinator {
             if(player instanceof HumanPlayer)
                 SettingsLoader.INSTANCE.removeSettingsListener((HumanPlayer)player);
         }
+
+        // Clear Game Chat
+        master.getChat().clear(ChatMessage.Channel.game(""+gameID));
 
         // TODO: Manually stop any running BotPlayer Minimax threads
     }

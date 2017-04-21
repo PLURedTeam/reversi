@@ -1,8 +1,6 @@
 package plu.red.reversi.core.lobby;
 
-import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.IMainGUI;
-import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.ReversiLogic;
@@ -10,6 +8,7 @@ import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
 
@@ -38,8 +37,8 @@ public class Lobby extends Coordinator implements ISettingsListener {
     //  Member Methods
     // ****************
 
-    public Lobby(IMainGUI gui) {
-        super(gui);
+    public Lobby(Controller master, IMainGUI gui) {
+        super(master, gui);
         this.loadedGame = null;
 
         // Create new settings
@@ -47,10 +46,13 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Register as a ISettingsListener
         SettingsLoader.INSTANCE.addSettingsListener(this);
+
+        // Create Lobby Chat
+        master.getChat().create(ChatMessage.Channel.LOBBY_PREFIX);
     }
 
-    public Lobby(IMainGUI gui, Game loadedGame) {
-        super(gui);
+    public Lobby(Controller master, IMainGUI gui, Game loadedGame) {
+        super(master, gui);
         this.loadedGame = loadedGame;
 
         // Add our predefined Player Slots
@@ -67,6 +69,9 @@ public class Lobby extends Coordinator implements ISettingsListener {
             }
             slot.setNameCustom(true); // Stop automatic name changing when settings change
             playerSlots.add(slot);
+
+            // Create Lobby Chat
+            master.getChat().create(ChatMessage.Channel.LOBBY_PREFIX);
         }
 
         // Spoof a settings change in order to update Local player names
@@ -187,7 +192,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
         if(!canStart()) return null;
 
         if(loadedGame == null) {
-            loadedGame = new Game(gui);
+            loadedGame = new Game(master, gui);
             loadedGame.setLogic(new ReversiLogic(loadedGame));
 
             // Set the settings
@@ -235,6 +240,9 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Unregister ISettingsListener
         SettingsLoader.INSTANCE.removeSettingsListener(this);
+
+        // Clear Lobby Chat
+        master.getChat().clear(ChatMessage.Channel.LOBBY_PREFIX);
     }
 
 
