@@ -7,7 +7,10 @@ import plu.red.reversi.core.util.User;
 import java.util.ArrayList;
 
 /**
- * Created by JChase on 4/7/17.
+ * Glory to the Red Team.
+ *
+ * Tournament capability for the Game, asks for a User ArrayList and starts a Tournament
+ *
  */
 public class Tournament {
 
@@ -18,8 +21,7 @@ public class Tournament {
     private ArrayList<User> userList;
     private ArrayList<Match> matchList;
 
-    private User winner, loser;
-    private int winnerScore, loserScore;
+    private User winner;
 
     /**
      * Constructor for the Tournament
@@ -30,49 +32,14 @@ public class Tournament {
         userList = usrs;
         matchList = new ArrayList<Match>(usrs.size()-1);
 
-        //we assume the matchList will always be (userList.size()-1) / 2
+        //we assume the matchList will always be 3 or 7  (userList.size()-1) / 2
         int j = usrs.size()-1;
         //pair up users in the matchList
         for(int i = 0; i < j; i++) {
-            matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
+            matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0));
             j--;
         }
-
-        //delete losers from the userList
-        for(int k = 0; k < matchList.size(); k++){
-            if( matchList.get(k).score1 > matchList.get(k).score2 )
-                userList.remove(matchList.get(k).usrs.second);
-            else
-                userList.remove(matchList.get(k).usrs.first);
-        }
-
-        this.worker(userList);
     }
-
-    /**
-     * This method is used to modify the userList after the Constructor has initially populated
-     * the match list
-     */
-    public void worker(ArrayList<User> usrLs){
-
-        int j = usrLs.size()-1;
-        //pair up users in the matchList
-        for(int i = 0; i < j; i++) {
-            matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0, 0));
-            j--;
-        }
-
-        //delete losers
-        for(int k = 0; k < matchList.size(); k++){
-            if( matchList.get(k).score1 > matchList.get(k).score2 )
-                userList.remove(matchList.get(k).usrs.second);
-            else
-                userList.remove(matchList.get(k).usrs.first);
-
-        }
-    }
-
-
 
     /**
      * currentMatch finds the current match based on the id
@@ -111,7 +78,6 @@ public class Tournament {
         return matchList.indexOf(m);
     }
 
-
     /**
      * nextMatch
      * @param current match
@@ -126,7 +92,7 @@ public class Tournament {
      * This method sets the winner
      * @param u the user left in the userList
      */
-    public void setWinner(User u){
+    private void setWinner(User u){
         userList.set(0, u);
         winner = u;
     }
@@ -139,78 +105,62 @@ public class Tournament {
         return userList.get(0);
     }
 
-    /**
-     * This method sets the loser a match
-     * @param u loser in match
-     */
-    public void setLoser(User u){
-        loser = u;
-    }
 
     /**
-     * This method returns the loser of the tournament
-     * @return the loser
-     */
-    public User getLoser(){
-        return loser;
-    }
-
-    /**
-     * This method sets the winner, loser and their scores
-     * @param winner1
-     * @param loser1
-     * @param winScore1
-     * @param loseScore1
-     */
-    public void completedGame(User winner1, User loser1, int winScore1, int loseScore1){
-        setWinner(winner1);
-        setLoser(loser1);
-        winnerScore = winScore1;
-        loserScore = loseScore1;
-    }
-
-    /**
-     * Static inner class Match to keep track of the match being played
+     *  Inner class Match to keep track of the match being played
      *
      */
-    public static class Match implements IGameOverListener {
-        Pair usrs;
-        User usr;
+    public class Match implements IGameOverListener{
+        Pair usrs; //Two users for a given Match in a Tournament
         User winner;
-        User loser;
-        int score1, score2;
+        int score;
 
         /**
-         * Constructor for a match
-         * @param u
-         * @param s1
-         * @param s2
+         * Constructor for a Match in a Tournament
+         * @param p the Pair of Users
+         * @param s the score of the winner
+         *
          */
-        public Match(Pair u, int s1, int s2){
-            usrs = u;
-            score1=s1;
-            score2=s2;
-
+        public Match(Pair p, int s){
+            usrs = p;
+            score = s;
         }
 
-
         /**
-         * This method returns the winner of the current match
+         * This method returns the winner of the current Match
          * @return the winner
          */
         public User getMatchWinner(){ return winner; }
 
+
         /**
-         * This method returns the loser of the current match
-         * @return the loser of the individual match
+         * This method is used to create the pairs after the first round by modifying the userList (after the Constructor
+         * has initially populated the match list) which deletes the losers
          */
-        public User getMatchLoser(){
-            return loser;
+        public void nextRound(ArrayList<User> usrLs){
+
+            int j = usrLs.size()-1;
+            //pair up users in the matchList
+            for(int i = 0; i < j; i++) {
+                matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0));
+                j--;
+            }
+
+            //delete losers
+            for(int k = 0; k < matchList.size(); k++){
+                userList.remove(matchList.get(k).winner);
+
+            }
         }
 
-
+        /**
+         * Update the UserList every time the Game is over
+         * @param player Player object representing who won, null if no one wins
+         * @param score the final winning score
+         */
         @Override
         public void onGameOver(Player player, int score){
+            nextRound(userList);
 
         }
     }//end class Match

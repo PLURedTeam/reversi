@@ -33,7 +33,7 @@ public class TournamentTest {
     @Test
     public void currentMatch() throws Exception {
 
-        Tournament.Match m = (new Tournament.Match(new Tournament.Pair(u1, u2), 0, 0));
+        //Tournament.Match m = (new Tournament.Match(new Tournament.Pair(u1, u2), 0));
         Tournament.Match n = tournament1.currentMatch(1);
         // assertEquals(m, n);
     }
