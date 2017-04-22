@@ -13,6 +13,7 @@ import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -60,8 +61,27 @@ public class BoardTest {
 
     @Test
     public void testIterate() {
-        Board b = new Board(8);
-        for(BoardIndex index : b)
-            assertEquals(-1, b.at(index));
+
+        Board b = new Board(3);
+
+        // check the 4 corners are iterated properly
+        b.apply(new SetCommand(1, new BoardIndex(0, 0)));
+        b.apply(new SetCommand(2, new BoardIndex(0, 2)));
+        b.apply(new SetCommand(3, new BoardIndex(2, 0)));
+        b.apply(new SetCommand(4, new BoardIndex(2, 2)));
+
+        Iterator<BoardIndex> iter = b.iterator();
+
+        assertEquals(1, b.at(iter.next()));
+        assertEquals(-1, b.at(iter.next()));
+        assertEquals(2, b.at(iter.next()));
+        assertEquals(-1, b.at(iter.next()));
+        assertEquals(-1, b.at(iter.next()));
+        assertEquals(-1, b.at(iter.next()));
+        assertEquals(3, b.at(iter.next()));
+        assertEquals(-1, b.at(iter.next()));
+        assertEquals(4, b.at(iter.next()));
+
+        assertFalse(iter.hasNext());
     }
 }

@@ -147,9 +147,7 @@ public class Board implements Iterable<BoardIndex> {
     /**
      * Iterator for Board used to get each BoardIndex.
      */
-    public static class BoardIterator implements Iterator<BoardIndex> {
-        private final int size;
-        private int r;
+    public class BoardIterator implements Iterator<BoardIndex> {
         private int c;
 
         /**
@@ -157,25 +155,17 @@ public class Board implements Iterable<BoardIndex> {
          * @param size Size of the board being iterated.
          */
         BoardIterator(int size) {
-            this.size = size;
-            r = 0;
             c = 0;
         }
 
         @Override
         public boolean hasNext() {
-            if(r < size - 1) return true;
-            if(c < size - 1) return true;
-            return false;
+            return c < size * size;
         }
 
         @Override
         public BoardIndex next() {
-            if(++c == size) {
-                c = 0;
-                ++r;
-            }
-            return new BoardIndex(r, c);
+            return new BoardIndex(c / size, c++ % size);
         }
     }
 }
