@@ -5,6 +5,7 @@ import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
@@ -188,7 +189,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         if(loadedGame == null) {
             loadedGame = new Game(gui);
-            loadedGame.setLogic(new ReversiLogic(loadedGame));
+            loadedGame.setLogic(new GoLogic(loadedGame));
 
             // Set the settings
             settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());

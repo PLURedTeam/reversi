@@ -594,21 +594,51 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
          * Run the animation on the board
          */
         private void dispatch() {
-            final BoardIndex origin = added.iterator().next();
-
             final boolean f = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
 
-            int originIndex = indexFromCoord(toBoardCoords(origin, size), size);
+            if(added.size() == 1) {
+                // we have an origin to spice up the animation
+                // basically, there will be a greater animation delay for pieces farther away
+                // from the origin
+                final BoardIndex origin = added.iterator().next();
 
-            pieces[originIndex].animateEnter(f, getLastTick());
-            addChild(pieces[originIndex]);
+                int originIndex = indexFromCoord(toBoardCoords(origin, size), size);
 
-            for(BoardIndex index : flipped) {
+                pieces[originIndex].animateEnter(f, getLastTick());
+                addChild(pieces[originIndex]);
+
+                for(BoardIndex index : flipped) {
+                    Vector2ic coords = toBoardCoords(index, size);
+                    int i = indexFromCoord(coords, size);
+
+                    // flips are delayed dramatically (see the power delay function above)
+                    pieces[i].animateFlip(f, getLastTick() + delayForPiece(index));
+                }
+            }
+            else {
+                for(BoardIndex index : added) {
+                    Vector2ic coords = toBoardCoords(index, size);
+                    int i = indexFromCoord(coords, size);
+
+                    // flips are delayed dramatically (see the power delay function above)
+                    pieces[i].animateEnter(f, getLastTick());
+                }
+
+                for(BoardIndex index : flipped) {
+                    Vector2ic coords = toBoardCoords(index, size);
+                    int i = indexFromCoord(coords, size);
+
+                    // flips are delayed dramatically (see the power delay function above)
+                    pieces[i].animateFlip(f, getLastTick());
+                }
+            }
+
+            for(BoardIndex index : removed) {
                 Vector2ic coords = toBoardCoords(index, size);
                 int i = indexFromCoord(coords, size);
 
-                // flips are delayed dramatically (see the power delay function above)
-                pieces[i].animateFlip(f, getLastTick() + delayForPiece(index));
+                // TODO: Fun removal animation
+                removeChild(pieces[i]);
             }
         }
     }
