@@ -428,10 +428,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                     if(mCanDoCommand) {
                         if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                             // we can use the game board because GUI will be caught up animation wise
+                            // TODO: Get valid moves for previous moves was borked
                             for(BoardIndex index :
-                                    mGame.getGameLogic().getValidMoves(mGame.getNextPlayerID(
-                                            mGame.getHistory().getBoardCommand(mBoardIterator.getPos()).playerID
-                                    ) ,getCurrentBoard())) {
+                                    mGame.getGameLogic().getValidMoves(mGame.getCurrentPlayer().getID())) {
                                 mRenderer.mBoard.highlightAt(index, POSSIBLE_MOVES_COLOR);
                             }
                         }
@@ -630,7 +629,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 // hack for right now.
                                 mAutoFollow = true;
 
-                                mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
+                                //mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
 
                                 mAutoFollow = preAutoFollow;
 
