@@ -13,6 +13,7 @@ import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.db.DBUtilities;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -397,8 +398,12 @@ public class Game extends Coordinator {
         // Send Move Commands to the Board object
         if(cmd instanceof MoveCommand) {
             if(!gameRunning) return false;
-            gameLogic.play((MoveCommand)cmd);
-            nextTurn();
+            try {
+                gameLogic.play((MoveCommand)cmd);
+                nextTurn();
+            } catch(InvalidParameterException e) {
+                System.err.println(e.getMessage());
+            }
         }
 
         // Listen to Surrender Commands
