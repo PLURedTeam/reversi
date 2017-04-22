@@ -324,12 +324,21 @@ public abstract class Model3D {
             //System.out.println("Added duplicate object as child--use clone()!");
             return;
         }
-        else child.parent = this;
+
+        child.parent = this;
+
+        child.posChanged();
+        child.scaleChanged();
+        child.rotChanged();
     }
 
     public void removeChild(Model3D child) {
         children.remove(child);
         child.parent = null;
+
+        child.posChanged();
+        child.scaleChanged();
+        child.rotChanged();
     }
 
     /**
