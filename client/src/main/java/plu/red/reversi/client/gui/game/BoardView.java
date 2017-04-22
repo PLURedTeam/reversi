@@ -154,10 +154,12 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                         // TODO
                     }
 
-                    BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
+                    if(boardIterator.getPos() >= 0) {
+                        BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
 
-                    if(lastMove instanceof MoveCommand)
-                        board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                        if(lastMove instanceof MoveCommand)
+                            board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                    }
                 }
             }
         });
