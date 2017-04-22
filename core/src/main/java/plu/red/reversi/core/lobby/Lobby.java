@@ -189,7 +189,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         if(loadedGame == null) {
             loadedGame = new Game(gui);
-            loadedGame.setLogic(new GoLogic(loadedGame));
+            loadedGame.setLogic(new ReversiLogic(loadedGame));
 
             // Set the settings
             settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());

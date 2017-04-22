@@ -315,7 +315,13 @@ public abstract class GameLogic {
      * @throws IllegalArgumentException If player count is invalid.
      */
     public final Collection<SetCommand> getSetupCommands() throws IllegalArgumentException {
-        return getSetupCommands(Arrays.stream(game.getUsedPlayers()).mapToInt(Integer::intValue).toArray(), game.getBoard().size);
+        int[] usedPlayers = new int[game.getUsedPlayers().length];
+        Integer[] usedPlayersOld = game.getUsedPlayers();
+
+        for(int i = 0;i < usedPlayers.length;i++)
+            usedPlayers[i] = usedPlayersOld[i];
+
+        return getSetupCommands(usedPlayers, game.getBoard().size);
     }
 
 

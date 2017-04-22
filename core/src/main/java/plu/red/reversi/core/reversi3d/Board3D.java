@@ -281,6 +281,8 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         int i = indexFromCoord(toBoardCoords(index, size), size);
 
+        System.out.println("Highlight at " + index + " at i " + i);
+
         highlights[i].setColor(color);
 
         addChild(highlights[i]);
