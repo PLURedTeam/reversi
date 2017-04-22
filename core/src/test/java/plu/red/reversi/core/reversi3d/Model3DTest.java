@@ -1,16 +1,13 @@
 package plu.red.reversi.core.reversi3d;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import plu.red.reversi.core.graphics.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.PipelineDefinition;
 
 /**
  * Created by daniel on 4/21/17.
