@@ -1,6 +1,5 @@
-package plu.red.reversi.server;
+package plu.red.reversi.server.Managers;
 
-import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.listener.ISessionListener;

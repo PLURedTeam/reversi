@@ -7,8 +7,8 @@ import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.glassfish.jersey.media.sse.SseFeature;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
-import plu.red.reversi.server.GameManager;
-import plu.red.reversi.server.UserManager;
+import plu.red.reversi.server.Managers.GameManager;
+import plu.red.reversi.server.Managers.UserManager;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;

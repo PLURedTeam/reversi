@@ -1,9 +1,8 @@
-package plu.red.reversi.server;
+package plu.red.reversi.server.Managers;
 
 import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

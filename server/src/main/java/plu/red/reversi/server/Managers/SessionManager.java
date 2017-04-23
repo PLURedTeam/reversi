@@ -1,4 +1,4 @@
-package plu.red.reversi.server;
+package plu.red.reversi.server.Managers;
 
 import plu.red.reversi.server.listener.ISessionListener;
 
