@@ -3,6 +3,7 @@ package plu.red.reversi.core.network;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 
 import javax.swing.*;
@@ -27,6 +28,7 @@ public class WebUtilities {
     private int sessionID;
     private User user = new User();
     private boolean loggedIn = false;
+    private int networkGameID = -1;
 
     /**
      * Constructor for WebUtilities
@@ -271,5 +273,107 @@ public class WebUtilities {
         WebTarget target = client.target(baseURI + "chat");
         Response response = target.request().post(Entity.text(message.toString()));
     }//sendChat
+
+    /**
+     * Creates a new game on the server that players can join
+     * @return true if game created, false otherwise
+     */
+    public boolean createGame(int numPlayers) {
+        if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
+
+            try {
+                //Create target and call server
+                WebTarget target = client.target(baseURI + "game/create/" + numPlayers);
+                Response response = target.request().post(Entity.json(user));
+
+                //If invalid credentials, return false
+                if (response.getStatus() == 403) {
+                    JOptionPane.showMessageDialog(null,
+                            "You must login to create a game.",
+                            "Login Error", 2);
+                    return false;
+                }//if
+
+                //set the game ID
+                networkGameID = response.readEntity(Integer.class);
+
+                return true;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                        "The server is currently unreachable. Please try again later.",
+                        "Login Error", 2);
+                return false;
+            }//catch
+        } else {
+
+            if(!loggedIn) {
+                JOptionPane.showMessageDialog(null,
+                        "You are not currently logged in. You must login first.",
+                        "Create Game Error", 2);
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "You can only be in one network game at a time.",
+                        "Create Game Error", 2);
+            }//else
+            return false;
+        }//else
+    }//createGame
+
+    /**
+     * Calls the server to join a network game
+     * @param gameID the gameID of the game to join
+     * @return true if game joined, false otherwise
+     */
+    public boolean joinGame(int gameID) {
+        if(loggedIn) { //Check to see if currently logged in
+
+            try {
+                //Create target and call server
+                WebTarget target = client.target(baseURI + "game/join/" + gameID);
+                Response response = target.request().post(Entity.json(user));
+
+                //If invalid credentials, return false
+                if (response.getStatus() == 403) {
+                    JOptionPane.showMessageDialog(null,
+                            "You must login to join a game.",
+                            "Join Game Error", 2);
+                    return false;
+                }//if
+
+                //set the game ID
+                boolean joined = response.readEntity(Boolean.class);
+
+                return true;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                        "The server is currently unreachable. Please try again later.",
+                        "Join Game Error", 2);
+                return false;
+            }//catch
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    "You are not currently logged in. You must login first",
+                    "Join Game Error", 2);
+            return false;
+        }//else
+    }//joinGame
+
+    /**
+     * Gets a list of the games currently on the server
+     * @return An arraylist of GamePairs
+     */
+    public ArrayList<GamePair> getOnlineGames() {
+        try {
+            WebTarget target = client.target(baseURI + "game/get-games");
+            Response response = target.request(MediaType.APPLICATION_JSON).get();
+            ArrayList<GamePair> games = response.readEntity(new GenericType<ArrayList<GamePair>>() {});
+            return games;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "The server is currently unreachable. Please try again later.",
+                    "Delete User Error", 2);
+            return null;
+        }//catch
+    }//getOnlineUsers
 
 }//webUtilities

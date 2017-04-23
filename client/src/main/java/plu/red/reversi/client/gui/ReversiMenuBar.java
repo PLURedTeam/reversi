@@ -28,6 +28,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private JMenuItem saveGameItem;
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
+    private JMenuItem newOnlineGameItem;
+    private JMenuItem joinOnlineGameItem;
 
     private JMenuItem highlightMenuItem;
     private JMenuItem bestMoveMenuItem;
@@ -85,19 +87,21 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         saveGameItem.addActionListener(this);
         menu.add(saveGameItem);
 
-        JMenuItem menuItem = new JMenuItem("New Online Game");
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+        newOnlineGameItem = new JMenuItem("New Online Game");
+        newOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_O, InputEvent.META_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription(
+        newOnlineGameItem.getAccessibleContext().setAccessibleDescription(
                 "Start a new online game and invite someone to play.");
-        menu.add(menuItem);
+        newOnlineGameItem.addActionListener(this);
+        menu.add(newOnlineGameItem);
 
-        menuItem = new JMenuItem("Join Online Game");
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+        joinOnlineGameItem = new JMenuItem("Join Online Game");
+        joinOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_J, InputEvent.META_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription(
+        joinOnlineGameItem.getAccessibleContext().setAccessibleDescription(
                 "Join an existing online game.");
-        menu.add(menuItem);
+        joinOnlineGameItem.addActionListener(this);
+        menu.add(joinOnlineGameItem);
 
         menu.addSeparator();
 
@@ -194,5 +198,15 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         if(e.getSource() == saveGameItem) {
             gui.saveGame();
         }
+
+        if(e.getSource() == newOnlineGameItem) {
+            gui.createNetworkGame();
+        }
+
+        if(e.getSource() == joinOnlineGameItem) {
+            gui.joinNetworkGame();
+        }
+
+
     }
 }

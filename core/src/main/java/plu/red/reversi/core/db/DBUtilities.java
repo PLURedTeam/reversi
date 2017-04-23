@@ -38,7 +38,6 @@ public class DBUtilities {
      */
     public DBUtilities() {
         initDB();
-        cleanupGames();
     }//constructor
 
     private void initDB() {
@@ -106,24 +105,6 @@ public class DBUtilities {
         Collections.addAll(players,p);
 
         gameID = createGame();
-        saveGame(gameID);
-        updateGame(gameID, n);
-        saveGamePlayers(gameID, players);
-        saveGameSettings(gameID, s);
-
-        for(int i = 0; i < h.getNumBoardCommands(); i++)
-            saveMove(gameID, h.getBoardCommand(i));
-
-        return gameID;
-    }//saveGame
-
-
-    public int saveGame(int gameID, History h, Player[] p, JSONObject s, String n) {
-
-        //Create a collection from an array
-        Collection<Player> players = new HashSet<Player>();
-        Collections.addAll(players,p);
-
         saveGame(gameID);
         updateGame(gameID, n);
         saveGamePlayers(gameID, players);
@@ -255,7 +236,6 @@ public class DBUtilities {
             e.printStackTrace();
         }//catch
     }//loadGamePlayers
-
 
     /**
      *
@@ -394,7 +374,6 @@ public class DBUtilities {
             }//catch
         return moveSaved;
     }//saveMove
-
 
     /**
      * Gets the games saved in the database
@@ -544,22 +523,5 @@ public class DBUtilities {
 
         return json;
     }//loadGameSettings
-
-    /**
-     * Cleans up the database removing games that were not saved
-     * to the database (i.e. games with no name)
-     */
-    private void cleanupGames() {
-
-        String sql = "delete from GAME where name IS NULL or name=''";
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.execute(sql);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }//catch
-    }//cleanupGames
 
 }//DBUtilities
