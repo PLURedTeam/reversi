@@ -36,10 +36,11 @@ public abstract class Controller {
 
 
     public Controller(IMainGUI gui) {
-        this.gui = gui;
+        if(gui == null) this.gui = new IMainGUI.NullGUI();
+        else this.gui = gui;
         chat.create(ChatMessage.Channel.GLOBAL);
-        gui.setController(this);
-        setCore(new Lobby(this, gui));
+        this.gui.setController(this);
+        setCore(new Lobby(this, this.gui));
     }
 
     public Controller(IMainGUI gui, Coordinator core) {

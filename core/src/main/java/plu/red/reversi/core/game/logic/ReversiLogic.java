@@ -27,6 +27,14 @@ import java.util.*;
  * by default, and you can manually specify otherwise in each case.
  */
 public class ReversiLogic extends GameLogic {
+
+    /**
+     * Type Getter. Retrieves the type of this GameLogic.
+     *
+     * @return Type of GameLogic
+     */
+    public Type getType() { return Type.REVERSI; }
+
     /**
      * Constructs a new ReversiLogic Unit to be able to play a game of reversi.
      * @param game Game this logic is used for.

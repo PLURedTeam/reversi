@@ -1,5 +1,7 @@
 package plu.red.reversi.core.game.player;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.util.Color;
@@ -56,6 +58,54 @@ public abstract class Player {
         this.playerID.set(playerID);
         game.registerPlayer(this, this.playerID);
         this.name = "Player";
+    }
+
+    /**
+     * Serial Constructor. Creates a Player belonging to an unserialized Game. Player is created with data unserialized
+     * from a given JSONObject.
+     *
+     * @param game Game object this Player belongs to
+     * @param json JSONObject storing this Player's data
+     * @throws JSONException if there is a problem during unserialization
+     */
+    protected Player(Game game, JSONObject json) throws JSONException {
+        this.game = game;
+        this.color = new Color(json.getInt("color"));
+        this.playerID = new ID();
+        this.playerID.set(json.getInt("id"));
+        this.name = json.getString("name");
+        game.registerPlayer(this, this.playerID);
+    }
+
+    /**
+     * Static Serial Creator. Unserializes a Player object from JSON based on the stored Player type.
+     *
+     * @param game Game object the Player belongs to
+     * @param json JSONObject storing the Player's data
+     * @return Newly created Player
+     * @throws JSONException if there is a problem during unserialization
+     */
+    public static Player unserializePlayer(Game game, JSONObject json) throws JSONException {
+        int type = json.getInt("type");
+        switch(type) {
+            case 0: return new HumanPlayer(game, json);
+            case 1: return new BotPlayer(game, json);
+            default: throw new IllegalArgumentException("Unknown Player Type '" + type + "' when trying to unserialize");
+        }
+    }
+
+    /**
+     * Serializes this Player into a JSONObject.
+     *
+     * @return New JSONObject from this Player
+     * @throws JSONException if there is a problem during serialization
+     */
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("color", this.color.composite);
+        json.put("id", this.playerID.get());
+        json.put("name", this.name);
+        return json;
     }
 
     /**

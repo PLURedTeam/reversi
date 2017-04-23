@@ -24,6 +24,14 @@ import java.util.*;
  * by default, and you can manually specify otherwise in each case.
  */
 public class GoLogic extends GameLogic {
+
+    /**
+     * Type Getter. Retrieves the type of this GameLogic.
+     *
+     * @return Type of GameLogic
+     */
+    public Type getType() { return Type.GO; }
+
     /**
      * Make a move on the board.
      *

@@ -1,8 +1,12 @@
 package plu.red.reversi.core.game;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GoLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
@@ -73,6 +77,7 @@ public class Game extends Coordinator {
     protected boolean gameInitialized = false;
     protected boolean gameRunning = true;
     private boolean gameSaved = false;
+    protected final boolean host;
 
     // Game Identification
     private int gameID = -1;
@@ -138,7 +143,10 @@ public class Game extends Coordinator {
      * @param master Controller object that is the master Controller for this program
      * @param gui IMainGUI object that displays for the program
      */
-    public Game(Controller master, IMainGUI gui) { super(master, gui); }
+    public Game(Controller master, IMainGUI gui) {
+        super(master, gui);
+        host = true;
+    }
 
     /**
      * Set this Game's GameLoic to the given object. Used to specifiy what type of game is being played. e.g. reversi.
@@ -447,6 +455,14 @@ public class Game extends Coordinator {
     public boolean isInitialized() { return gameInitialized; }
 
     /**
+     * Determines whether or not this game is the host game for a multiplayer session. Always <code>true</code> for
+     * singleplayer.
+     *
+     * @return <code>true</code> if this game is the host game, <code>false</code> otherwise
+     */
+    public boolean isHost() { return host; }
+
+    /**
      * GameID getter. Retrieves this Game's <code>gameID</code>.
      *
      * @return Integer <code>gameID</code> of this Game
@@ -480,6 +496,73 @@ public class Game extends Coordinator {
         master.getChat().clear(ChatMessage.Channel.game(""+gameID));
 
         // TODO: Manually stop any running BotPlayer Minimax threads
+    }
+
+    /**
+     * Serialize this Game. Takes the data of this Game object and serializes it into a DataMap.
+     *
+     * @return Serialized DataMap
+     */
+    public DataMap serialize() {
+        DataMap data = new DataMap();
+
+        // Model Objects
+        data.set("settings",    settings);
+        data.set("board",       board);
+        data.set("history",     history);
+        data.set("type",        gameLogic.getType().ordinal());
+
+        // Player Data
+        data.set("playerCount", players.size());
+        int i = 0;
+        for(Player player : players.values())
+            try { data.set("player"+(i++), player.toJSON()); }
+            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
+
+        // State Flags
+        data.set("initialized", gameInitialized);
+        data.set("running",     gameRunning);
+        data.set("saved",       gameSaved);
+
+        // ID
+        data.set("id", gameID);
+
+        return data;
+    }
+
+    public Game(Controller master, IMainGUI gui, DataMap data) {
+        super(master, gui);
+
+        // Model Objects
+        settings    = data.get("settings",  DataMap.class);
+        board       = data.get("board",     Board.class);
+        history     = data.get("history",   History.class);
+        int ord     = data.get("type",      Integer.class);
+        GameLogic.Type type = GameLogic.Type.values()[ord];
+        switch(type) {
+            case REVERSI:   gameLogic = new ReversiLogic(this); break;
+            //case GO:        gameLogic = new GoLogic(this); break;
+            default:    throw new IllegalArgumentException("Unknown GameLogic Type '"+type+"'");
+        }
+
+        // Player Data
+        int pc = data.get("playerCount", Integer.class);
+        for(int i = 0; i < pc; i++)
+            try { Player.unserializePlayer(this, data.get("player"+i, JSONObject.class)); }
+            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
+
+        // State Flags
+        gameInitialized = data.get("initialized",   Boolean.class);
+        gameRunning     = data.get("running",       Boolean.class);
+        gameSaved       = data.get("saved",         Boolean.class);
+
+        // ID
+        gameID = data.get("id", Integer.class);
+
+        this.host = false;
+
+        // Start the Game
+        if(gameInitialized) this.initialize();
     }
 
 }

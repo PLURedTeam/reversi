@@ -1,5 +1,7 @@
 package plu.red.reversi.core.game.player;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
@@ -41,6 +43,33 @@ public class HumanPlayer extends Player implements ISettingsListener {
     public HumanPlayer(Game game, int playerID, Color color) {
         super(game, playerID, color);
         SettingsLoader.INSTANCE.addSettingsListener(this);
+    }
+
+    /**
+     * Serial Constructor. Creates a HumanPlayer belonging to an unserialized Game. HumanPlayer is created with data unserialized
+     * from a given JSONObject.
+     *
+     * @param game Game object this Player belongs to
+     * @param json JSONObject storing this Player's data
+     * @throws JSONException if there is a problem during unserialization
+     */
+    public HumanPlayer(Game game, JSONObject json) throws JSONException {
+        super(game, json);
+        duplicateID = json.getInt("duplicate");
+    }
+
+    /**
+     * Serializes this Player into a JSONObject.
+     *
+     * @return New JSONObject from this Player
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = super.toJSON();
+        json.put("duplicate", this.duplicateID);
+        json.put("type", 0);
+        return json;
     }
 
     /**

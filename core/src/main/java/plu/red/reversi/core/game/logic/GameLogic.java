@@ -28,6 +28,22 @@ import java.util.*;
  * by default, and you can manually specify otherwise in each case.
  */
 public abstract class GameLogic {
+
+    /**
+     * Enumeration that specifies a type of GameLogic.
+     */
+    public enum Type {
+        REVERSI,
+        GO
+    }
+
+    /**
+     * Type Getter. Retrieves the type of this GameLogic.
+     *
+     * @return Type of GameLogic
+     */
+    public abstract Type getType();
+
     protected final HashSet<IBoardUpdateListener> boardUpdateListeners = new HashSet<>();
     protected final Game game;
 
