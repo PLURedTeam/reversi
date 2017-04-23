@@ -96,6 +96,36 @@ public abstract class GameLogic {
 
 
     /**
+     * @return The minimum number of players for the game.
+     */
+    public abstract int minPlayerCount();
+
+
+    /**
+     * @return The maximum number of players for the game.
+     */
+    public abstract int maxPlayerCount();
+
+
+    /**
+     * Returns a list of valid player counts. This list will be sorted in ascending order.
+     * @return A list of valid player counts in ascending order.
+     */
+    public abstract int[] validPlayerCounts();
+
+
+    /**
+     * Checks if a given count is valid.
+     * @param count The number of player to check if it is valid.
+     * @return True if the player count is valid.
+     */
+    public boolean validPlayerCount(int count) {
+        int[] valid = validPlayerCounts();
+        return Arrays.binarySearch(valid, count) >= 0;
+    }
+
+
+    /**
      * Apply multiple commands at once. Used when you have a saved game state you wish to restore.
      * NOTE: This will note update history.
      * @param commands List of commands to be applied in order.
