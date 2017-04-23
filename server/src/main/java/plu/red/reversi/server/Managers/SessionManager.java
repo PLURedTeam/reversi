@@ -1,5 +1,6 @@
 package plu.red.reversi.server.Managers;
 
+import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.server.listener.ISessionListener;
 
 import java.util.HashSet;
@@ -8,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Andrew on 3/26/2017.
  */
-public class SessionManager implements Runnable {
+public class SessionManager implements Runnable, IListener {
 
     public static SessionManager INSTANCE = new SessionManager();
 
@@ -64,6 +65,14 @@ public class SessionManager implements Runnable {
         for(ISessionListener listener : listeners) listener.endSession(sessionID);
     }//notifyListeners
 
+    /**
+     * Adds a listener to the collection of listeners
+     * @param s the ISessionListener to add
+     */
+    public void addListener(ISessionListener s) {
+        listeners.add(s);
+    }//addlistener
+
 
     /**
      * Thread that looks for expired sessions and removes them
@@ -80,7 +89,7 @@ public class SessionManager implements Runnable {
                 }//if
 
             }//for
-            try { Thread.sleep(5000);}
+            try { Thread.sleep(30000);}
             catch (InterruptedException e) { e.printStackTrace();}
         }//while
     }//run
