@@ -17,6 +17,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.game.player.Player;
@@ -327,6 +328,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     public Board getCurrentBoard() {
         return boardIterator.board;
     }
+
+    public GameLogicCache getCurrentCache() { return boardIterator.cache; }
 
     /**
      * Gets the move index of the current game representing the current BoardCommand index.

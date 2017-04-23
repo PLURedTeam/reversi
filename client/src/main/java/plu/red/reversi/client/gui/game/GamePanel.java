@@ -104,7 +104,7 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
 
     @Override
     public void onBoardStateChanged(BoardView view) {
-        playerInfoPanel.setCurrentBoard(view.getCurrentBoard());
+        playerInfoPanel.setCurrentBoard(view.getCurrentCache(), view.getCurrentBoard());
 
         historyPanel.setSelectedIndex(view.getCurrentMoveIndex());
     }
