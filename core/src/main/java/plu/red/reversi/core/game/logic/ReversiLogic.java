@@ -29,6 +29,8 @@ import java.util.function.BiFunction;
  * by default, and you can manually specify otherwise in each case.
  */
 public class ReversiLogic extends GameLogic {
+    public final static int[] VALID_PLAYER_COUNTS = {2, 4};
+
 
     /**
      * Type Getter. Retrieves the type of this GameLogic.
@@ -59,6 +61,35 @@ public class ReversiLogic extends GameLogic {
     @Override
     public GameLogicCache createCache() {
         return new ReversiLogicCache();
+    }
+
+
+    /**
+     * @return The minimum number of players for the game.
+     */
+    @Override
+    public int minPlayerCount() {
+        return 2;
+    }
+
+
+    /**
+     * @return The maximum number of players for the game.
+     */
+    @Override
+    public int maxPlayerCount() {
+        return 4;
+    }
+
+
+    /**
+     * Returns a list of valid player counts. This list will be sorted in ascending order.
+     *
+     * @return A list of valid player counts in ascending order.
+     */
+    @Override
+    public int[] validPlayerCounts() {
+        return VALID_PLAYER_COUNTS;
     }
 
 
