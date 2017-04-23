@@ -68,6 +68,13 @@ public abstract class GameLogic {
 
 
     /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    public abstract GameLogicCache createCache();
+
+
+    /**
      * Registers an iFlipListener that will have signal sent to it when Flips are applied.
      * @param listener IFlipListener to register.
      * @return This object for chaining.
@@ -112,7 +119,7 @@ public abstract class GameLogic {
      */
     public final GameLogic initBoard(Collection<BoardCommand> commands) {
         //since the collection will be from a history object, don't update histroy
-        return initBoard(commands, game.getBoard(), true, false);
+        return initBoard(game.getGameCache(), game.getBoard(), commands, true, false);
     }
 
 
@@ -124,12 +131,12 @@ public abstract class GameLogic {
      * @param record True if this should update the game history.
      * @return This object for chaining.
      */
-    public final GameLogic initBoard(Collection<BoardCommand> commands, Board board, boolean notify, boolean record) {
+    public final GameLogic initBoard(GameLogicCache cache, Board board, Collection<BoardCommand> commands, boolean notify, boolean record) {
         for(BoardCommand c: commands) {
             if(c instanceof MoveCommand)
-                play((MoveCommand)c, board, notify, record);
+                play(cache, board, (MoveCommand)c, notify, record);
             if(c instanceof SetCommand)
-                apply((SetCommand)c, board, notify, record);
+                apply(cache, board, (SetCommand)c, notify, record);
         }
         return this;
     }
@@ -140,7 +147,7 @@ public abstract class GameLogic {
      * @return This object for chaining.
      */
     public final GameLogic initBoard() {
-        return initBoard(Arrays.stream(game.getUsedPlayers()).mapToInt(Integer::intValue).toArray(), game.getBoard(), true, true);
+        return initBoard(game.getGameCache(), game.getBoard(), Arrays.stream(game.getUsedPlayers()).mapToInt(Integer::intValue).toArray(), true, true);
     }
 
 
@@ -152,10 +159,10 @@ public abstract class GameLogic {
      * @param record True if this should update the game history.
      * @return This object for chaining.
      */
-    public final GameLogic initBoard(int[] players, Board board, boolean notify, boolean record) {
+    public final GameLogic initBoard(GameLogicCache cache, Board board, int[] players, boolean notify, boolean record) {
         Collection<SetCommand> commands = getSetupCommands(players, board.size);
         for(SetCommand c : commands)
-            apply(c, board, notify, record);
+            apply(cache, board, c, notify, record);
 
         return this;
     }
@@ -167,7 +174,7 @@ public abstract class GameLogic {
      * @return This object for chaining.
      */
     public final GameLogic apply(SetCommand command) {
-        return apply(command, game.getBoard(), true, true);
+        return apply(game.getGameCache(), game.getBoard(), command, true, true);
     }
 
 
@@ -179,7 +186,7 @@ public abstract class GameLogic {
      * @param record True if this should update the game history.
      * @return This object for chaining.
      */
-    public final GameLogic apply(SetCommand command, Board board, boolean notify, boolean record) {
+    public GameLogic apply(GameLogicCache cache, Board board, SetCommand command, boolean notify, boolean record) {
         board.apply(command);
 
         if(notify) {
@@ -201,7 +208,7 @@ public abstract class GameLogic {
      * @throws InvalidParameterException If it is an invalid move, no move will be made.
      */
     public final GameLogic play(MoveCommand command) throws InvalidParameterException {
-        return play(command, game.getBoard(), true, true);
+        return play(game.getGameCache(), game.getBoard(), command, true, true);
     };
 
 
@@ -214,7 +221,7 @@ public abstract class GameLogic {
      * @return This object for chaining.
      * @throws InvalidParameterException If it is an invalid move, no move will be made.
      */
-    public abstract GameLogic play(MoveCommand command, Board board, boolean notify, boolean record) throws InvalidParameterException;
+    public abstract GameLogic play(GameLogicCache cache, Board board, MoveCommand command, boolean notify, boolean record) throws InvalidParameterException;
 
 
     /**
@@ -225,7 +232,7 @@ public abstract class GameLogic {
      * @param command Includes player and board index.
      */
     public final boolean isValidMove(MoveCommand command) {
-        return isValidMove(command, game.getBoard());
+        return isValidMove(game.getGameCache(), game.getBoard(), command);
     }
 
 
@@ -237,7 +244,7 @@ public abstract class GameLogic {
      * @param command Includes player and board index.
      * @param board Board to apply commands to.
      */
-    public abstract boolean isValidMove(MoveCommand command, Board board);
+    public abstract boolean isValidMove(GameLogicCache cache, Board board, MoveCommand command);
 
 
     /**
@@ -247,7 +254,7 @@ public abstract class GameLogic {
      * @return ArrayList moves
      */
     public final Set<BoardIndex> getValidMoves(int player) {
-        return getValidMoves(player, game.getBoard());
+        return getValidMoves(game.getGameCache(), game.getBoard(), player);
     }
 
 
@@ -258,7 +265,17 @@ public abstract class GameLogic {
      * @param board Board to apply commands to.
      * @return ArrayList moves
      */
-    public abstract Set<BoardIndex> getValidMoves(int player, Board board);
+    public Set<BoardIndex> getValidMoves(GameLogicCache cache, Board board, int player) {
+        //declare an array for possible moves method
+        HashSet<BoardIndex> moves = new HashSet<>();
+
+        //Add all valid moves to the set
+        for(BoardIndex index : board)
+            if(isValidMove(cache, board, new MoveCommand(player, index)))
+                moves.add(index); //adds the valid move into the array of moves
+
+        return moves;
+    }
 
 
     /**
@@ -268,7 +285,7 @@ public abstract class GameLogic {
      * @return True if the player is able to play, else false.
      */
     public final boolean canPlay(int player) {
-        return canPlay(player, game.getBoard());
+        return canPlay(game.getGameCache(), game.getBoard(), player);
     }
 
 
@@ -279,11 +296,11 @@ public abstract class GameLogic {
      * @param board Board to apply commands to.
      * @return True if the player is able to play, else false.
      */
-    public boolean canPlay(int player, Board board) {
+    public boolean canPlay(GameLogicCache cache, Board board, int player) {
         BoardIndex index = new BoardIndex();
         for(index.row = 0; index.row < board.size; index.row++)
             for(index.column = 0; index.column < board.size; index.column++)
-                if(isValidMove(new MoveCommand(player, index), board))
+                if(isValidMove(cache, board, new MoveCommand(player, index)))
                     return true;
         return false;
     }
@@ -295,7 +312,7 @@ public abstract class GameLogic {
      * @return Score for the given player.
      */
     public final int getScore(int player) {
-        return getScore(player, game.getBoard());
+        return getScore(game.getGameCache(), game.getBoard(), player);
     }
 
 
@@ -305,7 +322,7 @@ public abstract class GameLogic {
      * @param board Board to apply commands to.
      * @return Score for the given player.
      */
-    public abstract int getScore(int player, Board board);
+    public abstract int getScore(GameLogicCache cache, Board board, int player);
 
 
     /**
@@ -314,7 +331,13 @@ public abstract class GameLogic {
      * @throws IllegalArgumentException If player count is invalid.
      */
     public final Collection<SetCommand> getSetupCommands() throws IllegalArgumentException {
-        return getSetupCommands(Arrays.stream(game.getUsedPlayers()).mapToInt(Integer::intValue).toArray(), game.getBoard().size);
+        int[] usedPlayers = new int[game.getUsedPlayers().length];
+        Integer[] usedPlayersOld = game.getUsedPlayers();
+
+        for(int i = 0;i < usedPlayers.length;i++)
+            usedPlayers[i] = usedPlayersOld[i];
+
+        return getSetupCommands(usedPlayers, game.getBoard().size);
     }
 
 

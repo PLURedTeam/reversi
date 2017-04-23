@@ -1,9 +1,8 @@
-package plu.red.reversi.server;
+package plu.red.reversi.server.Managers;
 
 import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -85,5 +84,21 @@ public class UserManager {
         }//for
         return users;
     }//onlineUsers
+
+
+    /**
+     * Gets the user with the associated sessionID
+     * @param sessionID the sessionID of the user to be retrieved
+     */
+    public User getUser(int sessionID) {
+        for(String username: onlineUsers.keySet())
+            if(onlineUsers.get(username).getSessionID() == sessionID) {
+                return onlineUsers.get(username);
+            }//for
+
+        return null;
+    }//timedOut
+
+
 
 }//UserManager

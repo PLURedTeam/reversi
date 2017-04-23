@@ -3,6 +3,7 @@ package plu.red.reversi.core;
 import org.junit.Test;
 import plu.red.reversi.core.util.UnionFind;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -121,9 +122,15 @@ public class UnionFindTest {
         uf.addAndUnion(3, 2);
         uf.add(4);
 
-        uf.removeSet(2);
+        Collection<Integer> removed = new LinkedList<>();
+        uf.removeSet(2, removed);
         assertEquals(1, uf.size());
         assertEquals(1, uf.disjointSets());
+        assertEquals(3, removed.size());
+        assertTrue(removed.contains(1));
+        assertTrue(removed.contains(2));
+        assertTrue(removed.contains(3));
+        assertFalse(removed.contains(4));
         assertFalse(uf.contains(1));
         assertFalse(uf.contains(2));
         assertFalse(uf.contains(3));

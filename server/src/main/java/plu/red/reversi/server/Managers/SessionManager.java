@@ -1,5 +1,8 @@
-package plu.red.reversi.server;
+package plu.red.reversi.server.Managers;
 
+import plu.red.reversi.server.listener.ISessionListener;
+
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -9,6 +12,7 @@ public class SessionManager implements Runnable {
 
     public static SessionManager INSTANCE = new SessionManager();
 
+    private HashSet<ISessionListener> listeners = new HashSet<ISessionListener>();
     private ConcurrentHashMap<Integer, Long> sessions;
     private int sessionIncrementer = 1000;
 
@@ -39,6 +43,7 @@ public class SessionManager implements Runnable {
     public void removeSession(int sessionID) {
         System.out.println("[SESSION MANAGER] REMOVING SESSION: " + sessionID);
         sessions.remove(sessionID);
+        notifyListeners(sessionID);
     }//sessionID
 
     /**
@@ -48,6 +53,17 @@ public class SessionManager implements Runnable {
     public void keepSessionAlive(int sessionID) {
         sessions.put(sessionID, System.currentTimeMillis());
     }//keepSessionAlive
+
+
+    /**
+     * Notifies listeners that a user has logged out of the server
+     *
+     * @param sessionID the sessionID of the user to remove
+     */
+    protected final void notifyListeners(int sessionID) {
+        for(ISessionListener listener : listeners) listener.endSession(sessionID);
+    }//notifyListeners
+
 
     /**
      * Thread that looks for expired sessions and removes them

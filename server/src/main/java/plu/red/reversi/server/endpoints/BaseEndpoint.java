@@ -1,10 +1,9 @@
 package plu.red.reversi.server.endpoints;
 
-import plu.red.reversi.server.LocalServer;
 import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
-import plu.red.reversi.server.SessionManager;
-import plu.red.reversi.server.UserManager;
+import plu.red.reversi.server.Managers.SessionManager;
+import plu.red.reversi.server.Managers.UserManager;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;

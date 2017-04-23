@@ -2,13 +2,13 @@ package plu.red.reversi.core.game;
 
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.util.Looper;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 
 import java.util.Set;
 
-//TODO: cache player score and pass it along to reduce the computation requirement
 //TODO: use iterative search to improve efficiency and allow cutting it off part-way through
 
 /**
@@ -20,6 +20,7 @@ public class ReversiMinimax implements Runnable {
     public final int MAX_DEPTH;
 
     private Looper.LooperCall<BoardIndex> callback;
+
 
     /**
      * Constructs a ReversiMinimax problem to solve.
@@ -33,6 +34,7 @@ public class ReversiMinimax implements Runnable {
         this.MAX_DEPTH = MAX_DEPTH;
     }
 
+
     public ReversiMinimax(final Game game, int aiID, int MAX_DEPTH, Looper.LooperCall<BoardIndex> callback) {
         this.game = game;
         this.aiID = aiID;
@@ -40,6 +42,7 @@ public class ReversiMinimax implements Runnable {
 
         this.callback = callback;
     }
+
 
     /**
      * Calculate the best move in reversi by using the minimax algorithm.
@@ -61,6 +64,7 @@ public class ReversiMinimax implements Runnable {
         }
     }
 
+
     /**
      * Check if the current player can make a move on the current game state.
      * Does not account for when their turn will be, assumes it is being to asked right now.
@@ -71,6 +75,7 @@ public class ReversiMinimax implements Runnable {
         return true;
     }
 
+
     /**
      * Retrieve the best move as a move command.
      * @return A move command representing the best move.
@@ -80,6 +85,7 @@ public class ReversiMinimax implements Runnable {
         if(b == null) throw new IndexOutOfBoundsException("AI Cannot move");
         return new MoveCommand(aiID, b);
     }
+
 
     /**
      * Finds the index of the best play.
@@ -99,10 +105,11 @@ public class ReversiMinimax implements Runnable {
 
         BoardIndex bestMove = null;
         for(BoardIndex i : possibleMoves) {
+            GameLogicCache subCache = game.getGameCache().duplicate();
             Board subBoard = new Board(board);
-            logic.play(new MoveCommand(aiID, i), subBoard, false, false);
+            logic.play(subCache, subBoard, new MoveCommand(aiID, i), false, false);
 
-            final int childScore = getBestPlay(subBoard, game.getNextPlayerID(aiID), alpha, beta, 1);
+            final int childScore = getBestPlay(subCache.duplicate(), subBoard, game.getNextPlayerID(aiID), alpha, beta, 1);
             if(childScore > bestScore) {
                 bestScore = childScore;
                 bestMove = i;
@@ -115,16 +122,62 @@ public class ReversiMinimax implements Runnable {
     }
 
     /**
+     * Find the best of the children to choose if our turn, and assume they choose the worst
+     * on their turn.
+     * @return A child of node which is the best state to go to.
+     */
+    private int getBestPlay(GameLogicCache cache, Board board, int player, int alpha, int beta, int depth) {
+        if(depth >= MAX_DEPTH)
+            return heuristicScore(cache, board, false);
+
+        final GameLogic logic = game.getGameLogic();
+        final boolean turn_skipping = game.getSettings().get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class);
+        final int start_player = player;
+
+        Set<BoardIndex> possibleMoves = logic.getValidMoves(cache, board, player);
+        while(possibleMoves.isEmpty()) { //can't move
+            player = game.getNextPlayerID(player);
+            if(player != start_player) //inc. player and make sure we have not looped
+                possibleMoves = logic.getValidMoves(cache, board, player);
+            else
+                return heuristicScore(cache, board, true);
+        }
+
+        final boolean maximize = player == aiID;
+        int bestScore = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        for(BoardIndex i : possibleMoves) {
+            GameLogicCache subCache = cache.duplicate();
+            Board subBoard = new Board(board);
+            logic.play(subCache, subBoard, new MoveCommand(player, i), false, false);
+
+            final int childScore = getBestPlay(subCache, subBoard, game.getNextPlayerID(player), alpha, beta, depth + 1);
+            if(maximize && childScore > bestScore) {
+                bestScore = childScore;
+                alpha = Math.max(alpha, childScore);
+            }
+            else if(!maximize && childScore < bestScore) {
+                bestScore = childScore;
+                beta = Math.min(beta, childScore);
+            }
+
+            if(beta <= alpha) break;
+        }
+        return bestScore;
+    }
+
+
+    /**
      * Determines the heuristic score for a given state.
      * @param board Game state to analyze.
      * @param endgame Is this an endgame analysis?
      * @return Score for the game state.
      */
-    private int heuristicScore(Board board, boolean endgame) {
+    private int heuristicScore(GameLogicCache cache, Board board, boolean endgame) {
         final GameLogic logic = game.getGameLogic();
 
         //ours - (all - ours) == ours * 2 - all
-        int score = (logic.getScore(aiID, board) * 2) - board.getTotalPieces();
+        int score = (logic.getScore(cache, board, aiID) * 2) - board.getTotalPieces();
 
         if(!endgame) {
             int player = board.at(new BoardIndex(0, 0));
@@ -142,49 +195,5 @@ public class ReversiMinimax implements Runnable {
             return score;
         }
         return score * 16; //weight the score
-    }
-
-    /**
-     * Find the best of the children to choose if our turn, and assume they choose the worst
-     * on their turn.
-     * @return A child of node which is the best state to go to.
-     */
-    private int getBestPlay(Board board, int player, int alpha, int beta, int depth) {
-        if(depth >= MAX_DEPTH)
-            return heuristicScore(board, false);
-
-        final GameLogic logic = game.getGameLogic();
-        final boolean turn_skipping = game.getSettings().get(SettingsLoader.GAME_ALLOW_TURN_SKIPPING, Boolean.class);
-        final int start_player = player;
-
-        Set<BoardIndex> possibleMoves = logic.getValidMoves(player, board);
-        while(possibleMoves.isEmpty()) { //can't move
-            player = game.getNextPlayerID(player);
-            if(player != start_player) //inc. player and make sure we have not looped
-                possibleMoves = logic.getValidMoves(player, board);
-            else
-                return heuristicScore(board, true);
-        }
-
-        final boolean maximize = player == aiID;
-        int bestScore = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-
-        for(BoardIndex i : possibleMoves) {
-            Board subBoard = new Board(board);
-            logic.play(new MoveCommand(player, i), subBoard, false, false);
-
-            final int childScore = getBestPlay(subBoard, game.getNextPlayerID(player), alpha, beta, depth + 1);
-            if(maximize && childScore > bestScore) {
-                bestScore = childScore;
-                alpha = Math.max(alpha, childScore);
-            }
-            else if(!maximize && childScore < bestScore) {
-                bestScore = childScore;
-                beta = Math.min(beta, childScore);
-            }
-
-            if(beta <= alpha) break;
-        }
-        return bestScore;
     }
 }

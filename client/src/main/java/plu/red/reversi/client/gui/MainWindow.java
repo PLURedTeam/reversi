@@ -7,6 +7,8 @@ import plu.red.reversi.core.*;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
@@ -15,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 
 /**
  * Glory to the Red Team.
@@ -233,6 +236,47 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Save Game", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
+    /**
+     * Calls the server to create a new network game
+     */
+    public void createNetworkGame() {
+        Object[] numPlayers = {2,4};
+        int p = (int)JOptionPane.showInputDialog(this, "Number of Players", "Create Network Game", JOptionPane.QUESTION_MESSAGE, null, numPlayers, numPlayers[0]);
+
+        //TODO: Add logic to call server and set up game on client side
+
+        WebUtilities.INSTANCE.createGame(p);
+    }//createNetworkGame
+
+    /**
+     * Calls the server to get a list of available online games to join
+     */
+    public void joinNetworkGame() {
+        //Just for testing
+        ArrayList<GamePair> games = WebUtilities.INSTANCE.getOnlineGames();
+
+        if (games != null) {
+            Object[][] rows = new Object[games.size()][4];
+
+            for (int i = 0; i < games.size(); i++) {
+                rows[i][0] = games.get(i).gameID;
+                rows[i][1] = games.get(i).players.size() + " / " + games.get(i).numPlayers;
+                rows[i][2] = games.get(i).status;
+                rows[i][3] = new JButton("Join Game" + games.get(i).gameID);
+            }//for
+
+            Object[] cols = {"Game ID", "Number of Players", "Status", "Join Game"};
+            JTable table = new JTable(rows, cols);
+            JOptionPane.showMessageDialog(null, new JScrollPane(table), "Online Users", 1);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    "There are currently 0 games available",
+                    "", 1);
+
+        }//else
+
+    }//joinNetworkGame
 
     /**
      * Opens the Main's Settings window, where they can change options and settings. If the window is already open

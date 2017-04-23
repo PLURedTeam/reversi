@@ -1,6 +1,10 @@
-package plu.red.reversi.android.graphics;
+package plu.red.reversi.core.reversi3d;
 
 import org.joml.Vector3fc;
+import plu.red.reversi.core.graphics.Graphics3D;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.Shader;
+import plu.red.reversi.core.graphics.VertexBufferObject;
 
 import java.io.IOException;
 import java.util.ArrayList;

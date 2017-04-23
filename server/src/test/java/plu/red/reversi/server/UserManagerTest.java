@@ -1,9 +1,9 @@
 package plu.red.reversi.server;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.util.User;
+import plu.red.reversi.server.Managers.UserManager;
 
 import static org.junit.Assert.*;
 

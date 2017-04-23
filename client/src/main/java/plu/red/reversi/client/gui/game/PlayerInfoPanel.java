@@ -6,6 +6,7 @@ import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.Player;
@@ -29,6 +30,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
     private Color activeBackgroundColor = new Color(180, 250, 180);
 
     private Board board;
+    private GameLogicCache cache;
 
     private class PlayerPanel extends JPanel {
         public final JLabel playerName;
@@ -51,6 +53,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
         this.game = game;
 
         board = game.getBoard();
+        cache = game.getGameCache();
 
         final int BORDER_SIZE = 5;
 
@@ -70,7 +73,7 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
 
         // Create an individual score panel for every player in the Game
         for(Player player : game.getAllPlayers()) {
-            PlayerPanel panel = new PlayerPanel(player, game.getGameLogic().getScore(player.getID()));
+            PlayerPanel panel = new PlayerPanel(player, game.getGameLogic().getScore(cache, board, player.getID()));
             playerPanelMap.put(player.getID(), panel);
             this.add(panel);
         }
@@ -122,7 +125,8 @@ public class PlayerInfoPanel extends JPanel implements ICommandListener, ISettin
         populate();
     }
 
-    public void setCurrentBoard(Board board) {
+    public void setCurrentBoard(GameLogicCache cache, Board board) {
+        this.cache = cache;
         this.board = board;
 
         populate();

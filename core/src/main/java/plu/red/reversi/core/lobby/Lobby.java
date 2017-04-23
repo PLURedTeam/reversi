@@ -3,6 +3,7 @@ package plu.red.reversi.core.lobby;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
