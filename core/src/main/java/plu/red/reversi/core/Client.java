@@ -19,12 +19,31 @@ public class Client extends Controller {
     public Client(IMainGUI gui) { super(gui); }
     public Client(IMainGUI gui, Coordinator core) { super(gui, core); }
 
-    public void createIntoLobby() {
-
-        setCore(new Lobby(this, gui));
+    private String queryName(boolean networked) {
+        String name = "Local Game";
+        if(networked) {
+            name = null;
+            while(name == null) {
+                name = gui.showQueryDialog("Game Name", "Enter a name for the new Game Lobby:");
+                if(name == null) return null; // Cancelled
+                else if(name.isEmpty()) // TODO: Check for duplicate names
+                    gui.showErrorDialog("Game Name", "Name Cannot be Empty");
+            }
+        }
+        return name;
     }
 
-    public void loadIntoLobby() {
+    public void createIntoLobby(boolean networked) {
+        String name = queryName(networked);
+        if(name == null) return; // Cancelled
+        setCore(new Lobby(this, gui, networked, name));
+    }
+
+    public void loadIntoLobby(boolean networked) {
+
+        // Figure out the Game name
+        String gameName = queryName(networked);
+        if(gameName == null) return; // Cancelled
 
         // Get the name of the Game to load
         String name = gui.showLoadDialog();
@@ -43,7 +62,7 @@ public class Client extends Controller {
         Game game = Game.loadGameFromDatabase(gui, gameID);
         game.setGameSaved(true); //Sets that the game has been saved before and has a name
 
-        setCore(new Lobby(this, gui, game));
+        setCore(new Lobby(this, gui, game, networked, gameName));
     }
 
     public void startGame() throws IllegalStateException {

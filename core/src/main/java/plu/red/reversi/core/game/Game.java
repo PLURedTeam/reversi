@@ -81,6 +81,8 @@ public class Game extends Coordinator {
 
     // Game Identification
     private int gameID = -1;
+    protected final boolean networked;
+    protected final String name;
 
 
 
@@ -144,8 +146,23 @@ public class Game extends Coordinator {
      * @param gui IMainGUI object that displays for the program
      */
     public Game(Controller master, IMainGUI gui) {
+        this(master, gui, false, "Local Game");
+    }
+
+    /**
+     * Full Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
+     * DataMap and Players) and then be initialized.
+     *
+     * @param master Controller object that is the master Controller for this program
+     * @param gui IMainGUI object that displays for the program
+     * @param networked Whether the Game is singleplayer or multiplayer
+     * @param name String <code>name</code> of the Game
+     */
+    public Game(Controller master, IMainGUI gui, boolean networked, String name) {
         super(master, gui);
-        host = true;
+        this.networked = networked;
+        this.name = name;
+        this.host = true;
     }
 
     /**
@@ -234,7 +251,7 @@ public class Game extends Coordinator {
         }
 
         // Create Game Chat
-        master.getChat().create(ChatMessage.Channel.game(""+gameID));
+        if(networked) master.getChat().create(ChatMessage.Channel.game(name));
 
         gameInitialized = true;
 
@@ -482,6 +499,20 @@ public class Game extends Coordinator {
     public void setGameSaved(boolean gs) { gameSaved = gs; }
 
     /**
+     * Networked Getter. Determines whether or not this Game is a singleplayer or multiplayer Game.
+     *
+     * @return <code>true</code> if this Game is networked/multiplayer, <code>false</code> otherwise
+     */
+    public boolean isNetworked() { return networked; }
+
+    /**
+     * Name Getter. Retrieves the <code>name</code> of this Game.
+     *
+     * @return String <code>name</code>
+     */
+    public String getName() { return name; }
+
+    /**
      * Perform any cleanup operations that are needed, such as removing listeners that are not automatically cleaned up.
      */
     public void cleanup() {
@@ -493,7 +524,7 @@ public class Game extends Coordinator {
         }
 
         // Clear Game Chat
-        master.getChat().clear(ChatMessage.Channel.game(""+gameID));
+        master.getChat().clear(ChatMessage.Channel.game(name));
 
         // TODO: Manually stop any running BotPlayer Minimax threads
     }
@@ -523,6 +554,8 @@ public class Game extends Coordinator {
         data.set("initialized", gameInitialized);
         data.set("running",     gameRunning);
         data.set("saved",       gameSaved);
+        data.set("networked",   networked);
+        data.set("name",        name);
 
         // ID
         data.set("id", gameID);
@@ -555,6 +588,8 @@ public class Game extends Coordinator {
         gameInitialized = data.get("initialized",   Boolean.class);
         gameRunning     = data.get("running",       Boolean.class);
         gameSaved       = data.get("saved",         Boolean.class);
+        networked       = data.get("networked",     Boolean.class);
+        name            = data.get("name",          String.class);
 
         // ID
         gameID = data.get("id", Integer.class);

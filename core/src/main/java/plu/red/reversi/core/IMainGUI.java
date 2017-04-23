@@ -39,12 +39,37 @@ public interface IMainGUI {
     String showSaveDialog();
 
     /**
-     * Load Dialog Display Method. Shows a Load Dialog o the user, which queries what Game to load from existing saved
+     * Load Dialog Display Method. Shows a Load Dialog to the user, which queries what Game to load from existing saved
      * Games. Can be cancelled.
      *
      * @return String name chosen, or null if the user cancelled
      */
     String showLoadDialog();
+
+    /**
+     * Information Dialog Display Method. Shows an Information Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     */
+    void showInformationDialog(String title, String body);
+
+    /**
+     * Error Dialog Display Method. Shows an Error Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     */
+    void showErrorDialog(String title, String body);
+
+    /**
+     * Query Dialog Display Method. Shows a Query Dialog to the user, displaying a question and expecting a response.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     * @return String response, or <code>null</code> for no response
+     */
+    String showQueryDialog(String title, String body);
 
 
     public static class NullGUI implements IMainGUI {
@@ -53,5 +78,8 @@ public interface IMainGUI {
         @Override public void updateGUIMinor() {}
         @Override public String showSaveDialog() { return null; }
         @Override public String showLoadDialog() { return null; }
+        @Override public void showInformationDialog(String title, String body) {}
+        @Override public void showErrorDialog(String title, String body) {}
+        @Override public String showQueryDialog(String title, String body) { return null; }
     }
 }

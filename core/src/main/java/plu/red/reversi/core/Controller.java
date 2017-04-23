@@ -61,8 +61,8 @@ public abstract class Controller {
 
     public ChatLog getChat() { return chat; }
 
-    public abstract void createIntoLobby();
-    public abstract void loadIntoLobby();
+    public abstract void createIntoLobby(boolean networked);
+    public abstract void loadIntoLobby(boolean networked);
     public abstract void startGame() throws IllegalStateException;
     public abstract void saveGame() throws IllegalStateException;
 }
