@@ -19,47 +19,50 @@ import static org.junit.Assert.assertTrue;
 public class ReversiLogicTest {
     @Test
     public void testGetScore() {
-        Board board = new Board(4);
         GameLogic logic = new ReversiLogic();
-        logic.initBoard(new int[]{0, 1}, board, false, false);
+        Board board = new Board(4);
+        GameLogicCache cache = logic.createCache();
+        logic.initBoard(cache, board, new int[]{0, 1}, false, false);
 
-        assertEquals(2, logic.getScore(0, board));
-        assertEquals(2, logic.getScore(1, board));
-        logic.play(new MoveCommand(0, new BoardIndex(3, 1)), board, false, false);
-        assertEquals(4, logic.getScore(0, board));
-        assertEquals(1, logic.getScore(1, board));
+        assertEquals(2, logic.getScore(cache, board, 0));
+        assertEquals(2, logic.getScore(cache, board, 1));
+        logic.play(cache, board, new MoveCommand(0, new BoardIndex(3, 1)), false, false);
+        assertEquals(4, logic.getScore(cache, board, 0));
+        assertEquals(1, logic.getScore(cache, board, 1));
     }
 
     @Test
     public void testIsValidMove() {
         Board board = new Board(4);
         GameLogic logic = new ReversiLogic();
-        logic.initBoard(new int[]{0, 1}, board, false, false);
+        GameLogicCache cache = logic.createCache();
+        logic.initBoard(cache, board, new int[]{0, 1}, false, false);
 
         MoveCommand m = new MoveCommand(1, new BoardIndex(0, 0));
-        assertFalse(logic.isValidMove(m, board));
+        assertFalse(logic.isValidMove(cache, board, m));
 
         m.position.row = 1; m.position.column = 0;
-        assertTrue(logic.isValidMove(m, board));
+        assertTrue(logic.isValidMove(cache, board, m));
 
         m.position.row = 0; m.position.column = 1;
-        assertTrue(logic.isValidMove(m, board));
+        assertTrue(logic.isValidMove(cache, board, m));
 
         m.position.row = 2; m.position.column = 3;
-        assertTrue(logic.isValidMove(m, board));
+        assertTrue(logic.isValidMove(cache, board, m));
 
         m.position.row = 3; m.position.column = 2;
-        assertTrue(logic.isValidMove(m, board));
+        assertTrue(logic.isValidMove(cache, board, m));
     }
 
     @Test
     public void testGetValidMoves() {
         Board board = new Board(4);
         GameLogic logic = new ReversiLogic();
-        logic.initBoard(new int[]{0, 1}, board, false, false);
+        GameLogicCache cache = logic.createCache();
+        logic.initBoard(cache, board, new int[]{0, 1}, false, false);
 
         Set<BoardIndex> moveList;
-        moveList = logic.getValidMoves(1, board);
+        moveList = logic.getValidMoves(cache, board, 1);
 
         assertEquals(4, moveList.size());
         assertTrue(moveList.contains(new BoardIndex(0, 1)));
@@ -77,10 +80,11 @@ public class ReversiLogicTest {
 
         Board board = new Board(4);
         GameLogic logic = new ReversiLogic();
-        logic.initBoard(new int[]{0,1}, board, false, false);
+        GameLogicCache cache = logic.createCache();
+        logic.initBoard(cache, board, new int[]{0,1}, false, false);
 
         try {
-            logic.play(c, board, false, false);
+            logic.play(cache, board, c, false, false);
             assertTrue(false);
         } catch(IllegalArgumentException e) {
             assertTrue(true);
@@ -91,16 +95,17 @@ public class ReversiLogicTest {
     public void testRepeatedPlays() {
         Board board = new Board(8);
         GameLogic logic = new ReversiLogic();
-        logic.initBoard(new int[]{0, 1}, board, false, false);
+        GameLogicCache cache = logic.createCache();
+        logic.initBoard(cache, board, new int[]{0, 1}, false, false);
 
         for(int x = 0; x < 15; ++x) {
-            MoveCommand m = new MoveCommand(0, logic.getValidMoves(0, board).iterator().next());
-            assertTrue(logic.isValidMove(m, board));
-            logic.play(m, board, false, false);
+            MoveCommand m = new MoveCommand(0, logic.getValidMoves(cache, board, 0).iterator().next());
+            assertTrue(logic.isValidMove(cache, board, m));
+            logic.play(cache, board, m, false, false);
 
-            BoardIndex i = new BoardIndex(logic.getValidMoves(1, board).iterator().next());
-            assertTrue(logic.isValidMove(new MoveCommand(1, i), board));
-            logic.play(new MoveCommand(1, i), board, false, false);
+            BoardIndex i = new BoardIndex(logic.getValidMoves(cache, board, 1).iterator().next());
+            assertTrue(logic.isValidMove(cache, board, new MoveCommand(1, i)));
+            logic.play(cache, board, new MoveCommand(1, i), false, false);
         }
     }
 }

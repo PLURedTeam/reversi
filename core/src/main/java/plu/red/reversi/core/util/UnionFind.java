@@ -1,5 +1,7 @@
 package plu.red.reversi.core.util;
 
+import com.surelogic.Nullable;
+
 import java.security.InvalidParameterException;
 import java.util.*;
 
@@ -240,15 +242,21 @@ public class UnionFind<T> extends AbstractSet<T> {
      * Remove the entire disjoint set that v is part of.
      * Note this has an O(n) efficiency.
      * @param v A member of the set to be removed.
+     * @param removed Collection which will have all removed values added to it.
      * @return True if it removes the set, false if v is not in any set.
      */
-    public boolean removeSet(T v) {
+    public boolean removeSet(T v, @Nullable Collection<T> removed) {
         //create list of things to remove and then remove them
         Collection<T> toRemove = getSet(v);
         if(toRemove == null) return false;
 
+        //remove the values
         for(T i : toRemove)
             members.remove(i);
+
+        //record what we removed
+        if(removed != null)
+            removed.addAll(toRemove);
 
         disjointSets--;
         return true;

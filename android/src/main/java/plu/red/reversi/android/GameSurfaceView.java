@@ -219,7 +219,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.setCameraPos(-distanceX + mRenderer.getCameraPos().x(), -distanceY + mRenderer.getCameraPos().y());
+                mRenderer.setCameraPos(distanceX + mRenderer.getCameraPos().x(), distanceY + mRenderer.getCameraPos().y());
 
                 requestRender();
             }
@@ -269,8 +269,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                 // Current scroll position
                 (int)pos.x(),
                 (int)pos.y(),
-                (int)velocityX,
-                (int)velocityY,
+                (int)-velocityX,
+                (int)-velocityY,
                 (int)scrollBounds.left,
                 (int)scrollBounds.right,
                 (int)scrollBounds.top,
@@ -428,10 +428,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                     if(mCanDoCommand) {
                         if(mHighlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                             // we can use the game board because GUI will be caught up animation wise
+                            // TODO: Get valid moves for previous moves was borked
                             for(BoardIndex index :
-                                    mGame.getGameLogic().getValidMoves(mGame.getNextPlayerID(
-                                            mGame.getHistory().getBoardCommand(mBoardIterator.getPos()).playerID
-                                    ) ,getCurrentBoard())) {
+                                    mGame.getGameLogic().getValidMoves(mGame.getCurrentPlayer().getID())) {
                                 mRenderer.mBoard.highlightAt(index, POSSIBLE_MOVES_COLOR);
                             }
                         }
@@ -630,7 +629,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 // hack for right now.
                                 mAutoFollow = true;
 
-                                mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
+                                //mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
 
                                 mAutoFollow = preAutoFollow;
 
@@ -831,7 +830,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             }
             else {
 
-                mCamera.setDir(new Vector2f(-x, y).mul(1.0f / 400));
+                mCamera.setDir(new Vector2f(x, -y).mul(1.0f / 400));
             }
         }
 
@@ -839,7 +838,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
             if(mPresentationMode) {
                 Vector2f f = new Vector2f(mCamera.getDir()).mul(400);
-                f.x = -f.x;
+                f.y = -f.y;
                 return f;
             }
             else {
@@ -859,7 +858,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
             if(mPresentationMode)
                 // return an obnoxiously large number since there is technically no limit
-                return new RectF(Integer.MIN_VALUE, 0.0f, Integer.MAX_VALUE, 0.5f * (float)Math.PI * 400);
+                return new RectF(Integer.MIN_VALUE, -0.5f * (float) Math.PI * 400, Integer.MAX_VALUE, 0.5f * (float)Math.PI * 400);
 
             float r = mBoard.getBoardRadius() * mCamera.getZoom();
 

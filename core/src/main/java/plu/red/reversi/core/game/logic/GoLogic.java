@@ -1,13 +1,17 @@
 package plu.red.reversi.core.game.logic;
 
+import com.surelogic.Nullable;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
+import plu.red.reversi.core.util.UnionFind;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+
 
 /**
  * GoLogic is responsible for handling the rules of Chinese Go and updating the board state.
@@ -33,6 +37,31 @@ public class GoLogic extends GameLogic {
     public Type getType() { return Type.GO; }
 
     /**
+     * Constructs a new GoLogic Unit to be able to play a game of Go.
+     * @param game Game this logic is used for.
+     */
+    public GoLogic(Game game) {
+        super(game);
+    }
+
+
+    /**
+     * This constructor should only be used for testing.
+     */
+    public GoLogic() {super();}
+
+
+    /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    @Override
+    public GameLogicCache createCache() {
+        return new GoLogicCache();
+    }
+
+
+    /**
      * Make a move on the board.
      *
      * @param command Represents the move which is to be played.
@@ -43,29 +72,71 @@ public class GoLogic extends GameLogic {
      * @throws InvalidParameterException If it is an invalid move, no move will be made.
      */
     @Override
-    public GameLogic play(MoveCommand command, Board board, boolean notify, boolean record) throws InvalidParameterException {
-        if(!isValidMove(command)) //TODO: calculate as a result of other things to increase efficiency
+    public GameLogic play(GameLogicCache cache, Board board, MoveCommand command, boolean notify, boolean record) throws InvalidParameterException {
+        GoLogicCache gcache = (GoLogicCache)cache;
+        if(gcache == null) throw new InvalidParameterException("Incorrect cache type for Go's play.");
+
+        //if a tile is already there, it cannot be valid
+        if(board.at(command.position) >= 0)
             throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
 
-        if(!Group.discover(board, command.position, command.playerID).hasLiberty(board))
-            throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
+        //This will be updated as we progress, and set to true if it is valid.
+        // Basically catch right before final actions if it is not a valid play.
+        boolean validPlay = tileHasLiberty(board, command.position);
 
-        BoardUpdate update = new BoardUpdate();
-        if(notify) update.added.add(command.position);
+        //attempt to play the move and handle if it turns out to be invalid
+        Set<BoardIndex> adjGroups = findAdjGroups(gcache, board, command.position);
 
-        //Remove any groups which no longer have liberties
-        //TODO: this is painfully inefficient in every way
-        Set<Group> groups = getGroups(board);
-        for(Group group : groups) {
-            if(group.hasLiberty(board)) continue;
-            for(BoardIndex index : group) {
-                apply(new SetCommand(-1, command.position), board, false, false);
-                if(notify) update.removed.add(index);
+        //Use these to keep track so we don't apply the change until we are 100% sure that we won't have to undo it
+        BoardUpdate boardUpdate = new BoardUpdate();
+        boardUpdate.player = command.playerID;
+        boardUpdate.added.add(command.position);
+        Collection<BoardIndex> toUnion = new LinkedList<>();
+        Collection<BoardIndex> toRemove = new LinkedList<>();
+
+        //for all the groups, check if it will be unioned or removed
+        for(BoardIndex index : adjGroups) {
+            if(board.at(index) == command.playerID) {
+                //we will want to union with this
+                toUnion.add(index);
+
+                if(!validPlay) //if we are not sure yet that it is valid, see if this will make it valid
+                    validPlay = groupHasLiberty(gcache, board, index, command.position);
+            }
+            else { //it is not the current player
+                //if we will remove it
+                if(!groupHasLiberty(gcache, board, index, command.position)) {
+                    toRemove.add(index);
+                    //For sure a valid play because we are removing the piece
+                    validPlay = true;
+                }
             }
         }
 
-        if(record) game.getHistory().addCommand(command);
-        if(notify) updateBoardListeners(update);
+        if(!validPlay) //handle invalid play
+            throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
+
+        //now we can apply the changes
+        apply(cache, board, new SetCommand(command), false, false);
+        gcache.groups.add(command.position);
+        for(BoardIndex index : toUnion)
+            //merge this group with all surrounding groups of this player
+            gcache.groups.union(index, command.position);
+        for(BoardIndex index : toRemove)
+            //this will remove the set and add all that was removed to the update
+            gcache.groups.removeSet(index, boardUpdate.removed);
+
+        //actually remove the pieces from the board
+        for(BoardIndex index : boardUpdate.removed)
+            apply(cache, board, new SetCommand(-1, index), false, false);
+
+        cache.addToScore(command.playerID, boardUpdate.removed.size());
+
+        if(record)
+            game.getHistory().addCommand(command);
+        if(notify)
+            updateBoardListeners(boardUpdate);
+
         return this;
     }
 
@@ -79,31 +150,36 @@ public class GoLogic extends GameLogic {
      * @param board   Board to apply commands to.
      */
     @Override
-    public boolean isValidMove(MoveCommand command, Board board) {
-        if(tileHasLiberty(board, command.position)) return true;
+    public boolean isValidMove(GameLogicCache cache, Board board, MoveCommand command) {
+        GoLogicCache gcache = (GoLogicCache)cache;
+        if(gcache == null) throw new InvalidParameterException("Incorrect cache type for Go's isValidMove.");
 
-        //TODO: use caching to speed this up
-        Group group = new Group(board, command.position, command.playerID);
-        return group.hasLiberty(board);
-    }
+        //if a tile is already there, it cannot be valid
+        if(board.at(command.position) >= 0) return false;
 
+        //Process in order of least intensive to most intensive checks, and stop when we know it must be valid
+        //Check if the tile has liberties
+        if(tileHasLiberty(board, command.position))
+            return true;
 
-    /**
-     * Find the different moves that could be made and return them.
-     *
-     * @param player Integer Player ID to check for
-     * @param board  Board to apply commands to.
-     * @return ArrayList moves
-     */
-    @Override
-    public Set<BoardIndex> getValidMoves(int player, Board board) {
-        Set<BoardIndex> moves = new HashSet<>();
+        //Check if the group it would be part of has liberties or if there will be liberties after playing (i.e. we
+        // cause other pieces to be removed).
+        //Could join groups, and we don't want to modify board or the disjoint-sets due to computational cost, so
+        // instead find all current groups that are of the same player in adjacent tiles
+        Set<BoardIndex> groups = findAdjGroups(gcache, board, command.position);
+        for(BoardIndex i: groups) {
+            //if it is current player, see if it has an opening
+            if(board.at(i) == command.playerID)
+                //check if the group has liberties excluding the current tile
+                if(groupHasLiberty(gcache, board, i, command.position))
+                    return true;
 
-        for(BoardIndex i : board)
-            if(isValidMove(new MoveCommand(player, i)))
-                moves.add(i);
+            else //it's an opponent, see if it will have no liberties after the move
+                if(!groupHasLiberty(gcache, board, i, command.position))
+                    return true;
+        }
 
-        return moves;
+        return false;
     }
 
 
@@ -115,8 +191,11 @@ public class GoLogic extends GameLogic {
      * @return Score for the given player.
      */
     @Override
-    public int getScore(int player, Board board) {
-        return 0;
+    public int getScore(GameLogicCache cache, Board board, int player) {
+        GoLogicCache c = (GoLogicCache)cache;
+        if(c == null) throw new InvalidParameterException("Incorrect cache type for Go's getScore.");
+        Integer score = c.score.get(player);
+        return score == null ? 0 : score;
     }
 
 
@@ -126,10 +205,9 @@ public class GoLogic extends GameLogic {
      * @param players Array of the player ids used in current game in order.
      * @param size of board for which to generate the setup commands for.
      * @return List of the moves to be made to create the initial state.
-     * @throws IllegalArgumentException If player count is invalid.
      */
     @Override
-    public Collection<SetCommand> getSetupCommands(int[] players, int size) throws IllegalArgumentException {
+    public Collection<SetCommand> getSetupCommands(int[] players, int size) {
         return new LinkedList<>();
     }
 
@@ -141,22 +219,37 @@ public class GoLogic extends GameLogic {
      * @param board Board to search for groups on.
      * @return A board of group ids which line up with the main game board.
      */
-    private Set<Group> getGroups(Board board) {
-        Board groupb = new Board(board); //TODO: replace with union-find
-        HashSet<Group> groups = new HashSet<>();
+    private GoLogicCache getGroups(GoLogicCache cache, Board board) {
+        final UnionFind<BoardIndex> groups = cache.groups;
 
-        int groupID = 0;
-        for(BoardIndex index : board) {
-            final int player = board.at(index);
-            if(groupb.at(index) >= 0 || player < 0) continue;
+        //if we already have groups cached, clear them before re-scanning the board
+        if(!groups.isEmpty()) groups.clear();
 
-            Group group = new Group(board, index, player);
-            groupb.applyAll(group, groupID);
-            groups.add(group);
-            if(!group.isEmpty()) groupID++;
+        //scan through the board from top left to bottom right, and union with top and left tiles iff they are the
+        // same player and that player is not the null player
+        for(int r = 0; r < board.size; ++r) {
+            for(int c = 0; c < board.size; ++c) {
+                //read player
+                BoardIndex t = new BoardIndex(r, c);
+                int p = board.at(t);
+
+                if(p < 0) continue; //verify they are not null
+                groups.add(t); //add them
+
+                //Check left and top; union if same player
+                if(r > 0) {
+                    BoardIndex t2 = new BoardIndex(r - 1, c);
+                    if(board.at(t2) == p)
+                        groups.union(t, t2);
+                } if(r > 0 && c > 0) {
+                    BoardIndex t2 = new BoardIndex(r - 1, c - 1);
+                    if(board.at(t2) == p)
+                        groups.union(t, t2);
+                }
+            }
         }
 
-        return groups;
+        return cache;
     }
 
 
@@ -166,105 +259,88 @@ public class GoLogic extends GameLogic {
      * @param index Index on the board to check.
      * @return Number of liberties around a single tile.
      */
-    public static boolean tileHasLiberty(Board board, BoardIndex index) {
-        for (int i = 0; i < 4; ++i) {
+    private static boolean tileHasLiberty(Board board, BoardIndex index) {
+        for(int i = 0; i < 4; ++i) {
             //Get vector of direction
-            final int dr = i < 2 ? -1 : 1;
-            final int dc = i % 2 == 0 ? -1 : 1;
+            final int dr = getdr(i);
+            final int dc = getdc(i);
 
             final BoardIndex p = new BoardIndex(index.row + dr, index.column + dc);
-            if(board.at(p) < 0) return true;
+            try {
+                if (board.at(p) < 0) return true;
+            } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
+
         }
 
         return false;
     }
 
 
+    private static boolean groupHasLiberty(GoLogicCache cache, Board board, BoardIndex group, @Nullable BoardIndex ignore) {
+        //Go through all tiles and check their adjacent spaces for openings which are not the ignore tile
+        // return true as soon as we find a valid opening.
+        Set<BoardIndex> tiles = cache.groups.getSet(group);
+
+        for(BoardIndex tile : tiles) {
+            for(int i = 0; i < 4; ++i) {
+                //Get vector of direction
+                final int dr = getdr(i);
+                final int dc = getdc(i);
+
+                final BoardIndex t = new BoardIndex(tile.row + dr, tile.column + dc);
+                try {
+                    if (board.at(t) < 0 && !t.equals(ignore)) return true;
+                } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
+            }
+        }
+        return false;
+    }
+
 
     /**
-     * This represents a grouping of tiles which are joined by horizontal or vertical connections.
-     * These are used as the primary units in the Game of Go.
-     *
-     * TODO: Union-Find and Caching of group information.
+     * Find all groups adjacent to a tile given a move command of the player and the position. This will return a set
+     * of all the group representatives.
+     * @param board Board to search.
+     * @param location The tile to scan around
+     * @return A set of group representatives for all unique, adjacent groups.
      */
-    private static class Group extends HashSet<BoardIndex> {
-        /**
-         * Basic constructor.
-         */
-        public Group() {
-            super();
+    private Set<BoardIndex> findAdjGroups(GoLogicCache cache, Board board, BoardIndex location) {
+        //Use a tree set because it does not have to allocate an array and we have a max of 4 things to insert
+        Set<BoardIndex> groups = new TreeSet<>();
+        for(int i = 0; i < 4; ++i) {
+            //Get vector of direction
+            final int dr = getdr(i);
+            final int dc = getdc(i);
+
+            //tile to check
+            BoardIndex index = new BoardIndex(
+                location.row + dr,
+                location.column + dc
+            );
+
+            try {
+                //if there is a piece of same player, find group representative
+                if(board.at(index) >= 0)
+                    groups.add(cache.groups.getRep(index));
+            } catch(ArrayIndexOutOfBoundsException e) { /* do nothing */ }
         }
+        return groups;
+    }
 
 
-        /**
-         * Constructor which will initialize the new object to the group it discovers.
-         * @param index Origin point of the search.
-         * @param board Board to discover the group on.
-         * @param player Player who's pieces are being analyzed
-         */
-        public Group(Board board, BoardIndex index, final int player) {
-            super(discover(board, index, player));
+    private static int getdr(int i) {
+        switch(i) {
+            case 0: return 1;
+            case 1: return -1;
+            default: return 0;
         }
+    }
 
-
-        /**
-         * Checks if this group has at least one free spot around it. Prefer this to countLiberties
-         * where possible.
-         * @return True if this group has at least one liberty.
-         */
-        public boolean hasLiberty(Board board) {
-            for(BoardIndex index : this)
-                if(GoLogic.tileHasLiberty(board, index)) return true;
-
-            return false;
-        }
-
-
-        /**
-         * Use breadth first search to find the set of all group members given a specific starting tile.
-         * Note, this will not check the first tile for player validity so it can be used to check for what group
-         * there would be if a piece were played there.
-         * @param index Origin point of the search.
-         * @param board Board to discover the group on.
-         * @param player Player who's pieces are being analyzed
-         * @return A list of all members in the group, null if there are none
-         */
-        public static Group discover(Board board, BoardIndex index, final int player) {
-            Group group = new Group();
-
-            if(player < 0) //invalid player, so there is no group
-                return group;
-
-            Queue<BoardIndex> queue = new LinkedList<>();
-            queue.add(index);
-
-            while(!queue.isEmpty()) {
-                index = queue.poll();
-
-                //add it to the set (will not be checked for player value by intent)
-                group.add(index);
-
-                //Queue all adjacent tiles
-                for(int i = 0; i < 4; i++) {
-                    //Calculate direction
-                    final int dr = i < 2 ? -1 : 1;
-                    final int dc = i % 2 == 0 ? -1 : 1;
-
-                    //Check boundaries
-                    final int nr = index.row + dr;
-                    final int nc = index.column + dc;
-                    if(nr < 0 || nr >= board.size) continue;
-                    if(nc < 0 || nc >= board.size) continue;
-
-                    //Add to queue if we have not already discovered it in this search
-                    BoardIndex nIndex = new BoardIndex(nr, nc);
-
-                    //make sure it's the same player and that we have not already added it
-                    if((board.at(index) == player) && (!group.contains(nIndex)))
-                        queue.add(nIndex);
-                }
-            }
-            return group;
+    private static int getdc(int i) {
+        switch(i) {
+            case 2: return 1;
+            case 3: return -1;
+            default: return 0;
         }
     }
 }

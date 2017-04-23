@@ -4,11 +4,12 @@ import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 
-import java.util.Set;
-
+//TODO: stop using logic.initBoard when possible and replace with forward stepping
 public class BoardIterator {
-    public History hist;
+    public History history;
+    public GameLogicCache cache;
     public Board board;
     private GameLogic logic;
     private int pos;
@@ -20,16 +21,18 @@ public class BoardIterator {
      * @param boardsize Size of the board
      */
     public BoardIterator(History h, GameLogic l, int boardsize){
-        hist = h;
+        history = h;
         logic = l;
         board = new Board(boardsize);
+        cache = l.createCache();
         pos = 0;
     }
 
     public BoardIterator(BoardIterator other) {
-        hist = other.hist;
+        history = other.history;
         logic = other.logic;
         board = new Board(other.board);
+        cache = logic.createCache();
         pos = other.pos;
     }
 
@@ -40,7 +43,8 @@ public class BoardIterator {
     public void goTo(int i){
         pos = i;
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(i+1), board, false, false);
+        cache.invalidate();
+        logic.initBoard(cache, board, history.getMoveCommandsUntil(i+1), false, false);
     }
 
     /**
@@ -49,7 +53,8 @@ public class BoardIterator {
      */
     public BoardIterator previous(){
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(pos), board, false, false);
+        cache.invalidate();
+        logic.initBoard(cache, board, history.getMoveCommandsUntil(pos), false, false);
         pos--;
         return this;
     }
@@ -59,11 +64,11 @@ public class BoardIterator {
      * @return the BoardIterator at the next space
      */
     public BoardIterator next() {
-        BoardCommand c = hist.getBoardCommand(++pos);
+        BoardCommand c = history.getBoardCommand(++pos);
         if(c instanceof SetCommand)
-            logic.apply((SetCommand)c, board, false, false);
+            logic.apply(cache, board, (SetCommand)c, false, false);
         else
-            logic.play((MoveCommand)c, board, false, false);
+            logic.play(cache, board, (MoveCommand)c, false, false);
         return this;
     }
 
@@ -73,7 +78,8 @@ public class BoardIterator {
      */
     public BoardIterator end() {
         board = new Board(board.size);
-        logic.initBoard(hist.getMoveCommandsUntil(hist.getNumBoardCommands()), board, false, false);
+        cache.invalidate();
+        logic.initBoard(cache, board, history.getMoveCommandsUntil(history.getNumBoardCommands()), false, false);
         return this;
     }
 

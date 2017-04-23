@@ -17,14 +17,17 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
-import plu.red.reversi.core.graphics.*;
+import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.graphics.Pipeline;
+import plu.red.reversi.core.graphics.PipelineDefinition;
+import plu.red.reversi.core.graphics.SimpleGLFragmentShader;
+import plu.red.reversi.core.graphics.SimpleGLVertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
-import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.reversi3d.Board3D;
 import plu.red.reversi.core.reversi3d.Camera;
 import plu.red.reversi.core.reversi3d.HighlightMode;
@@ -32,8 +35,9 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * The JPanel containing the board and its edges.
@@ -132,19 +136,15 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                     if(highlightMode == HighlightMode.HIGHLIGHT_POSSIBLE_MOVES) {
                         // we can use the game board because GUI will be caught up animation wise
 
-                        System.out.println("NEXT PLAYER: " +
-                                game.getNextPlayerID(game.getHistory().getBoardCommand(boardIterator.getPos()).playerID));
-
-                        System.out.println(boardIterator.getPos());
-
                         Set<BoardIndex> validMoves = (
                             game.getGameLogic()
                                 .getValidMoves(
+                                    boardIterator.cache,
+                                    boardIterator.board,
                                     game.getNextPlayerID (
                                         game.getHistory()
                                             .getBoardCommand(boardIterator.getPos()).playerID
-                                    ),
-                                    boardIterator.board
+                                    )
                                 )
                         );
 
@@ -155,10 +155,12 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                         // TODO
                     }
 
-                    BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
+                    if(boardIterator.getPos() >= 0) {
+                        BoardCommand lastMove = game.getHistory().getBoardCommand(boardIterator.getPos());
 
-                    if(lastMove instanceof MoveCommand)
-                        board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                        if(lastMove instanceof MoveCommand)
+                            board.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                    }
                 }
             }
         });
@@ -205,9 +207,11 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     }
 
     @Override
-    public void onGameOver(Player player, int score) {
+    public void onGameOver(Player player, int score){
         // TODO
     }
+
+
 
     @Override
     public void onBoardUpdate(BoardUpdate update) {
@@ -324,6 +328,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     public Board getCurrentBoard() {
         return boardIterator.board;
     }
+
+    public GameLogicCache getCurrentCache() { return boardIterator.cache; }
 
     /**
      * Gets the move index of the current game representing the current BoardCommand index.

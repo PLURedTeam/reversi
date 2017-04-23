@@ -10,6 +10,8 @@ import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * ReversiLogic is responsible for handling Reversi/Othello rules and updating the
@@ -43,10 +45,42 @@ public class ReversiLogic extends GameLogic {
         super(game);
     }
 
+
     /**
      * This constructor should only be used for testing.
      */
     public  ReversiLogic() {super();}
+
+
+    /**
+     * Constructs a new cache objcet of the appropriate subtype.
+     * @return A new GameLogic cache of the appropriate subtype.
+     */
+    @Override
+    public GameLogicCache createCache() {
+        return new ReversiLogicCache();
+    }
+
+
+    /**
+     * Sets a tile on the board without considering legality or playing out the move.
+     * @param command Command specifying a location and its new player value.
+     * @param board Board to apply commands to.
+     * @param notify True if this should notify subscribed listeners.
+     * @param record True if this should update the game history.
+     * @return This object for chaining.
+     */
+    @Override
+    public GameLogic apply(GameLogicCache cache, Board board, SetCommand command, boolean notify, boolean record) {
+        //handle score change before calling superclass
+        ReversiLogicCache rcache = (ReversiLogicCache)cache;
+        if(rcache == null) throw new InvalidParameterException("Invalid cache passed to apply in ReversiLogic.");
+
+        rcache.addToScore(board.at(command.position), -1); //decrement score of old player
+        rcache.addToScore(command.playerID, 1); //inc new player score
+
+        return super.apply(cache, board, command, notify, record);
+    }
 
 
     /**
@@ -59,16 +93,16 @@ public class ReversiLogic extends GameLogic {
      * @throws InvalidParameterException If it is an invalid move, no move will be made.
      */
     @Override
-    public GameLogic play(MoveCommand command, Board board, boolean notify, boolean record) throws InvalidParameterException {
+    public GameLogic play(GameLogicCache cache, Board board, MoveCommand command, boolean notify, boolean record) throws InvalidParameterException {
         Collection<BoardIndex> indexes = calculateFlipsFromBoard(command.position, command.playerID, board);
 
         if(indexes.isEmpty())
             throw new InvalidParameterException("Invalid play by player " + command.playerID + " to " + command.position);
 
         //set tiles
-        apply(new SetCommand(command), board, false, false);
+        apply(cache, board, new SetCommand(command), false, false);
         for(BoardIndex index : indexes) {
-            apply(new SetCommand(command.playerID, index), board, false, false);
+            apply(cache, board, new SetCommand(command.playerID, index), false, false);
         }
 
         if(notify) {
@@ -93,35 +127,11 @@ public class ReversiLogic extends GameLogic {
      * @param board   Board to apply commands to.
      */
     @Override
-    public boolean isValidMove(MoveCommand command, Board board) {
+    public boolean isValidMove(GameLogicCache cache, Board board, MoveCommand command) {
         return (
                 board.at(command.position) == -1 &&
-                        !calculateFlipsFromBoard(command.position, command.playerID, board).isEmpty()
+                !calculateFlipsFromBoard(command.position, command.playerID, board).isEmpty()
         );
-    }
-
-
-    /**
-     * Find the different moves that could be made and return them.
-     *
-     * @param player Integer Player ID to check for
-     * @param board  Board to apply commands to.
-     * @return ArrayList moves
-     */
-    @Override
-    public Set<BoardIndex> getValidMoves(int player, Board board) {
-        //declare an array for possible moves method
-        HashSet<BoardIndex> moves = new HashSet<>();
-
-        BoardIndex index = new BoardIndex();
-
-        //Add all valid moves to the set
-        for(index.row = 0; index.row < board.size; index.row++)
-            for(index.column = 0; index.column < board.size; index.column++)
-                if(isValidMove(new MoveCommand(player, index), board))
-                    moves.add(new BoardIndex(index)); //adds the valid move into the array of moves
-
-        return moves;
     }
 
 
@@ -133,14 +143,24 @@ public class ReversiLogic extends GameLogic {
      * @return Score for the given player.
      */
     @Override
-    public int getScore(int player, Board board) {
-        int score = 0;
-        //look for the instances of the role on the board
-        for(int r = 0; r < board.size; r++)
-            for(int c = 0; c < board.size; c++)
-                if(board.at(new BoardIndex(r, c)) == player)
-                    score++;
-        return score;
+    public int getScore(GameLogicCache cache, Board board, int player) {
+        //check cache
+        ReversiLogicCache rcache = (ReversiLogicCache)cache;
+        if(rcache == null) throw new InvalidParameterException("Invalid cache passed to getScore in ReversiLogic.");
+
+        //see if the cache has the score
+        Integer value = rcache.score.get(player);
+        if(value != null) return value;
+        //make sure we set the value to prevent searching with future calls even if the tile does not exist
+        cache.score.put(player, 0);
+
+        //go ahead and calculate the score for all players
+        for(BoardIndex i : board) {
+            int v = board.at(i); //read value at board
+            if(v < 0) continue; //skip if invalid
+            rcache.addToScore(v, 1);
+        }
+        return cache.score.get(player);
     }
 
 

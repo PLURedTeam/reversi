@@ -5,7 +5,8 @@ import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
-import plu.red.reversi.core.game.logic.GoLogic;
+
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
@@ -14,6 +15,7 @@ import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.db.DBUtilities;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -66,6 +68,7 @@ public class Game extends Coordinator {
     protected DataMap settings = null;
     protected Board board = null;
     protected GameLogic gameLogic = null;
+    protected GameLogicCache gameCache = null;
     protected History history = null;
 
     // Player Data
@@ -218,6 +221,7 @@ public class Game extends Coordinator {
         if(players.isEmpty()) throw new IllegalStateException("No Players have been registered!");
 
         board = new Board(settings.get(SettingsLoader.GAME_BOARD_SIZE, Integer.class));
+        gameCache = gameLogic.createCache();
 
         // Ensure a History exists and setup the Board
         //History after these if conditions will be updated by GameLogic
@@ -262,6 +266,13 @@ public class Game extends Coordinator {
      * @return this Game's GameLogic
      */
     public GameLogic getGameLogic() { return gameLogic; }
+
+    /**
+     * Retrieves the GameLogicCache which holds information about the current game state.
+     *
+     * @return this Game's GameLogicCache
+     */
+    public GameLogicCache getGameCache() { return gameCache; }
 
     /**
      * Retrieves the History that this Game object is using.
@@ -398,8 +409,12 @@ public class Game extends Coordinator {
         // Send Move Commands to the Board object
         if(cmd instanceof MoveCommand) {
             if(!gameRunning) return false;
-            gameLogic.play((MoveCommand)cmd);
-            nextTurn();
+            try {
+                gameLogic.play((MoveCommand)cmd);
+                nextTurn();
+            } catch(InvalidParameterException e) {
+                System.err.println(e.getMessage());
+            }
         }
 
         // Listen to Surrender Commands

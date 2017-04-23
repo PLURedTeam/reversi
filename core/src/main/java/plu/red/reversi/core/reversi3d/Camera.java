@@ -172,8 +172,8 @@ public class Camera {
         float offxy = CAMERA_RADIUS * (float)Math.cos(currentState.cameraDir.y);
         float offz = CAMERA_RADIUS * (float)Math.sin(currentState.cameraDir.y);
 
-        float cx = (float)Math.cos(currentState.cameraDir.x - Math.PI / 2); // we sub PI over 2 here because otherwise the calcs will not be relative to negative y
-        float cy = (float)Math.sin(currentState.cameraDir.x - Math.PI / 2);
+        float cx = (float)Math.cos(currentState.cameraDir.x + Math.PI / 2); // we sub PI over 2 here because otherwise the calcs will not be relative to negative y
+        float cy = (float)Math.sin(currentState.cameraDir.x + Math.PI / 2);
 
         return getRealCameraCenter().sub(offxy * cx, offxy * cy, -offz);
     }
@@ -186,8 +186,8 @@ public class Camera {
     }
 
     public Vector3f getRealCameraUp() {
-        float cx = -(float)Math.cos(currentState.cameraDir.x + Math.PI / 2); // we sub PI over 4 here because otherwise the calcs will not be relative to negative y
-        float cy = -(float)Math.sin(currentState.cameraDir.x + Math.PI / 2);
+        float cx = (float)Math.cos(currentState.cameraDir.x + Math.PI / 2); // we sub PI over 4 here because otherwise the calcs will not be relative to negative y
+        float cy = (float)Math.sin(currentState.cameraDir.x + Math.PI / 2);
         return new Vector3f(cx, cy, 1);
     }
 

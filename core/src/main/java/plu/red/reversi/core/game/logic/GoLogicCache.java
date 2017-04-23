@@ -10,6 +10,7 @@ import plu.red.reversi.core.util.UnionFind;
 public class GoLogicCache extends GameLogicCache {
     public final UnionFind<BoardIndex> groups;
 
+
     /**
      * Basic constructor which initializes values to their defaults.
      */
@@ -30,6 +31,16 @@ public class GoLogicCache extends GameLogicCache {
     public GoLogicCache(GoLogicCache other) {
         super(other);
         groups = new UnionFind<>(other.groups);
+    }
+
+
+    /**
+     * Invalidate the cache. Clears it out and forces it to be regenerated. Use this if the board is changed outside
+     * of a game logic function.
+     */
+    public void invalidate() {
+        super.invalidate();
+        groups.clear();
     }
 
 

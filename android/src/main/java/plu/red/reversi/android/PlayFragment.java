@@ -176,7 +176,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     .setText(String.format(
                             Locale.getDefault(),
                             "%d",
-                            mGame.getGameLogic().getScore(players[i].getID(), mGameView.getCurrentBoard())
+                            // TODO: Historical game logic scores have been borked.
+                            mGame.getGameLogic().getScore(players[i].getID())
                     ));
         }
     }

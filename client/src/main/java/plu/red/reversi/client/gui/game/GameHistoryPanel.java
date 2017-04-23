@@ -129,7 +129,8 @@ public class GameHistoryPanel extends JPanel implements ICommandListener, ListSe
     public void setSelectedIndex(int index) {
         selectedIndex = index;
 
-        historyTable.setRowSelectionInterval(index, index);
+        if(index >= 0)
+            historyTable.setRowSelectionInterval(index, index);
     }
 
     public void setListener(HistoryPanelListener listener) {
