@@ -1,5 +1,7 @@
 package plu.red.reversi.core.game;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.util.DataMap;
@@ -13,39 +15,28 @@ import java.util.LinkedList;
  */
 public class History {
 
-    /*
     // Register JSON Converter
     static {
         DataMap.Setting.registerConverter(History.class,
                 (key, value, json) -> {
                     JSONObject jobj = new JSONObject();
-                    int size = value.size;
-                    jobj.put("size", size);
-                    ArrayList<ArrayList<Integer>> b = new ArrayList<>(size);
-                    for(int i = 0; i < size; i++) {
-                        ArrayList<Integer> l = new ArrayList<>(size);
-                        for(int j = 0; j < size; j++)
-                            l.set(j, value.board[i][j]);
-                        b.set(i, l);
-                    }
-                    jobj.put("data", b);
+                    jobj.put("size", value.moves.size());
+                    JSONArray jlist = new JSONArray();
+                    for(int i = 0; i < value.moves.size(); i++)
+                        jlist.put(i, value.moves.get(i).toJSON());
+                    jobj.put("data", jlist);
                     json.put(key, jobj);
                 },
                 (key, json) -> {
                     JSONObject jobj = json.getJSONObject(key);
                     int size = jobj.getInt("size");
-                    Board b = new Board(size);
-                    JSONArray rows = jobj.getJSONArray("data");
-                    for(int i = 0; i < size; i++) {
-                        JSONArray cols = rows.getJSONArray(i);
-                        for(int j = 0; j < size; j++) {
-                            b.board[i][j] = cols.getInt(j);
-                        }
-                    }
-                    return b;
+                    JSONArray jlist = jobj.getJSONArray("data");
+                    History hist = new History();
+                    for(int i = 0; i < size; i++)
+                        hist.moves.add((BoardCommand)Command.fromJSON(jlist.getJSONObject(i)));
+                    return hist;
                 });
     }
-    */
 
     private ArrayList<BoardCommand> moves;
 

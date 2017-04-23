@@ -1,5 +1,7 @@
 package plu.red.reversi.core.command;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.Game;
@@ -11,6 +13,8 @@ import plu.red.reversi.core.game.Game;
  * piece is changed, such as when setting up the initial Board state.
  */
 public class SetCommand extends BoardCommand {
+
+    static final int SERIAL_ID = 4;
 
     /**
      * Basic Constructor. Constructs a new SetCommand with a given <code>playerID</code>, <code>position</code>, and
@@ -32,6 +36,19 @@ public class SetCommand extends BoardCommand {
     public SetCommand(Source source, int playerID, BoardIndex position) { super(source, playerID, position); }
 
     /**
+     * Deserialize Constructor. Deserializes a SetCommand from a JSONObject.
+     *
+     * @param json JSONObject to deserialize
+     * @throws JSONException if there is a problem during serialization
+     */
+    SetCommand(JSONObject json) throws JSONException {
+        super(
+                Source.values()[json.getInt("source")],
+                json.getInt("playerID"),
+                new BoardIndex(json.getInt("pos_row"), json.getInt("pos_column")));
+    }
+
+    /**
      * Constructs a new set command from a move command.
      *
      * @param cmd Move command to copy.
@@ -49,5 +66,22 @@ public class SetCommand extends BoardCommand {
     public boolean isValid(Coordinator controller) {
         // Is the Coordinator a Game Coordinator
         return controller instanceof Game;
+    }
+
+    /**
+     * Serializes this Command into a JSONObject.
+     *
+     * @return New JSONObject from this Command
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("type", SERIAL_ID);
+        json.put("source", source.ordinal());
+        json.put("playerID", playerID);
+        json.put("pos_column", position.column);
+        json.put("pos_row", position.row);
+        return json;
     }
 }

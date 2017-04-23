@@ -1,5 +1,7 @@
 package plu.red.reversi.core.command;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.util.ChatMessage;
 
@@ -9,6 +11,8 @@ import plu.red.reversi.core.util.ChatMessage;
  * Command implementation for a ChatMessage. Simply carries the ChatMessage through the Command system.
  */
 public class ChatCommand extends Command {
+
+    static final int SERIAL_ID = 0;
 
     /**
      * ChatMessage <code>message</code> carried by this ChatCommand.
@@ -36,6 +40,17 @@ public class ChatCommand extends Command {
     }
 
     /**
+     * Deserialize Constructor. Deserializes a ChatCommand from a JSONObject.
+     *
+     * @param json JSONObject to deserialize
+     * @throws JSONException if there is a problem during serialization
+     */
+    ChatCommand(JSONObject json) throws JSONException {
+        super(Source.values()[json.getInt("source")]);
+        this.message = ChatMessage.fromJSON(json.getJSONObject("message"));
+    }
+
+    /**
      * Uses data from a Coordinator object to determine whether or not this Command is valid. IE: Whether a move played
      * by a player is on a valid position of a board.
      *
@@ -46,5 +61,20 @@ public class ChatCommand extends Command {
     public boolean isValid(Coordinator controller) {
         // Always valid
         return true;
+    }
+
+    /**
+     * Serializes this Command into a JSONObject.
+     *
+     * @return New JSONObject from this Command
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("type", SERIAL_ID);
+        json.put("source", source.ordinal());
+        json.put("message", message.toJSON());
+        return json;
     }
 }
