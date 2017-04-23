@@ -95,14 +95,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         saveGameItem.addActionListener(this);
         menu.add(saveGameItem);
 
-        newOnlineGameItem = new JMenuItem("New Online Game");
-        newOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_O, InputEvent.META_MASK));
-        newOnlineGameItem.getAccessibleContext().setAccessibleDescription(
-                "Start a new online game and invite someone to play.");
-        newOnlineGameItem.addActionListener(this);
-        menu.add(newOnlineGameItem);
-
         joinOnlineGameItem = new JMenuItem("Join Online Game");
         joinOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_J, InputEvent.META_MASK));
@@ -209,10 +201,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         if(e.getSource() == saveGameItem) {
             gui.saveGame();
-        }
-
-        if(e.getSource() == newOnlineGameItem) {
-            gui.createNetworkGame();
         }
 
         if(e.getSource() == joinOnlineGameItem) {

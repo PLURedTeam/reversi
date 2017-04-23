@@ -200,6 +200,21 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     }
 
     /**
+     * Query Dialog Display Method. Shows a Query Dialog with a list of options to the user, displaying a question and
+     * expecting a response.
+     *
+     * @param title        String <code>title</code> of the Dialog
+     * @param body         String <code>body</code> of the Dialog
+     * @param values       Object array of values to choose from
+     * @param defaultValue Default Object value to start selected
+     * @return Object value that was selected, or <code>null</code> for no response
+     */
+    @Override
+    public Object showQueryDialog(String title, String body, Object[] values, Object defaultValue) {
+        return JOptionPane.showInputDialog(this, body, title, JOptionPane.QUESTION_MESSAGE, null, values, defaultValue);
+    }
+
+    /**
      * Creates a new game panel and starts the game
      */
     public void startGame() {
