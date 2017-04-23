@@ -31,6 +31,8 @@ public class Lobby extends Coordinator implements ISettingsListener {
     protected DataMap settings;
     protected ArrayList<PlayerSlot> playerSlots = new ArrayList<>();
     protected Game loadedGame;
+    protected final boolean networked;
+    protected final String name;
 
 
 
@@ -38,8 +40,12 @@ public class Lobby extends Coordinator implements ISettingsListener {
     //  Member Methods
     // ****************
 
-    public Lobby(Controller master, IMainGUI gui) {
+    public Lobby(Controller master, IMainGUI gui) { this(master, gui, false, "Local Game"); }
+
+    public Lobby(Controller master, IMainGUI gui, boolean networked, String name) {
         super(master, gui);
+        this.networked = networked;
+        this.name = name;
         this.loadedGame = null;
 
         // Create new settings
@@ -49,11 +55,15 @@ public class Lobby extends Coordinator implements ISettingsListener {
         SettingsLoader.INSTANCE.addSettingsListener(this);
 
         // Create Lobby Chat
-        master.getChat().create(ChatMessage.Channel.LOBBY_PREFIX);
+       if(networked) master.getChat().create(ChatMessage.Channel.lobby(this.name));
     }
 
-    public Lobby(Controller master, IMainGUI gui, Game loadedGame) {
+    public Lobby(Controller master, IMainGUI gui, Game loadedGame) { this(master, gui, loadedGame, false, "Loaded Game"); }
+
+    public Lobby(Controller master, IMainGUI gui, Game loadedGame, boolean networked, String name) {
         super(master, gui);
+        this.networked = networked;
+        this.name = name;
         this.loadedGame = loadedGame;
 
         // Add our predefined Player Slots
@@ -70,9 +80,6 @@ public class Lobby extends Coordinator implements ISettingsListener {
             }
             slot.setNameCustom(true); // Stop automatic name changing when settings change
             playerSlots.add(slot);
-
-            // Create Lobby Chat
-            master.getChat().create(ChatMessage.Channel.LOBBY_PREFIX);
         }
 
         // Spoof a settings change in order to update Local player names
@@ -83,6 +90,9 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Register as a ISettingsListener
         SettingsLoader.INSTANCE.addSettingsListener(this);
+
+        // Create Lobby Chat
+        if(networked) master.getChat().create(ChatMessage.Channel.lobby(this.name));
     }
 
     protected Color getDefaultColorForSlot(int slotNum) {
@@ -193,7 +203,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
         if(!canStart()) return null;
 
         if(loadedGame == null) {
-            loadedGame = new Game(master, gui);
+            loadedGame = new Game(master, gui, networked, name);
             loadedGame.setLogic(new ReversiLogic(loadedGame));
 
             // Set the settings
@@ -243,7 +253,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
         SettingsLoader.INSTANCE.removeSettingsListener(this);
 
         // Clear Lobby Chat
-        master.getChat().clear(ChatMessage.Channel.LOBBY_PREFIX);
+        master.getChat().clear(ChatMessage.Channel.lobby(this.name));
     }
 
 
@@ -294,6 +304,21 @@ public class Lobby extends Coordinator implements ISettingsListener {
      * @return Loaded Game object, or <code>null</code> if no Game has been loaded
      */
     public Game getLoadedGame() { return loadedGame; }
+
+    /**
+     * Networked Status Getter. Determines if this Lobby is networked; IE if the Game this Lobby is creating is an
+     * online multiplayer game.
+     *
+     * @return <code>true</code> if this Lobby is networked, <code>false</code> otherwise
+     */
+    public boolean isNetworked() { return networked; }
+
+    /**
+     * Name Getter. Retrieves the <code>name</code> to associate with this Lobby and the Game it creates.
+     *
+     * @return String <code>name</code>
+     */
+    public String getName() { return name; }
 
     /**
      * Called when the client's settings have been changed.

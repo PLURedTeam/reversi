@@ -61,15 +61,23 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private JMenu buildGameMenu() {
         JMenu menu = new JMenu("Game");
         menu.getAccessibleContext().setAccessibleDescription(
-                "New game");
+                "Game Options and Actions");
 
-        newGameItem = new JMenuItem("New Game");
+        newGameItem = new JMenuItem("New Local Game");
         newGameItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_N, InputEvent.CTRL_MASK));
         newGameItem.getAccessibleContext().setAccessibleDescription(
-                "Start a new game against the computer");
+                "Start a new game against the computer or local players.");
         newGameItem.addActionListener(this);
         menu.add(newGameItem);
+
+        newOnlineGameItem = new JMenuItem("New Online Game");
+        newOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.ALT_MASK));
+        newOnlineGameItem.getAccessibleContext().setAccessibleDescription(
+                "Start a new game against online players.");
+        newOnlineGameItem.addActionListener(this);
+        menu.add(newOnlineGameItem);
 
         loadGameItem = new JMenuItem("Load Game");
         loadGameItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -86,14 +94,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 "Save the current game");
         saveGameItem.addActionListener(this);
         menu.add(saveGameItem);
-
-        newOnlineGameItem = new JMenuItem("New Online Game");
-        newOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_O, InputEvent.META_MASK));
-        newOnlineGameItem.getAccessibleContext().setAccessibleDescription(
-                "Start a new online game and invite someone to play.");
-        newOnlineGameItem.addActionListener(this);
-        menu.add(newOnlineGameItem);
 
         joinOnlineGameItem = new JMenuItem("Join Online Game");
         joinOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -191,16 +191,16 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
             gui.createNewGame();
         }
 
+        if(e.getSource() == newOnlineGameItem) {
+            gui.createNewOnlineGame();
+        }
+
         if(e.getSource() == loadGameItem) {
             gui.loadGame();
         }
 
         if(e.getSource() == saveGameItem) {
             gui.saveGame();
-        }
-
-        if(e.getSource() == newOnlineGameItem) {
-            gui.createNetworkGame();
         }
 
         if(e.getSource() == joinOnlineGameItem) {

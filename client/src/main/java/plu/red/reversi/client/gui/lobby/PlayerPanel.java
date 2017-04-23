@@ -82,7 +82,8 @@ public class PlayerPanel extends JPanel implements ActionListener {
         rightPanel.add(Box.createVerticalGlue());
 
         // Create the type Selector
-        typeSelect = new JComboBox<>(new String[]{"Local", "Network", "AI"});
+        if(lobby.isNetworked()) typeSelect = new JComboBox<>(new String[]{"Local", "Network", "AI"});
+        else typeSelect = new JComboBox<>(new String[]{"Local", "AI"});
         switch(slot.getType()) {
             default:
             case LOCAL:
@@ -123,7 +124,9 @@ public class PlayerPanel extends JPanel implements ActionListener {
         if(e.getSource() == typeSelect) {
             switch((String)typeSelect.getSelectedItem()) {
                 default:
-                case "Network": // No separate Network type exists yet
+                case "Network":
+                    slot.setType(PlayerSlot.SlotType.NETWORK);
+                    break;
                 case "Local":
                     slot.setType(PlayerSlot.SlotType.LOCAL);
                     break;

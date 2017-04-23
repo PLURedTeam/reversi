@@ -87,6 +87,9 @@ public class PlayerSlot {
      */
     public void setType(SlotType type) {
 
+        if(!lobby.isNetworked() && type == SlotType.NETWORK)
+            type = SlotType.LOCAL;
+
         if(this.type != type) {
             switch (type) {
                 case LOCAL:

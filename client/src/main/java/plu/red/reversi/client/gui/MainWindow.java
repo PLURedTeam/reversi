@@ -166,6 +166,55 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     }
 
     /**
+     * Information Dialog Display Method. Shows an Information Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body  String <code>body</code> of the Dialog
+     */
+    @Override
+    public void showInformationDialog(String title, String body) {
+        JOptionPane.showMessageDialog(this, body, title, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Error Dialog Display Method. Shows an Error Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body  String <code>body</code> of the Dialog
+     */
+    @Override
+    public void showErrorDialog(String title, String body) {
+        JOptionPane.showMessageDialog(this, body, title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Query Dialog Display Method. Shows a Query Dialog to the user, displaying a question and expecting a response.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body  String <code>body</code> of the Dialog
+     * @return String response, or <code>null</code> for no response
+     */
+    @Override
+    public String showQueryDialog(String title, String body) {
+        return JOptionPane.showInputDialog(this, body, title, JOptionPane.QUESTION_MESSAGE);
+    }
+
+    /**
+     * Query Dialog Display Method. Shows a Query Dialog with a list of options to the user, displaying a question and
+     * expecting a response.
+     *
+     * @param title        String <code>title</code> of the Dialog
+     * @param body         String <code>body</code> of the Dialog
+     * @param values       Object array of values to choose from
+     * @param defaultValue Default Object value to start selected
+     * @return Object value that was selected, or <code>null</code> for no response
+     */
+    @Override
+    public Object showQueryDialog(String title, String body, Object[] values, Object defaultValue) {
+        return JOptionPane.showInputDialog(this, body, title, JOptionPane.QUESTION_MESSAGE, null, values, defaultValue);
+    }
+
+    /**
      * Creates a new game panel and starts the game
      */
     public void startGame() {
@@ -173,10 +222,14 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     }
 
     /**
-     * Creates a new game panel
+     * Creates a new local game panel
      */
     public void createNewGame() {
-        master.createIntoLobby();
+        master.createIntoLobby(false);
+    }
+
+    public void createNewOnlineGame() {
+        master.createIntoLobby(true);
     }
 
     /**
@@ -184,7 +237,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      * Then loads and creates the game
      */
     public void loadGame() {
-        master.loadIntoLobby();
+        master.loadIntoLobby(false);
     }
 
     /**
