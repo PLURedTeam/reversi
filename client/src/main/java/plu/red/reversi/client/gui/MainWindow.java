@@ -256,13 +256,13 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      * Calls the server to create a new network game
      */
     @Deprecated
-    public void createNetworkGame() {
+    public void createNetworkGame(String name) {
         Object[] numPlayers = {2,4};
         int p = (int)JOptionPane.showInputDialog(this, "Number of Players", "Create Network Game", JOptionPane.QUESTION_MESSAGE, null, numPlayers, numPlayers[0]);
 
         //TODO: Add logic to call server and set up game on client side
 
-        WebUtilities.INSTANCE.createGame(p);
+        //WebUtilities.INSTANCE.createGame(p);
     }//createNetworkGame
 
     /**
@@ -276,13 +276,12 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
             Object[][] rows = new Object[games.size()][4];
 
             for (int i = 0; i < games.size(); i++) {
-                rows[i][0] = games.get(i).gameID;
+                rows[i][0] = games.get(i).gameName;
                 rows[i][1] = games.get(i).players.size() + " / " + games.get(i).numPlayers;
                 rows[i][2] = games.get(i).status;
-                rows[i][3] = new JButton("Join Game" + games.get(i).gameID);
             }//for
 
-            Object[] cols = {"Game ID", "Number of Players", "Status", "Join Game"};
+            Object[] cols = {"Game Name", "Number of Players", "Status"};
             JTable table = new JTable(rows, cols);
             JOptionPane.showMessageDialog(null, new JScrollPane(table), "Online Users", 1);
         } else {
@@ -291,6 +290,9 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
                     "", 1);
 
         }//else
+
+
+        WebUtilities.INSTANCE.joinGame(0);
 
     }//joinNetworkGame
 

@@ -25,10 +25,10 @@ public class GameManager implements ISessionListener {
      * @param numPlayers the number of players the game can support
      * @return the id of the game created
      */
-    public int createGame(int numPlayers) {
+    public int createGame(int numPlayers, String name) {
         Integer gameID = gameCounter++; //Get next game id
         System.out.println("[GAME MANAGER] Creating New Game: " + gameID);
-        games.put(gameID,new GamePair(gameID,numPlayers));
+        games.put(gameID,new GamePair(gameID,numPlayers, name));
         return gameID;
     }//createGame
 

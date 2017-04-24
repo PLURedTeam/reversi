@@ -86,7 +86,7 @@ public class Client extends Controller {
             lobby.addSlot(networked ? PlayerSlot.SlotType.NETWORK : PlayerSlot.SlotType.LOCAL);
 
         // Notify Server
-        if(networked) WebUtilities.INSTANCE.createGame(count);
+        if(networked) WebUtilities.INSTANCE.createGame(count, name);
     }
 
     public void loadIntoLobby(boolean networked) {

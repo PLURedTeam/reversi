@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.inject.Singleton;
 
 /**
  * Created by Andrew on 3/23/17.
@@ -24,6 +25,7 @@ import java.util.HashMap;
  * A set of endpoints that will be accessed from the game URI
  * with a path parameter that includes the game id.
  */
+@Singleton
 @Path("game")
 public class GameEndpoint {
 
@@ -37,7 +39,7 @@ public class GameEndpoint {
      * @param move the command to be applied
      * @return true if applied to game, false otherwise
      */
-    @Path("move/{id}")
+    @Path("{id}")
     @POST
     @Consumes
     public void sendMove(@PathParam("id") int id, JSONObject move) {
@@ -58,7 +60,7 @@ public class GameEndpoint {
      * @param id the game id to listen to
      * @return the eventOutput item for the client
      */
-    @Path("move/{id}")
+    @Path("{id}")
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput getMoves(@PathParam("id") int id) {
@@ -76,13 +78,18 @@ public class GameEndpoint {
      * @param user The user that wants to start the new network game
      * @return the gameID associated with the new network game
      */
-    @Path("create/{num}")
+    @Path("create/{num}/{name}")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createGame(@PathParam("num") int numPlayers, User user) {
+    public Response createGame(@PathParam("num") int numPlayers, @PathParam("name") String name, User user) {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
             throw new WebApplicationException(403);
-        int gameID = GameManager.INSTANCE.createGame(numPlayers);
+        int gameID = GameManager.INSTANCE.createGame(numPlayers, name);
+
+        //Create a broadcaster
+        SseBroadcaster broadcaster = new SseBroadcaster();
+        games.put(gameID, broadcaster);
+
         GameManager.INSTANCE.addPlayer(gameID,user);
         return Response.ok(gameID).build();
     }//createGame
@@ -101,7 +108,20 @@ public class GameEndpoint {
             throw new WebApplicationException(403);
 
         boolean joined = GameManager.INSTANCE.addPlayer(gameID, user);
-        return Response.ok(joined).build();
+
+        if(!GameManager.INSTANCE.gameExists(gameID))
+            throw new WebApplicationException(404);
+
+        OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+        OutboundEvent event = eventBuilder.mediaType(MediaType.APPLICATION_JSON_TYPE)
+                .name("join")
+                .data(User.class, user)
+                .build();
+        games.get(gameID).broadcast(event); //broadcast the move
+
+        if(!joined) throw new WebApplicationException(410);
+
+        return Response.ok(gameID).build();
     }//joinGame
 
     /**

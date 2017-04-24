@@ -12,9 +12,7 @@ import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.network.WebUtilities;
-import plu.red.reversi.core.util.ChatMessage;
-import plu.red.reversi.core.util.Color;
-import plu.red.reversi.core.util.DataMap;
+import plu.red.reversi.core.util.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -134,6 +132,11 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
         gui.updateGUIMinor();
 
         return this;
+    }
+
+    public GamePair joinUser(User user, GamePair pair) {
+
+        return null;
     }
 
     /**

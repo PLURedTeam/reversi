@@ -23,15 +23,17 @@ public class GamePair {
     public GameStatus status; //the status of the game
     public int gameID;
     public int numPlayers;
+    public String gameName;
 
     /**
      * Constructor
      * Sets the game status to "LOBBY"
      */
-    public GamePair(int id, int p) {
+    public GamePair(int id, int p, String name) {
         gameID = id;
         numPlayers = p;
         status = GameStatus.LOBBY;
+        gameName = name;
     }//constructor
 
     public GamePair() {}
@@ -39,9 +41,11 @@ public class GamePair {
     public void setStatus(GameStatus s) {status = s;}
     public void setGameID(int id) {gameID = id;}
     public void setNumPlayers(int p) {numPlayers = p;}
+    public void setGameName(String n) {gameName = n;}
     public ArrayList<User> getPlayers() {return players;}
     public GameStatus getStatus() {return status;}
     public int getGameID() {return gameID;}
     public int getNumPlayers() {return numPlayers;}
+    public String getGameName() {return gameName;}
 
 }//gamePair

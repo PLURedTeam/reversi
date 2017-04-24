@@ -262,13 +262,13 @@ public class WebUtilities {
      * Creates a new game on the server that players can join
      * @return true if game created, false otherwise
      */
-    public boolean createGame(int numPlayers) {
+    public boolean createGame(int numPlayers, String name) {
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
 
             try {
                 //Create target and call server
-                WebTarget target = client.target(baseURI + "game/create/" + numPlayers);
+                WebTarget target = client.target(baseURI + "game/create/" + numPlayers + "/" + name);
                 Response response = target.request().post(Entity.json(user));
 
                 //If invalid credentials, return false
@@ -279,6 +279,8 @@ public class WebUtilities {
 
                 //set the game ID
                 networkGameID = response.readEntity(Integer.class);
+                Thread gameHandler = new Thread(new GameHandler(this,networkGameID));
+                gameHandler.start();
 
                 return true;
             } catch (Exception e) {
@@ -316,8 +318,16 @@ public class WebUtilities {
                     return false;
                 }//if
 
+                //If game is gone, return false
+                if (response.getStatus() == 410) {
+                    gui.showErrorDialog("Join Game Error", "The requested game is no longer available.");
+                    return false;
+                }//if
+
                 //set the game ID
-                boolean joined = response.readEntity(Boolean.class);
+                networkGameID = response.readEntity(Integer.class);
+                Thread gameHandler = new Thread(new GameHandler(this,networkGameID));
+                gameHandler.start();
 
                 return true;
             } catch (Exception e) {
