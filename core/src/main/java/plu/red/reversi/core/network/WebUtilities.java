@@ -2,6 +2,8 @@ package plu.red.reversi.core.network;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
@@ -48,6 +50,7 @@ public class WebUtilities {
      * @return true if valid credentials, false otherwise
      */
     public boolean login(String username, String password) {
+        IMainGUI gui = Controller.getInstance().gui;
         if(!loggedIn) { //Check to see if currently logged in
 
             //Create User
@@ -61,20 +64,16 @@ public class WebUtilities {
 
                 //If invalid credentials, return false
                 if (response.getStatus() == 403) {
-                    JOptionPane.showMessageDialog(null,
-                            "That username and/or password was incorrect.",
-                            "Login Error", 2);
+                    gui.showErrorDialog("Login Error", "That username and/or password was incorrect.");
                     return false;
                 }//if
 
-                JOptionPane.showMessageDialog(null,
-                        "Successfully logged in.",
-                        "Login Successful", 1);
+                gui.showInformationDialog("Login Successful", "Successfully logged in.");
 
                 user = response.readEntity(User.class);
                 sessionID = user.getSessionID();
                 loggedIn = true;
-                plu.red.reversi.core.Client.getInstance().getCore().notifyLoggedInListeners(loggedIn);
+                Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                 //Start the session thread
                 Thread session = new Thread(new SessionHandler(client, user));
@@ -85,15 +84,12 @@ public class WebUtilities {
 
                 return true;
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                        "The server is currently unreachable. Please try again later.",
-                        "Login Error", 2);
+                System.err.println(e.getMessage());
+                gui.showErrorDialog("Login Error", "The server is currently unreachable. Please try again later.");
                 return false;
             }//catch
         } else {
-            JOptionPane.showMessageDialog(null,
-                    "You are currently logged in. You must logout first",
-                    "Login Error", 2);
+            gui.showErrorDialog("Login Error", "You are currently logged in. You must logout first");
             return false;
         }//else
     }//login
@@ -106,6 +102,8 @@ public class WebUtilities {
         //If not logged in, return true
         if(loggedIn == false) return true;
 
+        IMainGUI gui = Controller.getInstance().gui;
+
         try {
         //Call server to logout
         WebTarget target = client.target(baseURI + "logout");
@@ -117,15 +115,12 @@ public class WebUtilities {
         user.setPassword(null);
         user.setSessionID(-1);
 
-        // Lol full package name because network Client
-        plu.red.reversi.core.Client.getInstance().getCore().notifyLoggedInListeners(loggedIn);
+        Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
         return true;
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Logout Error",2);
+            gui.showErrorDialog("Logout Error", "The server is currently unreachable. Please try again later.");
             return false;
         }//catch
 
@@ -142,6 +137,8 @@ public class WebUtilities {
         //Logout the current user
         if(loggedIn) logout();
 
+        IMainGUI gui = Controller.getInstance().gui;
+
         //Create a user object
         user.setUsername(username);
         user.setPassword(password);
@@ -151,28 +148,21 @@ public class WebUtilities {
         Response response = target.request().post(Entity.json(user));
 
         if(response.getStatus() == 200) {
-            JOptionPane.showMessageDialog(null,
-                    "Your online account was successfully created.",
-                    "Online Account Created", 1);
+            gui.showInformationDialog("Online Account Created", "Your online account was successfully created.");
+            login(username, password); // Login to simplify one step
             return true;
         }//if
         if(response.getStatus() == 406) {
-            JOptionPane.showMessageDialog(null,
-                    "That username already exists, please try again with a different username.",
-                    "Create User Error", 2);
+            gui.showErrorDialog("Create User Error", "That username already exists, please try again with a different username.");
         }//if
         if(response.getStatus() == 500) {
-            JOptionPane.showMessageDialog(null,
-                    "A server error occurred. Please try again later.",
-                    "Server Error", 2);
+            gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
         }
 
         return false;
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Create User Error",2);
+            gui.showErrorDialog("Create User Error", "The server is currently unreachable. Please try again later.");
             return false;
         }//catch
     }//createUser
@@ -188,6 +178,8 @@ public class WebUtilities {
         //Logout the current user
         if(loggedIn) logout();
 
+        IMainGUI gui = Controller.getInstance().gui;
+
         //Create a user object
         user.setUsername(username);
         user.setPassword(password);
@@ -197,28 +189,20 @@ public class WebUtilities {
             Response response = target.request().post(Entity.json(user));
 
             if(response.getStatus() == 200) {
-                JOptionPane.showMessageDialog(null,
-                        "Your online account was successfully deleted.",
-                        "Online Account Deleted", 1);
+                gui.showInformationDialog("Online Account Deleted", "Your online account was successfully deleted.");
                 return true;
             }//if
             if(response.getStatus() == 406) {
-                JOptionPane.showMessageDialog(null,
-                        "That username and/or password was incorrect.",
-                        "Delete User Error", 2);
+                gui.showErrorDialog("Delete User Error", "That username and/or password was incorrect.");
             }//if
             if(response.getStatus() == 500) {
-                JOptionPane.showMessageDialog(null,
-                        "A server error occurred. Please try again later.",
-                        "Server Error", 2);
+                gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
             }
 
             return false;
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Delete User Error",2);
+            gui.showErrorDialog("Delete User Error", "The server is currently unreachable. Please try again later.");
             return false;
         }//catch
     }//deleteUser
@@ -229,6 +213,8 @@ public class WebUtilities {
      */
     public ArrayList<User> getOnlineUsers() {
 
+        IMainGUI gui = Controller.getInstance().gui;
+
         try {
             WebTarget target = client.target(baseURI + "online-users");
             Response response = target.request(MediaType.APPLICATION_JSON).get();
@@ -238,9 +224,7 @@ public class WebUtilities {
 
             return users;
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Delete User Error", 2);
+            gui.showErrorDialog("Get Online Users Error", "The server is currently unreachable. Please try again later.");
             return null;
         }//catch
     }//getOnlineUsers
@@ -279,6 +263,7 @@ public class WebUtilities {
      * @return true if game created, false otherwise
      */
     public boolean createGame(int numPlayers) {
+        IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
 
             try {
@@ -288,9 +273,7 @@ public class WebUtilities {
 
                 //If invalid credentials, return false
                 if (response.getStatus() == 403) {
-                    JOptionPane.showMessageDialog(null,
-                            "You must login to create a game.",
-                            "Login Error", 2);
+                    gui.showErrorDialog("Create Game Error", "You must login to create a game.");
                     return false;
                 }//if
 
@@ -299,21 +282,15 @@ public class WebUtilities {
 
                 return true;
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                        "The server is currently unreachable. Please try again later.",
-                        "Login Error", 2);
+                gui.showErrorDialog("Create Game Error", "The server is currently unreachable. Please try again later.");
                 return false;
             }//catch
         } else {
 
             if(!loggedIn) {
-                JOptionPane.showMessageDialog(null,
-                        "You are not currently logged in. You must login first.",
-                        "Create Game Error", 2);
+                gui.showErrorDialog("Create Game Error", "You are not currently logged in. You must login first.");
             } else {
-                JOptionPane.showMessageDialog(null,
-                        "You can only be in one network game at a time.",
-                        "Create Game Error", 2);
+                gui.showErrorDialog("Create Game Error", "You can only be in one network game at a time.");
             }//else
             return false;
         }//else
@@ -325,6 +302,7 @@ public class WebUtilities {
      * @return true if game joined, false otherwise
      */
     public boolean joinGame(int gameID) {
+        IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn) { //Check to see if currently logged in
 
             try {
@@ -334,9 +312,7 @@ public class WebUtilities {
 
                 //If invalid credentials, return false
                 if (response.getStatus() == 403) {
-                    JOptionPane.showMessageDialog(null,
-                            "You must login to join a game.",
-                            "Join Game Error", 2);
+                    gui.showErrorDialog("Join Game Error", "You must login to join a game.");
                     return false;
                 }//if
 
@@ -345,15 +321,11 @@ public class WebUtilities {
 
                 return true;
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                        "The server is currently unreachable. Please try again later.",
-                        "Join Game Error", 2);
+                gui.showErrorDialog("Join Game Error", "The server is currently unreachable. Please try again later.");
                 return false;
             }//catch
         } else {
-            JOptionPane.showMessageDialog(null,
-                    "You are not currently logged in. You must login first",
-                    "Join Game Error", 2);
+            gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
             return false;
         }//else
     }//joinGame
@@ -363,15 +335,14 @@ public class WebUtilities {
      * @return An arraylist of GamePairs
      */
     public ArrayList<GamePair> getOnlineGames() {
+        IMainGUI gui = Controller.getInstance().gui;
         try {
             WebTarget target = client.target(baseURI + "game/get-games");
             Response response = target.request(MediaType.APPLICATION_JSON).get();
             ArrayList<GamePair> games = response.readEntity(new GenericType<ArrayList<GamePair>>() {});
             return games;
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "The server is currently unreachable. Please try again later.",
-                    "Delete User Error", 2);
+            gui.showErrorDialog("Get Online Games Error", "The server is currently unreachable. Please try again later.");
             return null;
         }//catch
     }//getOnlineUsers

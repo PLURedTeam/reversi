@@ -40,6 +40,8 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         this.chatEntryButton = new JButton("Chat");
         this.chatEntryButton.addActionListener(this);
         this.chatEntryButton.setEnabled(WebUtilities.INSTANCE.loggedIn());
+        if(!this.chatEntryButton.isEnabled())
+            this.chatEntryButton.setToolTipText("Login to Chat");
 
         this.setLayout(new BorderLayout());
         this.add(tabPane, BorderLayout.NORTH);
@@ -105,6 +107,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     @Override
     public void onLogout(boolean loggedIn) {
         chatEntryButton.setEnabled(loggedIn);
+        chatEntryButton.setToolTipText(loggedIn ? null : "Login to Chat");
         this.revalidate();
         this.repaint();
     }

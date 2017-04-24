@@ -1,5 +1,7 @@
 package plu.red.reversi.core;
 
+import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;
@@ -35,18 +37,18 @@ public abstract class Controller {
     protected ChatLog chat = new ChatLog();
 
 
-    public Controller(IMainGUI gui) {
+    protected Controller(IMainGUI gui) {
         if(gui == null) this.gui = new IMainGUI.NullGUI();
         else this.gui = gui;
         chat.create(ChatMessage.Channel.GLOBAL);
         this.gui.setController(this);
-        setCore(new Lobby(this, this.gui));
     }
 
     public Controller(IMainGUI gui, Coordinator core) {
-        this.gui = gui;
+        if(gui == null) this.gui = new IMainGUI.NullGUI();
+        else this.gui = gui;
         chat.create(ChatMessage.Channel.GLOBAL);
-        gui.setController(this);
+        this.gui.setController(this);
         setCore(core);
     }
 

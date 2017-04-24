@@ -22,18 +22,26 @@ public class Tournament {
     private ArrayList<Match> matchList;
 
     private User winner;
+    private double rounds;
 
     /**
      * Constructor for the Tournament
      * @param usrs is an ArrayList of User for a given Tournament, can only be powers of 2
      *
      */
-    public Tournament(ArrayList<User> usrs){
+    public Tournament(ArrayList<User> usrs) throws IllegalArgumentException {
+        //base case: only continue if usrs is an acceptable size
+        int j = usrs.size()-1;
+
+        //use bitwise operation to check if the list is a power of 2
+        if((j & -j) != j)
+            throw new IllegalArgumentException();
+
+        //initialize fields
         userList = usrs;
         matchList = new ArrayList<Match>(usrs.size()-1);
+        rounds = Math.sqrt((double)j);
 
-        //we assume the matchList will always be 3 or 7  (userList.size()-1) / 2
-        int j = usrs.size()-1;
         //pair up users in the matchList
         for(int i = 0; i < j; i++) {
             matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0));
@@ -92,23 +100,23 @@ public class Tournament {
      * This method sets the winner
      * @param u the user left in the userList
      */
-    private void setWinner(User u){
+    public void setFinalWinner(User u){
         userList.set(0, u);
         winner = u;
     }
 
     /**
-     * This method finds and returns the winner of the game
+     * This method finds and returns the winner of the Tournament
      * @return the winner -- who will be the last user left in the User array
      */
     public User getFinalWinner(){
         return userList.get(0);
     }
 
-
     /**
      *  Inner class Match to keep track of the match being played
-     *
+     *  Utilizes the IGameOverListener, to be notified when the game is finished
+     *  so that there can be new matches based on the winner of the initial round
      */
     public class Match implements IGameOverListener{
         Pair usrs; //Two users for a given Match in a Tournament
@@ -134,34 +142,50 @@ public class Tournament {
 
 
         /**
-         * This method is used to create the pairs after the first round by modifying the userList (after the Constructor
-         * has initially populated the match list) which deletes the losers
+         * This method is used to create the pairs after the first round
+         * by modifying the userList (after the Constructor
+         * has initially populated the match list) which deletes the losers, this method will be called
+         * in onGameOver
          */
         public void nextRound(ArrayList<User> usrLs){
+            //update userList
+            userList = usrLs;
 
-            int j = usrLs.size()-1;
+            //delete losers from the userList so that the winners can be put into a Match for the next round
+            for(int k = 0; k < matchList.size(); k++){
+                if(matchList.get(k).usrs.first == winner)
+                    userList.remove(matchList.get(k).usrs.second);
+                else
+                    userList.remove(matchList.get(k).usrs.first);
+            }
+
+            //save the new
+            int j = userList.size()-1;
             //pair up users in the matchList
             for(int i = 0; i < j; i++) {
                 matchList.add(new Match((new Pair(userList.get(i), userList.get(j))), 0));
                 j--;
             }
 
-            //delete losers
-            for(int k = 0; k < matchList.size(); k++){
-                userList.remove(matchList.get(k).winner);
+            //keeping track of the round
+            rounds--;
 
-            }
+            //check to see if this is the final game, if so, set the final winner
+            if(rounds == 1)
+                setFinalWinner(winner);
+
+
         }
 
         /**
          * Update the UserList every time the Game is over
          * @param player Player object representing who won, null if no one wins
+         * //TODO: use the Player to be able to see which user has won
          * @param score the final winning score
          */
         @Override
         public void onGameOver(Player player, int score){
             nextRound(userList);
-
         }
     }//end class Match
 

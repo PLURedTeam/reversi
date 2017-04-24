@@ -20,8 +20,7 @@ import java.util.Hashtable;
 public class PlayerPanel extends JPanel implements ActionListener {
 
     public final JLabel typeLabel;
-    public final JButton removeButton;
-    public final JComboBox<String> typeSelect;
+    public final JComboBox<PlayerSlot.SlotType> typeSelect;
     protected final JPanel middlePanel;
     protected SubPanel subPanel = null;
     protected final JPanel rightPanel;
@@ -70,34 +69,15 @@ public class PlayerPanel extends JPanel implements ActionListener {
         rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 
-        // TODO: Make Player Slot Remove Button use an Icon
-        // Create the Remove button and make the LobbyPanel the listener (because top-level actions are required
-        //   to actually remove this slot)
-        removeButton = new JButton("Remove");
-        removeButton.addActionListener(this);
-        removeButton.setVerticalAlignment(SwingConstants.CENTER);
-        removeButton.setHorizontalAlignment(SwingConstants.CENTER);
-        rightPanel.add(removeButton);
-
         rightPanel.add(Box.createVerticalGlue());
 
         // Create the type Selector
-        if(lobby.isNetworked()) typeSelect = new JComboBox<>(new String[]{"Local", "Network", "AI"});
-        else typeSelect = new JComboBox<>(new String[]{"Local", "AI"});
-        switch(slot.getType()) {
-            default:
-            case LOCAL:
-                typeSelect.setSelectedItem("Local");
-                break;
-            case NETWORK:
-                typeSelect.setSelectedItem("Network");
-                break;
-            case AI:
-                typeSelect.setSelectedItem("AI");
-                break;
-        }
+        typeSelect = new JComboBox<>(lobby.getValidSlotTypes());
+        typeSelect.setSelectedItem(slot.getType());
         typeSelect.addActionListener(this);
         rightPanel.add(typeSelect);
+
+        rightPanel.add(Box.createVerticalGlue());
 
         this.add(rightPanel);
 
@@ -111,7 +91,6 @@ public class PlayerPanel extends JPanel implements ActionListener {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         // Propogate setEnabled() to subcomponents
-        if(removeButton != null) removeButton.setEnabled(enabled);
         if(typeSelect != null) typeSelect.setEnabled(enabled);
         if(middlePanel != null) middlePanel.setEnabled(enabled);
         if(subPanel != null) subPanel.setEnabled(enabled);
@@ -122,23 +101,7 @@ public class PlayerPanel extends JPanel implements ActionListener {
 
         // Type Select Action
         if(e.getSource() == typeSelect) {
-            switch((String)typeSelect.getSelectedItem()) {
-                default:
-                case "Network":
-                    slot.setType(PlayerSlot.SlotType.NETWORK);
-                    break;
-                case "Local":
-                    slot.setType(PlayerSlot.SlotType.LOCAL);
-                    break;
-                case "AI":
-                    slot.setType(PlayerSlot.SlotType.AI);
-                    break;
-            }
-        }
-
-        // Remove Action
-        if(e.getSource() == removeButton) {
-            lobby.removeSlot(slot);
+            slot.setType((PlayerSlot.SlotType)typeSelect.getSelectedItem());
         }
     }
 

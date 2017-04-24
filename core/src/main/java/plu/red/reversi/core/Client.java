@@ -4,8 +4,13 @@ import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
+import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GoLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.lobby.PlayerSlot;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatLog;
 
 /**
@@ -16,8 +21,14 @@ import plu.red.reversi.core.util.ChatLog;
  */
 public class Client extends Controller {
 
-    public Client(IMainGUI gui) { super(gui); }
     public Client(IMainGUI gui, Coordinator core) { super(gui, core); }
+    public Client(IMainGUI gui) {
+        super(gui);
+        setCore(new Lobby(this, this.gui, new ReversiLogic()));
+        Lobby lobby = (Lobby)core;
+        lobby.addSlot(PlayerSlot.SlotType.LOCAL);
+        lobby.addSlot(PlayerSlot.SlotType.AI);
+    }
 
     private String queryName(boolean networked) {
         String name = "Local Game";
@@ -26,17 +37,56 @@ public class Client extends Controller {
             while(name == null) {
                 name = gui.showQueryDialog("Game Name", "Enter a name for the new Game Lobby:");
                 if(name == null) return null; // Cancelled
-                else if(name.isEmpty()) // TODO: Check for duplicate names
+                else if(name.isEmpty()) {// TODO: Check for duplicate names
                     gui.showErrorDialog("Game Name", "Name Cannot be Empty");
+                    name = null;
+                }
             }
         }
         return name;
     }
 
     public void createIntoLobby(boolean networked) {
+
+        // Check for login status
+        if(networked && !WebUtilities.INSTANCE.loggedIn()) {
+            gui.showErrorDialog("Network Game", "You must be logged in to start a networked Game");
+            return;
+        }
+
+        // Figure out the Game name
         String name = queryName(networked);
         if(name == null) return; // Cancelled
-        setCore(new Lobby(this, gui, networked, name));
+
+        // Figure out the Game type
+        Object type = gui.showQueryDialog("Game Type", "Select a type of Game to Host", GameLogic.Type.values(), GameLogic.Type.REVERSI);
+        if(type == null) return; // Cancelled
+        GameLogic logic;
+        switch((GameLogic.Type)type) {
+            case REVERSI:   logic = new ReversiLogic();     break;
+            case GO:        logic = new GoLogic();          break;
+            default:        throw new IllegalArgumentException("Unknown GameLogic Type Selected");
+        }
+
+        // Figure out Player counts
+        int[] ic = logic.validPlayerCounts();
+        Integer[] counts = new Integer[ic.length];
+        for(int i = 0; i < ic.length; i++) counts[i] = ic[i];
+        Object c = gui.showQueryDialog("Player Count", "Select the amount of Players that will be playing", counts, logic.minPlayerCount());
+        if(c == null) return; // Cancelled
+        Integer count = (Integer)c;
+
+        // Set the Lobby
+        setCore(new Lobby(this, gui, logic, networked, name));
+
+        // Add players
+        Lobby lobby = (Lobby)core;
+        lobby.addSlot(PlayerSlot.SlotType.LOCAL);
+        for(int i = 1; i < count; i++)
+            lobby.addSlot(networked ? PlayerSlot.SlotType.NETWORK : PlayerSlot.SlotType.LOCAL);
+
+        // Notify Server
+        if(networked) WebUtilities.INSTANCE.createGame(count);
     }
 
     public void loadIntoLobby(boolean networked) {

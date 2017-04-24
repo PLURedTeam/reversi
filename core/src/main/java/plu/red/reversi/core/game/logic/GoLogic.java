@@ -28,6 +28,8 @@ import java.util.*;
  * by default, and you can manually specify otherwise in each case.
  */
 public class GoLogic extends GameLogic {
+    public final static int[] VALID_PLAYER_COUNTS = {2, 3, 4, 5, 6, 7, 8};
+
 
     /**
      * Type Getter. Retrieves the type of this GameLogic.
@@ -58,6 +60,35 @@ public class GoLogic extends GameLogic {
     @Override
     public GameLogicCache createCache() {
         return new GoLogicCache();
+    }
+
+
+    /**
+     * @return The minimum number of players for the game.
+     */
+    @Override
+    public int minPlayerCount() {
+        return 2;
+    }
+
+
+    /**
+     * @return The maximum number of players for the game.
+     */
+    @Override
+    public int maxPlayerCount() {
+        return 8;
+    }
+
+
+    /**
+     * Returns a list of valid player counts. This list will be sorted in ascending order.
+     *
+     * @return A list of valid player counts in ascending order.
+     */
+    @Override
+    public int[] validPlayerCounts() {
+        return VALID_PLAYER_COUNTS;
     }
 
 
