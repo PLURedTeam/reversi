@@ -31,11 +31,13 @@ public class Tournament {
      */
     public Tournament(ArrayList<User> usrs) throws IllegalArgumentException {
         //base case: only continue if usrs is an acceptable size
-        int j = usrs.size()-1;
+        int j = usrs.size();
 
         //use bitwise operation to check if the list is a power of 2
         if((j & -j) != j)
             throw new IllegalArgumentException();
+
+        j--; //alter this value by 1 to use this as an index value
 
         //initialize fields
         userList = usrs;
@@ -187,6 +189,9 @@ public class Tournament {
         public void onGameOver(Player player, int score){
             nextRound(userList);
         }
+
+
+
     }//end class Match
 
     /**
