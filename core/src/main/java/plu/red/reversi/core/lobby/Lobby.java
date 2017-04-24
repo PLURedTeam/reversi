@@ -3,12 +3,15 @@ package plu.red.reversi.core.lobby;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
@@ -22,7 +25,7 @@ import java.util.Collection;
  * Lobby Coordinator. Object used as a Coordinator when setting up a game. A Lobby Coordinator contains all data and Model
  * objects relevant to setting up a game, and make them available to a GUI in order to display and change said data.
  */
-public class Lobby extends Coordinator implements ISettingsListener {
+public class Lobby extends Coordinator implements ISettingsListener, INetworkListener {
 
     // ******************
     //  Member Variables
@@ -31,6 +34,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
     protected DataMap settings;
     protected ArrayList<PlayerSlot> playerSlots = new ArrayList<>();
     protected Game loadedGame;
+    protected final GameLogic logic;
     protected final boolean networked;
     protected final String name;
 
@@ -40,10 +44,11 @@ public class Lobby extends Coordinator implements ISettingsListener {
     //  Member Methods
     // ****************
 
-    public Lobby(Controller master, IMainGUI gui) { this(master, gui, false, "Local Game"); }
+    public Lobby(Controller master, IMainGUI gui, GameLogic logic) { this(master, gui, logic, false, "Local Game"); }
 
-    public Lobby(Controller master, IMainGUI gui, boolean networked, String name) {
+    public Lobby(Controller master, IMainGUI gui, GameLogic logic, boolean networked, String name) {
         super(master, gui);
+        this.logic = logic;
         this.networked = networked;
         this.name = name;
         this.loadedGame = null;
@@ -54,6 +59,9 @@ public class Lobby extends Coordinator implements ISettingsListener {
         // Register as a ISettingsListener
         SettingsLoader.INSTANCE.addSettingsListener(this);
 
+        // Self-Register Listener
+        addListenerStatic(this);
+
         // Create Lobby Chat
        if(networked) master.getChat().create(ChatMessage.Channel.lobby(this.name));
     }
@@ -62,6 +70,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
     public Lobby(Controller master, IMainGUI gui, Game loadedGame, boolean networked, String name) {
         super(master, gui);
+        this.logic = loadedGame.getGameLogic();
         this.networked = networked;
         this.name = name;
         this.loadedGame = loadedGame;
@@ -82,14 +91,17 @@ public class Lobby extends Coordinator implements ISettingsListener {
             playerSlots.add(slot);
         }
 
-        // Spoof a settings change in order to update Local player names
-        this.onClientSettingsChanged();
+        // Update Local player names
+        updateNames();
 
         // Load Game settings
         this.settings = loadedGame.getSettings();
 
         // Register as a ISettingsListener
         SettingsLoader.INSTANCE.addSettingsListener(this);
+
+        // Self-Register Listener
+        addListenerStatic(this);
 
         // Create Lobby Chat
         if(networked) master.getChat().create(ChatMessage.Channel.lobby(this.name));
@@ -101,6 +113,10 @@ public class Lobby extends Coordinator implements ISettingsListener {
             case 1: return Color.WHITE;
             case 2: return Color.BLUE;
             case 3: return Color.RED;
+            case 4: return Color.YELLOW;
+            case 5: return Color.GREEN;
+            case 6: return Color.CYAN;
+            case 7: return Color.PURPLE;
             default: return Color.GRAY;
         }
     }
@@ -130,21 +146,24 @@ public class Lobby extends Coordinator implements ISettingsListener {
     public void addSlot(PlayerSlot.SlotType type) throws IllegalArgumentException {
 
         // Check player count
-        if(playerSlots.size() >= getMaxPlayerCount())
+        if(playerSlots.size() >= logic.maxPlayerCount())
             throw new IllegalArgumentException("Already at maximum Player count for this Lobby");
 
         // Count the amount of duplicate automatic local names
         int dupNum = 0;
         for(PlayerSlot slot : playerSlots) {
-            if(!slot.isNameCustom()) dupNum++;
+            if(slot.getType() == PlayerSlot.SlotType.LOCAL) dupNum++;
         }
 
         // Create the new slot
         PlayerSlot slot;
         switch(type) {
             case LOCAL:
-                String username = SettingsLoader.INSTANCE.getClientSettings().get(SettingsLoader.GLOBAL_USER_NAME, String.class);
+                String username = "Player";
+                if(WebUtilities.INSTANCE.loggedIn())
+                    username = WebUtilities.INSTANCE.getUser().getUsername();
                 Color color = getDefaultColorForSlot(playerSlots.size());
+                dupNum++;
                 if(dupNum > 1) username += dupNum;
                 slot = new PlayerSlot(this, type, color, username);
                 break;
@@ -169,9 +188,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Remove the slot
         playerSlots.remove(slot);
-
-        // Spoof a settings change in order to update Local player names
-        this.onClientSettingsChanged();
+        updateNames();
     }
 
     /**
@@ -188,9 +205,7 @@ public class Lobby extends Coordinator implements ISettingsListener {
      * @return True if this Lobby is ready to start a game, False otherwise
      */
     public boolean canStart() {
-        return
-                playerSlots.size() >= getMinPlayerCount()
-             && playerSlots.size() <= getMaxPlayerCount();
+        return logic.validPlayerCount(playerSlots.size());
     }
 
     /**
@@ -204,7 +219,11 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         if(loadedGame == null) {
             loadedGame = new Game(master, gui, networked, name);
-            loadedGame.setLogic(new ReversiLogic(loadedGame));
+
+            switch(logic.getType()) {
+                case REVERSI: loadedGame.setLogic(new ReversiLogic(loadedGame)); break;
+                case GO: loadedGame.setLogic(new GoLogic(loadedGame)); break;
+            }
 
             // Set the settings
             settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
@@ -254,6 +273,9 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Clear Lobby Chat
         master.getChat().clear(ChatMessage.Channel.lobby(this.name));
+
+        // Self-unregister
+        removeListenerStatic(this);
     }
 
 
@@ -268,26 +290,6 @@ public class Lobby extends Coordinator implements ISettingsListener {
      * @return this Lobby's <code>settings</code> DataMap
      */
     public DataMap getSettings() { return settings; }
-
-    /**
-     * Min Player Count Getter. Retrieves the minimum amount of Players that need to participate in the Game this Lobby
-     * is preparing for.
-     *
-     * @return Integer minimum amount of Players
-     */
-    public int getMinPlayerCount() {
-        return 2; // TODO: Make Min Player Count in a game dynamic later
-    }
-
-    /**
-     * Max Player Count Getter. Retrieves the maximum amount of Players that can participate in the Game this Lobby
-     * is preparing for.
-     *
-     * @return Integer maximum amount of Players
-     */
-    public int getMaxPlayerCount() {
-        return 4; // TODO: Make Max Player Count in a game dynamic later
-    }
 
     /**
      * Game Loaded Checker. Determines whether or not this Lobby is currently setting up a Game that has been loaded
@@ -321,18 +323,40 @@ public class Lobby extends Coordinator implements ISettingsListener {
     public String getName() { return name; }
 
     /**
-     * Called when the client's settings have been changed.
+     * GameLogic Getter. Retreives the <code>logic</code> that is used by this Lobby and the Game it creates.
+     *
+     * @return GameLogic <code>logic</code>
      */
-    @Override
-    public void onClientSettingsChanged() {
+    public GameLogic getLogic() { return logic; }
 
-        String username = SettingsLoader.INSTANCE.getClientSettings().get(SettingsLoader.GLOBAL_USER_NAME, String.class);
+    /**
+     * Valid SlotType Getter. Retrieves an array of the valid PlayerSlot.SlotTypes that are allowed to be selected for
+     * this Lobby.
+     *
+     * @return Array of valid SlotTypes
+     */
+    public PlayerSlot.SlotType[] getValidSlotTypes() {
+        ArrayList<PlayerSlot.SlotType> types = new ArrayList<>();
+        types.add(PlayerSlot.SlotType.LOCAL);
+        if(logic.getType() == GameLogic.Type.REVERSI)
+            types.add(PlayerSlot.SlotType.AI);
+        if(networked)
+            types.add(PlayerSlot.SlotType.NETWORK);
+        return types.toArray(new PlayerSlot.SlotType[]{});
+    }
 
+    protected void updateNames() {
+
+        // Get the Username
+        String username = "Player";
+        if(WebUtilities.INSTANCE.loggedIn())
+            username = WebUtilities.INSTANCE.getUser().getUsername();
+
+        // Count duplicates (Local Players)
         int dupNum = 0;
         for(PlayerSlot slot : playerSlots) {
             if(slot.getType() == PlayerSlot.SlotType.LOCAL) {
                 dupNum++;
-                if(slot.isNameCustom()) continue;
                 if(dupNum > 1) slot.setName(username + dupNum);
                 else slot.setName(username);
             }
@@ -340,5 +364,23 @@ public class Lobby extends Coordinator implements ISettingsListener {
 
         // Tell the GUI to refresh and repaint
         gui.updateGUIMinor();
+    }
+
+    /**
+     * Called when the client's settings have been changed.
+     */
+    @Override
+    public void onClientSettingsChanged() {
+        updateNames();
+    }
+
+    /**
+     * Called when a use logs out from the server
+     *
+     * @param loggedIn if the user is loggedIn
+     */
+    @Override
+    public void onLogout(boolean loggedIn) {
+        updateNames();
     }
 }

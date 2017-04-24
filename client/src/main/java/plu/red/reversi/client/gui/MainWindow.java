@@ -255,6 +255,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     /**
      * Calls the server to create a new network game
      */
+    @Deprecated
     public void createNetworkGame() {
         Object[] numPlayers = {2,4};
         int p = (int)JOptionPane.showInputDialog(this, "Number of Players", "Create Network Game", JOptionPane.QUESTION_MESSAGE, null, numPlayers, numPlayers[0]);
