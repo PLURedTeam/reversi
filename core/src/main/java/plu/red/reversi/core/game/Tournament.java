@@ -119,9 +119,9 @@ public class Tournament {
      *  so that there can be new matches based on the winner of the initial round
      */
     public class Match implements IGameOverListener{
-        Pair usrs; //Two users for a given Match in a Tournament
-        User winner;
-        int score;
+        private Pair usrs; //Two users for a given Match in a Tournament
+        private User winner;
+        private int score;
 
         /**
          * Constructor for a Match in a Tournament
