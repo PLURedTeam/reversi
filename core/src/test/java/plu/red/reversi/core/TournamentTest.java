@@ -32,7 +32,8 @@ public class TournamentTest {
 
     @Test
     public void currentMatch() throws Exception {
-        //System.out.print(tournament1.currentMatch(1));
+        // TODO: Test this when score value is available
+        //AssertTrue(tournament1.currentMatch(1).equals(new Tournament.Match(Tournament.Pair(u1, u2)));
     }
 
     @Test

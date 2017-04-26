@@ -190,6 +190,18 @@ public class Tournament {
             nextRound(userList);
         }
 
+        @Override
+        public boolean equals(Object o){
+            if(!(o instanceof Match))
+                return false;
+            //if the Match does not have the same Users, return false
+            if(this.usrs != ((Match) o).usrs )
+                return false;
+            else
+                return true;
+        }
+
+
 
 
     }//end class Match
