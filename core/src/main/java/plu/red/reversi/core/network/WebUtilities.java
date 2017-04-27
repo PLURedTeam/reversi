@@ -349,9 +349,15 @@ public class WebUtilities {
         try {
             WebTarget target = client.target(baseURI + "game/get-games");
             Response response = target.request(MediaType.APPLICATION_JSON).get();
+
+            if (response.getStatus() == 404) {
+                return new ArrayList<GamePair>();
+            }//if
+
             ArrayList<GamePair> games = response.readEntity(new GenericType<ArrayList<GamePair>>() {});
             return games;
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             gui.showErrorDialog("Get Online Games Error", "The server is currently unreachable. Please try again later.");
             return null;
         }//catch

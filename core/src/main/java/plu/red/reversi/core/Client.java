@@ -1,6 +1,7 @@
 package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
@@ -24,10 +25,7 @@ public class Client extends Controller {
     public Client(IMainGUI gui, Coordinator core) { super(gui, core); }
     public Client(IMainGUI gui) {
         super(gui);
-        setCore(new Lobby(this, this.gui, new ReversiLogic()));
-        Lobby lobby = (Lobby)core;
-        lobby.addSlot(PlayerSlot.SlotType.LOCAL);
-        lobby.addSlot(PlayerSlot.SlotType.AI);
+        setCore(new Browser(this, this.gui));
     }
 
     private String queryName(boolean networked) {

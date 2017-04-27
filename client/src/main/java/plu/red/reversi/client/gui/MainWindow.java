@@ -1,9 +1,11 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.client.gui.browser.BrowserPanel;
 import plu.red.reversi.client.gui.game.GamePanel;
 import plu.red.reversi.client.gui.lobby.LobbyPanel;
 import plu.red.reversi.client.gui.util.StatusBar;
 import plu.red.reversi.core.*;
+import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.lobby.Lobby;
@@ -105,6 +107,8 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
             populate(new GamePanel(this, (Game)core));
         } else if(core instanceof Lobby) {
             populate(new LobbyPanel(this, (Lobby)core));
+        } else if(core instanceof Browser) {
+            populate(new BrowserPanel(this, (Browser)core));
         }
 
         core.addListener(statusBar);
