@@ -6,6 +6,7 @@ import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
@@ -161,7 +162,14 @@ public abstract class GameLogic {
      * @return This object for chaining.
      */
     public final GameLogic initBoard() {
-        return initBoard(game.getGameCache(), game.getBoard(), Arrays.stream(game.getUsedPlayers()).mapToInt(Integer::intValue).toArray(), true, true);
+        Integer[] players = game.getUsedPlayers();
+        int[] playerIds = new int[players.length];
+        
+        for(int i = 0;i < players.length;i++) {
+            playerIds[i] = players[i];
+        }
+
+        return initBoard(game.getGameCache(), game.getBoard(), playerIds, true, true);
     }
 
 
