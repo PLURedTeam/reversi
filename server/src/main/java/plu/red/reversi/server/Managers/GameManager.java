@@ -42,6 +42,7 @@ public class GameManager implements ISessionListener {
     public boolean addPlayer(int id, User user) {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername())) return false;
         if(games.get(id).players.size() >= games.get(id).numPlayers) return false;
+        System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + "to Game: " + id);
         games.get(id).players.add(user);
         return true;
     }//addPlayer
@@ -62,6 +63,17 @@ public class GameManager implements ISessionListener {
         }//for
         return false;
     }//removeUser
+
+    /**
+     * Gets the game from the game manager if it exits
+     * @param id the id of the game
+     * @return GamePair of the specified game
+     */
+    public GamePair getGame(int id) {
+        if(!games.containsKey(id)) return null;
+        return games.get(id);
+    }//getGame
+
 
     /**
      * Gets the games that are currently on the server and the status in which the games are

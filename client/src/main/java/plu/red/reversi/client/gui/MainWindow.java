@@ -292,7 +292,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
         }//else
 
 
-        WebUtilities.INSTANCE.joinGame(0);
+       // WebUtilities.INSTANCE.joinGame(0);
 
     }//joinNetworkGame
 
