@@ -5,6 +5,7 @@ import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.core.browser.Browser;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
 
@@ -12,6 +13,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
 
 /**
  * Glory to the Red Team.
@@ -26,6 +30,8 @@ public class BrowserPanel extends CorePanel implements ActionListener {
     private ChatPanel panelChat;
 
     private JButton refreshButton;
+
+    private BrowserPanel.BrowserCellRenderer cellRenderer = null;
 
     public BrowserPanel(MainWindow gui, Browser bowser) {
         super(gui);
@@ -56,7 +62,18 @@ public class BrowserPanel extends CorePanel implements ActionListener {
         if(bowser.isConnected()) {
             JList<GamePair> list = new JList<>(bowser);
             //list.setSelectionModel(new BrowserPanel.BrowserListSelectionModel());
-            list.setCellRenderer(new BrowserPanel.BrowserCellRenderer());
+            cellRenderer = new BrowserPanel.BrowserCellRenderer();
+            list.setCellRenderer(cellRenderer);
+
+            //Add the listener to the JList
+            list.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+
+                    buttonClicked(e.getPoint(), list);
+                }//mouseClicked
+            });
+
             this.add(new JScrollPane(list,
                             JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
@@ -92,6 +109,26 @@ public class BrowserPanel extends CorePanel implements ActionListener {
         }
     }
 
+    public void buttonClicked(Point p, JList<GamePair> list) {
+
+
+        //TODO: Fix this, check if point is over button
+
+
+        int index = list.locationToIndex(p);
+
+        cellRenderer.buttons.get(index).doClick();
+
+        GamePair game = list.getModel().getElementAt(index);
+        int gameID = game.getGameID();
+        WebUtilities.INSTANCE.joinGame(gameID);
+
+
+
+    }//buttonClicked
+
+
+
     private static final class BrowserListSelectionModel extends DefaultListSelectionModel {
         @Override public void setSelectionInterval(int i0, int i1) {
             super.setSelectionInterval(-1, -1);
@@ -100,7 +137,9 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
     private static final class BrowserCellRenderer extends JPanel implements ListCellRenderer<GamePair> {
 
-        private void populate(GamePair val) {
+        public final HashMap<Integer, JButton> buttons = new HashMap<>();
+
+        private void populate(GamePair val, int index) {
             this.removeAll();
             if(val == null) return;
 
@@ -113,11 +152,19 @@ public class BrowserPanel extends CorePanel implements ActionListener {
             this.add(Box.createRigidArea(new Dimension(25, 0)));
             this.add(new JLabel(val.getPlayers().size() + "/" + val.getNumPlayers()));
             this.add(Box.createRigidArea(new Dimension(10, 0)));
+
+            if(!buttons.containsKey(index)) {
+                JButton button = new JButton("Join Game");
+                button.putClientProperty("gameID",val.getGameID());
+                buttons.put(index, button);
+            }
+
+            this.add(buttons.get(index));
         }
 
         @Override
         public Component getListCellRendererComponent(JList<? extends GamePair> list, GamePair value, int index, boolean isSelected, boolean cellHasFocus) {
-            populate(value);
+            populate(value, index);
             return this;
         }
     }

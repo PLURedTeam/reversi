@@ -55,6 +55,10 @@ public class GameHandler implements Runnable, INetworkListener {
 
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " Connected to the Game");
 
+
+
+
+
                 //TODO: Add to the lobby
 
             } else if(inboundEvent.getName().equals("move")) {
