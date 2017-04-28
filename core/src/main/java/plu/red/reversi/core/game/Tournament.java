@@ -31,11 +31,13 @@ public class Tournament {
      */
     public Tournament(ArrayList<User> usrs) throws IllegalArgumentException {
         //base case: only continue if usrs is an acceptable size
-        int j = usrs.size()-1;
+        int j = usrs.size();
 
         //use bitwise operation to check if the list is a power of 2
         if((j & -j) != j)
             throw new IllegalArgumentException();
+
+        j--; //alter this value by 1 to use this as an index value
 
         //initialize fields
         userList = usrs;
@@ -119,9 +121,9 @@ public class Tournament {
      *  so that there can be new matches based on the winner of the initial round
      */
     public class Match implements IGameOverListener{
-        Pair usrs; //Two users for a given Match in a Tournament
-        User winner;
-        int score;
+        private Pair usrs; //Two users for a given Match in a Tournament
+        private User winner;
+        private int score;
 
         /**
          * Constructor for a Match in a Tournament
@@ -187,6 +189,21 @@ public class Tournament {
         public void onGameOver(Player player, int score){
             nextRound(userList);
         }
+
+        @Override
+        public boolean equals(Object o){
+            if(!(o instanceof Match))
+                return false;
+            //if the Match does not have the same Users, return false
+            if(this.usrs != ((Match) o).usrs )
+                return false;
+            else
+                return true;
+        }
+
+
+
+
     }//end class Match
 
     /**
