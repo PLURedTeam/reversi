@@ -1,5 +1,6 @@
 package plu.red.reversi.client.gui;
 
+import plu.red.reversi.client.gui.tournament.TournamentPanel;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.User;
 
@@ -25,6 +26,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private JMenuItem seeRanking;
     private JMenuItem onlineUsers;
     private JMenuItem logout;
+    private JMenuItem viewTournament;
 
     /**
      * Initialize the network menu
@@ -74,6 +76,11 @@ public class NetworkMenu extends JMenu implements ActionListener {
         onlineUsers.addActionListener(this);
         this.add(onlineUsers);
 
+        //Create the onlineUsers menu item
+        viewTournament = new JMenuItem("View Tournament");
+        viewTournament.addActionListener(this);
+        this.add(viewTournament);
+
     }//constructor
 
     /**
@@ -95,8 +102,23 @@ public class NetworkMenu extends JMenu implements ActionListener {
             getOnlineUsers();
         } else if (e.getSource() == logout) {
             logout();
+        } else if(e.getSource() == viewTournament) {
+            viewTournament();
         }//if
     }//actionPerformed
+
+    /**
+     * For testing, shows the bracket on the screen
+     */
+    private void viewTournament() {
+
+        JFrame frame = new JFrame("Tournaments");
+        frame.add(new TournamentPanel());
+        frame.pack();
+        frame.setVisible(true);
+
+
+    }//viewTournament
 
     /**
      * Calls the webUtilities method to create the user on the server
