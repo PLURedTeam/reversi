@@ -5,6 +5,8 @@ import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
@@ -55,15 +57,21 @@ public class GameHandler implements Runnable, INetworkListener {
 
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " Connected to the Game");
 
-
-
-
-
-                //TODO: Add to the lobby
+                //TODO: Add name to the lobby
 
             } else if(inboundEvent.getName().equals("move")) {
 
+                Command c = inboundEvent.readData(Command.class);
+
+                //TODO: Send the move to the game to update
+
+                System.out.println("[GAME HANDLER]: " + c.source + " moved");
+
             } else if(inboundEvent.getName().equals("start")) {
+
+                Game g = inboundEvent.readData(Game.class);
+
+                //TODO: Create the game on the client so that it can start
 
             }//else
 

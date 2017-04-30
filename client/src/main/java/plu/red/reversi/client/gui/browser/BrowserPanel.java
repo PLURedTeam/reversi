@@ -69,7 +69,6 @@ public class BrowserPanel extends CorePanel implements ActionListener {
             list.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-
                     buttonClicked(e.getPoint(), list);
                 }//mouseClicked
             });
@@ -109,21 +108,22 @@ public class BrowserPanel extends CorePanel implements ActionListener {
         }
     }
 
+    /**
+     * Called when the mouse is clicked over the JList
+     * @param p the point where the mouse was clicked
+     * @param list the JList containing the network games
+     */
     public void buttonClicked(Point p, JList<GamePair> list) {
-
-
-        //TODO: Fix this, check if point is over button
-
-
         int index = list.locationToIndex(p);
 
-        cellRenderer.buttons.get(index).doClick();
-
-        GamePair game = list.getModel().getElementAt(index);
-        int gameID = game.getGameID();
-        WebUtilities.INSTANCE.joinGame(gameID);
-
-
+        //Check if click is over button
+        if(cellRenderer.buttons.get(index).getBounds().contains(p)) {
+            System.out.println("over button");
+            cellRenderer.buttons.get(index).doClick();
+            GamePair game = list.getModel().getElementAt(index);
+            int gameID = game.getGameID();
+            WebUtilities.INSTANCE.joinGame(gameID);
+        }//if
 
     }//buttonClicked
 

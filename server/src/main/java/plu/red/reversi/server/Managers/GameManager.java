@@ -42,7 +42,7 @@ public class GameManager implements ISessionListener {
     public boolean addPlayer(int id, User user) {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername())) return false;
         if(games.get(id).players.size() >= games.get(id).numPlayers) return false;
-        System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + "to Game: " + id);
+        System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + " to Game: " + id);
         games.get(id).players.add(user);
         return true;
     }//addPlayer
