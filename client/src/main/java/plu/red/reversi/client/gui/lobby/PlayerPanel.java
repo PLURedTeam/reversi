@@ -84,7 +84,7 @@ public class PlayerPanel extends JPanel implements ActionListener {
         this.add(Box.createRigidArea(new Dimension(15, 0)));
 
         this.setBackground(Utilities.getLessContrastColor(new Color(slot.getColor().composite)));
-        this.setEnabled(!lobby.isGameLoaded());
+        this.setEnabled(!(lobby.isGameLoaded() || lobby.isNetworked()));
     }
 
     @Override

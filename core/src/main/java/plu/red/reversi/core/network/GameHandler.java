@@ -4,10 +4,12 @@ import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
+import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.INetworkListener;
+import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
@@ -57,7 +59,9 @@ public class GameHandler implements Runnable, INetworkListener {
 
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " Connected to the Game");
 
-                //TODO: Add name to the lobby
+                Coordinator core = Controller.getInstance().getCore();
+                if(core instanceof Lobby)
+                    ((Lobby)core).joinUser(u);
 
             } else if(inboundEvent.getName().equals("move")) {
 

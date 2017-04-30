@@ -4,6 +4,7 @@ package plu.red.reversi.client.gui.browser;
 import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.ChatPanel;
+import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
@@ -33,6 +34,8 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
     private BrowserPanel.BrowserCellRenderer cellRenderer = null;
 
+    boolean connected = false;
+
     public BrowserPanel(MainWindow gui, Browser bowser) {
         super(gui);
         this.bowser = bowser;
@@ -60,23 +63,30 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
         // Create the Server List
         if(bowser.isConnected()) {
-            JList<GamePair> list = new JList<>(bowser);
-            //list.setSelectionModel(new BrowserPanel.BrowserListSelectionModel());
-            cellRenderer = new BrowserPanel.BrowserCellRenderer();
-            list.setCellRenderer(cellRenderer);
+            if(connected) {
+                JLabel label = new JLabel("Connected and Waiting for Game to Start");
+                this.add(label, BorderLayout.CENTER);
+            } else {
+                JList<GamePair> list = new JList<>(bowser);
+                //list.setSelectionModel(new BrowserPanel.BrowserListSelectionModel());
+                cellRenderer = new BrowserPanel.BrowserCellRenderer();
+                list.setCellRenderer(cellRenderer);
+                list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-            //Add the listener to the JList
-            list.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    buttonClicked(e.getPoint(), list);
-                }//mouseClicked
-            });
+                //Add the listener to the JList
+                list.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getSource() == list && e.getClickCount() == 2)
+                            buttonClicked(e.getPoint(), list);
+                    }//mouseClicked
+                });
 
-            this.add(new JScrollPane(list,
-                            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-                    BorderLayout.CENTER);
+                this.add(new JScrollPane(list,
+                                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+                        BorderLayout.CENTER);
+            }
         } else {
             JPanel pane = new JPanel();
             pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
@@ -116,14 +126,13 @@ public class BrowserPanel extends CorePanel implements ActionListener {
     public void buttonClicked(Point p, JList<GamePair> list) {
         int index = list.locationToIndex(p);
 
-        //Check if click is over button
-        if(cellRenderer.buttons.get(index).getBounds().contains(p)) {
-            System.out.println("over button");
-            cellRenderer.buttons.get(index).doClick();
             GamePair game = list.getModel().getElementAt(index);
             int gameID = game.getGameID();
-            WebUtilities.INSTANCE.joinGame(gameID);
-        }//if
+            if(WebUtilities.INSTANCE.joinGame(gameID)) {
+                connected = true;
+                Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
+                updateGUI();
+            }
 
     }//buttonClicked
 
@@ -136,8 +145,6 @@ public class BrowserPanel extends CorePanel implements ActionListener {
     }
 
     private static final class BrowserCellRenderer extends JPanel implements ListCellRenderer<GamePair> {
-
-        public final HashMap<Integer, JButton> buttons = new HashMap<>();
 
         private void populate(GamePair val, int index) {
             this.removeAll();
@@ -152,14 +159,6 @@ public class BrowserPanel extends CorePanel implements ActionListener {
             this.add(Box.createRigidArea(new Dimension(25, 0)));
             this.add(new JLabel(val.getPlayers().size() + "/" + val.getNumPlayers()));
             this.add(Box.createRigidArea(new Dimension(10, 0)));
-
-            if(!buttons.containsKey(index)) {
-                JButton button = new JButton("Join Game");
-                button.putClientProperty("gameID",val.getGameID());
-                buttons.put(index, button);
-            }
-
-            this.add(buttons.get(index));
         }
 
         @Override

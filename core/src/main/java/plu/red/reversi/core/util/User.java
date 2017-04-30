@@ -1,5 +1,8 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 /**
  * Created by Andrew on 3/16/2017.
  *
@@ -44,5 +47,23 @@ public class User {
     public void setStatus(String s) { status = s; }
     public int getRank() { return ranking; }
     public void setRank(int r) { ranking = r; }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("username", username);
+        json.put("password", password);
+        json.put("status", status);
+        json.put("sessionID", sessionID);
+        json.put("ranking", ranking);
+        return json;
+    }
+
+    public User(JSONObject json) throws JSONException {
+        username = json.getString("username");
+        password = json.getString("password");
+        status = json.getString("status");
+        sessionID = json.getInt("sessionID");
+        ranking = json.getInt("ranking");
+    }
 
 }//User

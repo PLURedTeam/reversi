@@ -2,6 +2,7 @@ package plu.red.reversi.core.lobby;
 
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.JoinCommand;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GoLogic;
@@ -134,9 +135,15 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
         return this;
     }
 
-    public GamePair joinUser(User user, GamePair pair) {
-
-        return null;
+    public void joinUser(User user) {
+        for(PlayerSlot slot : playerSlots) {
+            if(slot.getType() == PlayerSlot.SlotType.NETWORK && !slot.isClaimed()) {
+                slot.setClaimed(true);
+                slot.setName(user.getUsername());
+                break;
+            }
+        }
+        gui.updateGUIMinor();
     }
 
     /**

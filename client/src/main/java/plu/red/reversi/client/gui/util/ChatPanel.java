@@ -120,6 +120,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
             if(list.getModel() == chat.get(message.channel))
                 list.ensureIndexIsVisible(list.getModel().getSize()-1);
         }
+        this.repaint();
     }
 
     private static final class ChatListSelectionModel extends DefaultListSelectionModel {

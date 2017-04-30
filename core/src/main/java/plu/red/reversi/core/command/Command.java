@@ -11,6 +11,8 @@ import plu.red.reversi.core.Coordinator;
  */
 public abstract class Command {
 
+    protected static int NEXT_ID = 0;
+
     /**
      * Source Enumeration. Used to represents where a Command originated from, either from the client or the server.
      */
@@ -64,6 +66,7 @@ public abstract class Command {
             case SurrenderCommand.SERIAL_ID:    return new SurrenderCommand(json);
             case MoveCommand.SERIAL_ID:         return new MoveCommand(json);
             case SetCommand.SERIAL_ID:          return new SetCommand(json);
+            case JoinCommand.SERIAL_ID:         return new JoinCommand(json);
             default:    throw new IllegalArgumentException("Unknown Command Type when trying to deserialize");
         }
     }
