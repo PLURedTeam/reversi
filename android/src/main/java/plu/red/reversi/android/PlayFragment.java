@@ -47,7 +47,7 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
  */
 public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
 
-    private static final String PREF_AUTO_FOLLOW = "play_autoFollow";
+    public static final String PREF_AUTO_FOLLOW = "play_autoFollow";
 
     private GameListener mListener;
 
@@ -57,6 +57,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private LinearLayout mGameScorePanel;
 
     private Button mConfirmButton;
+    private Button mPlayForwardButton;
     private ImageButton mSwitchCameraButton;
 
     private GameSurfaceView mGameView;
@@ -82,9 +83,11 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameActionPanel = (RelativeLayout)v.findViewById(R.id.panel_game_actions);
         mSwitchCameraButton = (ImageButton)mGameActionPanel.findViewById(R.id.button_switch_camera_mode);
         mConfirmButton = (Button)mGameActionPanel.findViewById(R.id.button_confirm_move);
+        mPlayForwardButton = (Button)mGameActionPanel.findViewById(R.id.button_play_forward);
 
         mSwitchCameraButton.setOnClickListener(this);
         mConfirmButton.setOnClickListener(this);
+        mPlayForwardButton.setOnClickListener(this);
 
         mHandler = new Handler(Looper.myLooper());
 
@@ -103,10 +106,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         }
 
         if(mServiceConnection != null && mServiceConnection.getGame() != mGame) {
-            mGame = mServiceConnection.getGame();
-            mGameView.setGame(mGame);
-
-            prepareScorePanel();
+            refreshGame();
         }
         else {
             getContext().bindService(new Intent(getContext(), GameService.class), this, 0);
@@ -177,8 +177,25 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                             Locale.getDefault(),
                             "%d",
                             // TODO: Historical game logic scores have been borked.
-                            mGame.getGameLogic().getScore(players[i].getID())
+                            mGame.getGameLogic().getScore(
+                                    mGameView.getCurrentCache(),
+                                    mGameView.getCurrentBoard(),
+                                    players[i].getID()
+                            )
                     ));
+        }
+    }
+
+    private void updateActionPanel() {
+
+        mConfirmButton.setVisibility(View.GONE);
+        mPlayForwardButton.setVisibility(View.GONE);
+
+        if(!mGameView.isAutoFollow()) {
+            mPlayForwardButton.setVisibility(View.VISIBLE);
+        }
+        else if(mGameView.getCurrentSelected() != null) {
+            mConfirmButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -227,17 +244,23 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     mGameView.getCurrentSelected()
             ));
 
-            mConfirmButton.setVisibility(View.GONE);
+            mGameView.clearCurrentSelected();
+
+            updateActionPanel();
 
             // prevent the user from moving until all the animations are done
             mGameView.disablePlayer();
+        }
+        else if(v == mPlayForwardButton) {
+            mGameView.setAutoFollow(true);
+            updateActionPanel();
         }
     }
 
     @Override
     public void onBoardSelected(BoardIndex index) {
         doHighlights();
-        mConfirmButton.setVisibility(View.VISIBLE);
+        updateActionPanel();
     }
 
     @Override
@@ -270,6 +293,22 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameView.doHighlights();
     }
 
+    private void refreshGame() {
+        // get the currently running game
+        mGame = mServiceConnection.getGame();
+
+        mGameView.setGame(mGame);
+
+        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
+
+        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
+
+        prepareScorePanel();
+        updateActionPanel();
+    }
+
     /**
      * Called when a connection to the Service has been established, with
      * the {@link IBinder} of the communication channel to the
@@ -284,18 +323,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
         mServiceConnection = ((GameService.LocalBinder)service);
 
-        // get the currently running game
-        mGame = mServiceConnection.getGame();
-
-        mGameView.setGame(mGame);
-
-        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
-
-        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-
-        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
-
-        prepareScorePanel();
+        refreshGame();
     }
 
     /**

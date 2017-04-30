@@ -27,6 +27,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
@@ -479,6 +480,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         return mHighlightMode;
     }
 
+    public GameLogicCache getCurrentCache() {
+        return mBoardIterator.cache;
+    }
+
     private class UpdateTask implements Runnable {
 
         @Override
@@ -538,6 +543,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     public BoardIndex getCurrentSelected() {
         return mSelectedIndex;
+    }
+
+    public void clearCurrentSelected() {
+        mSelectedIndex = null;
     }
 
     public void disablePlayer() {
@@ -605,6 +614,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public void setAutoFollow(boolean follow) {
+
         if(follow) {
             mAutoFollow = true;
 
@@ -629,7 +639,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 // hack for right now.
                                 mAutoFollow = true;
 
-                                //mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
+                                mGame.getGameLogic().play(
+                                        iter.cache,
+                                        iter.board,
+                                        (MoveCommand) cmd,
+                                        true, false);
 
                                 mAutoFollow = preAutoFollow;
 

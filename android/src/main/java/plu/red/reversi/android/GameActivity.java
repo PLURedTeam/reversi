@@ -1,5 +1,6 @@
 package plu.red.reversi.android;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -204,26 +205,35 @@ public class GameActivity extends AppCompatActivity
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mServiceConnection.setGame(game);
-
-                                showFragment(mPlayFragment);
-
-                                ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
+                                newGame(game);
                             }
                         })
                         .show();
             }
             else {
-                mServiceConnection.setGame(game);
-
-                showFragment(mPlayFragment);
-
-                ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
+                newGame(game);
             }
         }
         else {
             // TODO: Not sure how to handle this issue; should only happen if the service connection dies really
         }
+    }
+
+    @SuppressLint("ApplySharedPref")
+    private void newGame(Game game) {
+        mServiceConnection.setGame(game);
+        showFragment(mPlayFragment);
+        ((NavigationView)findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_play);
+
+        // tell the play fragment that it does not need to honor the auto follow
+        // settings from the previous game
+
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putBoolean(PlayFragment.PREF_AUTO_FOLLOW, true);
+
+        // commit because sync may mess this up otherwise.
+        // the app is loading right now anyway so lag created will be almost unnoticable in context
+        editor.commit();
     }
 
     /**
