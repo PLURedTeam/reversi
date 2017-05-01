@@ -10,6 +10,7 @@ import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.ChatMessage;
@@ -80,19 +81,21 @@ public class GameHandler implements Runnable, INetworkListener {
 
             } else if(inboundEvent.getName().equals("start")) {
 
-                Game game;
+                if(!WebUtilities.INSTANCE.isHost()) {
+                    Game game;
 
-                try {
-                    JSONObject json = new JSONObject(inboundEvent.readData(String.class));
-                    DataMap map = new DataMap(json);
+                    try {
+                        JSONObject json = new JSONObject(inboundEvent.readData(String.class));
+                        DataMap map = new DataMap(json);
 
-                    game = new Game(Controller.getInstance(),Controller.getInstance().gui,map);
+                        game = new Game(Controller.getInstance(), Controller.getInstance().gui, map);
 
-                    Controller.getInstance().setCore(game);
+                        Controller.getInstance().setCore(game);
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }//catch
+                }//if
 
                 System.out.println("Game Started");
 

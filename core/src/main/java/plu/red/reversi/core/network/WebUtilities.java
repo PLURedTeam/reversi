@@ -32,6 +32,7 @@ public class WebUtilities {
     private int sessionID;
     private User user = new User();
     private boolean loggedIn = false;
+    private boolean gameHost = false;
     private int networkGameID = -1;
 
     /**
@@ -289,6 +290,7 @@ public class WebUtilities {
                 //set the game ID
                 networkGameID = response.readEntity(Integer.class);
                 Thread gameHandler = new Thread(new GameHandler(this,networkGameID));
+                gameHost = true;
                 gameHandler.start();
 
                 return true;
@@ -433,5 +435,14 @@ public class WebUtilities {
             return null;
         }//catch
     }//getOnlineUsers
+
+    /**
+     * Returns if the client is the host of the networked game
+     * @return true if host, false otherwise
+     */
+    public boolean isHost() {
+        return gameHost;
+    }//isHost
+
 
 }//webUtilities

@@ -55,7 +55,7 @@ public class HumanPlayer extends Player implements ISettingsListener {
      */
     public HumanPlayer(Game game, JSONObject json) throws JSONException {
         super(game, json);
-        duplicateID = json.getInt("duplicate");
+        duplicateID = json.optInt("duplicate");
     }
 
     /**

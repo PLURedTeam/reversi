@@ -7,6 +7,7 @@ import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
 
 import plu.red.reversi.core.game.logic.GameLogicCache;
+import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
@@ -430,7 +431,7 @@ public class Game extends Coordinator {
                 gameLogic.play((MoveCommand)cmd);
                 nextTurn();
             } catch(InvalidParameterException e) {
-                System.err.println(e.getMessage());
+                //System.err.println(e.getMessage());
             }
         }
 
@@ -589,22 +590,23 @@ public class Game extends Coordinator {
         GameLogic.Type type = GameLogic.Type.values()[ord];
         switch(type) {
             case REVERSI:   gameLogic = new ReversiLogic(this); break;
-            //case GO:        gameLogic = new GoLogic(this); break;
+            case GO:        gameLogic = new GoLogic(this); break;
             default:    throw new IllegalArgumentException("Unknown GameLogic Type '"+type+"'");
         }
 
-        // Player Data
-        int pc = data.get("playerCount", Integer.class);
-        for(int i = 0; i < pc; i++)
-            try { Player.unserializePlayer(this, data.get("player"+i, JSONObject.class)); }
-            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
-
         // State Flags
-        gameInitialized = data.get("initialized",   Boolean.class);
         gameRunning     = data.get("running",       Boolean.class);
         gameSaved       = data.get("saved",         Boolean.class);
         networked       = data.get("networked",     Boolean.class);
         name            = data.get("name",          String.class);
+
+        // Player Data
+        int pc = data.get("playerCount", Integer.class);
+        for(int i = 0; i < pc; i++)
+            try { Player.unserializePlayer(this, data.get("player"+i, JSONObject.class),networked); }
+            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
+
+        gameInitialized = data.get("initialized",   Boolean.class);
 
         // ID
         gameID = data.get("id", Integer.class);

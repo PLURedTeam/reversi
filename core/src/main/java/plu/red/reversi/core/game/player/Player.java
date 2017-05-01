@@ -85,14 +85,18 @@ public abstract class Player {
      * @return Newly created Player
      * @throws JSONException if there is a problem during unserialization
      */
-    public static Player unserializePlayer(Game game, JSONObject json) throws JSONException {
+    public static Player unserializePlayer(Game game, JSONObject json, boolean flip) throws JSONException {
         int type = json.getInt("type");
         switch(type) {
-            case 0: return new HumanPlayer(game, json);
+            case 0: return flip ? new NetworkPlayer(game, json) : new HumanPlayer(game, json);
             case 1: return new BotPlayer(game, json);
-            case 2: return new NetworkPlayer(game, json);
+            case 2: return flip ? new HumanPlayer(game, json) : new NetworkPlayer(game, json);
             default: throw new IllegalArgumentException("Unknown Player Type '" + type + "' when trying to unserialize");
         }
+    }
+
+    public static Player unserializePlayer(Game game, JSONObject json) throws JSONException {
+        return unserializePlayer(game, json, false);
     }
 
     /**
