@@ -146,6 +146,17 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
         gui.updateGUIMinor();
     }
 
+    public void removeUser(User user) {
+        for(PlayerSlot slot : playerSlots) {
+            if(slot.getName().equals(user.getUsername())) {
+                slot.setClaimed(false);
+                slot.setName("Open Slot");
+                break;
+            }
+        }
+        gui.updateGUIMinor();
+    }
+
     /**
      * Adds a new PlayerSlot. Will add a new PlayerSlot of the <code>type</code> given if there is still room in this
      * Lobby. If the <code>type</code> is <code>LOCAL</code>, the name will be auto-generated based on client settings.

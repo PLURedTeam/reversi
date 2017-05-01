@@ -80,6 +80,10 @@ public class GameHandler implements Runnable, INetworkListener {
             } else if(inboundEvent.getName().equals("leftGame")) {
                 User u = inboundEvent.readData(User.class);
 
+                Coordinator core = Controller.getInstance().getCore();
+                if(core instanceof Lobby)
+                    ((Lobby)core).removeUser(u);
+
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " left the Game");
 
             }//else
