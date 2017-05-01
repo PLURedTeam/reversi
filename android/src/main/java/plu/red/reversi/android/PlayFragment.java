@@ -21,6 +21,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -45,7 +46,7 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
  * Activities that contain this fragment must implement the
  * to handle interaction events.
  */
-public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
+public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener, AdapterView.OnItemClickListener {
 
     public static final String PREF_AUTO_FOLLOW = "play_autoFollow";
 
@@ -268,6 +269,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                mListener.getSlideList().setSelection(mGameView.getCurrentMoveIndex());
                 updateScorePanel();
             }
         });
@@ -306,6 +308,27 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
 
         prepareScorePanel();
+        updateActionPanel();
+
+        mListener.getSlideList().setAdapter(new GameHistoryAdapter(getContext(), mGame));
+        mListener.getSlideList().setOnItemClickListener(this);
+    }
+
+
+
+    /**
+     * The slideList has been clicked...
+     *
+     * @param parent   The AdapterView where the click happened.
+     * @param view     The view within the AdapterView that was clicked (this
+     *                 will be a view provided by the adapter)
+     * @param position The position of the view in the adapter.
+     * @param id       The row id of the item that was clicked.
+     */
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mGameView.setCurrentMove(position);
+
         updateActionPanel();
     }
 

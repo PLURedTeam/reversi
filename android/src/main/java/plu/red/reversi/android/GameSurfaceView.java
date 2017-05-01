@@ -414,7 +414,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public void onAnimationStepDone(Board3D board) {
 
-        mBoardIterator.next();
+        synchronized (mBoardIterator) {
+            mBoardIterator.next();
+        }
 
         if(mListener != null)
             mListener.onBoardScoreChanged();
@@ -465,10 +467,21 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public synchronized void setCurrentMove(int pos) {
-        mBoardIterator.goTo(pos);
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.mBoard.clearAnimations();
+            }
+        });
 
-        if(mRenderer.mBoard != null) {
-            mRenderer.mBoard.setBoard(mBoardIterator.board);
+        setAutoFollow(false);
+
+        synchronized (mBoardIterator) {
+            mBoardIterator.goTo(pos);
+
+            if(mRenderer.mBoard != null) {
+                mRenderer.mBoard.setBoard(mBoardIterator.board);
+            }
         }
 
         mCanDoCommand = true;
@@ -626,10 +639,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         mRenderer.mBoard.clearAnimations();
 
                         // queue up all the animations up until the end
-                        BoardIterator iter = new BoardIterator(mBoardIterator);
+                        BoardIterator iter;
+                        synchronized (mBoardIterator) {
+                            iter = new BoardIterator(mBoardIterator);
+                        }
 
-                        System.out.println("POS: " + mBoardIterator.getPos());
-                        System.out.println("Count: " + mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1).size());
                         for(BoardCommand cmd : mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1)) {
 
                             if(cmd instanceof MoveCommand) {
@@ -662,7 +676,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 mRenderer.mBoard.animBoardUpdate(update);
                             }
 
-                            iter.next();
+                            System.out.println("Calling next: " + iter.getPos() + ", " + mBoardIterator.getPos());
+
+                            //iter.next();
                         }
                     }
 

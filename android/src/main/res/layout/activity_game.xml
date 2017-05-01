@@ -22,4 +22,15 @@
         app:headerLayout="@layout/nav_header_game"
         app:menu="@menu/activity_game_drawer" />
 
+    <ListView
+        android:id="@+id/sub_nav_view"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@android:color/white"
+        android:choiceMode="singleChoice"
+        android:fitsSystemWindows="true">
+
+    </ListView>
+
 </android.support.v4.widget.DrawerLayout>

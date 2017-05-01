@@ -21,7 +21,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.reversi3d.HighlightMode;
@@ -38,6 +41,8 @@ public class GameActivity extends AppCompatActivity
     SingleplayerFragment mSingleplayerFragment;
     MultiplayerFragment mMultiplayerFragment;
     SavedGamesFragment mSavesFragment;
+
+    ListView mSubNavList;
 
     SettingsFragment mSettingsFragment;
     AboutFragment mAboutFragment;
@@ -57,6 +62,7 @@ public class GameActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -74,6 +80,8 @@ public class GameActivity extends AppCompatActivity
         mAboutFragment = new AboutFragment();
 
         mContentFrame = (FrameLayout) findViewById(R.id.content_frame);
+
+        mSubNavList = (ListView) findViewById(R.id.sub_nav_view);
 
         navigationView.setCheckedItem(R.id.nav_play);
         // manually fire this because it does not for the method above
@@ -107,12 +115,17 @@ public class GameActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        }
+        else if(drawer.isDrawerOpen(GravityCompat.END)) {
+            drawer.closeDrawer(GravityCompat.END);
         } else {
             super.onBackPressed();
         }
     }
 
     private void showFragment(Fragment frag) {
+        mSubNavList.setAdapter(null);
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.content_frame, frag, CONTENT_FRAGMENT_TAG)
@@ -177,6 +190,12 @@ public class GameActivity extends AppCompatActivity
                         HighlightMode.HIGHLIGHT_BEST_MOVE);
 
                 return true;
+            case R.id.menu_show_history:
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+                drawer.openDrawer(GravityCompat.END);
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -217,6 +236,11 @@ public class GameActivity extends AppCompatActivity
         else {
             // TODO: Not sure how to handle this issue; should only happen if the service connection dies really
         }
+    }
+
+    @Override
+    public ListView getSlideList() {
+        return mSubNavList;
     }
 
     @SuppressLint("ApplySharedPref")
