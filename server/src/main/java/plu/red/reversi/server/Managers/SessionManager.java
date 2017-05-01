@@ -84,6 +84,7 @@ public class SessionManager implements Runnable, IListener {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 65000) {
                     sessions.remove(sessionID);
                     UserManager.INSTANCE.timedOut(sessionID);
+                    GameManager.INSTANCE.endSession(sessionID);
                     System.out.println("[SESSION MANAGER] SESSION TIMED OUT: " + sessionID);
                     removeSession(sessionID);
                 }//if

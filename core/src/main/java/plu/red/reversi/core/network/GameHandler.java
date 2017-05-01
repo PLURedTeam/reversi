@@ -77,6 +77,11 @@ public class GameHandler implements Runnable, INetworkListener {
 
                 //TODO: Create the game on the client so that it can start
 
+            } else if(inboundEvent.getName().equals("leftGame")) {
+                User u = inboundEvent.readData(User.class);
+
+                System.out.println("[GAME HANDLER]: " + u.getUsername() + " left the Game");
+
             }//else
 
         }//while

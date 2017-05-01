@@ -44,6 +44,12 @@ public class Client extends Controller {
         return name;
     }
 
+    public void loadNetworkBrowser() {
+        Browser b = new Browser(this, this.gui);
+        setCore(b);
+        b.refresh();
+    }//loadNetworkBroswer
+
     public void createIntoLobby(boolean networked) {
 
         // Check for login status

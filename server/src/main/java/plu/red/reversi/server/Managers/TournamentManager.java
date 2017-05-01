@@ -1,17 +1,10 @@
 package plu.red.reversi.server.Managers;
 
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
-import plu.red.reversi.server.endpoints.GameEndpoint;
 import plu.red.reversi.server.listener.ISessionListener;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,11 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Manages the games that are currently waiting for players and games that are currently
  * being played.
  */
-public class GameManager {
+public class TournamentManager implements ISessionListener {
 
-    public static GameManager INSTANCE = new GameManager();
-
-    private HashMap<Integer,SseBroadcaster> broadcast = GameEndpoint.games;
+    public static TournamentManager INSTANCE = new TournamentManager();
 
     private int gameCounter = 0;
 
@@ -116,46 +107,14 @@ public class GameManager {
      * Listener for a session ending
      * @param sessionID the session id of the user
      */
+    @Override
     public void endSession(int sessionID) {
         new Thread(new Runnable() {
             @Override
             public void run() {
 
-                if(games.size() == 0) return;
-
-                for(Integer i: games.keySet()) {
-                    for(int j = 0; j < games.get(i).players.size(); j++) {
-                        if(games.get(i).players.get(j).getSessionID() == sessionID) {
-
-                            User u = games.get(i).players.get(j);
-                            System.out.println("[GAME MANAGER] USER LEFT GAME: " + u.getUsername());
-                            games.get(i).players.remove(j);
-
-                            //if the game is in lobby
-                            if(j == 0 && games.get(i).getStatus() == GamePair.GameStatus.LOBBY) {
-                                games.remove(i); //remove the game
-                                broadcast.remove(i); //remove the broadcaster
-                                break;
-                            }//if
-
-                            //TODO: Broadcast that the user has disconnected
-                            broadcastUserChange(u, i);
-                            break;
-
-                        }//if
-                    }//for
-                }//for
             }//run
         }).start();
 
     }//endSession
-
-    private void broadcastUserChange(User u, int gameID) {
-        OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-        OutboundEvent event = eventBuilder.mediaType(MediaType.APPLICATION_JSON_TYPE)
-                .name("leftGame")
-                .data(User.class, u)
-                .build();
-        broadcast.get(gameID).broadcast(event); //broadcast the user change
-    }//broadcastUserChange
 }//gameManager

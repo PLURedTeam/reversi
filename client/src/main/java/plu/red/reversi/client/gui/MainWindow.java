@@ -317,6 +317,11 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
      */
     @Override
     public void windowClosing(WindowEvent e) {
+
+        //Logout from the server
+        if(WebUtilities.INSTANCE.loggedIn() && e.getSource() == this)
+            WebUtilities.INSTANCE.logout();
+
         // Ask about saving
         if(e.getSource() == this && master.getCore() instanceof Game) {
             Game game = (Game) master.getCore();

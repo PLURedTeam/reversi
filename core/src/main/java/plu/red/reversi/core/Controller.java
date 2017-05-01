@@ -71,6 +71,8 @@ public abstract class Controller {
 
     public abstract void createIntoLobby(boolean networked);
     public abstract void loadIntoLobby(boolean networked);
+    public abstract void loadNetworkBrowser();
     public abstract void startGame() throws IllegalStateException;
     public abstract void saveGame() throws IllegalStateException;
+
 }

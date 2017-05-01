@@ -1,5 +1,7 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -24,6 +26,7 @@ public class GamePair {
     public int gameID;
     public int numPlayers;
     public String gameName;
+    public DataMap settings;
 
     /**
      * Constructor

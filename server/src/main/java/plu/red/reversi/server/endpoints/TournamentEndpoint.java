@@ -10,13 +10,13 @@ import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.GameManager;
 import plu.red.reversi.server.Managers.UserManager;
 
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.inject.Singleton;
 
 /**
  * Created by Andrew on 3/23/17.
@@ -26,11 +26,11 @@ import javax.inject.Singleton;
  * with a path parameter that includes the game id.
  */
 @Singleton
-@Path("game")
-public class GameEndpoint {
+@Path("tournament")
+public class TournamentEndpoint {
 
     //The broadcasters for the games
-    public static HashMap<Integer, SseBroadcaster> games = new HashMap<Integer, SseBroadcaster>();
+    private HashMap<Integer, SseBroadcaster> games = new HashMap<Integer, SseBroadcaster>();
 
     /**
      * Adds the move that is sent from a client into the game with the
@@ -93,12 +93,6 @@ public class GameEndpoint {
         GameManager.INSTANCE.addPlayer(gameID,user);
         return Response.ok(gameID).build();
     }//createGame
-
-
-
-
-
-
 
     /**
      * Adds the user to a game that is waiting on players

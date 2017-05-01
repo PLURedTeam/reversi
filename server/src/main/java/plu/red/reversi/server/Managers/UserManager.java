@@ -39,6 +39,7 @@ public class UserManager {
     public void removeUser(User user) {
         System.out.println("[USER MANAGER] USER LOGGED OUT: " + user.getUsername());
         onlineUsers.remove(user.getUsername());
+        GameManager.INSTANCE.endSession(user.getSessionID());
     }//user
 
     /**
