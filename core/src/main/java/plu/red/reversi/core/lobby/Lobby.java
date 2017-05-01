@@ -7,6 +7,7 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
+import plu.red.reversi.core.game.player.NetworkPlayer;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
@@ -253,7 +254,10 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
             for(PlayerSlot slot : playerSlots) {
                 Player p;
                 switch(slot.getType()) {
-                    case NETWORK: // No difference for network yet
+                    case NETWORK:
+                        p = new NetworkPlayer(loadedGame, slot.getColor());
+                        p.setName(slot.getName());
+                        break;
                     case LOCAL:
                         p = new HumanPlayer(loadedGame, slot.getColor());
                         p.setName(slot.getName());

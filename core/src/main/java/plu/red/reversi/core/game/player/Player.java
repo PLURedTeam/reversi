@@ -90,6 +90,7 @@ public abstract class Player {
         switch(type) {
             case 0: return new HumanPlayer(game, json);
             case 1: return new BotPlayer(game, json);
+            case 2: return new NetworkPlayer(game, json);
             default: throw new IllegalArgumentException("Unknown Player Type '" + type + "' when trying to unserialize");
         }
     }
