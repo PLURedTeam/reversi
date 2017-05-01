@@ -59,7 +59,7 @@ public abstract class Controller {
     }
 
 
-    protected final void setCore(Coordinator core) {
+    public void setCore(Coordinator core) {
         if(this.core != null) this.core.cleanup();
         this.core = core;
         gui.updateGUIMajor();

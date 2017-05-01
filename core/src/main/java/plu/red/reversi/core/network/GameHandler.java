@@ -1,5 +1,6 @@
 package plu.red.reversi.core.network;
 
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
@@ -12,6 +13,7 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.util.User;
 
 import javax.ws.rs.client.Client;
@@ -57,36 +59,42 @@ public class GameHandler implements Runnable, INetworkListener {
 
             if(inboundEvent.getName().equals("join")) {
                 User u = inboundEvent.readData(User.class);
-
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " Connected to the Game");
-
                 Coordinator core = Controller.getInstance().getCore();
                 if(core instanceof Lobby)
                     ((Lobby)core).joinUser(u);
 
             } else if(inboundEvent.getName().equals("move")) {
-
                 Command c = inboundEvent.readData(Command.class);
-
-                //TODO: Send the move to the game to update
-
+                Controller.getInstance().getCore().acceptCommand(c);
                 System.out.println("[GAME HANDLER]: " + c.source + " moved");
 
             } else if(inboundEvent.getName().equals("start")) {
 
-                Game g = inboundEvent.readData(Game.class);
+                Game game;
+
+                try {
+                    JSONObject json = new JSONObject(inboundEvent.readData(String.class));
+                    DataMap map = new DataMap(json);
+
+                    game = new Game(Controller.getInstance(),Controller.getInstance().gui,map);
+
+                    Controller.getInstance().setCore(game);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("Game Started");
 
                 //TODO: Create the game on the client so that it can start
 
             } else if(inboundEvent.getName().equals("leftGame")) {
                 User u = inboundEvent.readData(User.class);
-
                 Coordinator core = Controller.getInstance().getCore();
                 if(core instanceof Lobby)
                     ((Lobby)core).removeUser(u);
-
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " left the Game");
-
             }//else
 
         }//while

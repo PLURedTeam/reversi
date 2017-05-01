@@ -26,12 +26,12 @@ public class Board implements Iterable<BoardIndex> {
                     JSONObject jobj = new JSONObject();
                     int size = value.size;
                     jobj.put("size", size);
-                    ArrayList<ArrayList<Integer>> b = new ArrayList<>(size);
+                    ArrayList<ArrayList<Integer>> b = new ArrayList<>();
                     for(int i = 0; i < size; i++) {
-                        ArrayList<Integer> l = new ArrayList<>(size);
+                        ArrayList<Integer> l = new ArrayList<>();
                         for(int j = 0; j < size; j++)
-                            l.set(j, value.board[i][j]);
-                        b.set(i, l);
+                            l.add(value.board[i][j]);
+                        b.add(l);
                     }
                     jobj.put("data", b);
                     json.put(key, jobj);

@@ -126,6 +126,12 @@ public class Client extends Controller {
             throw new IllegalStateException("Can only start a game from a Lobby");
 
         setCore(((Lobby)core).startGame());
+
+        //check for networked
+        if(((Game)core).isNetworked())
+            WebUtilities.INSTANCE.startGame((Game)core);
+
+
     }
 
     public void saveGame() throws IllegalStateException {

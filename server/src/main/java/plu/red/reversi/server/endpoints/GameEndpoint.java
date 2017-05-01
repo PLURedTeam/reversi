@@ -41,7 +41,7 @@ public class GameEndpoint {
      */
     @Path("{id}")
     @POST
-    @Consumes
+    @Consumes(MediaType.APPLICATION_JSON)
     public void sendMove(@PathParam("id") int id, JSONObject move) {
         if(!GameManager.INSTANCE.gameExists(id))
             throw new WebApplicationException(404);
@@ -94,12 +94,6 @@ public class GameEndpoint {
         return Response.ok(gameID).build();
     }//createGame
 
-
-
-
-
-
-
     /**
      * Adds the user to a game that is waiting on players
      * @param gameID the gameID of the game to add the user to
@@ -129,6 +123,29 @@ public class GameEndpoint {
 
         return Response.ok(gameID).build();
     }//joinGame
+
+
+    /**
+     * Adds the move that is sent from a client into the game with the
+     * id from the path parameter
+     * @param id the game id
+     * @param game the game to start
+     */
+    @Path("start/{id}")
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void startGame(@PathParam("id") int id, String game) {
+        if(!GameManager.INSTANCE.gameExists(id))
+            throw new WebApplicationException(404);
+
+        OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+        OutboundEvent event = eventBuilder.mediaType(MediaType.TEXT_PLAIN_TYPE)
+                .name("start")
+                .data(String.class, game)
+                .build();
+        games.get(id).broadcast(event); //broadcast the starting game
+    }//startGame
+
 
     /**
      * Takes the final score for the player of a game in order to update

@@ -181,7 +181,6 @@ public class NetworkMenu extends JMenu implements ActionListener {
         Client.getInstance().loadNetworkBrowser();
     }//logout
 
-
     /**
      * Calls the server to delete the user from the server
      */

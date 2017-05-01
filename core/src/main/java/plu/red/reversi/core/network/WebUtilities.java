@@ -4,6 +4,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.IMainGUI;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
@@ -346,6 +347,41 @@ public class WebUtilities {
             return false;
         }//else
     }//joinGame
+
+
+    /**
+     * Sends the game to the server in order to start it on the networked players application
+     * @param g the game to start
+     */
+    public void startGame(Game g) {
+        IMainGUI gui = Controller.getInstance().gui;
+        if(loggedIn) { //Check to see if currently logged in
+
+            try {
+
+                String json = g.serialize().toJSON().toString();
+
+                //Create target and call server
+                WebTarget target = client.target(baseURI + "game/start/" + networkGameID);
+                Response response = target.request().post(Entity.text(json));
+
+                System.out.println(response.getStatus());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                e.getMessage();
+                gui.showErrorDialog("Start Game Error", "The server is currently unreachable. Please try again later.");
+            }//catch
+        } else {
+            gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
+        }//else
+
+    }//startGame
+
+
+
+
+
 
     /**
      * Gets a list of the games currently on the server

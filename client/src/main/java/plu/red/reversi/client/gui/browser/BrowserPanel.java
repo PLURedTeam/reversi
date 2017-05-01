@@ -36,6 +36,8 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
     boolean connected = false;
 
+    GamePair connectedPair = null;
+
     public BrowserPanel(MainWindow gui, Browser bowser) {
         super(gui);
         this.bowser = bowser;
@@ -108,6 +110,8 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
     @Override
     public void cleanup() {
+        if(connectedPair != null)
+            Controller.getInstance().getChat().clear(ChatMessage.Channel.lobby(connectedPair.getGameName()));
         // NOOP
     }
 
@@ -130,13 +134,18 @@ public class BrowserPanel extends CorePanel implements ActionListener {
             int gameID = game.getGameID();
             if(WebUtilities.INSTANCE.joinGame(gameID)) {
                 connected = true;
+                connectedPair = game;
                 Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
                 updateGUI();
             }
 
     }//buttonClicked
 
-
+    public void disconnect() {
+        connected = false;
+        connectedPair = null;
+        updateGUI();
+    }
 
     private static final class BrowserListSelectionModel extends DefaultListSelectionModel {
         @Override public void setSelectionInterval(int i0, int i1) {
