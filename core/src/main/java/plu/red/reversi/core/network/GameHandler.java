@@ -65,9 +65,18 @@ public class GameHandler implements Runnable, INetworkListener {
                     ((Lobby)core).joinUser(u);
 
             } else if(inboundEvent.getName().equals("move")) {
-                Command c = inboundEvent.readData(Command.class);
-                Controller.getInstance().getCore().acceptCommand(c);
-                System.out.println("[GAME HANDLER]: " + c.source + " moved");
+
+                try {
+                    JSONObject obj = new JSONObject(inboundEvent.readData(String.class));
+
+                    Command c = Command.fromJSON(obj);
+
+                    Controller.getInstance().getCore().acceptCommand(c);
+                    System.out.println("[GAME HANDLER]: " + c.source + " moved");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             } else if(inboundEvent.getName().equals("start")) {
 
@@ -86,8 +95,6 @@ public class GameHandler implements Runnable, INetworkListener {
                 }
 
                 System.out.println("Game Started");
-
-                //TODO: Create the game on the client so that it can start
 
             } else if(inboundEvent.getName().equals("leftGame")) {
                 User u = inboundEvent.readData(User.class);

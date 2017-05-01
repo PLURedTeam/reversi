@@ -41,15 +41,15 @@ public class GameEndpoint {
      */
     @Path("{id}")
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void sendMove(@PathParam("id") int id, JSONObject move) {
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void sendMove(@PathParam("id") int id, String move) {
         if(!GameManager.INSTANCE.gameExists(id))
             throw new WebApplicationException(404);
 
         OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-        OutboundEvent event = eventBuilder.mediaType(MediaType.APPLICATION_JSON_TYPE)
+        OutboundEvent event = eventBuilder.mediaType(MediaType.TEXT_PLAIN_TYPE)
                 .name("move")
-                .data(JSONObject.class, move)
+                .data(String.class, move)
                 .build();
         games.get(id).broadcast(event); //broadcast the move
     }//sendMove

@@ -143,6 +143,8 @@ public abstract class Coordinator {
             // Command Successful, propogate to Server
             // TODO: Propogate Command to the Server
 
+            WebUtilities.INSTANCE.sendMove(cmd);
+
             // Notify listeners that a Command has been accepted
             notifyCommandListeners(cmd);
         }

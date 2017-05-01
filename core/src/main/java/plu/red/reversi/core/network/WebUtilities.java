@@ -4,6 +4,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.IMainGUI;
+import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
@@ -379,7 +380,34 @@ public class WebUtilities {
     }//startGame
 
 
+    /**
+     * Sends a move to the server to be played
+     * @param c the command to be sent to the server
+     */
+    public void sendMove(Command c) {
+        IMainGUI gui = Controller.getInstance().gui;
+        if(loggedIn) { //Check to see if currently logged in
 
+            try {
+
+                String json = c.toJSON().toString();
+
+                //Create target and call server
+                WebTarget target = client.target(baseURI + "game/" + networkGameID);
+                Response response = target.request().post(Entity.text(json));
+
+                System.out.println(response.getStatus());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                e.getMessage();
+                gui.showErrorDialog("Start Game Error", "The server is currently unreachable. Please try again later.");
+            }//catch
+        } else {
+            gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
+        }//else
+
+    }//startGame
 
 
 
