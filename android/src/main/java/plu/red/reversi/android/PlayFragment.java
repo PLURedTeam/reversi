@@ -58,7 +58,11 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private LinearLayout mGameScorePanel;
 
     private Button mConfirmButton;
+
     private Button mPlayForwardButton;
+    private Button mPlayPrevButton;
+    private Button mPlayNextButton;
+
     private ImageButton mSwitchCameraButton;
 
     private GameSurfaceView mGameView;
@@ -84,11 +88,17 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameActionPanel = (RelativeLayout)v.findViewById(R.id.panel_game_actions);
         mSwitchCameraButton = (ImageButton)mGameActionPanel.findViewById(R.id.button_switch_camera_mode);
         mConfirmButton = (Button)mGameActionPanel.findViewById(R.id.button_confirm_move);
+
         mPlayForwardButton = (Button)mGameActionPanel.findViewById(R.id.button_play_forward);
+        mPlayNextButton = (Button)mGameActionPanel.findViewById(R.id.button_play_next);
+        mPlayPrevButton = (Button)mGameActionPanel.findViewById(R.id.button_play_prev);
+
 
         mSwitchCameraButton.setOnClickListener(this);
         mConfirmButton.setOnClickListener(this);
         mPlayForwardButton.setOnClickListener(this);
+        mPlayNextButton.setOnClickListener(this);
+        mPlayPrevButton.setOnClickListener(this);
 
         mHandler = new Handler(Looper.myLooper());
 
@@ -191,11 +201,18 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
         mConfirmButton.setVisibility(View.GONE);
         mPlayForwardButton.setVisibility(View.GONE);
+        mPlayNextButton.setVisibility(View.GONE);
+        mPlayPrevButton.setVisibility(View.GONE);
 
         if(!mGameView.isAutoFollow()) {
             mPlayForwardButton.setVisibility(View.VISIBLE);
+            if(mGameView.getCurrentMoveIndex() < mGame.getHistory().getNumBoardCommands() - 1)
+                mPlayNextButton.setVisibility(View.VISIBLE);
+            if(mGameView.getCurrentMoveIndex() > 0)
+                mPlayPrevButton.setVisibility(View.VISIBLE);
+
         }
-        else if(mGameView.getCurrentSelected() != null) {
+        else if(mGameView.getCurrentSelected() != null && mGameView.getCurrentMoveIndex() == mGame.getHistory().getNumBoardCommands() - 1) {
             mConfirmButton.setVisibility(View.VISIBLE);
         }
     }
@@ -256,6 +273,14 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
             mGameView.setAutoFollow(true);
             updateActionPanel();
         }
+        else if(v == mPlayNextButton) {
+            mGameView.setCurrentMove(mGameView.getCurrentMoveIndex() + 1);
+            updateActionPanel();
+        }
+        else if(v == mPlayPrevButton) {
+            mGameView.setCurrentMove(mGameView.getCurrentMoveIndex() - 1);
+            updateActionPanel();
+        }
     }
 
     @Override
@@ -265,16 +290,25 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     }
 
     @Override
-    public void onBoardScoreChanged() {
+    public void onBoardStateChanged() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mListener.getSlideList().setSelection(mGameView.getCurrentMoveIndex());
-                updateScorePanel();
+                if(mListener != null) {
+                    mListener.getSlideList().setSelection(mGameView.getCurrentMoveIndex());
+                    updateScorePanel();
+                }
             }
         });
 
         mServiceConnection.setMoveIndex(mGameView.getCurrentMoveIndex());
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateActionPanel();
+            }
+        });
     }
 
     @Override

@@ -12,6 +12,8 @@ import android.support.v7.preference.PreferenceScreen;
  */
 public class SettingsFragment extends PreferenceFragmentCompat {
 
+    public static final String KEY_P1_COLOR = "p1_color";
+    public static final String KEY_P2_COLOR = "p2_color";
 
     public SettingsFragment() {
         // Required empty public constructor

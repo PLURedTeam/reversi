@@ -11,6 +11,7 @@ import java.util.Comparator;
 
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 
 public class SavedGamesViewAdapter extends RecyclerView.Adapter<SavedGamesViewAdapter.ViewHolder> {
     private final GameListener mListener;
@@ -50,6 +51,7 @@ public class SavedGamesViewAdapter extends RecyclerView.Adapter<SavedGamesViewAd
                 if (null != mListener) {
 
                     Game game = Game.loadGameFromDatabase(null, Integer.parseInt(mGames[position][1]));
+                    game.setLogic(new ReversiLogic(game));
                     game.setGameSaved(true);
 
                     game.initialize();

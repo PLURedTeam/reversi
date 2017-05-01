@@ -16,8 +16,6 @@ import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.Collection;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -401,7 +399,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public void onScoreChange(Board3D board) {
         if(mListener != null)
-            mListener.onBoardScoreChanged();
+            mListener.onBoardStateChanged();
     }
 
     @Override
@@ -409,6 +407,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         // enable the ability to control again
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
             setPlayerEnabled(true);
+
+        doHighlights();
     }
 
     @Override
@@ -419,7 +419,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         }
 
         if(mListener != null)
-            mListener.onBoardScoreChanged();
+            mListener.onBoardStateChanged();
     }
 
     public void doHighlights() {
@@ -440,9 +440,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         else if(mHighlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
                             // TODO
                         }
-                        BoardCommand lastMove = mGame.getHistory().getBoardCommand(mBoardIterator.getPos());
-                        if (lastMove instanceof MoveCommand) {
-                            mRenderer.mBoard.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                        if(mBoardIterator.getPos() >= 0) {
+                            BoardCommand lastMove = mGame.getHistory().getBoardCommand(mBoardIterator.getPos());
+                            if (lastMove instanceof MoveCommand) {
+                                mRenderer.mBoard.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                            }
                         }
 
                         if(mSelectedIndex != null)
@@ -471,18 +473,18 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             @Override
             public void run() {
                 mRenderer.mBoard.clearAnimations();
+
+                synchronized (mBoardIterator) {
+                    mBoardIterator.goTo(pos);
+
+                    if(mRenderer.mBoard != null) {
+                        mRenderer.mBoard.setBoard(mBoardIterator.board);
+                    }
+                }
             }
         });
 
         setAutoFollow(false);
-
-        synchronized (mBoardIterator) {
-            mBoardIterator.goTo(pos);
-
-            if(mRenderer.mBoard != null) {
-                mRenderer.mBoard.setBoard(mBoardIterator.board);
-            }
-        }
 
         mCanDoCommand = true;
 
@@ -535,7 +537,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             @Override
             public void run() {
 
-                mListener.onBoardScoreChanged();
+                mListener.onBoardStateChanged();
             }
         });
 
@@ -596,7 +598,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     public interface GameSurfaceViewListener {
         void onBoardSelected(BoardIndex index);
-        void onBoardScoreChanged();
+        void onBoardStateChanged();
         void onPlayerStateChanged();
     }
 
@@ -674,11 +676,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 update.added.add(cmd.position);
 
                                 mRenderer.mBoard.animBoardUpdate(update);
+
+                                // we still have to do iter.next because we did not play above
+                                iter.next();
                             }
-
-                            System.out.println("Calling next: " + iter.getPos() + ", " + mBoardIterator.getPos());
-
-                            //iter.next();
                         }
                     }
 

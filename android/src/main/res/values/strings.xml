@@ -62,6 +62,8 @@
     <string name="pref_p1_color">Player 1 Color (future games)</string>
     <string name="pref_p1_color_title">Select a color:</string>
     <string name="pref_p2_color">Player 2 Color (future games)</string>
-    <string name="play_to_end">Play to Last Move</string>
+    <string name="play_to_end">Play to Last</string>
+    <string name="play_next">Next</string>
+    <string name="play_previous">Prev</string>
     <string name="menu_open_move_history">Open Move History</string>
 </resources>
