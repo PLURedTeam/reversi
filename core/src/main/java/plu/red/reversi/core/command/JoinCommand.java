@@ -40,7 +40,7 @@ public class JoinCommand extends Command {
      * @throws JSONException if there is a problem during serialization
      */
     JoinCommand(JSONObject json) throws JSONException {
-        super(Source.values()[json.getInt("source")]);
+        super(Source.SERVER);
         this.user = new User(json.getJSONObject("user"));
         this.claim = json.getBoolean("claim");
     }

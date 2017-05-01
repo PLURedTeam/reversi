@@ -45,7 +45,7 @@ public class SurrenderCommand extends Command {
      * @throws JSONException if there is a problem during serialization
      */
     SurrenderCommand(JSONObject json) throws JSONException {
-        super(Source.values()[json.getInt("source")]);
+        super(Source.SERVER);
         this.playerID = json.getInt("playerID");
     }
 

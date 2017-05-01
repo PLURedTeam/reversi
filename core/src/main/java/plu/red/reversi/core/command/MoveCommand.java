@@ -44,7 +44,7 @@ public class MoveCommand extends BoardCommand {
      */
     MoveCommand(JSONObject json) throws JSONException {
         super(
-                Source.values()[json.getInt("source")],
+                Source.SERVER,
                 json.getInt("playerID"),
                 new BoardIndex(json.getInt("pos_row"), json.getInt("pos_column")));
     }

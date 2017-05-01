@@ -43,7 +43,7 @@ public class SetCommand extends BoardCommand {
      */
     SetCommand(JSONObject json) throws JSONException {
         super(
-                Source.values()[json.getInt("source")],
+                Source.SERVER,
                 json.getInt("playerID"),
                 new BoardIndex(json.getInt("pos_row"), json.getInt("pos_column")));
     }

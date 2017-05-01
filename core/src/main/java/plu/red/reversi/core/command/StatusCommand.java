@@ -46,7 +46,7 @@ public class StatusCommand extends Command {
      * @throws JSONException if there is a problem during serialization
      */
     StatusCommand(JSONObject json) throws JSONException {
-        super(Source.values()[json.getInt("source")]);
+        super(Source.SERVER);
         this.message = json.getString("message");
     }
 
