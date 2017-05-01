@@ -5,7 +5,9 @@ import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.browser.Browser;
+import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
 import javax.swing.*;
@@ -130,10 +132,22 @@ public class NetworkMenu extends JMenu implements ActionListener {
     private void createUser() {
         JTextField username = new JTextField();
         JTextField password = new JPasswordField();
-        Object[] message = {"Username:", username, "Password:", password};
+        JTextField password1 = new JPasswordField();
+        Object[] message = {"Username:", username, "Password:", password, "Confirm Password:", password1};
 
         int option = JOptionPane.showConfirmDialog(gui, message, "Create an Online Account", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
+
+            if(password.getText().equals("")) {
+                gui.showErrorDialog("Create User Error", "Your password cannot be blank. Please Try again.");
+                return;
+            }//if
+
+            if(!password.getText().equals(password1.getText())) {
+                gui.showErrorDialog("Create User Error", "Your passwords did not match. Please try again.");
+                return;
+            }//if
+
             WebUtilities.INSTANCE.createUser(username.getText(), password.getText());
         }//if
     }//createUser

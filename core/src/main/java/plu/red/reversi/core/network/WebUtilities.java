@@ -63,6 +63,13 @@ public class WebUtilities {
                 Response response = target.request().post(Entity.json(user));
 
                 //If invalid credentials, return false
+                if (response.getStatus() == 409) {
+                    gui.showErrorDialog("Login Error", "That username is already logged in! Please try " +
+                            "again with a different username.");
+                    return false;
+                }//if
+
+                //If invalid credentials, return false
                 if (response.getStatus() == 403) {
                     gui.showErrorDialog("Login Error", "That username and/or password was incorrect.");
                     return false;

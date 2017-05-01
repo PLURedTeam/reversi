@@ -6,6 +6,7 @@ import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.INetworkListener;
