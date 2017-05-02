@@ -98,7 +98,17 @@ public class UserManager {
             }//for
 
         return null;
-    }//timedOut
+    }//getUser
+
+    /**
+     * Changes the user's status (IN LOBBY, IN GAME)
+     */
+    public void setStatus(String username, String status) {
+        for(String u: onlineUsers.keySet()) {
+            if(u.equals(username))
+                onlineUsers.get(u).setStatus(status);
+        }//for
+    }//setStatus
 
 
 

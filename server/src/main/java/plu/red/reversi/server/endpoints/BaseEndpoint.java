@@ -33,22 +33,18 @@ public class BaseEndpoint {
     @Path("login")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response login(User user) {
         if(user == null) throw new WebApplicationException(403);
 
-        try {
+        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
+            throw new WebApplicationException(409);
 
-            if(UserManager.INSTANCE.loggedIn(user.getUsername()))
-                throw new WebApplicationException(409);
-
-            if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
-                user.setPassword("");
-            } else {
-                throw new WebApplicationException(403);
-            }//else
-        } catch (NoSuchAlgorithmException e) {
-            throw new WebApplicationException(500);
-        }//catch
+        if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
+            user.setPassword("");
+        } else {
+            throw new WebApplicationException(403);
+        }//else
 
         user.setStatus("In Lobby");
         UserManager.INSTANCE.addUser(user);
@@ -88,14 +84,11 @@ public class BaseEndpoint {
         if(user == null)
             throw new WebApplicationException(400);
 
-        try {
-            if(DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword()))
-                return Response.ok().build();
-            else
-                throw new WebApplicationException(406);
-        } catch(NoSuchAlgorithmException e) {
-            throw new WebApplicationException(500);
-        }//catch
+        if(DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword()))
+            return Response.ok().build();
+        else
+            throw new WebApplicationException(406);
+
     }//createUser
 
     /**
@@ -113,14 +106,11 @@ public class BaseEndpoint {
         if(user == null)
             throw new WebApplicationException(400);
 
-        try {
-            if(DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword()))
-                return Response.ok().build();
-            else
-                throw new WebApplicationException(406);
-        } catch(NoSuchAlgorithmException e) {
-            throw new WebApplicationException(500);
-        }//catch
+        if(DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword()))
+            return Response.ok().build();
+        else
+            throw new WebApplicationException(406);
+
     }//deleteUser
 
     /**
@@ -158,8 +148,18 @@ public class BaseEndpoint {
      * @param sessionID
      */
     @Path("keep-session-alive/{id}")
+    @POST
     public Response keepSessionAlive(@PathParam("id") int sessionID) {
         SessionManager.INSTANCE.keepSessionAlive(sessionID);
         return Response.ok().build();
     }//keepSessionAlive
+
+    /**
+     * Test to see if the server is running correctly
+     */
+    @GET
+    public String test() {
+        return "Running!!!";
+    }//keepSessionAlive
+
 }//BaseEndpoint

@@ -16,12 +16,9 @@ public class User {
     private String password;
     private String status;
     private int sessionID;
-
-    private int ranking;
+    private int rank;
 
     public User() {}//DefaultConstructor
-
-    private int rank;
 
     /**
      * Constructor for the user class
@@ -45,8 +42,8 @@ public class User {
     public void setSessionID(int s) { sessionID = s; }
     public String getStatus() { return status; }
     public void setStatus(String s) { status = s; }
-    public int getRank() { return ranking; }
-    public void setRank(int r) { ranking = r; }
+    public int getRank() { return rank; }
+    public void setRank(int r) { rank = r; }
 
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
@@ -54,7 +51,7 @@ public class User {
         json.put("password", password);
         json.put("status", status);
         json.put("sessionID", sessionID);
-        json.put("ranking", ranking);
+        json.put("ranking", rank);
         return json;
     }
 
@@ -63,7 +60,7 @@ public class User {
         password = json.getString("password");
         status = json.getString("status");
         sessionID = json.getInt("sessionID");
-        ranking = json.getInt("ranking");
+        rank = json.getInt("ranking");
     }
 
 }//User

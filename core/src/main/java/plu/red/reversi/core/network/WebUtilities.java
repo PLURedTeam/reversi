@@ -10,7 +10,6 @@ import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 
-import javax.swing.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -18,6 +17,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 
 /**
@@ -28,7 +28,8 @@ public class WebUtilities {
     public static WebUtilities INSTANCE = new WebUtilities();
 
     private Client client;
-    private String baseURI = "http://mal.cs.plu.edu:8080/red-reversi/"; //Just temp, will change with production server
+    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    //private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
     private int sessionID;
     private User user = new User();
     private boolean loggedIn = false;
@@ -56,9 +57,24 @@ public class WebUtilities {
         IMainGUI gui = Controller.getInstance().gui;
         if(!loggedIn) { //Check to see if currently logged in
 
-            //Create User
-            user.setUsername(username);
-            user.setPassword(password);
+            try {
+
+                //Convert the users password into SHA256 format
+                MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
+                byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
+                StringBuffer sb = new StringBuffer(); //String buffer to build the password string
+                for (int i = 0; i < bytes.length; i++)
+                    sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+
+                //clear the byte array
+                for (int i = 0; i < bytes.length; i++) bytes[i] = 0;
+
+                //Create User
+                user.setUsername(username);
+                user.setPassword(sb.toString());
+            } catch(Exception e) {
+                e.printStackTrace();
+            }//catch
 
             try {
                 //Create target and call server
@@ -80,21 +96,27 @@ public class WebUtilities {
 
                 gui.showInformationDialog("Login Successful", "Successfully logged in.");
 
-                user = response.readEntity(User.class);
-                sessionID = user.getSessionID();
-                loggedIn = true;
-                Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
+                if(response.getStatus() == 200) {
 
-                //Start the session thread
-                Thread session = new Thread(new SessionHandler(client, user, baseURI));
-                session.start();
+                    user = response.readEntity(User.class);
+                    sessionID = user.getSessionID();
+                    loggedIn = true;
+                    Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
-                Thread chat = new Thread(new ChatHandler(this, baseURI));
-                chat.start();
+                    //Start the session thread
+                    Thread session = new Thread(new SessionHandler(client, user, baseURI));
+                    session.start();
 
-                return true;
+                    Thread chat = new Thread(new ChatHandler(this, baseURI));
+                    chat.start();
+                    return true;
+                }//if
+
+                System.out.println("LOGIN STATUS CODE: " + response.getStatus());
+
+                return false;
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                e.printStackTrace();
                 gui.showErrorDialog("Login Error", "The server is currently unreachable. Please try again later.");
                 return false;
             }//catch
@@ -149,9 +171,24 @@ public class WebUtilities {
 
         IMainGUI gui = Controller.getInstance().gui;
 
-        //Create a user object
-        user.setUsername(username);
-        user.setPassword(password);
+        try {
+
+            //Convert the users password into SHA256 format
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
+            byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
+            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
+            for (int i = 0; i < bytes.length; i++)
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+
+            //clear the byte array
+            for (int i = 0; i < bytes.length; i++) bytes[i] = 0;
+
+            //Create User
+            user.setUsername(username);
+            user.setPassword(sb.toString());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }//catch
 
         try {
         WebTarget target = client.target(baseURI + "create-user");
@@ -190,9 +227,24 @@ public class WebUtilities {
 
         IMainGUI gui = Controller.getInstance().gui;
 
-        //Create a user object
-        user.setUsername(username);
-        user.setPassword(password);
+        try {
+
+            //Convert the users password into SHA256 format
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
+            byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
+            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
+            for (int i = 0; i < bytes.length; i++)
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+
+            //clear the byte array
+            for (int i = 0; i < bytes.length; i++) bytes[i] = 0;
+
+            //Create User
+            user.setUsername(username);
+            user.setPassword(sb.toString());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }//catch
 
         try {
             WebTarget target = client.target(baseURI + "delete-user");
@@ -368,8 +420,6 @@ public class WebUtilities {
                 WebTarget target = client.target(baseURI + "game/start/" + networkGameID);
                 Response response = target.request().post(Entity.text(json));
 
-                System.out.println(response.getStatus());
-
             } catch (Exception e) {
                 e.printStackTrace();
                 e.getMessage();
@@ -397,9 +447,6 @@ public class WebUtilities {
                 //Create target and call server
                 WebTarget target = client.target(baseURI + "game/" + networkGameID);
                 Response response = target.request().post(Entity.text(json));
-
-                System.out.println(response.getStatus());
-
             } catch (Exception e) {
                 e.printStackTrace();
                 e.getMessage();
