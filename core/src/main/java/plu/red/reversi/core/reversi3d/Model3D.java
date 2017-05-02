@@ -125,124 +125,127 @@ public abstract class Model3D {
      * Using getFace() abstract method, calculates a set of normals and vertices for the current object. Uploads
      * the VBOs upon completion.
      *
-     * @param sectionId -1 to recalculate all sections, otherwise the section id to recalculate.
+     * @param vbo the buffer object to recalculate, as specified by a name in the shader.
      */
-    public void recalculate(int sectionId) {
+    public void recalculate(String vbo) {
 
-        if(sectionId == -1) {
-            // get all the points for the curve added, and begin preparing a map of points to normals
+        if(vbo == null) {
+
+            for(String v : pipeline.getExtras().keySet()) {
+                recalculate(v);
+            }
+        }
+
+        else if(vbo.equals("vPosition")) {
+
             int sectionCount = getSectionCount();
 
-            vertices.clear();
-            normals.clear();
-
-            for(int i = 0;i < sectionCount;i++)
-                recalculate(i);
+            for (int sectionId = 0; sectionId < sectionCount; sectionId++) {
+                calculateVertexSection(sectionId);
+            }
 
             try {
-                uploadBuffers();
+                g3d.uploadVBO(vertices);
+                g3d.uploadVBO(normals);
             } catch(IOException e) {
-                // TODO: Better error handling here.
                 e.printStackTrace();
             }
         }
 
+        else if(vbo.equals("vNormal")) {} // do nothing since normals are generated earlier
+
         else {
-
-            Vector3f norm = new Vector3f();
-            Vector3f tmp = new Vector3f();
-
-            // now that we have all the points, we are going to have to add the normals by using those mapped triangles and calculating their adjacent normals.
-            TreeMap<Vector3fc, Vector3f> vertexFaces = new TreeMap<>(new Comparator<Vector3fc>() {
-                @Override
-                public int compare(Vector3fc v1, Vector3fc v2) {
-                    if(v1.distance(v2) < 1e-4) {
-                        return 0;
-                    }
-
-                    if(Math.abs(v2.x() - v1.x()) > 1e-4)
-                        return v2.x() - v1.x() > 0 ? 1 : -1;
-
-                    if(Math.abs(v2.y() - v1.y()) > 1e-4)
-                        return v2.y() - v1.y() > 0 ? 1 : -1;
-
-                    return v2.z() - v1.z() > 0 ? 1 : -1;
-                }
-            });
-            List<Vector3fc> verts = new LinkedList<>();
-
-            int count = getFaceCount(sectionId);
-
-            for(int i = 0;i < count;i++) {
-
-                Vector3f[] face = getFace(sectionId, i);
-
-                face[1].sub(face[0], norm);
-                face[2].sub(face[0], tmp);
-
-                norm.cross(tmp).normalize();
-
-                if(Float.isNaN(norm.length())) {
-                    Vector3f tmp2 = new Vector3f();
-                    Vector3f tmp3 = new Vector3f();
-                    face[1].sub(face[0], tmp2);
-                    face[2].sub(face[0], tmp3);
-                    System.out.println("Got NaN from Cross: " + tmp2 + ", " + tmp3);
-                    for(int j = 0;j < face.length;j++)
-                        System.out.println("FV: " + face[j]);
-                }
-
-                for(int j = 1;j < face.length - 1;j++) {
-                    vertices.add(new Vector4f(face[0], 1));
-                    verts.add(face[0]);
-                    vertices.add(new Vector4f(face[j], 1));
-                    verts.add(face[j]);
-                    vertices.add(new Vector4f(face[j + 1], 1));
-                    verts.add(face[j + 1]);
-                }
-
-                for(Vector3fc v : face) {
-                    if(!vertexFaces.containsKey(v)) {
-                        vertexFaces.put(v, new Vector3f());
-                    }
-
-                    vertexFaces.get(v).add(norm);
-                }
-            }
-
-            for(Vector3fc v : verts) {
-                Vector3f n = vertexFaces.get(v);
-
-                if(n == null) {
-                    // something went wrong
-                    System.out.println("Could not getRep preexisting vertex for normal!!!");
-                }
-
-                if(n.length() == 0) {
-                    System.out.println("Have a 0 length vector!");
-                }
-
-                if(Float.isNaN(n.length())) {
-                    System.out.println("NaN vector!");
-                }
-
-                //System.out.println("Add normal: " + new Vector3f(n).normalize());
-                //System.out.println("For vertex: " + v);
-
-                normals.add(new Vector3f(n).normalize());
-            }
+            System.err.println("Unknown VBO type not handled by object: " + vbo);
         }
     }
 
     /**
-     * Forces the vertex and normal matricies to be uploaded. Calling this method is useful if the vertex or normal
-     * buffers were modified outside of recalculate()
-     * @throws IOException if the VBO is invalid
+     * Calculates a vertex face (AKA a surface with no sharp edges) by calling delegated methods.
+     * @param sectionId the vertex face id to update
      */
-    // THIS SHOULD CALL SUPER
-    protected void uploadBuffers() throws IOException {
-        g3d.uploadVBO(vertices);
-        g3d.uploadVBO(normals);
+    private void calculateVertexSection(int sectionId) {
+        Vector3f norm = new Vector3f();
+        Vector3f tmp = new Vector3f();
+
+        // now that we have all the points, we are going to have to add the normals by using those mapped triangles and calculating their adjacent normals.
+        TreeMap<Vector3fc, Vector3f> vertexFaces = new TreeMap<>(new Comparator<Vector3fc>() {
+            @Override
+            public int compare(Vector3fc v1, Vector3fc v2) {
+                if(v1.distance(v2) < 1e-4) {
+                    return 0;
+                }
+
+                if(Math.abs(v2.x() - v1.x()) > 1e-4)
+                    return v2.x() - v1.x() > 0 ? 1 : -1;
+
+                if(Math.abs(v2.y() - v1.y()) > 1e-4)
+                    return v2.y() - v1.y() > 0 ? 1 : -1;
+
+                return v2.z() - v1.z() > 0 ? 1 : -1;
+            }
+        });
+        List<Vector3fc> verts = new LinkedList<>();
+
+        int count = getFaceCount(sectionId);
+
+        for(int i = 0;i < count;i++) {
+
+            Vector3f[] face = getFace(sectionId, i);
+
+            face[1].sub(face[0], norm);
+            face[2].sub(face[0], tmp);
+
+            norm.cross(tmp).normalize();
+
+            if(Float.isNaN(norm.length())) {
+                Vector3f tmp2 = new Vector3f();
+                Vector3f tmp3 = new Vector3f();
+                face[1].sub(face[0], tmp2);
+                face[2].sub(face[0], tmp3);
+                System.out.println("Got NaN from Cross: " + tmp2 + ", " + tmp3);
+                for(int j = 0;j < face.length;j++)
+                    System.out.println("FV: " + face[j]);
+            }
+
+            for(int j = 1;j < face.length - 1;j++) {
+                vertices.add(new Vector4f(face[0], 1));
+                verts.add(face[0]);
+                vertices.add(new Vector4f(face[j], 1));
+                verts.add(face[j]);
+                vertices.add(new Vector4f(face[j + 1], 1));
+                verts.add(face[j + 1]);
+            }
+
+            for(Vector3fc v : face) {
+                if(!vertexFaces.containsKey(v)) {
+                    vertexFaces.put(v, new Vector3f());
+                }
+
+                vertexFaces.get(v).add(norm);
+            }
+        }
+
+        for(Vector3fc v : verts) {
+            Vector3f n = vertexFaces.get(v);
+
+            if(n == null) {
+                // something went wrong
+                System.out.println("Could not getRep preexisting vertex for normal!!!");
+            }
+
+            if(n.length() == 0) {
+                System.out.println("Have a 0 length vector!");
+            }
+
+            if(Float.isNaN(n.length())) {
+                System.out.println("NaN vector!");
+            }
+
+            //System.out.println("Add normal: " + new Vector3f(n).normalize());
+            //System.out.println("For vertex: " + v);
+
+            normals.add(new Vector3f(n).normalize());
+        }
     }
 
     /**
@@ -279,7 +282,7 @@ public abstract class Model3D {
 
         if(vertices.isEmpty() && getSectionCount() > 0)
             // vertex data should be generated
-            recalculate(-1);
+            recalculate(null);
 
         //g3d.enablePipelineVerticesVBO("position", getPipeline());
 

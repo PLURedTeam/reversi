@@ -59,40 +59,34 @@ public abstract class ColorModel3D extends Model3D {
     abstract Vector4f[] getFaceColor(int sectionIndex, int faceIndex);
 
     @Override
-    public void recalculate(int sectionId) {
-        if(sectionId != -1) {
+    public void recalculate(String vbo) {
+        if("vAlbedo".equals(vbo)) {
+
+            albedos.clear();
+
             // recalculate colors from the get face color call
-            int count = getFaceCount(sectionId);
+            int sectionCount = getSectionCount();
+            for(int sectionId = 0;sectionId < sectionCount;sectionId++) {
+                int count = getFaceCount(sectionId);
 
-            for(int i = 0;i < count;i++) {
+                for(int i = 0;i < count;i++) {
 
-                Vector4f[] albs = getFaceColor(sectionId, i);
+                    Vector4f[] albs = getFaceColor(sectionId, i);
 
-                for(int j = 1;j < albs.length - 1;j++) {
-                    albedos.add(albs[0]);
-                    albedos.add(albs[j]);
-                    albedos.add(albs[j + 1]);
+                    for(int j = 1;j < albs.length - 1;j++) {
+                        albedos.add(albs[0]);
+                        albedos.add(albs[j]);
+                        albedos.add(albs[j + 1]);
+                    }
                 }
             }
 
             try {
                 getGraphics3D().uploadVBO(albedos);
-            } catch(IOException e) {
-                // TODO: better error handling.... this is not very appropriate at all
-                System.err.println("Failed to upload vertex data for object: ");
+            } catch (IOException e) {
                 e.printStackTrace();
-
             }
         }
-        else albedos.clear();
-
-        super.recalculate(sectionId);
-    }
-
-    @Override
-    public void uploadBuffers() throws IOException {
-        super.uploadBuffers();
-
-        getGraphics3D().uploadVBO(albedos);
+        else super.recalculate(vbo);
     }
 }

@@ -39,12 +39,27 @@ public class StubPipeline extends Pipeline {
 
             @Override
             public List<String> getExtras() {
-                return new ArrayList<>();
+                List<String> extras = new ArrayList<>();
+
+                // add normal properties which should be expected
+                extras.add("vPosition");
+                extras.add("vNormal");
+                //extras.add("vAlbedo");
+
+                return extras;
             }
 
             @Override
             public List<String> getUniforms() {
-                return new ArrayList<>();
+
+                List<String> uniforms = new ArrayList<>();
+
+                // add normal properties which should be expected
+                uniforms.add("modelMatrix");
+                uniforms.add("viewMatrix");
+                uniforms.add("projectionMatrix");
+
+                return uniforms;
             }
         });
 

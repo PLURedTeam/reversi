@@ -191,6 +191,16 @@ public class Piece3D extends ColorModel3D {
         }
     }
 
+    public void setBaseColor(Color c) {
+        baseColor = c;
+        recalculate("vAlbedo");
+    }
+
+    public void setFlippedColor(Color c) {
+        flippedColor = c;
+        recalculate("vAlbedo");
+    }
+
     /**
      * Manually set whether or not this piece should be flipped. Automatically updates the rotation accordingly.
      * @param b is it flipped or not

@@ -27,7 +27,7 @@ public class Model3DTest {
     public void testRecalculate() {
         Model3D m3d = new StubModel3D(g3d, pipeline);
 
-        m3d.recalculate(-1);
+        m3d.recalculate(null);
 
         // should have all the vertices sent by the caller
         Assert.assertTrue(m3d.vertices.contains(new Vector4f(0,0,0,1)));
@@ -80,7 +80,7 @@ public class Model3DTest {
     @Test
     public void testModelTree() {
         Model3D root = new StubModel3D(g3d, pipeline);
-        root.recalculate(-1);
+        root.recalculate(null);
         Model3D l1 = root.clone();
         Model3D l2 = l1.clone();
 
@@ -96,11 +96,13 @@ public class Model3DTest {
         Assert.assertTrue(l1.isChild(l2));
         Assert.assertFalse(root.isChild(l2));
 
+        root.draw();
+
         g3d.clearCallSequence();
 
         root.draw();
 
-        Assert.assertEquals(g3d.getCallSequence().size(), 6);
+        Assert.assertEquals(15, g3d.getCallSequence().size());
     }
 
     public class StubModel3D extends Model3D {

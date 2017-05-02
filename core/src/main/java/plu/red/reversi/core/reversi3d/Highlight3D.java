@@ -119,7 +119,7 @@ public class Highlight3D extends ColorModel3D {
         this.color = color;
 
         // unfortunately current pipeline expectations require complete buffer refresh
-        recalculate(-1);
+        recalculate("vAlbedo");
     }
 
     public Vector3fc getColor() {
