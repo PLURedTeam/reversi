@@ -28,7 +28,7 @@ public class WebUtilities {
     public static WebUtilities INSTANCE = new WebUtilities();
 
     private Client client;
-    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    private String baseURI = "http://mal.cs.plu.edu:8080/red-reversi/"; //Just temp, will change with production server
     private int sessionID;
     private User user = new User();
     private boolean loggedIn = false;
@@ -86,10 +86,10 @@ public class WebUtilities {
                 Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                 //Start the session thread
-                Thread session = new Thread(new SessionHandler(client, user));
+                Thread session = new Thread(new SessionHandler(client, user, baseURI));
                 session.start();
 
-                Thread chat = new Thread(new ChatHandler(this));
+                Thread chat = new Thread(new ChatHandler(this, baseURI));
                 chat.start();
 
                 return true;
@@ -289,7 +289,7 @@ public class WebUtilities {
 
                 //set the game ID
                 networkGameID = response.readEntity(Integer.class);
-                Thread gameHandler = new Thread(new GameHandler(this,networkGameID));
+                Thread gameHandler = new Thread(new GameHandler(this,networkGameID,baseURI));
                 gameHost = true;
                 gameHandler.start();
 
@@ -337,7 +337,7 @@ public class WebUtilities {
 
                 //set the game ID
                 networkGameID = response.readEntity(Integer.class);
-                Thread gameHandler = new Thread(new GameHandler(this,networkGameID));
+                Thread gameHandler = new Thread(new GameHandler(this,networkGameID,baseURI));
                 gameHandler.start();
 
                 return true;

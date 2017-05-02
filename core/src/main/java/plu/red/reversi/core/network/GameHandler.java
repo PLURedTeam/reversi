@@ -27,7 +27,7 @@ import javax.ws.rs.client.WebTarget;
 public class GameHandler implements Runnable, INetworkListener {
 
     //fields
-    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    private String baseURI; //Just temp, will change with production server
     private WebUtilities util;
     private boolean loggedIn = true;
     private int gameID;
@@ -35,9 +35,10 @@ public class GameHandler implements Runnable, INetworkListener {
     /**
      * Constructor
      */
-    public GameHandler(WebUtilities u, int id) {
+    public GameHandler(WebUtilities u, int id, String baseURI) {
         util = u; //Set the WebUtilities
         gameID = id;
+        this.baseURI = baseURI;
         Coordinator.addListenerStatic(this); //Add the listener
     }//constructor
 

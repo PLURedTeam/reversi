@@ -21,15 +21,16 @@ import javax.ws.rs.client.WebTarget;
 public class ChatHandler implements Runnable, INetworkListener {
 
     //fields
-    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    private String baseURI; //Just temp, will change with production server
     private WebUtilities util;
     private boolean loggedIn = true;
 
     /**
      * Constructor
      */
-    public ChatHandler(WebUtilities u) {
+    public ChatHandler(WebUtilities u, String baseURI) {
         util = u; //Set the WebUtilities
+        this.baseURI = baseURI;
         Coordinator.addListenerStatic(this); //Add the listener
     }//constructor
 
