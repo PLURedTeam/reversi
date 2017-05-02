@@ -16,8 +16,6 @@ import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.Collection;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -27,6 +25,7 @@ import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
@@ -400,7 +399,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public void onScoreChange(Board3D board) {
         if(mListener != null)
-            mListener.onBoardScoreChanged();
+            mListener.onBoardStateChanged();
     }
 
     @Override
@@ -408,15 +407,19 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         // enable the ability to control again
         if(mGame.getCurrentPlayer() instanceof NullPlayer)
             setPlayerEnabled(true);
+
+        doHighlights();
     }
 
     @Override
     public void onAnimationStepDone(Board3D board) {
 
-        mBoardIterator.next();
+        synchronized (mBoardIterator) {
+            mBoardIterator.next();
+        }
 
         if(mListener != null)
-            mListener.onBoardScoreChanged();
+            mListener.onBoardStateChanged();
     }
 
     public void doHighlights() {
@@ -437,9 +440,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         else if(mHighlightMode == HighlightMode.HIGHLIGHT_BEST_MOVE) {
                             // TODO
                         }
-                        BoardCommand lastMove = mGame.getHistory().getBoardCommand(mBoardIterator.getPos());
-                        if (lastMove instanceof MoveCommand) {
-                            mRenderer.mBoard.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                        if(mBoardIterator.getPos() >= 0) {
+                            BoardCommand lastMove = mGame.getHistory().getBoardCommand(mBoardIterator.getPos());
+                            if (lastMove instanceof MoveCommand) {
+                                mRenderer.mBoard.highlightAt(lastMove.position, LAST_MOVE_COLOR);
+                            }
                         }
 
                         if(mSelectedIndex != null)
@@ -464,11 +469,22 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public synchronized void setCurrentMove(int pos) {
-        mBoardIterator.goTo(pos);
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.mBoard.clearAnimations();
 
-        if(mRenderer.mBoard != null) {
-            mRenderer.mBoard.setBoard(mBoardIterator.board);
-        }
+                synchronized (mBoardIterator) {
+                    mBoardIterator.goTo(pos);
+
+                    if(mRenderer.mBoard != null) {
+                        mRenderer.mBoard.setBoard(mBoardIterator.board);
+                    }
+                }
+            }
+        });
+
+        setAutoFollow(false);
 
         mCanDoCommand = true;
 
@@ -477,6 +493,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     public HighlightMode getHighlightMode() {
         return mHighlightMode;
+    }
+
+    public GameLogicCache getCurrentCache() {
+        return mBoardIterator.cache;
     }
 
     private class UpdateTask implements Runnable {
@@ -517,7 +537,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             @Override
             public void run() {
 
-                mListener.onBoardScoreChanged();
+                mListener.onBoardStateChanged();
             }
         });
 
@@ -538,6 +558,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     public BoardIndex getCurrentSelected() {
         return mSelectedIndex;
+    }
+
+    public void clearCurrentSelected() {
+        mSelectedIndex = null;
     }
 
     public void disablePlayer() {
@@ -574,7 +598,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     public interface GameSurfaceViewListener {
         void onBoardSelected(BoardIndex index);
-        void onBoardScoreChanged();
+        void onBoardStateChanged();
         void onPlayerStateChanged();
     }
 
@@ -605,6 +629,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public void setAutoFollow(boolean follow) {
+
         if(follow) {
             mAutoFollow = true;
 
@@ -616,10 +641,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                         mRenderer.mBoard.clearAnimations();
 
                         // queue up all the animations up until the end
-                        BoardIterator iter = new BoardIterator(mBoardIterator);
+                        BoardIterator iter;
+                        synchronized (mBoardIterator) {
+                            iter = new BoardIterator(mBoardIterator);
+                        }
 
-                        System.out.println("POS: " + mBoardIterator.getPos());
-                        System.out.println("Count: " + mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1).size());
                         for(BoardCommand cmd : mGame.getHistory().getMoveCommandsAfter(mBoardIterator.getPos() + 1)) {
 
                             if(cmd instanceof MoveCommand) {
@@ -629,7 +655,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 // hack for right now.
                                 mAutoFollow = true;
 
-                                //mGame.getGameLogic().play((MoveCommand) cmd, iter.board, true, false);
+                                mGame.getGameLogic().play(
+                                        iter.cache,
+                                        iter.board,
+                                        (MoveCommand) cmd,
+                                        true, false);
 
                                 mAutoFollow = preAutoFollow;
 
@@ -646,9 +676,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                                 update.added.add(cmd.position);
 
                                 mRenderer.mBoard.animBoardUpdate(update);
-                            }
 
-                            iter.next();
+                                // we still have to do iter.next because we did not play above
+                                iter.next();
+                            }
                         }
                     }
 

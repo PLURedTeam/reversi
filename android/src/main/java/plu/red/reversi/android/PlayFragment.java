@@ -21,6 +21,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -45,9 +46,9 @@ import plu.red.reversi.core.reversi3d.HighlightMode;
  * Activities that contain this fragment must implement the
  * to handle interaction events.
  */
-public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener {
+public class PlayFragment extends Fragment implements ServiceConnection, View.OnClickListener, GameSurfaceView.GameSurfaceViewListener, AdapterView.OnItemClickListener {
 
-    private static final String PREF_AUTO_FOLLOW = "play_autoFollow";
+    public static final String PREF_AUTO_FOLLOW = "play_autoFollow";
 
     private GameListener mListener;
 
@@ -57,6 +58,11 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
     private LinearLayout mGameScorePanel;
 
     private Button mConfirmButton;
+
+    private Button mPlayForwardButton;
+    private Button mPlayPrevButton;
+    private Button mPlayNextButton;
+
     private ImageButton mSwitchCameraButton;
 
     private GameSurfaceView mGameView;
@@ -83,8 +89,16 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mSwitchCameraButton = (ImageButton)mGameActionPanel.findViewById(R.id.button_switch_camera_mode);
         mConfirmButton = (Button)mGameActionPanel.findViewById(R.id.button_confirm_move);
 
+        mPlayForwardButton = (Button)mGameActionPanel.findViewById(R.id.button_play_forward);
+        mPlayNextButton = (Button)mGameActionPanel.findViewById(R.id.button_play_next);
+        mPlayPrevButton = (Button)mGameActionPanel.findViewById(R.id.button_play_prev);
+
+
         mSwitchCameraButton.setOnClickListener(this);
         mConfirmButton.setOnClickListener(this);
+        mPlayForwardButton.setOnClickListener(this);
+        mPlayNextButton.setOnClickListener(this);
+        mPlayPrevButton.setOnClickListener(this);
 
         mHandler = new Handler(Looper.myLooper());
 
@@ -103,10 +117,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         }
 
         if(mServiceConnection != null && mServiceConnection.getGame() != mGame) {
-            mGame = mServiceConnection.getGame();
-            mGameView.setGame(mGame);
-
-            prepareScorePanel();
+            refreshGame();
         }
         else {
             getContext().bindService(new Intent(getContext(), GameService.class), this, 0);
@@ -177,8 +188,32 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                             Locale.getDefault(),
                             "%d",
                             // TODO: Historical game logic scores have been borked.
-                            mGame.getGameLogic().getScore(players[i].getID())
+                            mGame.getGameLogic().getScore(
+                                    mGameView.getCurrentCache(),
+                                    mGameView.getCurrentBoard(),
+                                    players[i].getID()
+                            )
                     ));
+        }
+    }
+
+    private void updateActionPanel() {
+
+        mConfirmButton.setVisibility(View.GONE);
+        mPlayForwardButton.setVisibility(View.GONE);
+        mPlayNextButton.setVisibility(View.GONE);
+        mPlayPrevButton.setVisibility(View.GONE);
+
+        if(!mGameView.isAutoFollow()) {
+            mPlayForwardButton.setVisibility(View.VISIBLE);
+            if(mGameView.getCurrentMoveIndex() < mGame.getHistory().getNumBoardCommands() - 1)
+                mPlayNextButton.setVisibility(View.VISIBLE);
+            if(mGameView.getCurrentMoveIndex() > 0)
+                mPlayPrevButton.setVisibility(View.VISIBLE);
+
+        }
+        else if(mGameView.getCurrentSelected() != null && mGameView.getCurrentMoveIndex() == mGame.getHistory().getNumBoardCommands() - 1) {
+            mConfirmButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -227,29 +262,53 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                     mGameView.getCurrentSelected()
             ));
 
-            mConfirmButton.setVisibility(View.GONE);
+            mGameView.clearCurrentSelected();
+
+            updateActionPanel();
 
             // prevent the user from moving until all the animations are done
             mGameView.disablePlayer();
+        }
+        else if(v == mPlayForwardButton) {
+            mGameView.setAutoFollow(true);
+            updateActionPanel();
+        }
+        else if(v == mPlayNextButton) {
+            mGameView.setCurrentMove(mGameView.getCurrentMoveIndex() + 1);
+            updateActionPanel();
+        }
+        else if(v == mPlayPrevButton) {
+            mGameView.setCurrentMove(mGameView.getCurrentMoveIndex() - 1);
+            updateActionPanel();
         }
     }
 
     @Override
     public void onBoardSelected(BoardIndex index) {
         doHighlights();
-        mConfirmButton.setVisibility(View.VISIBLE);
+        updateActionPanel();
     }
 
     @Override
-    public void onBoardScoreChanged() {
+    public void onBoardStateChanged() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                updateScorePanel();
+                if(mListener != null) {
+                    mListener.getSlideList().setSelection(mGameView.getCurrentMoveIndex());
+                    updateScorePanel();
+                }
             }
         });
 
         mServiceConnection.setMoveIndex(mGameView.getCurrentMoveIndex());
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateActionPanel();
+            }
+        });
     }
 
     @Override
@@ -270,6 +329,43 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGameView.doHighlights();
     }
 
+    private void refreshGame() {
+        // get the currently running game
+        mGame = mServiceConnection.getGame();
+
+        mGameView.setGame(mGame);
+
+        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
+
+        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
+
+        prepareScorePanel();
+        updateActionPanel();
+
+        mListener.getSlideList().setAdapter(new GameHistoryAdapter(getContext(), mGame));
+        mListener.getSlideList().setOnItemClickListener(this);
+    }
+
+
+
+    /**
+     * The slideList has been clicked...
+     *
+     * @param parent   The AdapterView where the click happened.
+     * @param view     The view within the AdapterView that was clicked (this
+     *                 will be a view provided by the adapter)
+     * @param position The position of the view in the adapter.
+     * @param id       The row id of the item that was clicked.
+     */
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mGameView.setCurrentMove(position);
+
+        updateActionPanel();
+    }
+
     /**
      * Called when a connection to the Service has been established, with
      * the {@link IBinder} of the communication channel to the
@@ -284,18 +380,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
 
         mServiceConnection = ((GameService.LocalBinder)service);
 
-        // get the currently running game
-        mGame = mServiceConnection.getGame();
-
-        mGameView.setGame(mGame);
-
-        mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
-
-        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-
-        mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
-
-        prepareScorePanel();
+        refreshGame();
     }
 
     /**

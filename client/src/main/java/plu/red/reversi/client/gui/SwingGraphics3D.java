@@ -218,7 +218,7 @@ public class SwingGraphics3D extends Graphics3D {
         buf.rewind();
 
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, handle);
-        gl.glBufferData(GL3.GL_ARRAY_BUFFER, obj.getDataSize() * buf.capacity(), buf, GL3.GL_STATIC_DRAW);
+        gl.glBufferData(GL3.GL_ARRAY_BUFFER, obj.getDataSize() * buf.capacity(), buf, GL3.GL_DYNAMIC_DRAW);
 
         obj.setHandle(this, handle);
 

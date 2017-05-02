@@ -72,8 +72,8 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         Player[] players = game.getAllPlayers();
 
-        Piece3D piece = new Piece3D(g3d, pipeline, players[0].getColor(), players[1].getColor());
-        Highlight3D highlight = new Highlight3D(g3d, pipeline);
+        //Piece3D piece = new Piece3D(g3d, pipeline, players[0].getColor(), players[1].getColor());
+        //Highlight3D highlight = new Highlight3D(g3d, pipeline);
 
         // this first piece is unused, only used to make clones for all the others.
         // it will be discarded after.
@@ -88,7 +88,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         for(int i = 0;i < Math.pow(size, 2);i++) {
             int r = i / size;
             int c = i % size;
-            Piece3D p = (Piece3D)piece.clone();
+            Piece3D p = new Piece3D(g3d, pipeline, new Color(), new Color());
 
             Vector3f pos = new Vector3f(PIECE_SIZE * c + PIECE_SIZE / 2, PIECE_SIZE * r + PIECE_SIZE / 2, Piece3D.VERTICAL_RADIUS).add(origin);
 
@@ -412,24 +412,16 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
     public void setPiece(BoardIndex index, int playerId) {
         Player p = game.getPlayer(playerId);
 
-        Color color = null;
-
-        if(p != null)
-            color = p.getColor();
-
         Vector2ic coords = toBoardCoords(index, size);
         int i  = indexFromCoord(coords, size);
 
-        if(color == null) {
+        if(p == null) {
             removeChild(pieces[i]);
         }
-        else if(color.equals(pieces[i].getBaseColor())) {
-            addChild(pieces[i]);
-            pieces[i].setFlipped(false);
-        }
         else {
+            pieces[i].setBaseColor(p.getColor());
+            pieces[i].setFlipped(false);
             addChild(pieces[i]);
-            pieces[i].setFlipped(true);
         }
     }
 
@@ -594,7 +586,8 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
          * Run the animation on the board
          */
         private void dispatch() {
-            final boolean f = pieces[0].getFlippedColor() == game.getPlayer(player).getColor();
+
+            Color c = game.getPlayer(player).getColor();
 
             if(added.size() == 1) {
                 // we have an origin to spice up the animation
@@ -604,7 +597,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
                 int originIndex = indexFromCoord(toBoardCoords(origin, size), size);
 
-                pieces[originIndex].animateEnter(f, getLastTick());
+                pieces[originIndex].setBaseColor(c);
+                pieces[originIndex].setFlippedColor(c);
+                pieces[originIndex].animateEnter(false, getLastTick());
                 addChild(pieces[originIndex]);
 
                 for(BoardIndex index : flipped) {
@@ -612,7 +607,13 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                     int i = indexFromCoord(coords, size);
 
                     // flips are delayed dramatically (see the power delay function above)
-                    pieces[i].animateFlip(f, getLastTick() + delayForPiece(index));
+                    if(pieces[i].isFlipped())
+                        pieces[i].setBaseColor(c);
+                    else
+                        pieces[i].setFlippedColor(c);
+
+
+                    pieces[i].animateFlip(!pieces[i].isFlipped(), getLastTick() + delayForPiece(index));
                 }
             }
             else {
@@ -620,16 +621,21 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                     Vector2ic coords = toBoardCoords(index, size);
                     int i = indexFromCoord(coords, size);
 
-                    // flips are delayed dramatically (see the power delay function above)
-                    pieces[i].animateEnter(f, getLastTick());
+                    pieces[i].setBaseColor(c);
+                    pieces[i].setFlippedColor(c);
+                    pieces[i].animateEnter(false, getLastTick());
                 }
 
                 for(BoardIndex index : flipped) {
                     Vector2ic coords = toBoardCoords(index, size);
                     int i = indexFromCoord(coords, size);
 
-                    // flips are delayed dramatically (see the power delay function above)
-                    pieces[i].animateFlip(f, getLastTick());
+                    if(pieces[i].isFlipped())
+                        pieces[i].setBaseColor(c);
+                    else
+                        pieces[i].setFlippedColor(c);
+
+                    pieces[i].animateFlip(!pieces[i].isFlipped(), getLastTick());
                 }
             }
 

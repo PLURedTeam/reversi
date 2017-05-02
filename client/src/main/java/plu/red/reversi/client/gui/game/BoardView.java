@@ -347,7 +347,12 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
         boardIterator.goTo(index);
 
-        board.setBoard(boardIterator.board);
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                board.setBoard(boardIterator.board);
+            }
+        });
 
         autoFollow = index == game.getHistory().getNumBoardCommands() - 1;
         canPlay = true; // always true because animation will no longer be in progress.

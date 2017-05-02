@@ -1,7 +1,9 @@
 package plu.red.reversi.android;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,108 +91,114 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
 
         game.setSettings(SettingsLoader.INSTANCE.createGameSettings());
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        Color p1c = new Color(prefs.getInt(SettingsFragment.KEY_P1_COLOR, Color.RED.composite));
+        Color p2c = new Color(prefs.getInt(SettingsFragment.KEY_P2_COLOR, Color.BLUE.composite));
+
+
         switch(v.getId()) {
             case R.id.button_sp_first_easy_ai:
 
-                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
-                new NullPlayer(game, Color.RED).setName("Player");
+                new BotPlayer(game, p2c, 2).setName("Easy Bot");
+                new NullPlayer(game, p1c).setName("Player");
 
                 break;
             case R.id.button_sp_first_medium_ai:
 
-                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
-                new NullPlayer(game, Color.RED).setName("Player");
+                new BotPlayer(game, p2c, 4).setName("Medium Bot");
+                new NullPlayer(game, p1c).setName("Player");
 
                 break;
 
             case R.id.button_sp_first_hard_ai:
 
-                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
-                new NullPlayer(game, Color.RED).setName("Player");
+                new BotPlayer(game, p2c, 6).setName("Hard Bot");
+                new NullPlayer(game, p1c).setName("Player");
 
                 break;
 
             case R.id.button_sp_second_easy_ai:
 
-                new NullPlayer(game, Color.RED).setName("Player");
-                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new NullPlayer(game, p2c).setName("Player");
+                new BotPlayer(game, p1c, 2).setName("Easy Bot");
 
                 break;
 
             case R.id.button_sp_second_medium_ai:
 
-                new NullPlayer(game, Color.RED).setName("Player");
-                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new NullPlayer(game, p2c).setName("Player");
+                new BotPlayer(game, p1c, 4).setName("Medium Bot");
 
                 break;
 
             case R.id.button_sp_second_hard_ai:
 
-                new NullPlayer(game, Color.RED).setName("Player");
-                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new NullPlayer(game, p2c).setName("Player");
+                new BotPlayer(game, p1c, 6).setName("Hard Bot");
 
                 break;
 
             case R.id.button_ai_easy_easy:
 
-                new BotPlayer(game, Color.RED, 2).setName("Easy Bot");
-                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new BotPlayer(game, p2c, 2).setName("Easy Bot");
+                new BotPlayer(game, p1c, 2).setName("Easy Bot");
 
                 break;
 
             case R.id.button_ai_easy_medium:
 
-                new BotPlayer(game, Color.RED, 2).setName("Easy Bot");
-                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new BotPlayer(game, p2c, 2).setName("Easy Bot");
+                new BotPlayer(game, p1c, 4).setName("Medium Bot");
 
                 break;
 
             case R.id.button_ai_easy_hard:
 
-                new BotPlayer(game, Color.RED, 2).setName("Easy Bot");
-                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new BotPlayer(game, p2c, 2).setName("Easy Bot");
+                new BotPlayer(game, p1c, 6).setName("Hard Bot");
 
                 break;
 
             case R.id.button_ai_medium_easy:
 
-                new BotPlayer(game, Color.RED, 4).setName("Medium Bot");
-                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new BotPlayer(game, p2c, 4).setName("Medium Bot");
+                new BotPlayer(game, p1c, 2).setName("Easy Bot");
 
                 break;
 
             case R.id.button_ai_medium_medium:
 
-                new BotPlayer(game, Color.RED, 4).setName("Medium Bot");
-                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new BotPlayer(game, p2c, 4).setName("Medium Bot");
+                new BotPlayer(game, p1c, 4).setName("Medium Bot");
 
                 break;
 
             case R.id.button_ai_medium_hard:
 
-                new BotPlayer(game, Color.RED, 4).setName("Medium Bot");
-                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new BotPlayer(game, p2c, 4).setName("Medium Bot");
+                new BotPlayer(game, p1c, 6).setName("Hard Bot");
 
                 break;
 
             case R.id.button_ai_hard_easy:
 
-                new BotPlayer(game, Color.RED, 6).setName("Hard Bot");
-                new BotPlayer(game, Color.BLUE, 2).setName("Easy Bot");
+                new BotPlayer(game, p2c, 6).setName("Hard Bot");
+                new BotPlayer(game, p1c, 2).setName("Easy Bot");
 
                 break;
 
             case R.id.button_ai_hard_medium:
 
-                new BotPlayer(game, Color.RED, 6).setName("Hard Bot");
-                new BotPlayer(game, Color.BLUE, 4).setName("Medium Bot");
+                new BotPlayer(game, p2c, 6).setName("Hard Bot");
+                new BotPlayer(game, p1c, 4).setName("Medium Bot");
 
                 break;
 
             case R.id.button_ai_hard_hard:
 
-                new BotPlayer(game, Color.RED, 6).setName("Hard Bot");
-                new BotPlayer(game, Color.BLUE, 6).setName("Hard Bot");
+                new BotPlayer(game, p2c, 6).setName("Hard Bot");
+                new BotPlayer(game, p1c, 6).setName("Hard Bot");
 
                 break;
         }

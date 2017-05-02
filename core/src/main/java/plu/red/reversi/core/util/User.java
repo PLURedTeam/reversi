@@ -33,7 +33,7 @@ public class User {
     public User(String u, String p) {
         username = u;
         password = p;
-        rank = 0;
+        rank = 100;
     }//user
 
     //Accessors and Mutators

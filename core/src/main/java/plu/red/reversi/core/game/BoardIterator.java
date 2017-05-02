@@ -25,7 +25,7 @@ public class BoardIterator {
         logic = l;
         board = new Board(boardsize);
         cache = l.createCache();
-        pos = 0;
+        pos = -1;
     }
 
     public BoardIterator(BoardIterator other) {
@@ -33,7 +33,8 @@ public class BoardIterator {
         logic = other.logic;
         board = new Board(other.board);
         cache = logic.createCache();
-        pos = other.pos;
+
+        goTo(other.pos);
     }
 
     /**
@@ -44,7 +45,7 @@ public class BoardIterator {
         pos = i;
         board = new Board(board.size);
         cache.invalidate();
-        logic.initBoard(cache, board, history.getMoveCommandsUntil(i+1), false, false);
+        logic.initBoard(cache, board, history.getMoveCommandsUntil(i + 1), false, false);
     }
 
     /**
@@ -65,6 +66,7 @@ public class BoardIterator {
      */
     public BoardIterator next() {
         BoardCommand c = history.getBoardCommand(++pos);
+
         if(c instanceof SetCommand)
             logic.apply(cache, board, (SetCommand)c, false, false);
         else

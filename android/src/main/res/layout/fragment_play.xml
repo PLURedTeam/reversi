@@ -46,6 +46,33 @@
             android:visibility="gone"
             android:text="@string/button_confirm_move" />
 
+        <Button
+            android:id="@+id/button_play_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/button_play_forward"
+            android:visibility="gone"
+            android:text="@string/play_previous" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/button_play_forward"
+            android:visibility="gone"
+            android:text="@string/play_to_end" />
+
+        <Button
+            android:id="@+id/button_play_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/button_play_forward"
+            android:visibility="gone"
+            android:text="@string/play_next" />
+
         <ImageButton
             android:layout_width="40dp"
             android:layout_height="40dp"

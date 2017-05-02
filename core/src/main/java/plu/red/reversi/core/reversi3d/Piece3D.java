@@ -191,6 +191,16 @@ public class Piece3D extends ColorModel3D {
         }
     }
 
+    public void setBaseColor(Color c) {
+        baseColor = c;
+        recalculate("vAlbedo");
+    }
+
+    public void setFlippedColor(Color c) {
+        flippedColor = c;
+        recalculate("vAlbedo");
+    }
+
     /**
      * Manually set whether or not this piece should be flipped. Automatically updates the rotation accordingly.
      * @param b is it flipped or not
@@ -242,6 +252,15 @@ public class Piece3D extends ColorModel3D {
             animFlipStart = -1;
 
             setFlipped(!flipped);
+
+            // make sure the piece is not transformed wierdly
+            setPos(new Vector3f(
+                    getPos().x(),
+                    getPos().y(),
+                    VERTICAL_RADIUS
+            ));
+
+            setScale(new Vector3f(1));
         }
 
         animEnterStart = -1;
