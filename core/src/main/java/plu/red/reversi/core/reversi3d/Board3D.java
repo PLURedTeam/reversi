@@ -94,7 +94,8 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
             p.setPos(pos);
 
-            //addChild(p);
+            // pregenerate this because lazy vbo uploads can be slow
+            p.recalculate(null);
             pieces[i] = p;
 
             Highlight3D h = new Highlight3D(g3d, pipeline);
@@ -106,8 +107,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                     new Vector2f(PIECE_SIZE * (c + 1) - PIECE_BORDER_SIZE, PIECE_SIZE * (r + 1) - PIECE_BORDER_SIZE).add(new Vector2f(origin.x(), origin.y()))
             );
 
-            //if(r == c)
-            //    addChild(h);
+            h.recalculate(null);
             highlights[i] = h;
         }
 

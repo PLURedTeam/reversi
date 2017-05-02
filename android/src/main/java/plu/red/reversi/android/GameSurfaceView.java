@@ -544,12 +544,17 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mBoardIterator = new BoardIterator(mGame.getHistory(), mGame.getGameLogic(), mGame.getBoard().size);
 
         if(mRenderer.mGLStarted) {
-            mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
-            mRenderer.mBoard.addListener(this);
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
+                    mRenderer.mBoard.addListener(GameSurfaceView.this);
 
-            mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
+                    mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
 
-            doHighlights();
+                    doHighlights();
+                }
+            });
         }
 
         setCurrentMove(mAutoFollow ? mGame.getHistory().getNumBoardCommands() - 1 : 0);

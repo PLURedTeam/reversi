@@ -180,11 +180,15 @@ public class AndroidGraphics3D extends Graphics3D {
             int[] buf = new int[1];
             GLES30.glGenBuffers(1, buf, 0);
             handle = buf[0];
+
+            if(handle == 0)
+                // rendering is not ready yet... or something.
+                return;
         }
         Buffer buf = obj.getBuffer();
         buf.rewind();
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle);
-        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, obj.getDataSize() * buf.capacity(), buf, GLES30.GL_DYNAMIC_DRAW);
+        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, obj.getDataSize() * buf.capacity(), buf, GLES30.GL_STATIC_DRAW);
         obj.setHandle(this, handle);
         checkGLError();
         //Log.v(TAG, "Uploaded VBO data to " + handle + ", " + obj.size());
