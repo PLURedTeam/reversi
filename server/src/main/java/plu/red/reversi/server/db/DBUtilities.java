@@ -9,7 +9,7 @@ import java.sql.*;
 /**
  * Created by Andrew on 3/9/2017.
  *
- * A set of methods to retrieve and store persistant data in the database for
+ * A set of methods to retrieve and store persistent data in the database for
  * the network server.
  *
  */
@@ -51,7 +51,7 @@ public class DBUtilities {
      * @param password the password for the user (Stored using SHA256)
      * @return true if user created, false otherwise
      */
-    public boolean createUser(String username, String password) throws NoSuchAlgorithmException {
+    public boolean createUser(String username, String password) {
         int result = 0;
         String query = "Select username from USER where username=?";
         String sql = "Insert into USER values(?,?)";
@@ -65,21 +65,11 @@ public class DBUtilities {
 
             if(rs.next()) return false; //username exists return false
 
-            //Convert the users password into SHA256 format
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
-            byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
-            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
-            for(int i = 0; i < bytes.length; i++)
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
-
-            //clear the byte array
-            for(int i = 0; i < bytes.length; i++) bytes[i] = 0;
-
             //Create User
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.clearParameters();
             stmt.setString(1,username);
-            stmt.setString(2,sb.toString());
+            stmt.setString(2,password);
 
             result = stmt.executeUpdate(); //1 if user was added to database
 
@@ -99,25 +89,15 @@ public class DBUtilities {
      * @param password password for the user
      * @return true if deleted, false otherwise
      */
-    public boolean deleteUser(String username, String password) throws NoSuchAlgorithmException {
+    public boolean deleteUser(String username, String password) {
         int result = 0;
         String sql = "delete from USER where username=? and password=?";
 
         try {
-            //Convert the users password into SHA256 format
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
-            byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
-            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
-            for(int i = 0; i < bytes.length; i++)
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
-
-            //clear the byte array
-            for(int i = 0; i < bytes.length; i++) bytes[i] = 0;
-
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.clearParameters();
             stmt.setString(1,username);
-            stmt.setString(2,sb.toString());
+            stmt.setString(2,password);
 
             result = stmt.executeUpdate();
 
@@ -137,27 +117,16 @@ public class DBUtilities {
      * @param password the password of the player
      * @return true if valid credentials, false otherwise
      */
-    public boolean authenticateUser(String username, String password) throws NoSuchAlgorithmException {
+    public boolean authenticateUser(String username, String password) {
         int result = 0;
         String query = "Select username from USER where username=? and password=?";
 
         try {
-
-            //Convert the users password into SHA256 format
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
-            byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
-            StringBuffer sb = new StringBuffer(); //String buffer to build the password string
-            for(int i = 0; i < bytes.length; i++)
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
-
-            //clear the byte array
-            for(int i = 0; i < bytes.length; i++) bytes[i] = 0;
-
             //Check if credentials are correct
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.clearParameters();
             pstmt.setString(1,username);
-            pstmt.setString(2,sb.toString());
+            pstmt.setString(2,password);
             ResultSet rs = pstmt.executeQuery();
 
             if(rs.next())

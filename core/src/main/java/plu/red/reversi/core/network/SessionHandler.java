@@ -17,7 +17,7 @@ public class SessionHandler implements Runnable, INetworkListener {
     //Fields
     private Client client;
     private User user;
-    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    private String baseURI; //Just temp, will change with production server
     private boolean loggedIn = true;
 
     /**
@@ -25,9 +25,10 @@ public class SessionHandler implements Runnable, INetworkListener {
      * @param client The web client used to call the server
      * @param user The user object for the current logged in user
      */
-    public SessionHandler(Client client, User user) {
+    public SessionHandler(Client client, User user, String baseURI) {
         this.client = client;
         this.user = user;
+        this.baseURI = baseURI;
         Coordinator.addListenerStatic(this); //Add the listener
     }//constructor
 

@@ -5,11 +5,8 @@ import org.glassfish.jersey.media.sse.SseBroadcaster;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.endpoints.GameEndpoint;
-import plu.red.reversi.server.listener.ISessionListener;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +50,7 @@ public class GameManager {
         if(games.get(id).players.size() >= games.get(id).numPlayers) return false;
         System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + " to Game: " + id);
         games.get(id).players.add(user);
+        UserManager.INSTANCE.setStatus(user.getUsername(), "WAITING FOR GAME TO START");
         return true;
     }//addPlayer
 
@@ -67,6 +65,7 @@ public class GameManager {
         for(User u: games.get(id).players) {
             if(u.getUsername().equals(user)) {
                 games.get(id).players.remove(u);
+                UserManager.INSTANCE.setStatus(u.getUsername(), "IN LOBBY");
                 return true;
             }//if
         }//for
@@ -110,6 +109,8 @@ public class GameManager {
      */
     public void startGame(int id) {
         games.get(id).status = GamePair.GameStatus.PLAYING;
+        for(User u: games.get(id).players)
+                UserManager.INSTANCE.setStatus(u.getUsername(), "IN GAME");
     }//startGame
 
     /**
@@ -132,13 +133,13 @@ public class GameManager {
                             games.get(i).players.remove(j);
 
                             //if the game is in lobby
-                            if(j == 0 && games.get(i).getStatus() == GamePair.GameStatus.LOBBY) {
+                            if(j == 0 && (games.get(i).getStatus() == GamePair.GameStatus.LOBBY || games.get(i).getStatus() == GamePair.GameStatus.PLAYING)) {
                                 games.remove(i); //remove the game
                                 broadcast.remove(i); //remove the broadcaster
+                                System.out.println("[GAME MANAGER] REMOVING GAME: " + i);
                                 break;
                             }//if
 
-                            //TODO: Broadcast that the user has disconnected
                             broadcastUserChange(u, i);
                             break;
 
@@ -150,6 +151,11 @@ public class GameManager {
 
     }//endSession
 
+    /**
+     * Broadcasts that a user has disconnected from the current game
+     * @param u the User that left
+     * @param gameID the id of the game that the user left
+     */
     private void broadcastUserChange(User u, int gameID) {
         OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
         OutboundEvent event = eventBuilder.mediaType(MediaType.APPLICATION_JSON_TYPE)
