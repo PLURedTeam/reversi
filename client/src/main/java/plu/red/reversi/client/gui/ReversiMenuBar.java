@@ -29,7 +29,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
     private JMenuItem newOnlineGameItem;
-    private JMenuItem joinOnlineGameItem;
 
     private JMenuItem highlightMenuItem;
     private JMenuItem bestMoveMenuItem;
@@ -94,14 +93,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
                 "Save the current game");
         saveGameItem.addActionListener(this);
         menu.add(saveGameItem);
-
-        joinOnlineGameItem = new JMenuItem("Join Online Game");
-        joinOnlineGameItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_J, InputEvent.META_MASK));
-        joinOnlineGameItem.getAccessibleContext().setAccessibleDescription(
-                "Join an existing online game.");
-        joinOnlineGameItem.addActionListener(this);
-        menu.add(joinOnlineGameItem);
 
         menu.addSeparator();
 
@@ -202,11 +193,5 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         if(e.getSource() == saveGameItem) {
             gui.saveGame();
         }
-
-        if(e.getSource() == joinOnlineGameItem) {
-            gui.joinNetworkGame();
-        }
-
-
     }
 }
