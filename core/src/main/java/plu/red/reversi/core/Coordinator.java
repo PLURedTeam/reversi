@@ -132,7 +132,7 @@ public abstract class Coordinator {
                 if(!cmd.isValid(this)) return false;
         }
 
-        if(cmd.source == Command.Source.CLIENT) {
+        if(cmd.source == Command.Source.CLIENT && WebUtilities.INSTANCE.loggedIn()) {
             if(cmd instanceof ChatCommand)
                 WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
             else

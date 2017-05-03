@@ -461,7 +461,7 @@ public class WebUtilities {
                 gui.showErrorDialog("Start Game Error", "The server is currently unreachable. Please try again later.");
             }//catch
         } else {
-            gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
+            gui.showErrorDialog("Start Game Error", "You are not currently logged in. You must login first");
         }//else
 
     }//startGame
@@ -484,10 +484,10 @@ public class WebUtilities {
             } catch (Exception e) {
                 e.printStackTrace();
                 e.getMessage();
-                gui.showErrorDialog("Start Game Error", "The server is currently unreachable. Please try again later.");
+                gui.showErrorDialog("Send Move Error", "The server is currently unreachable. Please try again later.");
             }//catch
         } else {
-            gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
+            gui.showErrorDialog("Send Move Error", "You are not currently logged in. You must login first");
         }//else
 
     }//startGame
