@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.NetworkPlayer;
 
 /**
  * Glory to the Red Team.
@@ -61,7 +62,8 @@ public class MoveCommand extends BoardCommand {
         // Is it this Player's turn and is the position valid on the board
         return controller instanceof Game &&
                 ((Game)controller).getCurrentPlayer().getID() == playerID &&
-                ((Game)controller).getGameLogic().isValidMove(new MoveCommand(playerID, position));
+                ((Game)controller).getGameLogic().isValidMove(new MoveCommand(playerID, position)) &&
+                !(((Game)controller).getPlayer(playerID) instanceof NetworkPlayer);
     }
 
     /**
