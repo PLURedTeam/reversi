@@ -472,7 +472,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.mBoard.clearAnimations();
+                if(mRenderer.mBoard != null)
+                    mRenderer.mBoard.clearAnimations();
 
                 synchronized (mBoardIterator) {
                     mBoardIterator.goTo(pos);
@@ -699,7 +700,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
-                    mRenderer.mBoard.clearAnimations();
+                    if(mRenderer.mBoard != null)
+                        mRenderer.mBoard.clearAnimations();
                 }
             });
         }
