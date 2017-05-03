@@ -378,6 +378,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     @Override
     public void onBoardUpdate(BoardUpdate update) {
+
+        // every time a move is played, the selected index must be cleared if existing.
+        mSelectedIndex = null;
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
@@ -404,9 +408,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     @Override
     public void onAnimationsDone(Board3D board) {
+
         // enable the ability to control again
-        if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            setPlayerEnabled(true);
+        setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
 
         doHighlights();
     }
@@ -570,13 +574,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mSelectedIndex = null;
     }
 
-    public void disablePlayer() {
-        setPlayerEnabled(false);
+    public void setPlayerEnabled(boolean enabled) {
 
-        mSelectedIndex = null;
-    }
-
-    private void setPlayerEnabled(boolean enabled) {
+        System.out.println("Setting player enabled state: " + enabled);
 
         if(mCanDoCommand != enabled) {
 
