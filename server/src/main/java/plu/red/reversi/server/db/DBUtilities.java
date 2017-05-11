@@ -54,7 +54,7 @@ public class DBUtilities {
     public boolean createUser(String username, String password) {
         int result = 0;
         String query = "Select username from USER where username=?";
-        String sql = "Insert into USER values(?,?)";
+        String sql = "Insert into USER values(?,?,0,0)";
 
         try {
             //Check if username exists
