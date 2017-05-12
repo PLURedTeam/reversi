@@ -1,9 +1,6 @@
 package plu.red.reversi.server.db;
 
 //import statements
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 /**
@@ -34,16 +31,24 @@ public class DBUtilities {
         dbConnection = new DBConnection(); //Create the connection
         dbConnection.openDB(); //Open the connection
         conn = dbConnection.getConn(); //Set the database connection
+    }//constructor
 
-        //TURN ON FOREIGN KEY CONSTRAINTS
-        String sql = "PRAGMA foreign_keys = ON;";
+
+    private void initDB() {
+
         try {
-            Statement command = conn.createStatement();
-            command.execute(sql);
+            if(dbConnection.getConn().isClosed()) {
+                dbConnection = new DBConnection(); //Create the connection
+                dbConnection.openDB(); //Open the connection
+                conn = dbConnection.getConn(); //Set the database connection
+            }//if
         } catch (SQLException e) {
             e.printStackTrace();
-        }//catch
-    }//constructor
+        }
+
+
+    }
+
 
     /**
      * Creates the user in the database
@@ -52,6 +57,9 @@ public class DBUtilities {
      * @return true if user created, false otherwise
      */
     public boolean createUser(String username, String password) {
+
+        initDB();
+
         int result = 0;
         String query = "Select username from USER where username=?";
         String sql = "Insert into USER values(?,?,0,0)";
@@ -90,6 +98,9 @@ public class DBUtilities {
      * @return true if deleted, false otherwise
      */
     public boolean deleteUser(String username, String password) {
+
+        initDB();
+
         int result = 0;
         String sql = "delete from USER where username=? and password=?";
 
@@ -118,6 +129,9 @@ public class DBUtilities {
      * @return true if valid credentials, false otherwise
      */
     public boolean authenticateUser(String username, String password) {
+
+        initDB();
+
         int result = 0;
         String query = "Select username from USER where username=? and password=?";
 

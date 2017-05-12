@@ -139,6 +139,10 @@ public class WebUtilities {
                     return true;
                 }//if
 
+
+
+                System.out.println("Response code: "+ response.getStatus());
+
                 //If the code makes it this far, an internal server error has occurred.
                 gui.showErrorDialog("Login Error", "A server error occured. Please try again later.");
 
