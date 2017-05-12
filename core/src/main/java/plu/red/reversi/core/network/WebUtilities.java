@@ -48,7 +48,7 @@ public class WebUtilities {
 
     private Client client;
     //private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
-    private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/"; //Production Server URI
+    private String baseURI = "http://104.131.143.82:8080/reversi/reversi/"; //Production Server URI
     private int sessionID;
     private User user = new User();
     private boolean loggedIn = false;
