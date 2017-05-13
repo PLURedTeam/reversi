@@ -28,7 +28,7 @@ public class WebUtilities {
     public static WebUtilities INSTANCE = new WebUtilities();
 
     private Client client;
-    private String baseURI = "http://localhost:8080/reversi/"; //Just temp, will change with production server
+    private String baseURI = "http://172.17.0.2:8080/reversi/reversi"; //Just temp, will change with production server
     //private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
     private int sessionID;
     private User user = new User();

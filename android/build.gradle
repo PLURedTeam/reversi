@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
+        classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
     }
 }
 
@@ -27,6 +27,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        multiDexEnabled true
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         compileOptions {
@@ -39,6 +41,15 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/NOTICE' // will not include NOTICE file
+        exclude 'META-INF/LICENSE' // will not include LICENSE file
+        exclude 'META-INF/notice'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license'
+        exclude 'META-INF/license.txt'
     }
 }
 

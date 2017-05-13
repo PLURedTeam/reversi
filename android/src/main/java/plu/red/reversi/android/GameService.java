@@ -74,8 +74,7 @@ public class GameService extends Service implements ICommandListener {
         }
 
         // create a basic "default" game to get the user engaged.
-
-        Game game = new Game(null);
+        Game game = new Game(null, null);
 
         SettingsLoader instance = SettingsLoader.INSTANCE;
 
@@ -184,7 +183,7 @@ public class GameService extends Service implements ICommandListener {
                 shouldSave = shouldSave || !(p instanceof BotPlayer);
 
             if(shouldSave) {
-                DBUtilities.INSTANCE.saveGame(mGame.getGameID(), mGame.getHistory(),
+                DBUtilities.INSTANCE.saveGame(mGame.getHistory(),
                         mGame.getAllPlayers(),
                         mGame.getSettings().toJSON(),
                         SimpleDateFormat.getDateTimeInstance().format(new Date())

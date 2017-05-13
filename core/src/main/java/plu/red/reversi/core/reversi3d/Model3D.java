@@ -52,10 +52,6 @@ public abstract class Model3D {
 
     private int lastTick; /// keeps track of the last value for 'tick' which was supplied to update()
 
-
-    public VertexBufferObject<Vector4fc> vertices; /// the vertex buffer object containing all of the vertices for the current model
-    public VertexBufferObject<Vector3fc> normals;  /// the vertex buffer object containing all of the normal vectors for the current model. This VBO is auto-generated
-
     private final Graphics3D g3d;    /// the graphics renderer used by this model (should be the same for a whole tree)
     private final Pipeline pipeline; /// the rendering pipeline used by this model
 
@@ -64,9 +60,6 @@ public abstract class Model3D {
     public Model3D(Graphics3D g3d, Pipeline pipeline) {
 
         id = nextID++;
-
-        vertices = new VertexBufferObject<>(Vector4fc.class);
-        normals = new VertexBufferObject<>(Vector3fc.class);
 
         alphaBlended = false;
 
@@ -102,151 +95,12 @@ public abstract class Model3D {
      */
     // THIS SHOULD CALL SUPER
     public Model3D clone() {
-
         Model3D n = newInstance();
-
-        n.vertices = vertices;
-        n.normals = normals;
 
         return n;
     }
 
     abstract Model3D newInstance();
-
-    public HashMap<String, VertexBufferObject> extras;
-
-    abstract int getSectionCount();
-    abstract int getFaceCount(int sectionIndex);
-
-    abstract Vector3f[] getFace(int sectionIndex, int faceIndex);
-
-    /**
-     *
-     * Using getFace() abstract method, calculates a set of normals and vertices for the current object. Uploads
-     * the VBOs upon completion.
-     *
-     * @param vbo the buffer object to recalculate, as specified by a name in the shader.
-     */
-    public void recalculate(String vbo) {
-
-        if(vbo == null) {
-
-            for(String v : pipeline.getExtras().keySet()) {
-                recalculate(v);
-            }
-        }
-
-        else if(vbo.equals("vPosition")) {
-
-            int sectionCount = getSectionCount();
-
-            for (int sectionId = 0; sectionId < sectionCount; sectionId++) {
-                calculateVertexSection(sectionId);
-            }
-
-            try {
-                g3d.uploadVBO(vertices);
-                g3d.uploadVBO(normals);
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        else if(vbo.equals("vNormal")) {} // do nothing since normals are generated earlier
-
-        else {
-            System.err.println("Unknown VBO type not handled by object: " + vbo);
-        }
-    }
-
-    /**
-     * Calculates a vertex face (AKA a surface with no sharp edges) by calling delegated methods.
-     * @param sectionId the vertex face id to update
-     */
-    private void calculateVertexSection(int sectionId) {
-        Vector3f norm = new Vector3f();
-        Vector3f tmp = new Vector3f();
-
-        // now that we have all the points, we are going to have to add the normals by using those mapped triangles and calculating their adjacent normals.
-        TreeMap<Vector3fc, Vector3f> vertexFaces = new TreeMap<>(new Comparator<Vector3fc>() {
-            @Override
-            public int compare(Vector3fc v1, Vector3fc v2) {
-                if(v1.distance(v2) < 1e-4) {
-                    return 0;
-                }
-
-                if(Math.abs(v2.x() - v1.x()) > 1e-4)
-                    return v2.x() - v1.x() > 0 ? 1 : -1;
-
-                if(Math.abs(v2.y() - v1.y()) > 1e-4)
-                    return v2.y() - v1.y() > 0 ? 1 : -1;
-
-                return v2.z() - v1.z() > 0 ? 1 : -1;
-            }
-        });
-        List<Vector3fc> verts = new LinkedList<>();
-
-        int count = getFaceCount(sectionId);
-
-        for(int i = 0;i < count;i++) {
-
-            Vector3f[] face = getFace(sectionId, i);
-
-            face[1].sub(face[0], norm);
-            face[2].sub(face[0], tmp);
-
-            norm.cross(tmp).normalize();
-
-            if(Float.isNaN(norm.length())) {
-                Vector3f tmp2 = new Vector3f();
-                Vector3f tmp3 = new Vector3f();
-                face[1].sub(face[0], tmp2);
-                face[2].sub(face[0], tmp3);
-                System.out.println("Got NaN from Cross: " + tmp2 + ", " + tmp3);
-                for(int j = 0;j < face.length;j++)
-                    System.out.println("FV: " + face[j]);
-            }
-
-            for(int j = 1;j < face.length - 1;j++) {
-                vertices.add(new Vector4f(face[0], 1));
-                verts.add(face[0]);
-                vertices.add(new Vector4f(face[j], 1));
-                verts.add(face[j]);
-                vertices.add(new Vector4f(face[j + 1], 1));
-                verts.add(face[j + 1]);
-            }
-
-            for(Vector3fc v : face) {
-                if(!vertexFaces.containsKey(v)) {
-                    vertexFaces.put(v, new Vector3f());
-                }
-
-                vertexFaces.get(v).add(norm);
-            }
-        }
-
-        for(Vector3fc v : verts) {
-            Vector3f n = vertexFaces.get(v);
-
-            if(n == null) {
-                // something went wrong
-                System.out.println("Could not getRep preexisting vertex for normal!!!");
-            }
-
-            if(n.length() == 0) {
-                System.out.println("Have a 0 length vector!");
-            }
-
-            if(Float.isNaN(n.length())) {
-                System.out.println("NaN vector!");
-            }
-
-            //System.out.println("Add normal: " + new Vector3f(n).normalize());
-            //System.out.println("For vertex: " + v);
-
-            normals.add(new Vector3f(n).normalize());
-        }
-    }
 
     /**
      * Should be called 60 times per second to allow object to perform changes to itself/animations.
@@ -277,19 +131,18 @@ public abstract class Model3D {
     public final void draw() {
 
         //g3d.setPipeline(pipeline);
-
         g3d.setAlphaBlending(alphaBlended);
-
-        if(vertices.isEmpty() && getSectionCount() > 0)
-            // vertex data should be generated
-            recalculate(null);
-
         //g3d.enablePipelineVerticesVBO("position", getPipeline());
+
+        int size = 0;
 
         HashMap<String, VertexBufferObject> vbos = pipeline.getExtras();
         for(String vbo : vbos.keySet()) {
-            if(vbos.get(vbo) == null)
-                g3d.bindPipelineVBO(vbo, pipeline, getExtra(vbo));
+            if(vbos.get(vbo) == null) {
+                VertexBufferObject extra = getExtra(vbo);
+                g3d.bindPipelineVBO(vbo, pipeline, extra);
+                size = Math.max(size, extra.size());
+            }
         }
 
         HashMap<String, Object> uniforms = pipeline.getUniforms();
@@ -302,7 +155,7 @@ public abstract class Model3D {
         }
 
         // now we have bound all the data for this object. Commence draw!
-        g3d.drawVertices(0, vertices.size());
+        g3d.drawVertices(0, size);
 
         //g3d.disablePipelineVerticesVBO("position", getPipeline());
 
@@ -499,17 +352,7 @@ public abstract class Model3D {
      * @param name the name of the vertex attribute which has been requested
      * @return a VBO for the shader to use. Should match the type requested in the shader, although not enforced.
      */
-    // THIS SHOULD CALL SUPER
-    public VertexBufferObject getExtra(String name) {
-        switch(name) {
-            case "vPosition":
-                return vertices;
-            case "vNormal":
-                return normals;
-        }
-
-        return null;
-    }
+    public abstract VertexBufferObject getExtra(String name);
 
     protected Pipeline getPipeline() {
         return pipeline;

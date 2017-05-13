@@ -87,7 +87,7 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View v) {
 
-        Game game = new Game(null);
+        Game game = new Game(null, null);
 
 
         game.setLogic(new ReversiLogic(game));
