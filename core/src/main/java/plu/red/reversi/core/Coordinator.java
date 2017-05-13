@@ -142,10 +142,6 @@ public abstract class Coordinator {
         // Perform the Command's action/s
         boolean successful = parseCommand(cmd);
         if(successful && cmd.source == Command.Source.CLIENT) {
-            // Command Successful, propogate to Server
-            // TODO: Propogate Command to the Server
-
-            WebUtilities.INSTANCE.sendMove(cmd);
 
             // Notify listeners that a Command has been accepted
             notifyCommandListeners(cmd);
