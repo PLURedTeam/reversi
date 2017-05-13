@@ -63,9 +63,14 @@ public class GameManager {
     public boolean removePlayer(int id, User user) {
         if(!games.containsKey(id)) return false;
         for(User u: games.get(id).players) {
-            if(u.getUsername().equals(user)) {
+            if(u.getUsername().equals(user.getUsername())) {
                 games.get(id).players.remove(u);
+                broadcastUserChange(u, id);
                 UserManager.INSTANCE.setStatus(u.getUsername(), "IN LOBBY");
+
+                if(games.get(id).players.isEmpty())
+                    games.remove(id);
+
                 return true;
             }//if
         }//for

@@ -48,8 +48,8 @@ public class WebUtilities {
 
     private Client client;
     //private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
-    //private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
-    private String baseURI = "http://104.131.143.82:8080/reversi/reversi/"; //Production Server URI
+    private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
+   // private String baseURI = "http://104.131.143.82:8080/reversi/reversi/"; //Production Server URI
 
     private int sessionID;
     private User user = new User();
@@ -444,6 +444,24 @@ public class WebUtilities {
             return false;
         }//else
     }//joinGame
+
+
+    /**
+     * Calls the server to leave the network game
+     */
+    public void leaveNetworkGame() {
+        if(networkGameID == -1) return;
+
+        //Create target and call server
+        WebTarget target = client.target(baseURI + "game/leave/" + networkGameID);
+        Response response = target.request().post(Entity.json(user));
+
+
+
+
+    }//leaveNetworkGame
+
+
 
     /**
      * Sends the game to the server in order to start it on the networked players application

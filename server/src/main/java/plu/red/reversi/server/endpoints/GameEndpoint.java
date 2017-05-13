@@ -126,6 +126,30 @@ public class GameEndpoint {
 
 
     /**
+     * Adds the user to a game that is waiting on players
+     * @param gameID the gameID of the game to add the user to
+     * @param user The user to add to the network game
+     * @return true if user added to game, false otherwise
+     */
+    @Path("leave/{id}")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response leaveGame(@PathParam("id") int gameID, User user) {
+        if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
+            throw new WebApplicationException(403);
+
+        boolean removed = GameManager.INSTANCE.removePlayer(gameID, user);
+
+        if(!GameManager.INSTANCE.gameExists(gameID))
+            throw new WebApplicationException(404);
+
+        return Response.ok(gameID).build();
+    }//joinGame
+
+
+
+
+    /**
      * Adds the move that is sent from a client into the game with the
      * id from the path parameter
      * @param id the game id

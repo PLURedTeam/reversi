@@ -35,6 +35,7 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
 
     private JButton startButton;
     private JButton loadButton;
+    private JButton leaveNetworkGame;
 
     public LobbyPanel(MainWindow gui, Lobby lobby) {
         super(gui);
@@ -60,13 +61,18 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
         loadButton = new JButton("Load");
         loadButton.addActionListener(this);
 
-        if(lobby.isNetworked())
-            loadButton.setEnabled(false);
-
-
         JPanel startContainer = new JPanel();
         startContainer.setLayout(new BoxLayout(startContainer, BoxLayout.X_AXIS));
         startContainer.add(loadButton);
+
+        if(lobby.isNetworked()) {
+            leaveNetworkGame = new JButton("Leave Game");
+            leaveNetworkGame.addActionListener(this);
+            loadButton.setVisible(false);
+            startContainer.add(leaveNetworkGame);
+        }//if
+
+
         startContainer.add(Box.createHorizontalGlue());
         startContainer.add(startButton);
 
@@ -144,6 +150,10 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
 
         if(e.getSource() == loadButton) {
             gui.loadGame();
+        }
+
+        if(e.getSource() == leaveNetworkGame) {
+            gui.leaveNetworkGame();
         }
     }
 

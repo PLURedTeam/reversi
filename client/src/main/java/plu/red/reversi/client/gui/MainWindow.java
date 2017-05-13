@@ -269,6 +269,13 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
         //WebUtilities.INSTANCE.createGame(p);
     }//createNetworkGame
 
+
+    public void leaveNetworkGame() {
+       WebUtilities.INSTANCE.leaveNetworkGame();
+       Client.getInstance().loadNetworkBrowser();
+    }//
+
+
     /**
      * Calls the server to get a list of available online games to join
      */
