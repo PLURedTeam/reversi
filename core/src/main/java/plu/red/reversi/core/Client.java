@@ -153,6 +153,29 @@ public class Client extends Controller {
         // Get information to save with
         String name = gui.showSaveDialog();
         if(name == null || name.length() < 1) return; // Cancelled
+
+
+        String[][] dbGames = DBUtilities.INSTANCE.getGames();
+        boolean dup = false;
+
+        boolean notSaved = true;
+
+        while(notSaved) {
+            for (int i = 0; i < dbGames.length; i++) {
+                dup = false;
+                if (name.equals(dbGames[i][0])) {
+                    gui.showErrorDialog("Save Game Error", "That game name exists. Please choose another name.");
+                    name = gui.showSaveDialog();
+                    dup = true;
+                    break;
+                }//if
+
+            }//for
+            if(dup == false)
+                notSaved = false;
+        }
+
+
         Game game = (Game)core;
         int gameID = game.getGameID();
 
