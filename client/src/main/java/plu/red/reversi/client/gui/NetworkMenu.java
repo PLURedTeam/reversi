@@ -217,9 +217,9 @@ public class NetworkMenu extends JMenu implements ActionListener {
             Object[] cols = {"Username", "Status", "Ranking"};
             JTable table = new JTable(rows, cols);
             table.setEnabled(false);
-            JOptionPane.showMessageDialog(null, new JScrollPane(table), "Online Users", 1);
+            JOptionPane.showMessageDialog(gui, new JScrollPane(table), "Online Users", 1);
         } else {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(gui,
                     "There are currently 0 users online",
                     "", 1);
 

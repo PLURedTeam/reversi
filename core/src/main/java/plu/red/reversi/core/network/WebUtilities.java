@@ -314,11 +314,16 @@ public class WebUtilities {
             WebTarget target = client.target(baseURI + "online-users");
             Response response = target.request(MediaType.APPLICATION_JSON).get();
 
-            ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>() {
-            });
+            ArrayList<User> users = null;
+
+            if(response.getStatus() == 404)
+                return users;
+
+            users = response.readEntity(new GenericType<ArrayList<User>>() {});
 
             return users;
         } catch (Exception e) {
+            e.printStackTrace();
             gui.showErrorDialog("Get Online Users Error", "The server is currently unreachable. Please try again later.");
             return null;
         }//catch
