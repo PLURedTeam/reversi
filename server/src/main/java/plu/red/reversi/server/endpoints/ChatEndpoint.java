@@ -1,10 +1,8 @@
 package plu.red.reversi.server.endpoints;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
-import plu.red.reversi.core.util.ChatMessage;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
 
 import javax.ws.rs.*;
@@ -13,11 +11,21 @@ import javax.inject.Singleton;
 
 /**
  * Created by Andrew on 3/23/17.
- * Glory to the Red Team.
  *
- * A set of endpoints that will be accessed from the base URI
- * These endpoints are not user specific and are to be used for
- * basic server interactions (i.e. non game or chat functions)
+ * A set of endpoints that will be accessed from the chat URI
+ * These endpoints are to be used for chat among network users.
+ *
+ * Chat uses Jersey Server Sent Events. These events are broadcast
+ * to all clients that currently have the eventOutput object. A client
+ * can get the eventOutput object (which will be the eventInput on the
+ * client side) by a GET request to the chat URI. To send a message, the
+ * client will send a POST request to the chat URI with the message that
+ * is to be broadcast.
+ *
+ * In order for the broadcaster to work properly, the class must be a
+ * singleton. This is annotated below with the @Singleton flag. Without
+ * this class as a singleton, each client that connects, will be given an
+ * eventOutput object that belongs to a new broadcaster for that instance.
  */
 @Singleton
 @Path("/chat")
@@ -47,7 +55,7 @@ public class ChatEndpoint {
      */
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
-    public EventOutput listenToBroadcast() {
+    public EventOutput registerListener() {
         final EventOutput eventOutput = new EventOutput();
         this.broadcaster.add(eventOutput);
         return eventOutput;

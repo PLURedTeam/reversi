@@ -325,7 +325,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
         // Ask about saving
         if(e.getSource() == this && master.getCore() instanceof Game) {
             Game game = (Game) master.getCore();
-            if(!game.getGameSaved()) { //If game has been saved, do not show prompt
+            if(!game.getGameSaved() && !game.isNetworked()) { //If game has been saved, do not show prompt
                 if (JOptionPane.showConfirmDialog(this,
                         "Do you want to save this game?", "Save",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)

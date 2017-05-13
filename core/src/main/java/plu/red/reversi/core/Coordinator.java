@@ -132,9 +132,11 @@ public abstract class Coordinator {
                 if(!cmd.isValid(this)) return false;
         }
 
-        if(cmd instanceof ChatCommand && cmd.source == Command.Source.CLIENT) {
-            // Propagate chat command to the Server
-            WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
+        if(cmd.source == Command.Source.CLIENT && WebUtilities.INSTANCE.loggedIn()) {
+            if(cmd instanceof ChatCommand)
+                WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
+            else
+                WebUtilities.INSTANCE.sendMove(cmd);
         }
 
         // Perform the Command's action/s

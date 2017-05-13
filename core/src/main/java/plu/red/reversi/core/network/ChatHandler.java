@@ -15,7 +15,7 @@ import javax.ws.rs.client.WebTarget;
 /**
  * Created by Andrew on 4/13/2017.
  *
- * Handles the Server Side Events for chat. Notifies the chat listeners when a new chat message is received
+ * Handles the Server Sent Events for chat. Notifies the chat listeners when a new chat message is received
  * from the server.
  */
 public class ChatHandler implements Runnable, INetworkListener {
