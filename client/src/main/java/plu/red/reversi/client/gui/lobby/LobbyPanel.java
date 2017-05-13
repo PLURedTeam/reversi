@@ -60,6 +60,10 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
         loadButton = new JButton("Load");
         loadButton.addActionListener(this);
 
+        if(lobby.isNetworked())
+            loadButton.setEnabled(false);
+
+
         JPanel startContainer = new JPanel();
         startContainer.setLayout(new BoxLayout(startContainer, BoxLayout.X_AXIS));
         startContainer.add(loadButton);
