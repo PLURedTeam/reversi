@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 
+import plu.red.reversi.core.Client;
+import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
@@ -58,6 +60,8 @@ public class GameService extends Service implements ICommandListener {
 
         super.onCreate();
 
+        Controller.init(null);
+
         Log.d(TAG, "Game service is alive");
 
         mBinder = new LocalBinder();
@@ -74,6 +78,7 @@ public class GameService extends Service implements ICommandListener {
         }
 
         // create a basic "default" game to get the user engaged.
+
         Game game = new Game(null, null);
 
         SettingsLoader instance = SettingsLoader.INSTANCE;

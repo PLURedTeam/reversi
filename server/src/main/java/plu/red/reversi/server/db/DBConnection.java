@@ -1,8 +1,6 @@
 package plu.red.reversi.server.db;
 
 //import statements
-
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,7 +24,7 @@ public class DBConnection {
     public DBConnection() {
         // Load the SQLite JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }//catch
@@ -49,17 +47,13 @@ public class DBConnection {
      */
     public String openDB() {
         try {
-            //Testing to see if db file exists
-            File file = new File("serverDB.db");
 
-            if(file.exists()) {
-                //Connects to the database file
-                conn = DriverManager.getConnection("jdbc:sqlite:serverDB.db");
-            } else {
+            String url = "jdbc:mysql://mysql.apxpro.com:3306/cs390?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+            String username = "teamred";
+            String password = "390rocks";
+
                 //Creates the database file and connects to it
-                conn = DriverManager.getConnection("jdbc:sqlite:serverDB.db");
-                CreateDB db = new CreateDB(conn); //Creates the tables in the database
-            }//else
+                conn = DriverManager.getConnection(url,username,password);
         } catch (SQLException e) {
             e.printStackTrace();
         }//catch
