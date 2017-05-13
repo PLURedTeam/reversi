@@ -1,11 +1,13 @@
 package plu.red.reversi.core;
 
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.History;
+import plu.red.reversi.core.util.DataMap;
 
 import java.util.LinkedList;
 
@@ -63,5 +65,23 @@ public class HistoryTest {
         assertEquals(3, history.getMoveCommandsUntil(3).size());
 
         assertEquals(5, ((MoveCommand)history.getMoveCommandsUntil(3).get(1)).position.column);
+    }
+
+    @Test
+    public void testSerialize() {
+        history.addCommand(new MoveCommand(0, new BoardIndex(1, 2)));
+        history.addCommand(new MoveCommand(1, new BoardIndex(3, 5)));
+        history.addCommand(new MoveCommand(0, new BoardIndex(2, 0)));
+
+        assertEquals(3, history.getNumBoardCommands());
+
+        DataMap data = new DataMap();
+        data.set("test", history);
+        JSONObject json = data.toJSON();
+
+        DataMap data2 = new DataMap(json);
+        History history2 = data2.get("test", History.class);
+
+        assertEquals(3, history2.getNumBoardCommands());
     }
 }

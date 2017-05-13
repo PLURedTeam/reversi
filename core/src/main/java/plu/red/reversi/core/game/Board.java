@@ -1,10 +1,13 @@
 package plu.red.reversi.core.game;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
+import plu.red.reversi.core.util.DataMap;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -15,6 +18,40 @@ import java.util.function.Consumer;
  * Represents the state of the board at a particular instant in time
  */
 public class Board implements Iterable<BoardIndex> {
+
+    // Register JSON Converter
+    static {
+        DataMap.Setting.registerConverter(Board.class,
+                (key, value, json) -> {
+                    JSONObject jobj = new JSONObject();
+                    int size = value.size;
+                    jobj.put("size", size);
+                    ArrayList<ArrayList<Integer>> b = new ArrayList<>();
+                    for(int i = 0; i < size; i++) {
+                        ArrayList<Integer> l = new ArrayList<>();
+                        for(int j = 0; j < size; j++)
+                            l.add(value.board[i][j]);
+                        b.add(l);
+                    }
+                    jobj.put("data", b);
+                    json.put(key, jobj);
+                },
+                (key, json) -> {
+                    JSONObject jobj = json.getJSONObject(key);
+                    int size = jobj.getInt("size");
+                    Board b = new Board(size);
+                    JSONArray rows = jobj.getJSONArray("data");
+                    for(int i = 0; i < size; i++) {
+                        JSONArray cols = rows.getJSONArray(i);
+                        for(int j = 0; j < size; j++) {
+                            b.board[i][j] = cols.getInt(j);
+                        }
+                    }
+                    return b;
+                });
+    }
+
+
     private int[][] board; // 2D array that represents the board. -1 represents an empty space.
     public final int size;
 

@@ -39,6 +39,7 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
     public static final float BORDER_SIZE = 0.08f;         /// the amount of extra space to put on the edge of the board around the tiles
 
     public static final int ANIMATION_QUEUE_DELAY = 20;    /// the amount of ticks to wait after an animation has been queued has been played
+    public static final int BLACKOUT_WAVE_PROPOGATE = 5;   /// the number of ticks before the blackout wave moves another piece "over"
 
     private Collection<Board3DListener> listeners;
 
@@ -53,6 +54,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
     private int size;                                      /// the size of one side of the board (the board is a square)
 
     private Game game;                                     /// the game object this board is showing (though not necessarily showing the latest state of)
+
+    private boolean doBlackout;                            /// for the endgame animation, whether or not an animated blackout should occur
+    private Color blackoutTo;                              /// for the endgame animation, specifies the color to animate dramtically to
 
     public Board3D(Graphics3D g3d, Pipeline pipeline, Game game) {
 
@@ -315,9 +319,15 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
             done = false;
         }
 
-        if(done && boardUpdates.isEmpty())
-            for(Board3DListener listener : listeners)
+        if(done && boardUpdates.isEmpty()) {
+
+            if(doBlackout) {
+                dispatchBlackout();
+            }
+
+            for (Board3DListener listener : listeners)
                 listener.onAnimationsDone(this);
+        }
 
         return updated;
     }
@@ -386,10 +396,51 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
     }
 
     /**
+     * Dramatically flip the board pieces, finishing so that the specified color is what is facing upu. This animation
+     * is useful for the implementation of an endgame animation.
+     * @param color the color to blackout to, or null if the board should be animated to a clear instead.
+     */
+    public void animBlackout(Color color) {
+        doBlackout = true;
+        blackoutTo = color;
+
+        if(boardUpdates.isEmpty())
+            dispatchBlackout();
+    }
+
+    private void dispatchBlackout() {
+        // set each piece to be the new value
+        for(int i = 0;i < pieces.length;i++) {
+            // figure out what the delay will be
+            Vector2ic pos = indexToCoord(i, size);
+            int delay = (pos.x() + pos.y()) * BLACKOUT_WAVE_PROPOGATE;
+
+            if(blackoutTo != null) {
+                if(pieces[i].isFlipped())
+                    pieces[i].setBaseColor(blackoutTo);
+                else
+                    pieces[i].setFlippedColor(blackoutTo);
+
+                if(isChild(pieces[i]))
+                    pieces[i].animateFlip(!pieces[i].isFlipped(), delay);
+                else {
+                    pieces[i].animateEnter(!pieces[i].isFlipped(), delay);
+                    addChild(pieces[i]);
+                }
+            }
+            else
+                removeChild(pieces[i]);
+        }
+
+        doBlackout = false;
+    }
+
+    /**
      * Immediately stops any running animations and clears the board update queue. the board will be left in a state
      * which reflects what would be visible after the current board update animation has finished completing.
      */
     public void clearAnimations() {
+        doBlackout = false;
         boardUpdates.clear();
 
         if(currentBoardUpdate != null) {

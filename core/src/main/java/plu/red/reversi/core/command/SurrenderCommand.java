@@ -1,5 +1,7 @@
 package plu.red.reversi.core.command;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.game.Game;
 
@@ -9,6 +11,8 @@ import plu.red.reversi.core.game.Game;
  * Command implementation class for a surrender action.
  */
 public class SurrenderCommand extends Command {
+
+    static final int SERIAL_ID = 2;
 
     /**
      * Integer ID specifying what Player issued this SurrenderCommand.
@@ -35,6 +39,17 @@ public class SurrenderCommand extends Command {
     }
 
     /**
+     * Deserialize Constructor. Deserializes a SurrenderCommand from a JSONObject.
+     *
+     * @param json JSONObject to deserialize
+     * @throws JSONException if there is a problem during serialization
+     */
+    SurrenderCommand(JSONObject json) throws JSONException {
+        super(Source.SERVER);
+        this.playerID = json.getInt("playerID");
+    }
+
+    /**
      * Uses data from a Coordinator object to determine whether or not this Command is valid. IE: Whether a move played
      * by a player is on a valid position of a board.
      *
@@ -45,5 +60,20 @@ public class SurrenderCommand extends Command {
     public boolean isValid(Coordinator controller) {
         return controller instanceof Game &&
                 ((Game)controller).getCurrentPlayer().getID() == playerID;
+    }
+
+    /**
+     * Serializes this Command into a JSONObject.
+     *
+     * @return New JSONObject from this Command
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("type", SERIAL_ID);
+        json.put("source", source.ordinal());
+        json.put("playerID", playerID);
+        return json;
     }
 }

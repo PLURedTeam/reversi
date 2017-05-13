@@ -1,7 +1,10 @@
 package plu.red.reversi.core.game;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.util.DataMap;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -11,6 +14,30 @@ import java.util.LinkedList;
  * Stores all the past actions and moves of the players.
  */
 public class History {
+
+    // Register JSON Converter
+    static {
+        DataMap.Setting.registerConverter(History.class,
+                (key, value, json) -> {
+                    JSONObject jobj = new JSONObject();
+                    jobj.put("size", value.moves.size());
+                    JSONArray jlist = new JSONArray();
+                    for(int i = 0; i < value.moves.size(); i++)
+                        jlist.put(i, value.moves.get(i).toJSON());
+                    jobj.put("data", jlist);
+                    json.put(key, jobj);
+                },
+                (key, json) -> {
+                    JSONObject jobj = json.getJSONObject(key);
+                    int size = jobj.getInt("size");
+                    JSONArray jlist = jobj.getJSONArray("data");
+                    History hist = new History();
+                    for(int i = 0; i < size; i++)
+                        hist.moves.add((BoardCommand)Command.fromJSON(jlist.getJSONObject(i)));
+                    return hist;
+                });
+    }
+
     private ArrayList<BoardCommand> moves;
 
     /**

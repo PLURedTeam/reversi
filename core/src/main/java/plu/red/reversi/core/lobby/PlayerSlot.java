@@ -26,6 +26,7 @@ public class PlayerSlot {
     protected boolean nameCustom = false;
     protected Color color;
     protected int aiDifficulty = 5;
+    protected boolean claimed = true;
 
     /**
      * Reference to parent Lobby Coordinator
@@ -55,6 +56,7 @@ public class PlayerSlot {
                 this.name = "Open Slot";
                 break;
         }
+        this.claimed = this.type != SlotType.NETWORK;
     }
 
     /**
@@ -71,6 +73,7 @@ public class PlayerSlot {
         this.type = type;
         this.color = color;
         this.name = name;
+        this.claimed = this.type != SlotType.NETWORK;
     }
 
     /**
@@ -87,6 +90,9 @@ public class PlayerSlot {
      */
     public void setType(SlotType type) {
 
+        if(!lobby.isNetworked() && type == SlotType.NETWORK)
+            type = SlotType.LOCAL;
+
         if(this.type != type) {
             switch (type) {
                 case LOCAL:
@@ -102,6 +108,7 @@ public class PlayerSlot {
             }
         }
         this.type = type;
+        this.claimed = this.type != SlotType.NETWORK;
 
         // Spoof settings change to update automatic name generation and the GUI
         lobby.onClientSettingsChanged();
@@ -166,4 +173,20 @@ public class PlayerSlot {
      * @param difficulty Integer <code>aiDifficulty</code> to set
      */
     public void setAIDifficulty(int difficulty) { this.aiDifficulty = difficulty; }
+
+    /**
+     * Claimed Status Getter. Retrieves whether or not this PlayerSlot has been claimed / has a player for it.
+     * Automatically <code>true</code> for Local and AI slots.
+     *
+     * @return <code>true</code> if the slot is claimed, <code>false</code> otherwise
+     */
+    public boolean isClaimed() { return claimed; }
+
+    /**
+     * Claimed Status Setter. Sets the <code>claimed</code> status of this PlayerSlot. Should not be used for Lopcal
+     * or AI slots.
+     *
+     * @param claimed Boolean <code>claimed</code> status
+     */
+    public void setClaimed(boolean claimed) { this.claimed = claimed; }
 }

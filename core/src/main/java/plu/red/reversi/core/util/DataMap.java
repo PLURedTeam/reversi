@@ -1,5 +1,6 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -605,6 +606,10 @@ public class DataMap {
             registerConverter(Double.class,  (key, value, json) -> json.put(key, value), (key, json) -> json.getDouble(key));
             registerConverter(Short.class,   (key, value, json) -> json.put(key, value), (key, json) -> (short)json.getInt(key));
             registerConverter(Long.class,    (key, value, json) -> json.put(key, value), (key, json) -> (long)json.getInt(key));
+
+            // Register pure JSON Conversions
+            registerConverter(JSONObject.class, (key, value, json) -> json.put(key, value), (key, json) -> json.getJSONObject(key));
+            registerConverter(JSONArray.class,  (key, value, json) -> json.put(key, value), (key, json) -> json.getJSONArray(key));
 
             // Register Recursive Conversion
             registerConverter(DataMap.class, (key, value, json) -> json.put(key, value.toJSON()), (key, json) -> new DataMap(json.getJSONObject(key)));

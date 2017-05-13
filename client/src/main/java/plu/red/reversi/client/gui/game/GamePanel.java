@@ -4,9 +4,9 @@ import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
+import plu.red.reversi.core.Client;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
-import plu.red.reversi.core.util.ChatMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,7 +60,8 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
         boardPanel.add(preserveAspectPanel, BorderLayout.CENTER);
 
         historyPanel = new GameHistoryPanel(game);
-        chatPanel = new ChatPanel(ChatMessage.Channel.game(""+game.getGameID()));
+        chatPanel = new ChatPanel(Client.getInstance().getChat());
+        game.addListener(chatPanel);
 
         // The board panel goes in the center
         this.add(boardPanel, BorderLayout.CENTER);

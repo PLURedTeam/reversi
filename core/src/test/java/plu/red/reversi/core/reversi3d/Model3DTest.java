@@ -25,7 +25,7 @@ public class Model3DTest {
 
     @Test
     public void testRecalculate() {
-        Model3D m3d = new StubModel3D(g3d, pipeline);
+        SurfaceModel3D m3d = new StubModel3D(g3d, pipeline);
 
         m3d.recalculate(null);
 
@@ -79,7 +79,7 @@ public class Model3DTest {
 
     @Test
     public void testModelTree() {
-        Model3D root = new StubModel3D(g3d, pipeline);
+        SurfaceModel3D root = new StubModel3D(g3d, pipeline);
         root.recalculate(null);
         Model3D l1 = root.clone();
         Model3D l2 = l1.clone();
@@ -105,7 +105,7 @@ public class Model3DTest {
         Assert.assertEquals(15, g3d.getCallSequence().size());
     }
 
-    public class StubModel3D extends Model3D {
+    public class StubModel3D extends SurfaceModel3D {
 
         public StubModel3D(Graphics3D g3d, Pipeline pipeline) {
             super(g3d, pipeline);

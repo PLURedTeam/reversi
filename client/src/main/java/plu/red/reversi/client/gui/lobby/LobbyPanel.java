@@ -8,7 +8,6 @@ import plu.red.reversi.client.gui.util.Utilities;
 import plu.red.reversi.core.*;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.lobby.PlayerSlot;
-import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
@@ -32,7 +31,6 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
     private SettingsPanel panelSettings;
     private ChatPanel panelChat;
     private JPanel playerSelectList;
-    private PlayerPanelSelect addPlayerButtons;
     //private ArrayList<PlayerPanel> playerSlots = new ArrayList<>();
 
     private JButton startButton;
@@ -103,7 +101,8 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
         this.add(rightPanel, BorderLayout.EAST);
 
         // Create the Chat Panel
-        panelChat = new ChatPanel(ChatMessage.Channel.LOBBY_PREFIX);
+        panelChat = new ChatPanel(gui.getController().getChat());
+        lobby.addListener(panelChat);
         this.add(panelChat, BorderLayout.SOUTH);
 
         // Create the Player Slots
@@ -128,21 +127,12 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
             playerSelectList.add(pp);
         }
 
-        // Keep at bottom
-        addPlayerButtons = new PlayerPanelSelect(this);
-        if(lobby.getAllSlots().size() < lobby.getMaxPlayerCount() && !lobby.isGameLoaded())
-            playerSelectList.add(addPlayerButtons);
-
         this.revalidate();
         this.repaint();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        if(e.getSource() == addPlayerButtons.add) {
-            lobby.addSlot(PlayerSlot.SlotType.LOCAL);
-        }
 
         if(e.getSource() == startButton) {
             gui.startGame();
@@ -163,21 +153,5 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
     @Override
     public void cleanup() {
         // NOOP
-    }
-
-    public static class PlayerPanelSelect extends JPanel {
-
-        public final JButton add;
-
-        public PlayerPanelSelect(ActionListener buttonListener) {
-            this.setMaximumSize(new Dimension(10000, 36));
-
-            add = new JButton("Add Player");
-            add.setVerticalAlignment(SwingConstants.CENTER);
-            add.setHorizontalAlignment(SwingConstants.CENTER);
-            add.addActionListener(buttonListener);
-
-            this.add(add);
-        }
     }
 }

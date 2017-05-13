@@ -30,6 +30,14 @@ import java.util.*;
 public class GoLogic extends GameLogic {
     public final static int[] VALID_PLAYER_COUNTS = {2, 3, 4, 5, 6, 7, 8};
 
+
+    /**
+     * Type Getter. Retrieves the type of this GameLogic.
+     *
+     * @return Type of GameLogic
+     */
+    public Type getType() { return Type.GO; }
+
     /**
      * Constructs a new GoLogic Unit to be able to play a game of Go.
      * @param game Game this logic is used for.

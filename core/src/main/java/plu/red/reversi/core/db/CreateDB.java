@@ -14,7 +14,7 @@ import java.sql.Statement;
 public class CreateDB {
 
     //fields
-    private Connection conn; //Connection object for the util
+    private Connection conn; //Connection object for the database
 
     /**
      * Constructor for the CreateDB class
@@ -38,7 +38,7 @@ public class CreateDB {
     }//constructor
 
     /**
-     * Creates the GAME table in the util using SQL commands
+     * Creates the GAME table in the database using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -58,7 +58,7 @@ public class CreateDB {
     }//createGameTable
 
     /**
-     * Creates the GAME_HISTORY table in the util using SQL commands
+     * Creates the GAME_HISTORY table in the database using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -84,7 +84,7 @@ public class CreateDB {
     }//createGameHistoryTable
 
     /**
-     * Creates the GAME_SETTINGS table in the util using SQL commands
+     * Creates the GAME_SETTINGS table in the database using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */
@@ -105,7 +105,7 @@ public class CreateDB {
     }//createGameSettingsTable
 
     /**
-     * Creates the PLAYERS table in the util using SQL commands
+     * Creates the PLAYERS table in the database using SQL commands
      * If the SQL statement fails, will print the SQL message to
      *  the console
      */

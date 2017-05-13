@@ -37,6 +37,7 @@ public class DBUtilities {
      *  and sets the conn field to the connection
      */
     public DBUtilities() {
+        initDB();
     }//constructor
 
     private void initDB() {
@@ -51,7 +52,6 @@ public class DBUtilities {
 
                 Statement command = conn.createStatement();
                 command.execute(sql);
-                cleanupGames();
             } catch (SQLException e) {
                 e.printStackTrace();
             }//catch
@@ -89,7 +89,14 @@ public class DBUtilities {
         return gameID;
     }//createGame
 
-
+    /**
+     * New method for saving the game all at once
+     * @param h the history of the game
+     * @param p the players in the game
+     * @param s the settingsMap
+     * @param n the name of the game to be saved
+     * @return the gameID
+     */
     public int saveGame(History h, Player[] p, JSONObject s, String n) {
         int gameID;
 
@@ -106,30 +113,8 @@ public class DBUtilities {
         for(int i = 0; i < h.getNumBoardCommands(); i++)
             saveMove(gameID, h.getBoardCommand(i));
 
-
-
-
         return gameID;
     }//saveGame
-
-
-    public int saveGame(int gameID, History h, Player[] p, JSONObject s, String n) {
-
-        //Create a collection from an array
-        Collection<Player> players = new HashSet<Player>();
-        Collections.addAll(players,p);
-
-        saveGame(gameID);
-        updateGame(gameID, n);
-        saveGamePlayers(gameID, players);
-        saveGameSettings(gameID, s);
-
-        for(int i = 0; i < h.getNumBoardCommands(); i++)
-            saveMove(gameID, h.getBoardCommand(i));
-
-        return gameID;
-    }//saveGame
-
 
     /**
      * Saves the game to the database
@@ -252,8 +237,12 @@ public class DBUtilities {
         }//catch
     }//loadGamePlayers
 
-
-
+    /**
+     *
+     * @param gameID
+     * @param name
+     * @return
+     */
     public boolean updateGame(int gameID, String name) {
 
         initDB();
@@ -284,7 +273,6 @@ public class DBUtilities {
      * @param gameID the id of the game to be loaded
      * @return
      *
-     *  TODO: FINISH THIS
      */
     public History loadGame(int gameID) {
 
@@ -322,6 +310,12 @@ public class DBUtilities {
         return h;
     }//loadGame
 
+    /**
+     * Saves a move from a game in the database
+     * @param gameID the id of the game being played
+     * @param cmd the command that was played
+     * @return true if saved, false otherwise
+     */
     public boolean saveMove(int gameID, BoardCommand cmd) {
 
         initDB();
@@ -380,7 +374,6 @@ public class DBUtilities {
             }//catch
         return moveSaved;
     }//saveMove
-
 
     /**
      * Gets the games saved in the database
@@ -530,22 +523,5 @@ public class DBUtilities {
 
         return json;
     }//loadGameSettings
-
-    /**
-     * Cleans up the database removing games that were not saved
-     * to the database (i.e. games with no name)
-     */
-    private void cleanupGames() {
-
-        String sql = "delete from GAME where name IS NULL or name=''";
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.execute(sql);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }//catch
-    }//cleanupGames
 
 }//DBUtilities

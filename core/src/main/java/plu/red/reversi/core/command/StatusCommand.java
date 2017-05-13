@@ -1,6 +1,9 @@
 package plu.red.reversi.core.command;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.util.ChatMessage;
 
 /**
  * Glory to the Red Team.
@@ -8,6 +11,8 @@ import plu.red.reversi.core.Coordinator;
  * Command implementation class for a status message.
  */
 public class StatusCommand extends Command {
+
+    static final int SERIAL_ID = 1;
 
     /**
      * String status <code>message</code> carried by this StatusCommand.
@@ -35,6 +40,17 @@ public class StatusCommand extends Command {
     }
 
     /**
+     * Deserialize Constructor. Deserializes a StatusCommand from a JSONObject.
+     *
+     * @param json JSONObject to deserialize
+     * @throws JSONException if there is a problem during serialization
+     */
+    StatusCommand(JSONObject json) throws JSONException {
+        super(Source.SERVER);
+        this.message = json.getString("message");
+    }
+
+    /**
      * Uses data from a Coordinator object to determine whether or not this Command is valid. IE: Whether a move played
      * by a player is on a valid position of a board.
      *
@@ -45,5 +61,20 @@ public class StatusCommand extends Command {
     public boolean isValid(Coordinator controller) {
         // Always valid
         return true;
+    }
+
+    /**
+     * Serializes this Command into a JSONObject.
+     *
+     * @return New JSONObject from this Command
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("type", SERIAL_ID);
+        json.put("source", source.ordinal());
+        json.put("message", message);
+        return json;
     }
 }

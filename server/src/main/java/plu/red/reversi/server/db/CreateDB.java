@@ -1,7 +1,6 @@
 package plu.red.reversi.server.db;
 
 //import statements
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,7 +8,7 @@ import java.sql.Statement;
 /**
  * Created by Andrew on 3/8/2017.
  *
- * Creates the tables for the clientside database
+ * Creates the tables for the serverside database
  */
 public class CreateDB {
 
@@ -30,8 +29,27 @@ public class CreateDB {
             System.out.println("Could not connect to the database.");
         else {
             //Call methods to create tables
-            //TODO: Create methods for creating the server database
+            createUserTable();
         }//else
     }//constructor
 
+    /**
+     * Creates the USER table in the database using SQL commands
+     * If the SQL statement fails, will print the SQL message to
+     *  the console
+     */
+    private void createUserTable() {
+        String sql = "create table USER (\n"
+                + "username varchar(50) UNIQUE,\n"
+                + "password char(64),\n"
+                + "PRIMARY KEY(username)\n"
+                + ");";
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+
+    }//createUserTable
 }//class

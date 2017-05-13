@@ -22,7 +22,7 @@ import java.util.List;
  *
  * Will also select a shader which supports this type of shading automatically.
  */
-public abstract class ColorModel3D extends Model3D {
+public abstract class ColorModel3D extends SurfaceModel3D {
 
     private VertexBufferObject<Vector4fc> albedos;
 

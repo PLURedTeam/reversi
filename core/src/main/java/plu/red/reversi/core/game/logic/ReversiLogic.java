@@ -31,6 +31,14 @@ import java.util.function.BiFunction;
 public class ReversiLogic extends GameLogic {
     public final static int[] VALID_PLAYER_COUNTS = {2, 4};
 
+
+    /**
+     * Type Getter. Retrieves the type of this GameLogic.
+     *
+     * @return Type of GameLogic
+     */
+    public Type getType() { return Type.REVERSI; }
+
     /**
      * Constructs a new ReversiLogic Unit to be able to play a game of reversi.
      * @param game Game this logic is used for.

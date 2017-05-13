@@ -1,13 +1,16 @@
 package plu.red.reversi.server.endpoints;
 
+import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
+import plu.red.reversi.server.Managers.SessionManager;
+import plu.red.reversi.server.Managers.UserManager;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 /**
  * Created by Andrew on 3/14/17.
@@ -17,6 +20,7 @@ import javax.ws.rs.core.Response;
  * These endpoints are not user specific and are to be used for
  * basic server interactions (i.e. non game or chat functions)
  */
+@Path("/")
 public class BaseEndpoint {
 
     /**
@@ -29,13 +33,24 @@ public class BaseEndpoint {
     @Path("login")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public User login(User user) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response login(User user) {
+        if(user == null) throw new WebApplicationException(403);
 
-       // TODO: Connect with database to authenticate user
+        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
+            throw new WebApplicationException(409);
 
-       //TODO: Set the password to false in the object for security reasons
+        if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
+            user.setPassword("");
+        } else {
+            throw new WebApplicationException(403);
+        }//else
 
-        return null;
+        user.setStatus("In Lobby");
+        UserManager.INSTANCE.addUser(user);
+        user.setSessionID(SessionManager.INSTANCE.addSession());
+
+        return Response.ok().entity(user).build();
     }//login
 
     /**
@@ -46,38 +61,56 @@ public class BaseEndpoint {
     @Path("logout")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String logout(User user) {
-        return "true";
+    public boolean logout(User user) {
+
+        if(user == null)
+            throw new WebApplicationException(403);
+
+        UserManager.INSTANCE.removeUser(user);
+        SessionManager.INSTANCE.removeSession(user.getSessionID());
+        return true;
     }//logout
 
     /**
-     * Login method to authenticate the users credentials
-     * @param username The requested username of the user
-     * @param password The password of the new user, transmitted in SHA256
-     *                 format
+     * Create user method to add a new user to the database
+     * @param user the user to be added to the database
      * @return true if user was created, false if username exists
      */
     @Path("create-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String createUser(String username, String password) {
-        return "true";
+    public Response createUser(User user) {
+
+        if(user == null)
+            throw new WebApplicationException(400);
+
+        if(DBUtilities.INSTANCE.createUser(user.getUsername(),user.getPassword()))
+            return Response.ok().build();
+        else
+            throw new WebApplicationException(406);
+
     }//createUser
 
     /**
      * Deletes the user from the server database and removes all
      * saved games from the database. If user is logged in, will
      * logout user and terminate any games in progress.
-     * @param username the users username
-     * @param password the password of the user, transmitted in SHA256
-     *                 format
+     * @param user the user to be deleted from the database
      * @return true if user is deleted, false if incorrect credentials
      */
     @Path("delete-user")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String deleteUser(String username, String password) {
-        return "true";
+    public Response deleteUser(User user) {
+
+        if(user == null)
+            throw new WebApplicationException(400);
+
+        if(DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword()))
+            return Response.ok().build();
+        else
+            throw new WebApplicationException(406);
+
     }//deleteUser
 
     /**
@@ -89,12 +122,19 @@ public class BaseEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOnlineUsers() {
-        return null;
+        ArrayList<User> u = UserManager.INSTANCE.onlineUsers();
+        if(u.isEmpty()) throw new WebApplicationException(404);
+
+        //Create a wrapper to send collection without breaking it apart
+        GenericEntity<ArrayList<User>> users = new GenericEntity<ArrayList<User>>(u) {};
+
+        return Response.ok(users).build();
     }//getOnlineUsers
 
     /**
      * Gets the current status of the leaderboard
      * @return A JSON Object of the current leaderboard
+     * TODO: Implement this once the ranking system is in place
      */
     @Path("leaderboard")
     @GET
@@ -102,5 +142,24 @@ public class BaseEndpoint {
     public Response getLeaderboard() {
         return null;
     }//getLeaderboard
+
+    /**
+     * Keeps the current session Alive on the server
+     * @param sessionID
+     */
+    @Path("keep-session-alive/{id}")
+    @POST
+    public Response keepSessionAlive(@PathParam("id") int sessionID) {
+        SessionManager.INSTANCE.keepSessionAlive(sessionID);
+        return Response.ok().build();
+    }//keepSessionAlive
+
+    /**
+     * Test to see if the server is running correctly
+     */
+    @GET
+    public String test() {
+        return "Running!!!";
+    }//keepSessionAlive
 
 }//BaseEndpoint

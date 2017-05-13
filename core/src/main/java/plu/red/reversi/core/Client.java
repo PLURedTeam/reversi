@@ -1,11 +1,18 @@
 package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
+import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GoLogic;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.lobby.PlayerSlot;
+import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.ChatLog;
 
 /**
  * Glory to the Red Team.
@@ -13,61 +20,84 @@ import plu.red.reversi.core.lobby.Lobby;
  * Master Coordinator for client-side operations. The Client class controls all sub-Controllers and Models that are used
  * in the client side of the program. Main operations such as starting or loading a Game take place through this class.
  */
-public class Client {
+public class Client extends Controller {
 
-    // not public final because it needs to be initialized
-    private static Client INSTANCE = null;
-
-    /**
-     * Initialize the Client Controller with a IMainGUI reference.
-     *
-     * @param gui IMainGUI reference to init with
-     */
-    public static void init(IMainGUI gui) { INSTANCE = new Client(gui); }
-
-    /**
-     * Gets the global instance of the Client controller.
-     *
-     * @return Global Client instance
-     */
-    public static Client getInstance() { return INSTANCE; }
-
-    public final IMainGUI gui;
-
-    protected Coordinator core = null;
-
-
-
-    public Client(IMainGUI gui) {
-        this.gui = gui;
-        gui.setClient(this);
-        setCore(new Lobby(gui));
+    public Client(IMainGUI gui, ChatLog chat, Coordinator core) { super(gui, chat, core); }
+    public Client(IMainGUI gui, ChatLog chat) {
+        super(gui, chat);
+        setCore(new Browser(this, this.gui));
     }
 
-    public Client(IMainGUI gui, Coordinator core) {
-        this.gui = gui;
-        gui.setClient(this);
-        setCore(core);
+    private String queryName(boolean networked) {
+        String name = "Local Game";
+        if(networked) {
+            name = null;
+            while(name == null) {
+                name = gui.showQueryDialog("Game Name", "Enter a name for the new Game Lobby:");
+                if(name == null) return null; // Cancelled
+                else if(name.isEmpty()) {// TODO: Check for duplicate names
+                    gui.showErrorDialog("Game Name", "Name Cannot be Empty");
+                    name = null;
+                }
+            }
+        }
+        return name;
     }
 
+    public void loadNetworkBrowser() {
+        Browser b = new Browser(this, this.gui);
+        setCore(b);
+        b.refresh();
+    }//loadNetworkBroswer
 
-    protected final void setCore(Coordinator core) {
-        if(this.core != null) this.core.cleanup();
-        this.core = core;
-        gui.updateGUIMajor();
+    public void createIntoLobby(boolean networked) {
+
+        // Check for login status
+        if(networked && !WebUtilities.INSTANCE.loggedIn()) {
+            gui.showErrorDialog("Network Game", "You must be logged in to start a networked Game");
+            return;
+        }
+
+        // Figure out the Game name
+        String name = queryName(networked);
+        if(name == null) return; // Cancelled
+
+        // Figure out the Game type
+        Object type = gui.showQueryDialog("Game Type", "Select a type of Game to Host", GameLogic.Type.values(), GameLogic.Type.REVERSI);
+        if(type == null) return; // Cancelled
+        GameLogic logic;
+        switch((GameLogic.Type)type) {
+            case REVERSI:   logic = new ReversiLogic();     break;
+            case GO:        logic = new GoLogic();          break;
+            default:        throw new IllegalArgumentException("Unknown GameLogic Type Selected");
+        }
+
+        // Figure out Player counts
+        int[] ic = logic.validPlayerCounts();
+        Integer[] counts = new Integer[ic.length];
+        for(int i = 0; i < ic.length; i++) counts[i] = ic[i];
+        Object c = gui.showQueryDialog("Player Count", "Select the amount of Players that will be playing", counts, logic.minPlayerCount());
+        if(c == null) return; // Cancelled
+        Integer count = (Integer)c;
+
+        // Set the Lobby
+        setCore(new Lobby(this, gui, logic, networked, name));
+
+        // Add players
+        Lobby lobby = (Lobby)core;
+        lobby.addSlot(PlayerSlot.SlotType.LOCAL);
+        for(int i = 1; i < count; i++)
+            lobby.addSlot(networked ? PlayerSlot.SlotType.NETWORK : PlayerSlot.SlotType.LOCAL);
+
+        // Notify Server
+        if(networked) WebUtilities.INSTANCE.createGame(count, name);
     }
 
-    public Coordinator getCore() { return core; }
+    public void loadIntoLobby(boolean networked) {
 
-
-
-
-    public void createIntoLobby() {
-
-        setCore(new Lobby(gui));
-    }
-
-    public void loadIntoLobby() {
+        // Figure out the Game name
+        String gameName = queryName(networked);
+        if(gameName == null) return; // Cancelled
 
         // Get the name of the Game to load
         String name = gui.showLoadDialog();
@@ -86,7 +116,7 @@ public class Client {
         Game game = Game.loadGameFromDatabase(gui, gameID);
         game.setGameSaved(true); //Sets that the game has been saved before and has a name
 
-        setCore(new Lobby(gui, game));
+        setCore(new Lobby(this, gui, game, networked, gameName));
     }
 
     public void startGame() throws IllegalStateException {
@@ -96,6 +126,12 @@ public class Client {
             throw new IllegalStateException("Can only start a game from a Lobby");
 
         setCore(((Lobby)core).startGame());
+
+        //check for networked
+        if(((Game)core).isNetworked())
+            WebUtilities.INSTANCE.startGame((Game)core);
+
+
     }
 
     public void saveGame() throws IllegalStateException {
@@ -117,11 +153,6 @@ public class Client {
 
         DBUtilities.INSTANCE.saveGame(h,p,s,name);
 
-
-
-//        // Update the Game name in the database and save
-//        DBUtilities.INSTANCE.updateGame(gameID, name);
-//        DBUtilities.INSTANCE.saveGameSettings(gameID, game.getSettings().toJSON());
         game.setGameSaved(true);
     }
 }

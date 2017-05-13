@@ -1,6 +1,8 @@
 package plu.red.reversi.core.game.player;
 
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
@@ -37,6 +39,35 @@ public class BotPlayer extends Player implements Looper.LooperCallback<BoardInde
         super(game, playerID, color);
         thread = null;
         minimax = new ReversiMinimax(game, getID(), difficulty, Looper.getLooper(Thread.currentThread()).getCall(this));
+    }
+
+    /**
+     * Serial Constructor. Creates a BotPlayer belonging to an unserialized Game. BotPlayer is created with data unserialized
+     * from a given JSONObject.
+     *
+     * @param game Game object this Player belongs to
+     * @param json JSONObject storing this Player's data
+     * @throws JSONException if there is a problem during unserialization
+     */
+    public BotPlayer(Game game, JSONObject json) throws JSONException {
+        super(game, json);
+        thread = null;
+        int difficulty = json.getInt("difficulty");
+        minimax = new ReversiMinimax(game, getID(), difficulty, Looper.getLooper(Thread.currentThread()).getCall(this));
+    }
+
+    /**
+     * Serializes this Player into a JSONObject.
+     *
+     * @return New JSONObject from this Player
+     * @throws JSONException if there is a problem during serialization
+     */
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = super.toJSON();
+        json.put("difficulty", this.minimax.MAX_DEPTH);
+        json.put("type", 1);
+        return json;
     }
 
     /**

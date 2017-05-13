@@ -1,15 +1,18 @@
 package plu.red.reversi.core.game;
 
-import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.IMainGUI;
-import plu.red.reversi.core.SettingsLoader;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.*;
 import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.logic.GameLogic;
+
 import plu.red.reversi.core.game.logic.GameLogicCache;
+import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.db.DBUtilities;
 
@@ -33,9 +36,10 @@ public class Game extends Coordinator {
      * @param score The winning score of the game; can be 0 if no Player won
      */
     protected final void notifyGameOverListeners(Player player, int score) {
-        for(IListener listener : listenerSet) {
+        for(IListener listener : listenerSet)
             if(listener instanceof IGameOverListener) ((IGameOverListener)listener).onGameOver(player, score);
-        }
+        for(IListener listener : listenerSetStatic)
+            if(listener instanceof IGameOverListener) ((IGameOverListener)listener).onGameOver(player, score);
     }
 
     /**
@@ -46,7 +50,7 @@ public class Game extends Coordinator {
      * @return New Game object
      */
     public static Game loadGameFromDatabase(IMainGUI gui, int gameID) {
-        Game game = new Game(gui);
+        Game game = new Game(Controller.getInstance(), gui);
         game
                 .setGameID(gameID)
                 .setHistory(DBUtilities.INSTANCE.loadGame(gameID))
@@ -77,9 +81,12 @@ public class Game extends Coordinator {
     protected boolean gameInitialized = false;
     protected boolean gameRunning = true;
     private boolean gameSaved = false;
+    protected final boolean host;
 
     // Game Identification
     private int gameID = -1;
+    protected final boolean networked;
+    protected final String name;
 
 
 
@@ -139,9 +146,28 @@ public class Game extends Coordinator {
      * Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
      * DataMap and Players) and then be initialized.
      *
+     * @param master Controller object that is the master Controller for this program
      * @param gui IMainGUI object that displays for the program
      */
-    public Game(IMainGUI gui) { super(gui); }
+    public Game(Controller master, IMainGUI gui) {
+        this(master, gui, false, "Local Game");
+    }
+
+    /**
+     * Full Constructor. Creates a new blank Game object. Said object then needs to have parts set to it (such as a
+     * DataMap and Players) and then be initialized.
+     *
+     * @param master Controller object that is the master Controller for this program
+     * @param gui IMainGUI object that displays for the program
+     * @param networked Whether the Game is singleplayer or multiplayer
+     * @param name String <code>name</code> of the Game
+     */
+    public Game(Controller master, IMainGUI gui, boolean networked, String name) {
+        super(master, gui);
+        this.networked = networked;
+        this.name = name;
+        this.host = true;
+    }
 
     /**
      * Set this Game's GameLoic to the given object. Used to specifiy what type of game is being played. e.g. reversi.
@@ -228,6 +254,9 @@ public class Game extends Coordinator {
             gameLogic.initBoard(cmds);
             currentPlayer = getNextPlayerID(cmds.getLast().playerID);
         }
+
+        // Create Game Chat
+        if(networked) master.getChat().create(ChatMessage.Channel.game(name));
 
         gameInitialized = true;
 
@@ -402,7 +431,7 @@ public class Game extends Coordinator {
                 gameLogic.play((MoveCommand)cmd);
                 nextTurn();
             } catch(InvalidParameterException e) {
-                System.err.println(e.getMessage());
+                //System.err.println(e.getMessage());
             }
         }
 
@@ -459,6 +488,14 @@ public class Game extends Coordinator {
     public boolean isInitialized() { return gameInitialized; }
 
     /**
+     * Determines whether or not this game is the host game for a multiplayer session. Always <code>true</code> for
+     * singleplayer.
+     *
+     * @return <code>true</code> if this game is the host game, <code>false</code> otherwise
+     */
+    public boolean isHost() { return host; }
+
+    /**
      * GameID getter. Retrieves this Game's <code>gameID</code>.
      *
      * @return Integer <code>gameID</code> of this Game
@@ -478,6 +515,20 @@ public class Game extends Coordinator {
     public void setGameSaved(boolean gs) { gameSaved = gs; }
 
     /**
+     * Networked Getter. Determines whether or not this Game is a singleplayer or multiplayer Game.
+     *
+     * @return <code>true</code> if this Game is networked/multiplayer, <code>false</code> otherwise
+     */
+    public boolean isNetworked() { return networked; }
+
+    /**
+     * Name Getter. Retrieves the <code>name</code> of this Game.
+     *
+     * @return String <code>name</code>
+     */
+    public String getName() { return name; }
+
+    /**
      * Perform any cleanup operations that are needed, such as removing listeners that are not automatically cleaned up.
      */
     public void cleanup() {
@@ -488,7 +539,82 @@ public class Game extends Coordinator {
                 SettingsLoader.INSTANCE.removeSettingsListener((HumanPlayer)player);
         }
 
+        // Clear Game Chat
+        master.getChat().clear(ChatMessage.Channel.game(name));
+
         // TODO: Manually stop any running BotPlayer Minimax threads
+    }
+
+    /**
+     * Serialize this Game. Takes the data of this Game object and serializes it into a DataMap.
+     *
+     * @return Serialized DataMap
+     */
+    public DataMap serialize() {
+        DataMap data = new DataMap();
+
+        // Model Objects
+        data.set("settings",    settings);
+        data.set("board",       board);
+        data.set("history",     history);
+        data.set("type",        gameLogic.getType().ordinal());
+
+        // Player Data
+        data.set("playerCount", players.size());
+        int i = 0;
+        for(Player player : players.values())
+            try { data.set("player"+(i++), player.toJSON()); }
+            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
+
+        // State Flags
+        data.set("initialized", gameInitialized);
+        data.set("running",     gameRunning);
+        data.set("saved",       gameSaved);
+        data.set("networked",   networked);
+        data.set("name",        name);
+
+        // ID
+        data.set("id", gameID);
+
+        return data;
+    }
+
+    public Game(Controller master, IMainGUI gui, DataMap data) {
+        super(master, gui);
+
+        // Model Objects
+        settings    = data.get("settings",  DataMap.class);
+        board       = data.get("board",     Board.class);
+        history     = data.get("history",   History.class);
+        int ord     = data.get("type",      Integer.class);
+        GameLogic.Type type = GameLogic.Type.values()[ord];
+        switch(type) {
+            case REVERSI:   gameLogic = new ReversiLogic(this); break;
+            case GO:        gameLogic = new GoLogic(this); break;
+            default:    throw new IllegalArgumentException("Unknown GameLogic Type '"+type+"'");
+        }
+
+        // State Flags
+        gameRunning     = data.get("running",       Boolean.class);
+        gameSaved       = data.get("saved",         Boolean.class);
+        networked       = data.get("networked",     Boolean.class);
+        name            = data.get("name",          String.class);
+
+        // Player Data
+        int pc = data.get("playerCount", Integer.class);
+        for(int i = 0; i < pc; i++)
+            try { Player.unserializePlayer(this, data.get("player"+i, JSONObject.class),networked); }
+            catch(JSONException ex) { throw new RuntimeException(ex.getMessage()); }
+
+        gameInitialized = data.get("initialized",   Boolean.class);
+
+        // ID
+        gameID = data.get("id", Integer.class);
+
+        this.host = false;
+
+        // Start the Game
+        if(gameInitialized) this.initialize();
     }
 
 }

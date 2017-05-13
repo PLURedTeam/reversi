@@ -9,12 +9,12 @@ package plu.red.reversi.core;
 public interface IMainGUI {
 
     /**
-     * Client Setter. Sets what Client master controller this GUI is displaying for. Usually only used by the Client
+     * Controller Setter. Sets what master Controller this GUI is displaying for. Usually only used by the Controller
      * class's constructor.
      *
-     * @param client Client object to set
+     * @param controller Controller object to set
      */
-    void setClient(Client client);
+    void setController(Controller controller);
 
     /**
      * GUI Display Updater. Called from a Client object when the Client object has changed significantly and the GUI
@@ -39,19 +39,60 @@ public interface IMainGUI {
     String showSaveDialog();
 
     /**
-     * Load Dialog Display Method. Shows a Load Dialog o the user, which queries what Game to load from existing saved
+     * Load Dialog Display Method. Shows a Load Dialog to the user, which queries what Game to load from existing saved
      * Games. Can be cancelled.
      *
      * @return String name chosen, or null if the user cancelled
      */
     String showLoadDialog();
 
+    /**
+     * Information Dialog Display Method. Shows an Information Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     */
+    void showInformationDialog(String title, String body);
+
+    /**
+     * Error Dialog Display Method. Shows an Error Dialog to the user, displaying the given information.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     */
+    void showErrorDialog(String title, String body);
+
+    /**
+     * Query Dialog Display Method. Shows a Query Dialog to the user, displaying a question and expecting a response.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     * @return String response, or <code>null</code> for no response
+     */
+    String showQueryDialog(String title, String body);
+
+    /**
+     * Query Dialog Display Method. Shows a Query Dialog with a list of options to the user, displaying a question and
+     * expecting a response.
+     *
+     * @param title String <code>title</code> of the Dialog
+     * @param body String <code>body</code> of the Dialog
+     * @param values Object array of values to choose from
+     * @param defaultValue Default Object value to start selected
+     * @return Object value that was selected, or <code>null</code> for no response
+     */
+    Object showQueryDialog(String title, String body, Object[] values, Object defaultValue);
+
 
     public static class NullGUI implements IMainGUI {
-        @Override public void setClient(Client client) {}
+        @Override public void setController(Controller controller) {}
         @Override public void updateGUIMajor() {}
         @Override public void updateGUIMinor() {}
         @Override public String showSaveDialog() { return null; }
         @Override public String showLoadDialog() { return null; }
+        @Override public void showInformationDialog(String title, String body) {}
+        @Override public void showErrorDialog(String title, String body) {}
+        @Override public String showQueryDialog(String title, String body) { return null; }
+        @Override public Object showQueryDialog(String title, String body, Object[] values, Object defaultValue) { return null; }
     }
 }

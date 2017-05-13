@@ -1,5 +1,8 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 /**
  * Created by Andrew on 3/16/2017.
  *
@@ -11,8 +14,11 @@ public class User {
     //fields
     private String username;
     private String password;
+    private String status;
     private int sessionID;
     private int rank;
+
+    public User() {}//DefaultConstructor
 
     /**
      * Constructor for the user class
@@ -29,10 +35,32 @@ public class User {
 
     //Accessors and Mutators
     public String getUsername() { return username; }
+    public void setUsername(String u) { username = u;}
     public String getPassword() { return password; }
-    public int getSessionID() { return sessionID; }
-    public int getRank() { return rank; }
-    public void setSessionID(int s) { sessionID = s; }
     public void setPassword(String p) { password = p; }
+    public int getSessionID() { return sessionID; }
+    public void setSessionID(int s) { sessionID = s; }
+    public String getStatus() { return status; }
+    public void setStatus(String s) { status = s; }
+    public int getRank() { return rank; }
     public void setRank(int r) { rank = r; }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("username", username);
+        json.put("password", password);
+        json.put("status", status);
+        json.put("sessionID", sessionID);
+        json.put("ranking", rank);
+        return json;
+    }
+
+    public User(JSONObject json) throws JSONException {
+        username = json.getString("username");
+        password = json.getString("password");
+        status = json.getString("status");
+        sessionID = json.getInt("sessionID");
+        rank = json.getInt("ranking");
+    }
+
 }//User
