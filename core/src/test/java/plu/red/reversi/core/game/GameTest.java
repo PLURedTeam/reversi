@@ -21,7 +21,7 @@ public class GameTest {
 
     @Before
     public void setup() {
-        Controller.init(new Client(null));
+        Controller.init(new Client(null, null));
         game = new Game(Controller.getInstance(), new IMainGUI.NullGUI());
 
         game.setLogic(new ReversiLogic(game));

@@ -46,16 +46,22 @@ public abstract class Controller {
     protected Controller(IMainGUI gui, ChatLog chat) {
         if(gui == null) this.gui = new IMainGUI.NullGUI();
         else this.gui = gui;
-        this.chat = chat;
-        chat.create(ChatMessage.Channel.GLOBAL);
+        if(chat != null)
+            this.chat = chat;
+        else
+            this.chat = new ChatLog.NullChatLog();
+        this.chat.create(ChatMessage.Channel.GLOBAL);
         this.gui.setController(this);
     }
 
     public Controller(IMainGUI gui, ChatLog chat, Coordinator core) {
         if(gui == null) this.gui = new IMainGUI.NullGUI();
         else this.gui = gui;
-        this.chat = chat;
-        chat.create(ChatMessage.Channel.GLOBAL);
+        if(chat != null)
+            this.chat = chat;
+        else
+            this.chat = new ChatLog.NullChatLog();
+        this.chat.create(ChatMessage.Channel.GLOBAL);
         this.gui.setController(this);
         setCore(core);
     }

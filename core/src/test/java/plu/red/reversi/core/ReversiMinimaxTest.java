@@ -24,7 +24,7 @@ public class ReversiMinimaxTest {
 
     @Before
     public void setup() {
-        Controller.init(new Client(new IMainGUI.NullGUI()));
+        Controller.init(new Client(new IMainGUI.NullGUI(), null));
         settingsMap = SettingsLoader.INSTANCE.loadGameSettingsFromJSON(new JSONObject());
         game = new Game(Controller.getInstance(), new IMainGUI.NullGUI());
         game.setSettings(settingsMap).setLogic(new ReversiLogic(game));

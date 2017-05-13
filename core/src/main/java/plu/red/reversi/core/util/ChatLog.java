@@ -46,4 +46,32 @@ public interface ChatLog {
      * @see ChatLog#clear(String)
      */
     void clear();
+
+    class NullChatLog implements ChatLog {
+
+        @Override
+        public void create(String channel) {
+
+        }
+
+        @Override
+        public void add(ChatMessage message) {
+
+        }
+
+        @Override
+        public void offer(ChatMessage message) {
+
+        }
+
+        @Override
+        public void clear(String channel) {
+
+        }
+
+        @Override
+        public void clear() {
+
+        }
+    }
 }
