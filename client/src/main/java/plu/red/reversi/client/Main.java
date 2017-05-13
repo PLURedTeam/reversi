@@ -4,6 +4,7 @@ import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingSource;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 import plu.red.reversi.client.gui.MainWindow;
+import plu.red.reversi.client.gui.browser.Browser;
 import plu.red.reversi.client.gui.util.ChatLog;
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
@@ -24,7 +25,12 @@ public class Main {
         ts.init();
 
         // Create the Client
-        Controller.init(new Client(new MainWindow(), new ChatLog()));
+        Browser browser = new Browser(null, null);
+        Controller.init(new Client(
+                new MainWindow(),
+                new ChatLog(),
+                browser,
+                browser));
 
         // looper call (feel free to move/adjust)
         // but recall that looper is actually used to call the API because it is necessary by android

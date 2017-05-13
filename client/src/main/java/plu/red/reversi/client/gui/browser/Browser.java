@@ -1,4 +1,4 @@
-package plu.red.reversi.core.browser;
+package plu.red.reversi.client.gui.browser;
 
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.Coordinator;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Browser Coordinator. Object used as a Coordinator when browsing available games. A Browser Coordinator contains all
  * a cache of Games from the Server, that can be refreshed.
  */
-public class Browser extends Coordinator implements ListModel<GamePair> {
+public class Browser extends plu.red.reversi.core.Browser implements ListModel<GamePair> {
 
     ArrayList<GamePair> games = null;
 
@@ -25,9 +25,10 @@ public class Browser extends Coordinator implements ListModel<GamePair> {
         super(master, gui);
     }
 
+    @Override
     public void refresh() {
         games = WebUtilities.INSTANCE.getOnlineGames();
-        System.out.println("Refreshed: " + (games == null));
+        System.out.println("Refreshed: " + (!games.isEmpty()));
         gui.updateGUIMinor();
     }
 
