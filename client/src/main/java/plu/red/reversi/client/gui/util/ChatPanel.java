@@ -6,7 +6,6 @@ import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.network.WebUtilities;
-import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;
 
 import javax.swing.*;
@@ -22,11 +21,11 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     //public final JList<ChatMessage> chatHistoryList;
     public final JTabbedPane tabPane;
     protected ArrayList<JList<ChatMessage>> tabList;
-    protected ChatLog chat;
+    protected plu.red.reversi.core.util.ChatLog chat;
     public final JTextField chatEntryField;
     public final JButton chatEntryButton;
 
-    public ChatPanel(ChatLog chat) {
+    public ChatPanel(plu.red.reversi.core.util.ChatLog chat) {
 
         // Create the Tabbed Pane
         tabPane = new JTabbedPane();
@@ -51,11 +50,11 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         setChat(chat);
     }
 
-    public void setChat(ChatLog chat) {
+    public void setChat(plu.red.reversi.core.util.ChatLog chat) {
         this.chat = chat;
         tabPane.removeAll();
         tabList.clear();
-        for(ChatLog.ChannelLog channel : chat) {
+        for(ChatLog.ChannelLog channel : ((ChatLog)chat)) {
             JList<ChatMessage> list = new JList<>(channel);
             list.setSelectionModel(new ChatListSelectionModel());
             list.setCellRenderer(new ChatCellRenderer());
@@ -117,7 +116,7 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         int index = tabPane.getSelectedIndex();
         if(index > -1) {
             JList<ChatMessage> list = tabList.get(index);
-            if(list.getModel() == chat.get(message.channel))
+            if(list.getModel() == ((ChatLog)chat).get(message.channel))
                 list.ensureIndexIsVisible(list.getModel().getSize()-1);
         }
         this.repaint();

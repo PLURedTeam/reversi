@@ -22,9 +22,9 @@ import plu.red.reversi.core.util.ChatLog;
  */
 public class Client extends Controller {
 
-    public Client(IMainGUI gui, Coordinator core) { super(gui, core); }
-    public Client(IMainGUI gui) {
-        super(gui);
+    public Client(IMainGUI gui, ChatLog chat, Coordinator core) { super(gui, chat, core); }
+    public Client(IMainGUI gui, ChatLog chat) {
+        super(gui, chat);
         setCore(new Browser(this, this.gui));
     }
 
