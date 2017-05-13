@@ -15,6 +15,7 @@ import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.BotPlayer;
+import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.util.Color;
 
@@ -38,6 +39,8 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_singleplayer, container, false);
+
+        v.findViewById(R.id.button_sp_human_vs_human).setOnClickListener(this);
 
         v.findViewById(R.id.button_sp_first_easy_ai).setOnClickListener(this);
         v.findViewById(R.id.button_sp_first_medium_ai).setOnClickListener(this);
@@ -98,6 +101,13 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
 
 
         switch(v.getId()) {
+            case R.id.button_sp_human_vs_human:
+
+                new NullPlayer(game, p2c).setName("Player 1");
+                new NullPlayer(game, p1c).setName("Player 2");
+
+                break;
+
             case R.id.button_sp_first_easy_ai:
 
                 new BotPlayer(game, p2c, 2).setName("Easy Bot");

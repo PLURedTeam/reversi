@@ -1,178 +1,193 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".SingleplayerFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textAlignment="center"
-        android:layout_margin="18dp"
-        android:text="@string/label_sp_against_ai_second" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="3.0"
-        android:orientation="horizontal">
+        android:padding="10dp"
+        android:orientation="vertical">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button_sp_second_easy_ai"
+            android:id="@+id/button_sp_human_vs_human"
             android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_easy" />
+            android:layout_gravity="center_horizontal"
+            android:text="@string/button_sp_human_vs_human" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/button_sp_second_medium_ai"
-            android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_medium" />
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:layout_margin="18dp"
+            android:text="@string/label_sp_against_ai_second" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/button_sp_second_hard_ai"
-            android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_hard" />
+            android:weightSum="3.0"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_second_easy_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_easy" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_second_medium_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_medium" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_second_hard_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_hard" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:layout_margin="18dp"
+            android:text="@string/label_sp_against_ai_first" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3.0"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_first_easy_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_easy" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_first_medium_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_medium" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_sp_first_hard_ai"
+                android:layout_weight="1.0"
+                android:text="@string/button_sp_difficulty_hard" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:layout_margin="18dp"
+            android:text="@string/label_ai_against_ai" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3.0"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_easy_easy"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_easy_easy" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_easy_medium"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_easy_medium" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_easy_hard"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_easy_hard" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3.0"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_medium_easy"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_medium_easy" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_medium_medium"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_medium_medium" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_medium_hard"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_medium_hard" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="3.0"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_hard_easy"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_hard_easy" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_hard_medium"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_hard_medium" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_ai_hard_hard"
+                android:layout_weight="1.0"
+                android:text="@string/button_ai_hard_hard" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textAlignment="center"
-        android:layout_margin="18dp"
-        android:text="@string/label_sp_against_ai_first" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="3.0"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_sp_first_easy_ai"
-            android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_easy" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_sp_first_medium_ai"
-            android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_medium" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_sp_first_hard_ai"
-            android:layout_weight="1.0"
-            android:text="@string/button_sp_difficulty_hard" />
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textAlignment="center"
-        android:layout_margin="18dp"
-        android:text="@string/label_ai_against_ai" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="3.0"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_easy_easy"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_easy_easy" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_easy_medium"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_easy_medium" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_easy_hard"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_easy_hard" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="3.0"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_medium_easy"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_medium_easy" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_medium_medium"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_medium_medium" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_medium_hard"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_medium_hard" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="3.0"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_hard_easy"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_hard_easy" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_hard_medium"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_hard_medium" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ai_hard_hard"
-            android:layout_weight="1.0"
-            android:text="@string/button_ai_hard_hard" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

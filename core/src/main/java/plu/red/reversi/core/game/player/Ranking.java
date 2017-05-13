@@ -22,6 +22,36 @@ public class Ranking {
         size = userList.size();
     }
 
+
+    /**
+     * This method is the ELO implementation of ranking Users and should be called after each game played
+     */
+    public void calculateRank(User u, User u2, int score, int totalGames){
+        int currentRank = u.getRank();
+
+        //Ranking Update = Old ranking + The weighted factor * (The score - the score expected)
+        int k;
+        double updateScore, expectedScore;
+
+        //Calculating the K factor based on amount of games played and their current ranking
+        if(totalGames < 30 && score < 2300 )
+            k = 40;
+        else if(score < 2400)
+            k = 20;
+        else
+            k = 10;
+
+        //Calculating the expected score
+        expectedScore = 1 / (1 + Math.pow(10, (currentRank - u2.getRank())/400));
+
+        updateScore = currentRank + k * (score - expectedScore);
+
+        u.setRank((int)updateScore);
+
+
+    }
+
+
     /**
      * This method should be called any time a User wins a game
      */

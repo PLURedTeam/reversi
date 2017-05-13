@@ -378,6 +378,10 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     @Override
     public void onBoardUpdate(BoardUpdate update) {
+
+        // every time a move is played, the selected index must be cleared if existing.
+        mSelectedIndex = null;
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
@@ -404,9 +408,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     @Override
     public void onAnimationsDone(Board3D board) {
+
         // enable the ability to control again
-        if(mGame.getCurrentPlayer() instanceof NullPlayer)
-            setPlayerEnabled(true);
+        setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
 
         doHighlights();
     }
@@ -472,7 +476,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.mBoard.clearAnimations();
+                if(mRenderer.mBoard != null)
+                    mRenderer.mBoard.clearAnimations();
 
                 synchronized (mBoardIterator) {
                     mBoardIterator.goTo(pos);
@@ -544,12 +549,17 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mBoardIterator = new BoardIterator(mGame.getHistory(), mGame.getGameLogic(), mGame.getBoard().size);
 
         if(mRenderer.mGLStarted) {
-            mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
-            mRenderer.mBoard.addListener(this);
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
+                    mRenderer.mBoard.addListener(GameSurfaceView.this);
 
-            mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
+                    mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
 
-            doHighlights();
+                    doHighlights();
+                }
+            });
         }
 
         setCurrentMove(mAutoFollow ? mGame.getHistory().getNumBoardCommands() - 1 : 0);
@@ -564,13 +574,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mSelectedIndex = null;
     }
 
-    public void disablePlayer() {
-        setPlayerEnabled(false);
+    public void setPlayerEnabled(boolean enabled) {
 
-        mSelectedIndex = null;
-    }
-
-    private void setPlayerEnabled(boolean enabled) {
+        System.out.println("Setting player enabled state: " + enabled);
 
         if(mCanDoCommand != enabled) {
 
@@ -694,7 +700,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
-                    mRenderer.mBoard.clearAnimations();
+                    if(mRenderer.mBoard != null)
+                        mRenderer.mBoard.clearAnimations();
                 }
             });
         }
