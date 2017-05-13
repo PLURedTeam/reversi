@@ -60,7 +60,7 @@ public class GameService extends Service implements ICommandListener {
 
         super.onCreate();
 
-        Controller.init(null);
+        Controller.init(new Client(null, null));
 
         Log.d(TAG, "Game service is alive");
 

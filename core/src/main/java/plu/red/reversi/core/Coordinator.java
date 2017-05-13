@@ -172,12 +172,12 @@ public abstract class Coordinator {
     /**
      * Reference to the GUI implementing IMainGUI for displaying the program.
      */
-    public final IMainGUI gui;
+    public IMainGUI gui;
 
     /**
      * Reference to the master Controller that is being used for this program.
      */
-    public final Controller master;
+    public Controller master;
 
     /**
      * Abstract Constructor. Base constructor that accepts an IMainGUI object that this Coordinator can manipulate.
@@ -188,5 +188,13 @@ public abstract class Coordinator {
     public Coordinator(Controller master, IMainGUI gui) {
         this.master = master;
         this.gui = gui == null ? new IMainGUI.NullGUI() : gui;
+    }
+
+    /**
+     * Used to tell the controller to refresh content in some way.
+     * By default, nothing happens.
+     */
+    public void refresh() {
+
     }
 }

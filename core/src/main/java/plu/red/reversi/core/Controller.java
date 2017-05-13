@@ -1,9 +1,5 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.browser.Browser;
-import plu.red.reversi.core.game.logic.GameLogic;
-import plu.red.reversi.core.game.logic.ReversiLogic;
-import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;
 
@@ -26,8 +22,7 @@ public abstract class Controller {
     public static void init(Controller controller) {
         INSTANCE = controller;
         Coordinator core = INSTANCE.getCore();
-        if(core instanceof Browser)
-            ((Browser)core).refresh();
+        core.refresh();
     }
 
     /**

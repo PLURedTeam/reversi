@@ -5,7 +5,7 @@ import plu.red.reversi.client.gui.game.GamePanel;
 import plu.red.reversi.client.gui.lobby.LobbyPanel;
 import plu.red.reversi.client.gui.util.StatusBar;
 import plu.red.reversi.core.*;
-import plu.red.reversi.core.browser.Browser;
+import plu.red.reversi.client.gui.browser.Browser;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.lobby.Lobby;

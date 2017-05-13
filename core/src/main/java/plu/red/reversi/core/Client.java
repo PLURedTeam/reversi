@@ -1,7 +1,6 @@
 package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
@@ -22,10 +21,14 @@ import plu.red.reversi.core.util.ChatLog;
  */
 public class Client extends Controller {
 
-    public Client(IMainGUI gui, ChatLog chat, Coordinator core) { super(gui, chat, core); }
-    public Client(IMainGUI gui, ChatLog chat) {
-        super(gui, chat);
-        setCore(new Browser(this, this.gui));
+    public Browser browser;
+
+    public Client(IMainGUI gui, ChatLog chat, Browser browser, Coordinator core) {
+        super(gui, chat, core);
+
+        this.browser = browser;
+        browser.master = this;
+        browser.gui = this.gui;
     }
 
     private String queryName(boolean networked) {
@@ -43,12 +46,6 @@ public class Client extends Controller {
         }
         return name;
     }
-
-    public void loadNetworkBrowser() {
-        Browser b = new Browser(this, this.gui);
-        setCore(b);
-        b.refresh();
-    }//loadNetworkBroswer
 
     public void createIntoLobby(boolean networked) {
 
@@ -117,6 +114,12 @@ public class Client extends Controller {
         game.setGameSaved(true); //Sets that the game has been saved before and has a name
 
         setCore(new Lobby(this, gui, game, networked, gameName));
+    }
+
+    @Override
+    public void loadNetworkBrowser() {
+        setCore(browser);
+        browser.refresh();
     }
 
     public void startGame() throws IllegalStateException {
