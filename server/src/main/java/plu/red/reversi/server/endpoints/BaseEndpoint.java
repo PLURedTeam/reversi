@@ -106,6 +106,9 @@ public class BaseEndpoint {
         if(user == null)
             throw new WebApplicationException(400);
 
+        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
+            throw new WebApplicationException(403);
+
         if(DBUtilities.INSTANCE.deleteUser(user.getUsername(),user.getPassword()))
             return Response.ok().build();
         else

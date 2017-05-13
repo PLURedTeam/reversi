@@ -57,6 +57,11 @@ public class Client extends Controller {
             return;
         }
 
+        if(networked && WebUtilities.INSTANCE.inNetworkGame()) {
+            gui.showErrorDialog("Network Game", "You can only be in one network game at a time.");
+            return;
+        }
+
         // Figure out the Game name
         String name = queryName(networked);
         if(name == null) return; // Cancelled

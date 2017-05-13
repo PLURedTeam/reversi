@@ -102,6 +102,14 @@ public class GameHandler implements Runnable, INetworkListener {
                 Coordinator core = Controller.getInstance().getCore();
                 if(core instanceof Lobby)
                     ((Lobby)core).removeUser(u);
+
+                if(u.getHost() && !WebUtilities.INSTANCE.isHost()) {
+                    WebUtilities.INSTANCE.leaveNetworkGame();
+                    Controller.getInstance().loadNetworkBrowser();
+                    core.gui.showErrorDialog("User Cancelled Game", u.getUsername() + " has cancelled the Game.");
+                }//if
+
+
                 System.out.println("[GAME HANDLER]: " + u.getUsername() + " left the Game");
 
                 if(core instanceof Game && util.loggedIn())

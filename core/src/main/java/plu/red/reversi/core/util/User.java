@@ -17,6 +17,7 @@ public class User {
     private String status;
     private int sessionID;
     private int rank;
+    private boolean host;
 
     public User() {}//DefaultConstructor
 
@@ -44,6 +45,8 @@ public class User {
     public void setStatus(String s) { status = s; }
     public int getRank() { return rank; }
     public void setRank(int r) { rank = r; }
+    public boolean getHost() {return host;}
+    public void setHost(boolean h) {host = h;}
 
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
@@ -52,6 +55,7 @@ public class User {
         json.put("status", status);
         json.put("sessionID", sessionID);
         json.put("ranking", rank);
+        json.put("host", host);
         return json;
     }
 
@@ -61,6 +65,7 @@ public class User {
         status = json.getString("status");
         sessionID = json.getInt("sessionID");
         rank = json.getInt("ranking");
+        host = json.getBoolean("host");
     }
 
 }//User

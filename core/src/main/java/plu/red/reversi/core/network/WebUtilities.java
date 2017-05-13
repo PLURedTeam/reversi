@@ -98,6 +98,7 @@ public class WebUtilities {
                 //Create User
                 user.setUsername(username);
                 user.setPassword(sb.toString());
+                user.setHost(false);
             } catch(Exception e) {
                 e.printStackTrace();
             }//catch
@@ -287,6 +288,9 @@ public class WebUtilities {
             if(response.getStatus() == 406) {
                 gui.showErrorDialog("Delete User Error", "That username and/or password was incorrect.");
             }//if
+            if(response.getStatus() == 403) {
+                gui.showErrorDialog("Delete User Error", "That username is currently logged in. Cannot delete account.");
+            }//if
             if(response.getStatus() == 500) {
                 gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
             }
@@ -455,10 +459,7 @@ public class WebUtilities {
         //Create target and call server
         WebTarget target = client.target(baseURI + "game/leave/" + networkGameID);
         Response response = target.request().post(Entity.json(user));
-
-
-
-
+        networkGameID = -1;
     }//leaveNetworkGame
 
 
@@ -546,5 +547,10 @@ public class WebUtilities {
     public boolean isHost() {
         return gameHost;
     }//isHost
+
+    public boolean inNetworkGame() {
+        if(networkGameID == -1) return false;
+        return true;
+    }
 
 }//webUtilities

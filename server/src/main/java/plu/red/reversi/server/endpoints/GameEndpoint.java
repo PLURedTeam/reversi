@@ -90,6 +90,7 @@ public class GameEndpoint {
         SseBroadcaster broadcaster = new SseBroadcaster();
         games.put(gameID, broadcaster);
 
+        user.setHost(true);
         GameManager.INSTANCE.addPlayer(gameID,user);
         return Response.ok(gameID).build();
     }//createGame
@@ -107,6 +108,7 @@ public class GameEndpoint {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
             throw new WebApplicationException(403);
 
+        user.setHost(false);
         boolean joined = GameManager.INSTANCE.addPlayer(gameID, user);
 
         if(!GameManager.INSTANCE.gameExists(gameID))
