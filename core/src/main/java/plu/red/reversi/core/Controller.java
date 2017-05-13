@@ -22,7 +22,9 @@ public abstract class Controller {
     public static void init(Controller controller) {
         INSTANCE = controller;
         Coordinator core = INSTANCE.getCore();
-        core.refresh();
+        if(core != null) {
+            core.refresh();
+        }
     }
 
     /**

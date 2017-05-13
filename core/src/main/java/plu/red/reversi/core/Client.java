@@ -26,9 +26,11 @@ public class Client extends Controller {
     public Client(IMainGUI gui, ChatLog chat, Browser browser, Coordinator core) {
         super(gui, chat, core);
 
-        this.browser = browser;
-        browser.master = this;
-        browser.gui = this.gui;
+        if(browser != null) {
+            this.browser = browser;
+            browser.master = this;
+            browser.gui = this.gui;
+        }
     }
 
     private String queryName(boolean networked) {
