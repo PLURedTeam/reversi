@@ -5,7 +5,6 @@ import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.core.Controller;
-import plu.red.reversi.core.browser.Browser;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
@@ -16,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
 
 /**
  * Glory to the Red Team.

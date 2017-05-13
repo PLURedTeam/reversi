@@ -37,25 +37,10 @@ public class DeveloperMenu extends JMenu implements ActionListener {
         this.setMnemonic(KeyEvent.VK_D);
         this.getAccessibleContext().setAccessibleDescription("Developer options");
 
-        testFlipAnimItem = new JMenuItem("Test flip animation" );
-        testFlipAnimItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.ALT_MASK));
-        testFlipAnimItem.addActionListener(this);
-        this.add(testFlipAnimItem);
-
-        changePlayer1NameItem = new JMenuItem("Change Player 1 Name");
-        changePlayer1NameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
-        changePlayer1NameItem.addActionListener(this);
-        this.add(changePlayer1NameItem);
-
         swapActivePlayerItem = new JMenuItem("Swap Active Player");
         swapActivePlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK));
         swapActivePlayerItem.addActionListener(this);
         this.add(swapActivePlayerItem);
-
-        testServerItem = new JMenuItem("Test Server");
-        testServerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_MASK));
-        testServerItem.addActionListener(this);
-        this.add(testServerItem);
 
         endGameItem = new JMenuItem("Force End the Game");
         endGameItem.addActionListener(this);
@@ -63,14 +48,8 @@ public class DeveloperMenu extends JMenu implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == testFlipAnimItem) {
-            testFlip();
-        } else if( e.getSource() == changePlayer1NameItem) {
-            changePlayer1Name();
-        } else if( e.getSource() == swapActivePlayerItem ) {
+        if( e.getSource() == swapActivePlayerItem ) {
             swapActivePlayer();
-        } else if( e.getSource() == testServerItem ) {
-            testServer();
         } else if( e.getSource() == endGameItem) {
             endGame();
         }

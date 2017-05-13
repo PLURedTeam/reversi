@@ -2,12 +2,7 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.tournament.TournamentPanel;
 import plu.red.reversi.core.Client;
-import plu.red.reversi.core.Controller;
-import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.browser.Browser;
-import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.network.WebUtilities;
-import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.User;
 
 import javax.swing.*;
