@@ -97,7 +97,7 @@ public class DBUtilities {
      * @param n the name of the game to be saved
      * @return the gameID
      */
-    public int saveGame(History h, Player[] p, JSONObject s, String n) {
+    public int saveGame(History h, Player[] p, JSONObject s, String n, int t) {
         int gameID;
 
         //Create a collection from an array
@@ -109,12 +109,68 @@ public class DBUtilities {
         updateGame(gameID, n);
         saveGamePlayers(gameID, players);
         saveGameSettings(gameID, s);
+        setGameType(gameID, t);
 
         for(int i = 0; i < h.getNumBoardCommands(); i++)
             saveMove(gameID, h.getBoardCommand(i));
 
         return gameID;
     }//saveGame
+
+    /**
+     * Saves the game type into the database (Reversi/Go)
+     * @param gameID the game id of the game
+     * @param t the type of game(reversi=0,Go=1)
+     */
+    public void setGameType(int gameID, int t) {
+
+        initDB();
+
+        String sql = "update GAME set game_type=? where game_id=?;";
+
+        int result = 0;
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,t);
+            stmt.setInt(2,gameID);
+            result = stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+    }
+
+    /**
+     * Loads the game Type from the database
+     * @param gameID the game ID
+     * @return the integer representation of the game type
+     */
+    public int loadGameType(int gameID) {
+        initDB();
+
+        String sql = "select game_type from GAME where game_id=?;";
+
+        int type = -1;
+
+        ResultSet result;
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.clearParameters();
+            stmt.setInt(1,gameID);
+            result = stmt.executeQuery();
+
+            if(result.next())
+                type = result.getInt("game_type");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }//catch
+
+        return type;
+    }//loadGameType
+
+
 
     /**
      * Saves the game to the database
@@ -128,7 +184,7 @@ public class DBUtilities {
 
         boolean gameSaved = false;
         int result;
-        String sql = "insert into GAME values(?,?,?);";
+        String sql = "insert into GAME values(?,?,?,?);";
 
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);

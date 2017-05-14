@@ -47,6 +47,7 @@ public class CreateDB {
                 + "game_id int NOT NULL,\n"
                 + "name varchar(50),\n"
                 + "user_color varchar(50),\n"
+                + "game_type int,\n"
                 + "PRIMARY KEY(game_id)\n"
                 + ");";
         try {

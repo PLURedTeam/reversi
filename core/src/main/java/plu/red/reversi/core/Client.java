@@ -179,12 +179,15 @@ public class Client extends Controller {
         Game game = (Game)core;
         int gameID = game.getGameID();
 
+        int type = game.getGameLogic().getType().ordinal();
+
+
 
         History h = game.getHistory();
         Player[] p = game.getAllPlayers();
         JSONObject s = game.getSettings().toJSON();
 
-        DBUtilities.INSTANCE.saveGame(h,p,s,name);
+        DBUtilities.INSTANCE.saveGame(h,p,s,name,type);
 
         game.setGameSaved(true);
     }

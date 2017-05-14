@@ -56,6 +56,19 @@ public class Game extends Coordinator {
                 .setHistory(DBUtilities.INSTANCE.loadGame(gameID))
                 .setSettings(new DataMap(DBUtilities.INSTANCE.loadGameSettings(gameID)));
         DBUtilities.INSTANCE.loadGamePlayers(game);
+
+        GameLogic.Type type = GameLogic.Type.values()[DBUtilities.INSTANCE.loadGameType(gameID)];
+        switch(type) {
+            case REVERSI:
+                game.setLogic(new ReversiLogic(game));
+                break;
+            case GO:
+                game.setLogic(new GoLogic(game));
+                break;
+            default:
+
+        }
+
         return game;
     }
 
