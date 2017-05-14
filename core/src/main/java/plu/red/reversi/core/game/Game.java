@@ -42,10 +42,14 @@ public class Game extends Coordinator {
      * @param score The winning score of the game; can be 0 if no Player won
      */
     protected final void notifyGameOverListeners(Player player, int score) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof IGameOverListener) ((IGameOverListener)listener).onGameOver(player, score);
-        for(IListener listener : listenerSetStatic)
-            if(listener instanceof IGameOverListener) ((IGameOverListener)listener).onGameOver(player, score);
+        synchronized(listenerSet) {
+            for (IListener listener : listenerSet)
+                if (listener instanceof IGameOverListener) ((IGameOverListener) listener).onGameOver(player, score);
+        }
+        synchronized(listenerSetStatic) {
+            for (IListener listener : listenerSetStatic)
+                if (listener instanceof IGameOverListener) ((IGameOverListener) listener).onGameOver(player, score);
+        }
     }
 
     /**
