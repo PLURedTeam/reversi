@@ -149,13 +149,17 @@ public class Client extends Controller {
 
         //check for networked
         if(((Lobby) core).canStart()) {
-            setCore(((Lobby)core).startGame());
+            Game game = ((Lobby)core).startGame();
 
-            if(((Game) core).isNetworked())
-                started = WebUtilities.INSTANCE.startGame((Game) core);
+
+            if(game.isNetworked())
+                started = WebUtilities.INSTANCE.startGame(game);
             if(!started) {
-                gui.showErrorDialog("Start Game Error", "Not enough players to start game.");
+                gui.showErrorDialog("Start Game Error", "Couldn't start game on server.");
+                return;
             }
+
+            setCore(game);
 
         } else {
             gui.showErrorDialog("Start Game Error", "Not enough players to start game.");
