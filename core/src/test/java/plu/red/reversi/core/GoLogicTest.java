@@ -1,7 +1,6 @@
 package plu.red.reversi.core;
 
 import org.junit.Test;
-import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
@@ -9,11 +8,7 @@ import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.logic.GoLogic;
 
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class GoLogicTest {
     @Test

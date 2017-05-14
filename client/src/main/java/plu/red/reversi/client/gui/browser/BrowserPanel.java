@@ -143,11 +143,15 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
             GamePair game = list.getModel().getElementAt(index);
             int gameID = game.getGameID();
-            if(WebUtilities.INSTANCE.joinGame(gameID)) {
-                connected = true;
-                connectedPair = game;
-                Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
-                updateGUI();
+
+            if(game.getStatus().equals(GamePair.GameStatus.LOBBY)) {
+
+                if (WebUtilities.INSTANCE.joinGame(gameID)) {
+                    connected = true;
+                    connectedPair = game;
+                    Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
+                    updateGUI();
+                }
             }
 
     }//buttonClicked
@@ -175,6 +179,8 @@ public class BrowserPanel extends CorePanel implements ActionListener {
             this.add(Box.createRigidArea(new Dimension(10, 0)));
             this.add(new JLabel(val.getGameName()));
             this.add(Box.createHorizontalGlue());
+            this.add(new JLabel(val.gameType + ""));
+            this.add(Box.createRigidArea(new Dimension(25, 0)));
             this.add(new JLabel(val.getStatus().toString()));
             this.add(Box.createRigidArea(new Dimension(25, 0)));
             this.add(new JLabel(val.getPlayers().size() + "/" + val.getNumPlayers()));

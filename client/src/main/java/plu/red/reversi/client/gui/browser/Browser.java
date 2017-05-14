@@ -1,7 +1,6 @@
 package plu.red.reversi.client.gui.browser;
 
 import plu.red.reversi.core.Controller;
-import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.network.WebUtilities;

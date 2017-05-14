@@ -20,11 +20,6 @@ import plu.red.reversi.core.game.History;
 import plu.red.reversi.core.listener.ICommandListener;
 
 /**
- * Created by daniel on 5/1/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
-/**
  * An ArrayAdapter to show history entries for a game.
  */
 public class GameHistoryAdapter extends ArrayAdapter<BoardCommand> implements ICommandListener {

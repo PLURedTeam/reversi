@@ -1,8 +1,5 @@
 package plu.red.reversi.core.reversi3d;
 
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import plu.red.reversi.core.graphics.Graphics3D;
@@ -10,12 +7,6 @@ import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.graphics.VertexBufferObject;
 
 import java.io.IOException;
-import java.util.List;
-
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
 
 /**
  * Extends model3d by providing functionality that allows for the uploading of albedos along with face data.

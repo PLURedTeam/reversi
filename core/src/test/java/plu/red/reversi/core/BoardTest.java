@@ -1,21 +1,11 @@
 package plu.red.reversi.core;
 
-import org.junit.Assert;
 import org.junit.Test;
-import plu.red.reversi.core.command.BoardCommand;
-import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
-import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.game.logic.GameLogic;
-import plu.red.reversi.core.game.logic.ReversiLogic;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 

@@ -39,6 +39,7 @@ import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
@@ -114,6 +115,18 @@ public class GameService extends Service implements ICommandListener, IChatListe
                 handler.postDelayed(this, 100);
             }
         }, 100);
+    }
+
+    @Override
+    public void onDestroy() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(WebUtilities.INSTANCE.loggedIn()) {
+                    WebUtilities.INSTANCE.logout();
+                }
+            }
+        }).start();
     }
 
     @Override

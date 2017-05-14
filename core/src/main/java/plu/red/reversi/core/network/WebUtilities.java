@@ -223,6 +223,7 @@ public class WebUtilities {
         user.setUsername(null);
         user.setPassword(null);
         user.setSessionID(-1);
+        networkGameID = -1;
 
         if(Controller.getInstance().getCore() != null)
             Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
@@ -461,19 +462,18 @@ public class WebUtilities {
      * Creates a new game on the server that players can join
      * @return true if game created, false otherwise
      */
-    public boolean createGame(int numPlayers, String name) {
+    public boolean createGame(int numPlayers, String name, GamePair.GameType g) {
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
 
             try {
-
                 RequestBody body = RequestBody.create(
                         okhttp3.MediaType.parse("application/json"),
                         user.toJSON().toString()
                 );
 
                 Request req = new Request.Builder()
-                        .url(baseURI + "game/create/" + numPlayers + "/" + name)
+                        .url(baseURI + "game/create/" + numPlayers + "/" + name + "/" + g)
                         .post(body)
                         .build();
 
@@ -593,7 +593,7 @@ public class WebUtilities {
      * Sends the game to the server in order to start it on the networked players application
      * @param g the game to start
      */
-    public void startGame(Game g) {
+    public boolean startGame(Game g) {
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn) { //Check to see if currently logged in
 
@@ -612,7 +612,12 @@ public class WebUtilities {
                         .post(body)
                         .build();
 
-                okh.newCall(req).execute().close();
+                okhttp3.Response res = okh.newCall(req).execute();
+                int code = res.code();
+                res.close();
+
+                if(code == 406) return false;
+                return true;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -622,7 +627,7 @@ public class WebUtilities {
         } else {
             gui.showErrorDialog("Start Game Error", "You are not currently logged in. You must login first");
         }//else
-
+        return false;
     }//startGame
 
     /**

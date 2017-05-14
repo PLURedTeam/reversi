@@ -3,11 +3,6 @@ package plu.red.reversi.core.graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by daniel on 3/19/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class SimpleGLVertexShader extends VertexShader {
 
     public SimpleGLVertexShader(PipelineDefinition d) {

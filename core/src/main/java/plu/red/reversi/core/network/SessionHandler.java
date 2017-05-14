@@ -41,7 +41,6 @@ public class SessionHandler implements Runnable, INetworkListener {
     public void run() {
         System.out.println("[SESSION HANDLER]: Thread Started");
         while(loggedIn) {
-
             try {
 
                 Request req = new Request.Builder()
@@ -50,7 +49,7 @@ public class SessionHandler implements Runnable, INetworkListener {
 
                 okh.newCall(req).execute().close();
 
-                Thread.sleep(60000);
+                Thread.sleep(30000);
             }
             catch(Exception e) {
                 e.printStackTrace();

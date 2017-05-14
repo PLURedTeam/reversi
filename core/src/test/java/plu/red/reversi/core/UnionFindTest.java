@@ -5,7 +5,6 @@ import plu.red.reversi.core.util.UnionFind;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
 

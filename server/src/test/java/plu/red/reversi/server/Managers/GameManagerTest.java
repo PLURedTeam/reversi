@@ -1,10 +1,8 @@
 package plu.red.reversi.server.Managers;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.util.GamePair;
-import plu.red.reversi.core.util.User;
 
 import static org.junit.Assert.*;
 
@@ -22,7 +20,7 @@ public class GameManagerTest {
 
     @Test
     public void createGame() throws Exception {
-        int gameID = games.createGame(2,"test");
+        int gameID = games.createGame(2,"test", GamePair.GameType.REVERSI);
         assertEquals(0,gameID);
         assertNotEquals(1,gameID);
         assertTrue(games.gameExists(0));
@@ -36,7 +34,7 @@ public class GameManagerTest {
 
     @Test
     public void getGame() throws Exception {
-        int gameID = games.createGame(2,"test");
+        int gameID = games.createGame(2,"test",GamePair.GameType.REVERSI);
         assertEquals("test",games.getGame(gameID).gameName);
         assertNull(games.getGame(2));
         assertNotEquals("test1",games.getGame(gameID).gameName);
@@ -51,14 +49,14 @@ public class GameManagerTest {
         assertEquals(0,games.getGames().size());
         assertNotEquals(1,games.getGames().size());
 
-        int gameID = games.createGame(2,"test");
+        int gameID = games.createGame(2,"test",GamePair.GameType.REVERSI);
         assertEquals(1,games.getGames().size());
         assertNotEquals(2,games.getGames().size());
     }
 
     @Test
     public void gameExists() throws Exception {
-        int gameID = games.createGame(2,"test");
+        int gameID = games.createGame(2,"test",GamePair.GameType.REVERSI);
         assertTrue(games.gameExists(0));
         assertFalse(games.gameExists(1));
     }

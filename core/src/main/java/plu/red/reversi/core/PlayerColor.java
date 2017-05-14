@@ -2,7 +2,6 @@ package plu.red.reversi.core;
 
 import org.joml.Vector3f;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Set;
 

@@ -1,12 +1,9 @@
 package plu.red.reversi.client.gui.game;
 
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.game.player.Player;
-import plu.red.reversi.core.util.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.Color;
 import java.util.Map;
 
 public class ScoreIcon extends JPanel {

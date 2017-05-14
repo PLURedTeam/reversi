@@ -2,22 +2,28 @@ package plu.red.reversi.core.game;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.*;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.IMainGUI;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.*;
+import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.logic.GameLogic;
-
 import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
-import plu.red.reversi.core.listener.*;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.IGameOverListener;
+import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
-import plu.red.reversi.core.db.DBUtilities;
 
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Glory to the Red Team.

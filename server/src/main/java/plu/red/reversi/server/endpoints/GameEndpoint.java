@@ -1,6 +1,5 @@
 package plu.red.reversi.server.endpoints;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
@@ -10,13 +9,13 @@ import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.GameManager;
 import plu.red.reversi.server.Managers.UserManager;
 
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.inject.Singleton;
 
 /**
  * Created by Andrew on 3/23/17.
@@ -78,13 +77,13 @@ public class GameEndpoint {
      * @param user The user that wants to start the new network game
      * @return the gameID associated with the new network game
      */
-    @Path("create/{num}/{name}")
+    @Path("create/{num}/{name}/{type}")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createGame(@PathParam("num") int numPlayers, @PathParam("name") String name, User user) {
+    public Response createGame(@PathParam("num") int numPlayers, @PathParam("name") String name, @PathParam("type") GamePair.GameType type, User user) {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
             throw new WebApplicationException(403);
-        int gameID = GameManager.INSTANCE.createGame(numPlayers, name);
+        int gameID = GameManager.INSTANCE.createGame(numPlayers, name,type);
 
         //Create a broadcaster
         SseBroadcaster broadcaster = new SseBroadcaster();
@@ -164,7 +163,10 @@ public class GameEndpoint {
         if(!GameManager.INSTANCE.gameExists(id))
             throw new WebApplicationException(404);
 
-        GameManager.INSTANCE.startGame(id); //Set the game status
+        boolean started = GameManager.INSTANCE.startGame(id); //Set the game status
+
+        if(!started)
+            throw new WebApplicationException(406);
 
         OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
         OutboundEvent event = eventBuilder.mediaType(MediaType.TEXT_PLAIN_TYPE)

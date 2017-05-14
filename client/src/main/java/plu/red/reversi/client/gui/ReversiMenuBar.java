@@ -3,18 +3,15 @@ package plu.red.reversi.client.gui;
 import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.gui.game.GamePanel;
 import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.game.player.HumanPlayer;
-import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 /**
  * The main menu bar.
@@ -179,7 +176,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
         }
 
         if(e.getSource() == quitMenuItem) {
-            System.exit(0);
+            gui.dispatchEvent(new WindowEvent(gui, WindowEvent.WINDOW_CLOSING));
         }
 
         if(e.getSource() == newGameItem) {
