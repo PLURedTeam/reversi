@@ -43,8 +43,11 @@ public class OptionsMenu extends JMenu implements ActionListener {
             //SettingsWindow settingsWindow = new SettingsWindow();
             gui.openClientSettings();
         } else if(e.getSource() == aboutItem) {
-            // NOOP
-            // TODO: Create an About window
+            gui.showInformationDialog("About", "Multiplayer Enabled Board Game Application.\n\n"
+                    + "Created by PLU Red Team.\n"
+                    + "Members: Daniel Beal, Jessica Chase, Mathew Conover, James De Broeck, Andrew Gjerness\n"
+                    + "\u00A92017"
+            );
         }
     }
 }
