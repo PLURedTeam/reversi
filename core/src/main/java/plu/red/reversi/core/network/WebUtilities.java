@@ -136,6 +136,8 @@ public class WebUtilities {
 
                 okhttp3.Response res = okh.newCall(req).execute();
 
+                System.out.println("Login response code: " + res.code());
+
                 //If the requested username is already logged in, return false
                 if (res.code() == 409) {
                     gui.showErrorDialog("Login Error", "That username is already logged in! Please try " +
@@ -156,7 +158,9 @@ public class WebUtilities {
                     sessionID = user.getSessionID();
                     loggedIn = true;
                     user.setPassword(hashedPass);
-                    Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
+
+                    if(Controller.getInstance().getCore() != null)
+                        Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                     //Start the session thread
                     Thread session = new Thread(new SessionHandler(okh, user, baseURI));
@@ -168,7 +172,9 @@ public class WebUtilities {
 
                     //Display the successful login
                     gui.showInformationDialog("Login Successful", "Successfully logged in.");
-                    Controller.getInstance().getCore().acceptCommand(new StatusCommand("Logged In As '" + username + "'"));
+
+                    if(Controller.getInstance().getCore() != null)
+                        Controller.getInstance().getCore().acceptCommand(new StatusCommand("Logged In As '" + username + "'"));
 
                     return true;
                 }//if
@@ -218,7 +224,8 @@ public class WebUtilities {
         user.setPassword(null);
         user.setSessionID(-1);
 
-        Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
+        if(Controller.getInstance().getCore() != null)
+            Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
         return true;
 
