@@ -1,10 +1,10 @@
 package plu.red.reversi.core.listener;
 
+import plu.red.reversi.core.game.BoardIndex;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
-import plu.red.reversi.core.game.BoardIndex;
 
 /**
  * In order to facilitate board updates in a way that allows for better queueing/state management,

@@ -1,7 +1,5 @@
 package plu.red.reversi.core.util;
 
-import org.codehaus.jettison.json.JSONObject;
-
 import java.util.ArrayList;
 
 /**

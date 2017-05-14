@@ -1,15 +1,14 @@
 package plu.red.reversi.server.endpoints;
 
-import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.SessionManager;
 import plu.red.reversi.server.Managers.UserManager;
+import plu.red.reversi.server.db.DBUtilities;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /**

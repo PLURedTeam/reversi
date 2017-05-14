@@ -1,6 +1,5 @@
 package plu.red.reversi.server.endpoints;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
@@ -10,13 +9,13 @@ import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.GameManager;
 import plu.red.reversi.server.Managers.UserManager;
 
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.inject.Singleton;
 
 /**
  * Created by Andrew on 3/23/17.

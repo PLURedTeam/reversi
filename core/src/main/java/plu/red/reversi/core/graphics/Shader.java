@@ -2,11 +2,6 @@ package plu.red.reversi.core.graphics;
 
 import java.util.List;
 
-/**
- * Created by daniel on 3/19/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public abstract class Shader extends Handle {
 
     private ShaderType type;

@@ -1,12 +1,12 @@
 package plu.red.reversi.client.gui.game;
 
-import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
+import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
 import plu.red.reversi.core.Client;
-import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.game.Game;
 
 import javax.swing.*;
 import java.awt.*;

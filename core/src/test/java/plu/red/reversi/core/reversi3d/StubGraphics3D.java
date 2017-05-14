@@ -10,11 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by daniel on 4/7/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class StubGraphics3D extends Graphics3D {
 
     private List<Object[]> callSequence;

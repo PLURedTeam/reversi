@@ -1,10 +1,8 @@
 package plu.red.reversi.server.Managers;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import plu.red.reversi.core.util.GamePair;
-import plu.red.reversi.core.util.User;
 
 import static org.junit.Assert.*;
 

@@ -2,11 +2,11 @@ package plu.red.reversi.core.game.player;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.game.BoardIndex;
-import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.BoardIndex;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.util.Color;
 

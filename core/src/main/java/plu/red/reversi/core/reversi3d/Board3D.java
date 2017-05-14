@@ -9,8 +9,6 @@ import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;

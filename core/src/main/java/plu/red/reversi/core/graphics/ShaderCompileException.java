@@ -3,11 +3,6 @@ package plu.red.reversi.core.graphics;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by daniel on 3/19/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class ShaderCompileException extends RuntimeException {
 
     public static final Pattern linePattern = Pattern.compile("^\\d+:(\\d+):");

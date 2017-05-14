@@ -3,20 +3,14 @@ package plu.red.reversi.core.reversi3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-
-import java.util.Collection;
-import java.util.HashSet;
-
 import plu.red.reversi.core.easing.EaseType;
 import plu.red.reversi.core.easing.PolynomialEasing;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
+import java.util.Collection;
+import java.util.HashSet;
 
 public class Piece3D extends ColorModel3D {
 

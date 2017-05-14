@@ -3,7 +3,8 @@ package plu.red.reversi.server;
 import org.junit.Test;
 import plu.red.reversi.server.Managers.SessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Created by Andrew on 4/17/2017.

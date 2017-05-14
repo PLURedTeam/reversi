@@ -24,11 +24,6 @@ import plu.red.reversi.core.graphics.Shader;
 import plu.red.reversi.core.graphics.ShaderCompileException;
 import plu.red.reversi.core.graphics.VertexBufferObject;
 
-/**
- * Created by daniel on 4/13/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class AndroidGraphics3D extends Graphics3D {
     private static final String TAG = AndroidGraphics3D.class.getSimpleName();
     private void checkGLError() {

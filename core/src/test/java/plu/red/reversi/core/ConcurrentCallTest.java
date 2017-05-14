@@ -2,15 +2,13 @@ package plu.red.reversi.core;
 
 
 import org.junit.Test;
-import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.ConcurrentCall;
 
 import java.util.HashSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static plu.red.reversi.core.util.ConcurrentCall.*;
-
-import static org.junit.Assert.assertEquals;
 
 public class ConcurrentCallTest {
 

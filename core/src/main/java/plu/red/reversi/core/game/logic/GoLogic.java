@@ -10,7 +10,10 @@ import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 import plu.red.reversi.core.util.UnionFind;
 
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 /**

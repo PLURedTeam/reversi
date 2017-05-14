@@ -5,13 +5,12 @@ import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * ReversiLogic is responsible for handling Reversi/Othello rules and updating the

@@ -3,7 +3,6 @@ package plu.red.reversi.core;
 
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.listener.ISettingsListener;
-import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
 
 import java.io.BufferedReader;
