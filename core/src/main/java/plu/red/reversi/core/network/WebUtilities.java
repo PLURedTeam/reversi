@@ -205,6 +205,7 @@ public class WebUtilities {
         user.setUsername(null);
         user.setPassword(null);
         user.setSessionID(-1);
+        networkGameID = -1;
 
         Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 

@@ -68,8 +68,10 @@ public class GameManager {
                 broadcastUserChange(u, id);
                 UserManager.INSTANCE.setStatus(u.getUsername(), "IN LOBBY");
 
-                if(games.get(id).players.isEmpty())
+                if(games.get(id).players.isEmpty()) {
                     games.remove(id);
+                    broadcast.remove(id); //remove the broadcaster
+                }
 
                 return true;
             }//if

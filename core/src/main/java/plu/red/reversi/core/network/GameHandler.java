@@ -53,7 +53,7 @@ public class GameHandler implements Runnable, INetworkListener {
 
         //Create the eventInput listener
         EventInput eventInput = target.request().get(EventInput.class);
-        while (!eventInput.isClosed() && loggedIn) {
+        while (!eventInput.isClosed() && loggedIn && WebUtilities.INSTANCE.inNetworkGame()) {
             final InboundEvent inboundEvent = eventInput.read();
             if (inboundEvent == null) break;
 

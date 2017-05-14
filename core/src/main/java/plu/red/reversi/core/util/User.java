@@ -54,7 +54,7 @@ public class User {
         json.put("password", password);
         json.put("status", status);
         json.put("sessionID", sessionID);
-        json.put("ranking", rank);
+        json.put("rank", rank);
         json.put("host", host);
         return json;
     }
@@ -64,7 +64,7 @@ public class User {
         password = json.getString("password");
         status = json.getString("status");
         sessionID = json.getInt("sessionID");
-        rank = json.getInt("ranking");
+        rank = json.getInt("rank");
         host = json.getBoolean("host");
     }
 
