@@ -67,4 +67,21 @@
     <string name="play_previous">Prev</string>
     <string name="menu_open_move_history">Open Move History</string>
     <string name="button_sp_human_vs_human">Human vs. Human</string>
+    <string name="send">Send</string>
+    <string name="title_activity_login">Log In to Reversi Online</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Login or register</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="login_successful">Login Successful</string>
+    <string name="login_trying">Trying Login...</string>
 </resources>

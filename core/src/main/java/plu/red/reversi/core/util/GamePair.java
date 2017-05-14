@@ -1,5 +1,6 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.util.ArrayList;
@@ -38,6 +39,28 @@ public class GamePair {
         status = GameStatus.LOBBY;
         gameName = name;
     }//constructor
+
+    public GamePair(JSONObject obj) {
+        try {
+            gameID = obj.getInt("gameID");
+            numPlayers = obj.getInt("numPlayers");
+            gameName = obj.getString("gameName");
+            status = GameStatus.LOBBY;
+        } catch(Exception e) {
+            // this should not happen.
+            e.printStackTrace();
+        }
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject obj = new JSONObject();
+
+        obj.put("gameID", gameID);
+        obj.put("numPlayers", numPlayers);
+        obj.put("gameName", gameName);
+
+        return obj;
+    }
 
     public GamePair() {}
     public void setPlayers(ArrayList<User> p) {players = p;}

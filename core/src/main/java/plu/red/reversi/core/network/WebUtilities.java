@@ -1,5 +1,9 @@
 package plu.red.reversi.core.network;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Controller;
@@ -11,13 +15,7 @@ import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 
@@ -47,7 +45,7 @@ public class WebUtilities {
 
     public static WebUtilities INSTANCE = new WebUtilities(); //Create Singleton
 
-    private Client client;
+    private OkHttpClient okh;
     private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
     //private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
 
@@ -62,8 +60,8 @@ public class WebUtilities {
      * Creates a new Client Object
      */
     public WebUtilities() {
-        //create the client
-        client = ClientBuilder.newClient();
+        okh = new OkHttpClient();
+
     }//webUtilities
 
 
@@ -126,33 +124,42 @@ public class WebUtilities {
             }//catch
 
             try {
-                //Create target and call server
-                WebTarget target = client.target(baseURI + "login");
-                Response response = target.request().post(Entity.json(user));
+                RequestBody body = RequestBody.create(
+                        okhttp3.MediaType.parse("application/json"),
+                        user.toJSON().toString()
+                );
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "login")
+                        .post(body)
+                        .build();
+
+                okhttp3.Response res = okh.newCall(req).execute();
 
                 //If the requested username is already logged in, return false
-                if (response.getStatus() == 409) {
+                if (res.code() == 409) {
                     gui.showErrorDialog("Login Error", "That username is already logged in! Please try " +
                             "again with a different username.");
                     return false;
                 }//if
 
                 //If invalid credentials, return false
-                if (response.getStatus() == 403) {
+                if (res.code() == 403) {
                     gui.showErrorDialog("Login Error", "That username and/or password was incorrect.");
                     return false;
                 }//if
 
-                if(response.getStatus() == 200) {
+                if(res.code() == 200) {
                     //read the server response
-                    user = response.readEntity(User.class);
+                    user = new User(new JSONObject(res.body().string()));
+                    res.close();
                     sessionID = user.getSessionID();
                     loggedIn = true;
                     user.setPassword(hashedPass);
                     Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                     //Start the session thread
-                    Thread session = new Thread(new SessionHandler(client, user, baseURI));
+                    Thread session = new Thread(new SessionHandler(okh, user, baseURI));
                     session.start();
 
                     //start the chat thread
@@ -165,10 +172,6 @@ public class WebUtilities {
 
                     return true;
                 }//if
-
-
-
-                System.out.println("Response code: "+ response.getStatus());
 
                 //If the code makes it this far, an internal server error has occurred.
                 gui.showErrorDialog("Login Error", "A server error occured. Please try again later.");
@@ -197,10 +200,19 @@ public class WebUtilities {
 
         try {
         //Call server to logout
-        WebTarget target = client.target(baseURI + "logout");
-        Response response = target.request().post(Entity.json(user));
+        RequestBody body = RequestBody.create(
+                okhttp3.MediaType.parse("application/json"),
+                user.toJSON().toString()
+        );
 
-        if(response.getStatus() != 200) return false; //an error occured
+        Request req = new Request.Builder()
+                .url(baseURI + "logout")
+                .post(body)
+                .build();
+
+        okhttp3.Response res = okh.newCall(req).execute();
+
+        if(res.code() != 200) return false; //an error occured
         loggedIn = false;
         user.setUsername(null);
         user.setPassword(null);
@@ -211,6 +223,7 @@ public class WebUtilities {
         return true;
 
         } catch (Exception e) {
+            e.printStackTrace();
             gui.showErrorDialog("Logout Error", "The server is currently unreachable. Please try again later.");
             return false;
         }//catch
@@ -248,18 +261,30 @@ public class WebUtilities {
         }//catch
 
         try {
-        WebTarget target = client.target(baseURI + "create-user");
-        Response response = target.request().post(Entity.json(user));
 
-        if(response.getStatus() == 200) {
+        RequestBody body = RequestBody.create(
+                okhttp3.MediaType.parse("application/json"),
+                user.toJSON().toString()
+        );
+
+        Request req = new Request.Builder()
+                .url(baseURI + "create-user")
+                .post(body)
+                .build();
+
+        okhttp3.Response res = okh.newCall(req).execute();
+
+        System.out.println("Create user response code: " + res.code());
+
+        if(res.code() == 200) {
             gui.showInformationDialog("Online Account Created", "Your online account was successfully created.");
             login(username, password); // Login to simplify one step
             return true;
         }//if
-        if(response.getStatus() == 406) {
+        if(res.code() == 406) {
             gui.showErrorDialog("Create User Error", "That username already exists, please try again with a different username.");
         }//if
-        if(response.getStatus() == 500) {
+        if(res.code() == 500) {
             gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
         }
 
@@ -302,20 +327,30 @@ public class WebUtilities {
         }//catch
 
         try {
-            WebTarget target = client.target(baseURI + "delete-user");
-            Response response = target.request().post(Entity.json(user));
 
-            if(response.getStatus() == 200) {
+            RequestBody body = RequestBody.create(
+                    okhttp3.MediaType.parse("application/json"),
+                    user.toJSON().toString()
+            );
+
+            Request req = new Request.Builder()
+                    .url(baseURI + "delete-user")
+                    .post(body)
+                    .build();
+
+            okhttp3.Response res = okh.newCall(req).execute();
+
+            if(res.code() == 200) {
                 gui.showInformationDialog("Online Account Deleted", "Your online account was successfully deleted.");
                 return true;
             }//if
-            if(response.getStatus() == 406) {
+            if(res.code() == 406) {
                 gui.showErrorDialog("Delete User Error", "That username and/or password was incorrect.");
             }//if
-            if(response.getStatus() == 403) {
+            if(res.code() == 403) {
                 gui.showErrorDialog("Delete User Error", "That username is currently logged in. Cannot delete account.");
             }//if
-            if(response.getStatus() == 500) {
+            if(res.code() == 500) {
                 gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
             }
 
@@ -335,15 +370,24 @@ public class WebUtilities {
         IMainGUI gui = Controller.getInstance().gui;
 
         try {
-            WebTarget target = client.target(baseURI + "online-users");
-            Response response = target.request(MediaType.APPLICATION_JSON).get();
+            Request req = new Request.Builder()
+                    .url(baseURI + "online-users")
+                    .build();
 
-            ArrayList<User> users = null;
+            okhttp3.Response res = okh.newCall(req).execute();
 
-            if(response.getStatus() == 404)
-                return users;
+            if(res.code() == 404)
+                return null;
 
-            users = response.readEntity(new GenericType<ArrayList<User>>() {});
+
+
+            ArrayList<User> users = new ArrayList<>();
+
+            JSONArray arr = new JSONArray(res.body().string());
+            res.close();
+            for(int i = 0;i < arr.length();i++) {
+                users.add(new User((JSONObject)arr.get(i)));
+            }
 
             return users;
         } catch (Exception e) {
@@ -384,8 +428,19 @@ public class WebUtilities {
         JSONObject message = null;
         try {message = m.toJSON();}
         catch (JSONException e) {e.printStackTrace();}
-        WebTarget target = client.target(baseURI + "chat");
-        Response response = target.request().post(Entity.text(message.toString()));
+
+        RequestBody body = RequestBody.create(okhttp3.MediaType.parse("text/plain"), message.toString());
+
+        Request req = new Request.Builder()
+                .url(baseURI + "chat")
+                .post(body)
+                .build();
+
+        try {
+            okh.newCall(req).execute().close();
+        } catch(IOException e) {
+            System.err.println("Failed to send chat!: " + e.getMessage());
+        }
     }//sendChat
 
 
@@ -404,18 +459,28 @@ public class WebUtilities {
         if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
 
             try {
-                //Create target and call server
-                WebTarget target = client.target(baseURI + "game/create/" + numPlayers + "/" + name);
-                Response response = target.request().post(Entity.json(user));
+
+                RequestBody body = RequestBody.create(
+                        okhttp3.MediaType.parse("application/json"),
+                        user.toJSON().toString()
+                );
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "game/create/" + numPlayers + "/" + name)
+                        .post(body)
+                        .build();
+
+                okhttp3.Response res = okh.newCall(req).execute();
 
                 //If invalid credentials, return false
-                if (response.getStatus() == 403) {
+                if (res.code() == 403) {
                     gui.showErrorDialog("Create Game Error", "You must login to create a game.");
                     return false;
                 }//if
 
                 //set the game ID
-                networkGameID = response.readEntity(Integer.class);
+                networkGameID = Integer.parseInt(res.body().string());
+                res.close();
                 Thread gameHandler = new Thread(new GameHandler(this,networkGameID,baseURI));
                 gameHost = true;
                 gameHandler.start();
@@ -446,24 +511,34 @@ public class WebUtilities {
         if(loggedIn) { //Check to see if currently logged in
 
             try {
-                //Create target and call server
-                WebTarget target = client.target(baseURI + "game/join/" + gameID);
-                Response response = target.request().post(Entity.json(user));
+
+                RequestBody body = RequestBody.create(
+                        okhttp3.MediaType.parse("application/json"),
+                        user.toJSON().toString()
+                );
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "game/join/" + gameID)
+                        .post(body)
+                        .build();
+
+                okhttp3.Response res = okh.newCall(req).execute();
 
                 //If invalid credentials, return false
-                if (response.getStatus() == 403) {
+                if (res.code() == 403) {
                     gui.showErrorDialog("Join Game Error", "You must login to join a game.");
                     return false;
                 }//if
 
                 //If game is gone, return false
-                if (response.getStatus() == 410) {
+                if (res.code() == 410) {
                     gui.showErrorDialog("Join Game Error", "The requested game is no longer available.");
                     return false;
                 }//if
 
                 //set the game ID
-                networkGameID = response.readEntity(Integer.class);
+                networkGameID = Integer.parseInt(res.body().string());
+                res.close();
                 Thread gameHandler = new Thread(new GameHandler(this,networkGameID,baseURI));
                 gameHandler.start();
 
@@ -485,9 +560,23 @@ public class WebUtilities {
     public void leaveNetworkGame() {
         if(networkGameID == -1) return;
 
-        //Create target and call server
-        WebTarget target = client.target(baseURI + "game/leave/" + networkGameID);
-        Response response = target.request().post(Entity.json(user));
+        try {
+            RequestBody body = RequestBody.create(
+                    okhttp3.MediaType.parse("application/json"),
+                    user.toJSON().toString()
+            );
+
+            Request req = new Request.Builder()
+                    .url(baseURI + "game/leave/" + networkGameID)
+                    .post(body)
+                    .build();
+
+            okh.newCall(req).execute().close();
+        } catch(Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+
+
         networkGameID = -1;
     }//leaveNetworkGame
 
@@ -506,8 +595,17 @@ public class WebUtilities {
                 String json = g.serialize().toJSON().toString();
 
                 //Create target and call server
-                WebTarget target = client.target(baseURI + "game/start/" + networkGameID);
-                Response response = target.request().post(Entity.text(json));
+                RequestBody body = RequestBody.create(
+                        okhttp3.MediaType.parse("text/plain"),
+                        json
+                );
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "game/start/" + networkGameID)
+                        .post(body)
+                        .build();
+
+                okh.newCall(req).execute().close();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -533,8 +631,18 @@ public class WebUtilities {
                 String json = c.toJSON().toString();
 
                 //Create target and call server
-                WebTarget target = client.target(baseURI + "game/" + networkGameID);
-                Response response = target.request().post(Entity.text(json));
+                RequestBody body = RequestBody.create(
+                        okhttp3.MediaType.parse("text/plain"),
+                        json
+                );
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "game/" + networkGameID)
+                        .post(body)
+                        .build();
+
+                okh.newCall(req).execute().close();
+
             } catch (Exception e) {
                 e.printStackTrace();
                 e.getMessage();
@@ -553,14 +661,26 @@ public class WebUtilities {
     public ArrayList<GamePair> getOnlineGames() {
         IMainGUI gui = Controller.getInstance().gui;
         try {
-            WebTarget target = client.target(baseURI + "game/get-games");
-            Response response = target.request(MediaType.APPLICATION_JSON).get();
 
-            if (response.getStatus() == 404) {
+            Request req = new Request.Builder()
+                    .url(baseURI + "game/get-games")
+                    .build();
+
+            okhttp3.Response res = okh.newCall(req).execute();
+
+            if (res.code() == 404) {
                 return new ArrayList<GamePair>();
             }//if
 
-            ArrayList<GamePair> games = response.readEntity(new GenericType<ArrayList<GamePair>>() {});
+            ArrayList<GamePair> games = new ArrayList<>();
+
+            JSONArray arr = new JSONArray(res.body().string());
+            res.close();
+
+            for(int i = 0;i < arr.length();i++) {
+                games.add(new GamePair(arr.getJSONObject(i)));
+            }
+
             return games;
         } catch (Exception e) {
             System.err.println(e.getMessage());

@@ -72,4 +72,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.github.kizitonwose.colorpreference:support:1.0.2'
+
+    //compile 'javax.inject:javax.inject:1'
+    //compile 'javax.xml.bind:jaxb-api:2.2.11'
+    //compile 'javax.activation:activation:1.1.1'
 }

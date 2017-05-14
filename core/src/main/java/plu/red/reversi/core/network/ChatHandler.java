@@ -1,16 +1,15 @@
 package plu.red.reversi.core.network;
 
+import com.launchdarkly.eventsource.EventHandler;
+import com.launchdarkly.eventsource.EventSource;
+import com.launchdarkly.eventsource.MessageEvent;
 import org.codehaus.jettison.json.JSONObject;
-import org.glassfish.jersey.media.sse.EventInput;
-import org.glassfish.jersey.media.sse.InboundEvent;
-import org.glassfish.jersey.media.sse.SseFeature;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.ChatMessage;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Created by Andrew on 4/13/2017.
@@ -18,12 +17,14 @@ import javax.ws.rs.client.WebTarget;
  * Handles the Server Sent Events for chat. Notifies the chat listeners when a new chat message is received
  * from the server.
  */
-public class ChatHandler implements Runnable, INetworkListener {
+public class ChatHandler implements Runnable, INetworkListener, EventHandler {
 
     //fields
     private String baseURI; //Just temp, will change with production server
     private WebUtilities util;
     private boolean loggedIn = true;
+
+    private EventSource es;
 
     /**
      * Constructor
@@ -41,31 +42,55 @@ public class ChatHandler implements Runnable, INetworkListener {
     public void run() {
         System.out.println("[CHAT HANDLER]: Thread Started");
 
-        //Build the client and set the target
-        Client chatClient = ClientBuilder.newBuilder().register(SseFeature.class).build();
-        WebTarget target = chatClient.target(baseURI + "chat");
+        try {
+            es = new EventSource.Builder(this, new URI(baseURI + "chat"))
+                    .build();
 
-        //Create the eventInput listener
-        EventInput eventInput = target.request().get(EventInput.class);
-        while (!eventInput.isClosed() && loggedIn) {
-            final InboundEvent inboundEvent = eventInput.read();
-            if (inboundEvent == null) break;
+            es.start();
+
+        } catch(Exception e) {
+            // should not happen
+            throw new RuntimeException();
+        }
+
+        //Coordinator.removeListenerStatic(this);
+        System.out.println("[CHAT HANDLER]: Thread Finished");
+    }//run
+
+    public void onOpen() throws Exception {
+        System.out.println("Chat handler has begun listening!");
+    }
+
+    public void onClosed() throws Exception {
+        System.out.println("Chat handler has stopped listening!");
+
+        Coordinator.removeListenerStatic(this);
+    }
+
+    public void onMessage(String event, MessageEvent messageEvent) throws Exception {
+
+        if(event.equals("message")) {
 
             ChatMessage message;
             try {
-                message = new ChatMessage().fromJSON(new JSONObject(inboundEvent.readData(String.class)));
+                message = new ChatMessage().fromJSON(new JSONObject(messageEvent.getData()));
             } catch (Exception e) {
-                continue; //Don't notify listeners
+                return;
             }//catch
 
             //Notify listeners
             plu.red.reversi.core.Client.getInstance().getCore().notifyChatListeners(message);
             System.out.println("Got [" + message.message + "] from broadcast");
-        }//while
+        }
+    }
 
-        Coordinator.removeListenerStatic(this);
-        System.out.println("[CHAT HANDLER]: Thread Finished");
-    }//run
+    public void onComment(String comment) throws Exception {
+
+    }
+
+    public void onError(Throwable t) {
+        t.printStackTrace();
+    }
 
     /**
      * Action listener for when the user logs out.
@@ -74,6 +99,15 @@ public class ChatHandler implements Runnable, INetworkListener {
     @Override
     public void onLogout(boolean loggedIn) {
         this.loggedIn = loggedIn;
+
+        if(!loggedIn) {
+            try {
+                es.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }//onLogout
 
 }//class

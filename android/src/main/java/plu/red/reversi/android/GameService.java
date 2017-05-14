@@ -15,10 +15,13 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
@@ -33,12 +36,14 @@ import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
 
-public class GameService extends Service implements ICommandListener {
+public class GameService extends Service implements ICommandListener, IChatListener {
 
     private static final String TAG = GameService.class.getSimpleName();
 
@@ -50,6 +55,8 @@ public class GameService extends Service implements ICommandListener {
 
     private Game mGame;
     private int mMoveIndex;
+
+    private HashMap<String, ArrayList<ChatMessage>> mChatMessages;
 
     public GameService() {
         mGame = null;
@@ -191,7 +198,8 @@ public class GameService extends Service implements ICommandListener {
                 DBUtilities.INSTANCE.saveGame(mGame.getHistory(),
                         mGame.getAllPlayers(),
                         mGame.getSettings().toJSON(),
-                        SimpleDateFormat.getDateTimeInstance().format(new Date())
+                        SimpleDateFormat.getDateTimeInstance().format(new Date()),
+                        mGame.getGameLogic().getType().ordinal()
                 );
 
                 mGame.setGameSaved(true);
@@ -201,6 +209,19 @@ public class GameService extends Service implements ICommandListener {
             if(cmd instanceof BoardCommand)
                 DBUtilities.INSTANCE.saveMove(mGame.getGameID(), (BoardCommand)cmd);
         }
+    }
+
+    /**
+     * Called when a chat message has been received, usually from the server.
+     *
+     * @param message ChatMessage object that is received
+     */
+    @Override
+    public void onChat(ChatMessage message) {
+        if(!mChatMessages.containsKey(message.channel))
+            mChatMessages.put(message.channel, new ArrayList<>());
+
+        mChatMessages.get(message.channel).add(message);
     }
 
     /**
@@ -248,6 +269,18 @@ public class GameService extends Service implements ICommandListener {
 
         public Game getGame() {
             return mGame;
+        }
+
+        public Set<String> getChannelList() {
+            return mChatMessages.keySet();
+        }
+
+        public int getChannelMessageCount(String channel) {
+            return mChatMessages.get(channel).size();
+        }
+
+        public ChatMessage getChannelMessage(String channel, int msg) {
+            return mChatMessages.get(channel).get(msg);
         }
     }
 

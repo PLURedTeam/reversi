@@ -1,5 +1,8 @@
 package plu.red.reversi.core.network;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.util.User;
@@ -15,18 +18,18 @@ import javax.ws.rs.client.WebTarget;
 public class SessionHandler implements Runnable, INetworkListener {
 
     //Fields
-    private Client client;
+    private OkHttpClient okh;
     private User user;
     private String baseURI; //Just temp, will change with production server
     private boolean loggedIn = true;
 
     /**
      * Constucts a new SessionHandler instance
-     * @param client The web client used to call the server
+     * @param okh The web client used to call the server
      * @param user The user object for the current logged in user
      */
-    public SessionHandler(Client client, User user, String baseURI) {
-        this.client = client;
+    public SessionHandler(OkHttpClient okh, User user, String baseURI) {
+        this.okh = okh;
         this.user = user;
         this.baseURI = baseURI;
         Coordinator.addListenerStatic(this); //Add the listener
@@ -38,10 +41,20 @@ public class SessionHandler implements Runnable, INetworkListener {
     public void run() {
         System.out.println("[SESSION HANDLER]: Thread Started");
         while(loggedIn) {
-            WebTarget target = client.target( baseURI + "keep-session-alive/" + user.getSessionID());
-            target.request().get();
-            try { Thread.sleep(60000);}
-            catch (InterruptedException e) {e.printStackTrace(); }
+
+            try {
+
+                Request req = new Request.Builder()
+                        .url(baseURI + "keep-session-alive/" + user.getSessionID())
+                        .build();
+
+                okh.newCall(req).execute().close();
+
+                Thread.sleep(60000);
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }//while
         System.out.println("[SESSION HANDLER]: Thread Finished");
     }//run
