@@ -400,13 +400,13 @@ public class WebUtilities {
      * Creates a new game on the server that players can join
      * @return true if game created, false otherwise
      */
-    public boolean createGame(int numPlayers, String name) {
+    public boolean createGame(int numPlayers, String name, GamePair.GameType g) {
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn && networkGameID == -1) { //Check to see if currently logged in
 
             try {
                 //Create target and call server
-                WebTarget target = client.target(baseURI + "game/create/" + numPlayers + "/" + name);
+                WebTarget target = client.target(baseURI + "game/create/" + numPlayers + "/" + name + "/" + g);
                 Response response = target.request().post(Entity.json(user));
 
                 //If invalid credentials, return false

@@ -37,8 +37,8 @@ public class BaseEndpoint {
     public Response login(User user) {
         if(user == null) throw new WebApplicationException(403);
 
-        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
-            throw new WebApplicationException(409);
+//        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
+//            throw new WebApplicationException(409);
 
         if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
             user.setPassword("");

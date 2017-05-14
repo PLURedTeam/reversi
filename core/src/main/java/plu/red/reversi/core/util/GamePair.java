@@ -21,22 +21,29 @@ public class GamePair {
         PLAYING;
     }//gameStatus
 
+    public enum GameType {
+        REVERSI,
+        GO;
+    }//gameType
+
     public ArrayList<User> players = new ArrayList<User>(); //The players in the game
     public GameStatus status; //the status of the game
     public int gameID;
     public int numPlayers;
     public String gameName;
     public DataMap settings;
+    public GameType gameType;
 
     /**
      * Constructor
      * Sets the game status to "LOBBY"
      */
-    public GamePair(int id, int p, String name) {
+    public GamePair(int id, int p, String name, GameType g) {
         gameID = id;
         numPlayers = p;
         status = GameStatus.LOBBY;
         gameName = name;
+        gameType = g;
     }//constructor
 
     public GamePair() {}
@@ -50,5 +57,7 @@ public class GamePair {
     public int getGameID() {return gameID;}
     public int getNumPlayers() {return numPlayers;}
     public String getGameName() {return gameName;}
+    public GameType getGameType() {return gameType;}
+    public void setGameType(GameType g) {gameType = g;}
 
 }//gamePair

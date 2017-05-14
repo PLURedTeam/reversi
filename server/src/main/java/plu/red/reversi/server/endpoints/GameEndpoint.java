@@ -78,13 +78,13 @@ public class GameEndpoint {
      * @param user The user that wants to start the new network game
      * @return the gameID associated with the new network game
      */
-    @Path("create/{num}/{name}")
+    @Path("create/{num}/{name}/{type}")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createGame(@PathParam("num") int numPlayers, @PathParam("name") String name, User user) {
+    public Response createGame(@PathParam("num") int numPlayers, @PathParam("name") String name, @PathParam("type") GamePair.GameType type, User user) {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
             throw new WebApplicationException(403);
-        int gameID = GameManager.INSTANCE.createGame(numPlayers, name);
+        int gameID = GameManager.INSTANCE.createGame(numPlayers, name,type);
 
         //Create a broadcaster
         SseBroadcaster broadcaster = new SseBroadcaster();

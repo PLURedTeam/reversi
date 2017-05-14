@@ -31,10 +31,10 @@ public class GameManager {
      * @param numPlayers the number of players the game can support
      * @return the id of the game created
      */
-    public int createGame(int numPlayers, String name) {
+    public int createGame(int numPlayers, String name, GamePair.GameType g) {
         Integer gameID = gameCounter++; //Get next game id
         System.out.println("[GAME MANAGER] Creating New Game: " + gameID);
-        games.put(gameID,new GamePair(gameID,numPlayers, name));
+        games.put(gameID,new GamePair(gameID,numPlayers, name,g));
         return gameID;
     }//createGame
 

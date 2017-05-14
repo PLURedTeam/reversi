@@ -12,6 +12,7 @@ import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.lobby.PlayerSlot;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatLog;
+import plu.red.reversi.core.util.GamePair;
 
 /**
  * Glory to the Red Team.
@@ -93,8 +94,17 @@ public class Client extends Controller {
         for(int i = 1; i < count; i++)
             lobby.addSlot(networked ? PlayerSlot.SlotType.NETWORK : PlayerSlot.SlotType.LOCAL);
 
+
+        GamePair.GameType gameType;
+
+        switch((GameLogic.Type)type) {
+            case REVERSI:   gameType = GamePair.GameType.REVERSI;     break;
+            case GO:        gameType = GamePair.GameType.REVERSI;          break;
+            default:        throw new IllegalArgumentException("Unknown GameLogic Type Selected");
+        }
+
         // Notify Server
-        if(networked) WebUtilities.INSTANCE.createGame(count, name);
+        if(networked) WebUtilities.INSTANCE.createGame(count, name,gameType);
     }
 
     public void loadIntoLobby(boolean networked) {
@@ -135,19 +145,21 @@ public class Client extends Controller {
         if(!(core instanceof Lobby))
             throw new IllegalStateException("Can only start a game from a Lobby");
 
-
-        setCore(((Lobby)core).startGame());
+        boolean started = false;
 
         //check for networked
-        if(((Game)core).isNetworked()) {
+        if(((Lobby) core).canStart()) {
+            setCore(((Lobby)core).startGame());
 
-            boolean started = WebUtilities.INSTANCE.startGame((Game) core);
-
-            if(!started)
+            if(((Game) core).isNetworked())
+                started = WebUtilities.INSTANCE.startGame((Game) core);
+            if(!started) {
                 gui.showErrorDialog("Start Game Error", "Not enough players to start game.");
-            return;
+            }
 
-        }
+        } else {
+            gui.showErrorDialog("Start Game Error", "Not enough players to start game.");
+        }//else
     }
 
     public void saveGame() throws IllegalStateException {

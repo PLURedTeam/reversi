@@ -44,7 +44,7 @@ public class SessionManager implements Runnable, IListener {
     public void removeSession(int sessionID) {
         System.out.println("[SESSION MANAGER] REMOVING SESSION: " + sessionID);
         sessions.remove(sessionID);
-        notifyListeners(sessionID);
+        UserManager.INSTANCE.timedOut(sessionID);
     }//sessionID
 
     /**
@@ -82,7 +82,6 @@ public class SessionManager implements Runnable, IListener {
         while(true) {
             for(Integer sessionID: sessions.keySet()) {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 65000) {
-                    sessions.remove(sessionID);
                     UserManager.INSTANCE.timedOut(sessionID);
                     GameManager.INSTANCE.endSession(sessionID);
                     System.out.println("[SESSION MANAGER] SESSION TIMED OUT: " + sessionID);
@@ -90,7 +89,10 @@ public class SessionManager implements Runnable, IListener {
                 }//if
 
             }//for
-            try { Thread.sleep(30000);}
+            try {
+                System.out.println("[SESSION MANAGER] SEARCHING FOR EXPIRED SESSIONS");
+                Thread.sleep(10000);
+            }
             catch (InterruptedException e) { e.printStackTrace();}
         }//while
     }//run

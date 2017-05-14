@@ -40,7 +40,7 @@ public class SessionHandler implements Runnable, INetworkListener {
         while(loggedIn) {
             WebTarget target = client.target( baseURI + "keep-session-alive/" + user.getSessionID());
             target.request().get();
-            try { Thread.sleep(60000);}
+            try { Thread.sleep(30000);}
             catch (InterruptedException e) {e.printStackTrace(); }
         }//while
         System.out.println("[SESSION HANDLER]: Thread Finished");
