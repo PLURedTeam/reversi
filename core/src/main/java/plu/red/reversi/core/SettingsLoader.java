@@ -20,8 +20,10 @@ public class SettingsLoader {
     public static final String GAME_TIME_LIMIT = "TimeLimit";
     public static final String GAME_TIME_BONUS = "TimeBonus";
 
-    public static final String GLOBAL_USER_NAME = "username";
-    public static final String GLOBAL_USER_COLOR = "usercolor";
+    public static final String GLOBAL_USER_NAME = "Username";
+    public static final String GLOBAL_USER_PASS = "Password";
+    public static final String GLOBAL_USER_COLOR = "UserColor";
+    public static final String GLOBAL_USE_3D_VIEW = "Use3DView";
 
     // ***********
     //  Listeners
@@ -97,10 +99,14 @@ public class SettingsLoader {
         // ****************************************
         // Using checkDefault(key, defaultVal, [description], [min], [max]) will ensure that default exists
 
+        /*
         settings.checkDefault(GLOBAL_USER_NAME, "Player",
                 "Name to associate user with.");
         settings.checkDefault(GLOBAL_USER_COLOR, Color.BLACK.composite,
                 "Default color to use for user, in an integer representation. Bits are stored as follows: A[31:24]-R[23:16]-G[15:8]-B[7:0]");
+                */
+        settings.checkDefault(GLOBAL_USE_3D_VIEW, false,
+                "Whether or not to use the 3D Board View when playing a game");
 
         return settings;
     }
@@ -122,7 +128,7 @@ public class SettingsLoader {
                 contents += line;
             clientSettings = new DataMap(new JSONObject(contents));
         } catch (Exception ex) {
-            System.err.println("Warning: Problem when trying to read Client Settings: " + ex.getMessage());
+            //System.err.println("Warning: Problem when trying to read Client Settings: " + ex.getMessage());
             clientSettings = new DataMap();
         }
 
@@ -140,7 +146,7 @@ public class SettingsLoader {
             writer.flush();
             writer.close();
         } catch(Exception ex) {
-            System.err.println("Error when trying to write Client Settings: " + ex.getMessage());
+            //System.err.println("Error when trying to write Client Settings: " + ex.getMessage());
         }
     }
 }

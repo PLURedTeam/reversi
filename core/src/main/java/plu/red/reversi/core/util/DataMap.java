@@ -470,6 +470,17 @@ public class DataMap {
     }
 
     /**
+     * Removes a setting associated with the given <code>key</code> from the DataMap, if it exists. If it doesn't, does
+     * nothing.
+     *
+     * @param key String <code>key</code> associated with setting to remove
+     */
+    public void remove(String key) {
+        if(dataMap.containsKey(key))
+            dataMap.remove(key);
+    }
+
+    /**
      * Sets a setting associated with a key, overwriting any existing setting.
      *
      * @param key String key

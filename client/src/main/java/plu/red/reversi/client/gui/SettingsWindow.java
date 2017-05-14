@@ -92,11 +92,19 @@ public class SettingsWindow extends JFrame implements ActionListener, KeyListene
         // Clear anything remaining
         settingsPanel.clearEntries();
 
+        /*
         // Username field
         SettingsPanel.TextFieldEntry username = new SettingsPanel.TextFieldEntry(settings, SettingsLoader.GLOBAL_USER_NAME, 12);
         username.addKeyListener(this);
         username.textField.addKeyListener(this);
         settingsPanel.addEntry(username);
+        */
+
+        // Use 3D View field
+        SettingsPanel.CheckBoxEntry use3Dview = new SettingsPanel.CheckBoxEntry(settings, SettingsLoader.GLOBAL_USE_3D_VIEW);
+        use3Dview.addKeyListener(this);
+        use3Dview.checkBox.addKeyListener(this);
+        settingsPanel.addEntry(use3Dview);
 
         // Tell the SettingsPanel to update and revalidate
         settingsPanel.updateEntries();

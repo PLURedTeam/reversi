@@ -10,8 +10,10 @@ import plu.red.reversi.core.db.DBUtilities;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.Looper;
+import plu.red.reversi.core.util.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -110,8 +112,6 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
         } else if(core instanceof Browser) {
             populate(new BrowserPanel(this, (Browser)core));
         }
-
-        core.addListener(statusBar);
     }
 
     /**
@@ -326,8 +326,16 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     public void windowClosing(WindowEvent e) {
 
         //Logout from the server
-        if(e.getSource() == this)
+        if(WebUtilities.INSTANCE.loggedIn() && e.getSource() == this) {
+
+            User user = WebUtilities.INSTANCE.getUser();
+            DataMap settings = SettingsLoader.INSTANCE.getClientSettings();
+            settings.set(SettingsLoader.GLOBAL_USER_NAME, user.getUsername());
+            settings.set(SettingsLoader.GLOBAL_USER_PASS, user.getPassword());
+            SettingsLoader.INSTANCE.saveClientSettings();
+
             WebUtilities.INSTANCE.logout();
+        }
 
         // Ask about saving
         if(e.getSource() == this && master.getCore() instanceof Game) {

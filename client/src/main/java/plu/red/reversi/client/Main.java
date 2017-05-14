@@ -8,6 +8,9 @@ import plu.red.reversi.client.gui.browser.Browser;
 import plu.red.reversi.client.gui.util.ChatLog;
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.SettingsLoader;
+import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.util.Looper;
 
 import javax.swing.*;
@@ -31,6 +34,20 @@ public class Main {
                 new ChatLog(),
                 browser,
                 browser));
+
+        // Attempt a login
+        DataMap settings = SettingsLoader.INSTANCE.getClientSettings();
+        if(settings.containsKey(SettingsLoader.GLOBAL_USER_NAME) && settings.containsKey(SettingsLoader.GLOBAL_USER_PASS)) {
+            try {
+                String username = settings.get(SettingsLoader.GLOBAL_USER_NAME, String.class);
+                String password = settings.get(SettingsLoader.GLOBAL_USER_PASS, String.class);
+                WebUtilities.INSTANCE.login(username, password, true);
+            } catch(Exception ex) {}
+        }
+
+        // Clear any cached login info
+        settings.remove(SettingsLoader.GLOBAL_USER_NAME);
+        settings.remove(SettingsLoader.GLOBAL_USER_PASS);
 
         // looper call (feel free to move/adjust)
         // but recall that looper is actually used to call the API because it is necessary by android
