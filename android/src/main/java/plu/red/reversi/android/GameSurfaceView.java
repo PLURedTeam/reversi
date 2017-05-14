@@ -43,11 +43,6 @@ import plu.red.reversi.core.reversi3d.FlatMode;
 import plu.red.reversi.core.reversi3d.FreeMode;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
-/**
- * Created by daniel on 3/18/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class GameSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, IBoardUpdateListener, Board3D.Board3DListener {
 
 

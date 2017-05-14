@@ -6,11 +6,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 
-/**
- * Created by daniel on 3/19/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public abstract class Graphics3D {
 
     /**

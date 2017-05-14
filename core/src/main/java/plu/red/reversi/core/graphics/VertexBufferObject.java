@@ -24,11 +24,6 @@ import java.nio.IntBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 // represents data which can be applied to vertices in a pipeline
 public class VertexBufferObject<T> extends ArrayList<T> {
 

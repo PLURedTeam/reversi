@@ -13,11 +13,6 @@ import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.util.Color;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public class Piece3D extends ColorModel3D {
 
     public static final int LONGITUDE_DETAIL = 30;

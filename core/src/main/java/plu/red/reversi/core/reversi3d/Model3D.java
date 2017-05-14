@@ -24,11 +24,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * Created by daniel on 3/20/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
 public abstract class Model3D {
 
     // IDs are only required here because of the fact that sortedset requires completely unique objects.
