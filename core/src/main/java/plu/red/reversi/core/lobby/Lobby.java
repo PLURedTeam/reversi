@@ -1,20 +1,25 @@
 package plu.red.reversi.core.lobby;
 
-import plu.red.reversi.core.*;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.IMainGUI;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.JoinCommand;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
-import plu.red.reversi.core.game.player.NetworkPlayer;
-import plu.red.reversi.core.listener.INetworkListener;
-import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
+import plu.red.reversi.core.game.player.NetworkPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.INetworkListener;
+import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.network.WebUtilities;
-import plu.red.reversi.core.util.*;
+import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.util.Color;
+import plu.red.reversi.core.util.DataMap;
+import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
 import java.util.Collection;

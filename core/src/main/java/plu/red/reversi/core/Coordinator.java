@@ -1,9 +1,13 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.*;
-import plu.red.reversi.core.listener.*;
-import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.command.ChatCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.listener.IChatListener;
+import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.ChatMessage;
 
 import java.util.HashSet;
 

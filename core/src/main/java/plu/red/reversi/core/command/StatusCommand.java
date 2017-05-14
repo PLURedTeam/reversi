@@ -3,7 +3,6 @@ package plu.red.reversi.core.command;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Coordinator;
-import plu.red.reversi.core.util.ChatMessage;
 
 /**
  * Glory to the Red Team.

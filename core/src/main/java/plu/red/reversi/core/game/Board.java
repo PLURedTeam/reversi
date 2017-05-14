@@ -2,15 +2,13 @@ package plu.red.reversi.core.game;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import plu.red.reversi.core.SettingsLoader;
-import plu.red.reversi.core.command.BoardCommand;
-import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SetCommand;
-import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.util.DataMap;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Glory to the Red Team.

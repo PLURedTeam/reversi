@@ -3,8 +3,6 @@ package plu.red.reversi.core.graphics;
 import org.joml.Vector3fc;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Collection;
 
 public abstract class Graphics3D {
 

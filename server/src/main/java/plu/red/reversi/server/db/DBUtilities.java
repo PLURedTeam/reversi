@@ -1,7 +1,11 @@
 package plu.red.reversi.server.db;
 
 //import statements
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Created by Andrew on 3/9/2017.

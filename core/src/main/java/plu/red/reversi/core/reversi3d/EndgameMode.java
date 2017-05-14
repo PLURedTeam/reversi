@@ -1,13 +1,9 @@
 package plu.red.reversi.core.reversi3d;
 
-import org.joml.Vector2f;
 import org.joml.Vector2fc;
-
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.Player;
 
-import java.io.File;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 

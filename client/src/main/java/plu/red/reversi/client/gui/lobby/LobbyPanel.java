@@ -1,11 +1,11 @@
 package plu.red.reversi.client.gui.lobby;
 
-import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
+import plu.red.reversi.client.gui.util.ChatPanel;
 import plu.red.reversi.client.gui.util.SettingsPanel;
 import plu.red.reversi.client.gui.util.Utilities;
-import plu.red.reversi.core.*;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.lobby.Lobby;
 import plu.red.reversi.core.lobby.PlayerSlot;
 import plu.red.reversi.core.util.DataMap;

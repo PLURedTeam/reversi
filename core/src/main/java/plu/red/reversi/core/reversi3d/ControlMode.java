@@ -1,7 +1,6 @@
 package plu.red.reversi.core.reversi3d;
 
 import org.joml.Vector2fc;
-
 import plu.red.reversi.core.game.Game;
 
 /**
