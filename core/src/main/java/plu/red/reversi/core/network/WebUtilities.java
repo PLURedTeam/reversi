@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONObject;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.StatusCommand;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.GamePair;
@@ -74,32 +75,54 @@ public class WebUtilities {
     /////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Calls the server to authenticate the user credentials to login
-     * to the server
+     * Calls the server to authenticate the user credentials to login to the server. The password should be plain-text
+     * and will be hashed with SHA256 before being sent to the server.
+     *
      * @param username The players username
-     * @param password The players password, should be passed in SHA256 format
-     * @return true if valid credentials, false otherwise
+     * @param password The players password, should be passed in plain-text
+     * @return <code>true</code> if valid credentials, <code>false</code> otherwise
      */
     public boolean login(String username, String password) {
+        return login(username, password, false);
+    }
+
+    /**
+     * Calls the server to authenticate the user credentials to login to the server. If the password has already been
+     * hashed, <code>preHashed</code> should be <code>true</code>
+     *
+     * @param username The players username
+     * @param password The players password, should be passed in plain-text or SHA256 format
+     * @param preHashed Whether or not the password has been pre-hashed
+     * @return <code>true</code> if valid credentials, <code>false</code> otherwise
+     */
+    public boolean login(String username, String password, boolean preHashed) {
         IMainGUI gui = Controller.getInstance().gui;
         if(!loggedIn) { //Check to see if currently logged in
 
-            try {
-                //Convert the users password into SHA256 format
-                MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
-                byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
-                StringBuffer sb = new StringBuffer(); //String buffer to build the password string
-                for (int i = 0; i < bytes.length; i++)
-                    sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+            String hashedPass;
 
-                for (int i = 0; i < bytes.length; i++) bytes[i] = 0;//clear the byte array
+            try {
+
+                if(preHashed) {
+                    hashedPass = password;
+                } else {
+                    //Convert the users password into SHA256 format
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Create the MessageDigest object
+                    byte[] bytes = digest.digest(password.getBytes()); //Get the byte array for the digest
+                    StringBuffer sb = new StringBuffer(); //String buffer to build the password string
+                    for (int i = 0; i < bytes.length; i++)
+                        sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1)); //Create the string
+                    for (int i = 0; i < bytes.length; i++) bytes[i] = 0;//clear the byte array
+                    hashedPass = sb.toString();
+                }
 
                 //Create User
                 user.setUsername(username);
-                user.setPassword(sb.toString());
+                user.setPassword(hashedPass);
                 user.setHost(false);
             } catch(Exception e) {
                 e.printStackTrace();
+                return false;
             }//catch
 
             try {
@@ -125,6 +148,7 @@ public class WebUtilities {
                     user = response.readEntity(User.class);
                     sessionID = user.getSessionID();
                     loggedIn = true;
+                    user.setPassword(hashedPass);
                     Controller.getInstance().getCore().notifyLoggedInListeners(loggedIn);
 
                     //Start the session thread
@@ -137,6 +161,7 @@ public class WebUtilities {
 
                     //Display the successful login
                     gui.showInformationDialog("Login Successful", "Successfully logged in.");
+                    Controller.getInstance().getCore().acceptCommand(new StatusCommand("Logged In As '" + username + "'"));
 
                     return true;
                 }//if
