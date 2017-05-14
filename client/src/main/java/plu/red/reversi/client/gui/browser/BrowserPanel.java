@@ -153,7 +153,7 @@ public class BrowserPanel extends CorePanel implements ActionListener {
                     updateGUI();
                 }
             }
-            
+
     }//buttonClicked
 
     public void disconnect() {

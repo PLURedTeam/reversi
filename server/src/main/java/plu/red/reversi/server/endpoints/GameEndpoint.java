@@ -164,7 +164,10 @@ public class GameEndpoint {
         if(!GameManager.INSTANCE.gameExists(id))
             throw new WebApplicationException(404);
 
-        GameManager.INSTANCE.startGame(id); //Set the game status
+        boolean started = GameManager.INSTANCE.startGame(id); //Set the game status
+
+        if(!started)
+            throw new WebApplicationException(406);
 
         OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
         OutboundEvent event = eventBuilder.mediaType(MediaType.TEXT_PLAIN_TYPE)

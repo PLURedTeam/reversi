@@ -498,7 +498,7 @@ public class WebUtilities {
      * Sends the game to the server in order to start it on the networked players application
      * @param g the game to start
      */
-    public void startGame(Game g) {
+    public boolean startGame(Game g) {
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn) { //Check to see if currently logged in
 
@@ -510,6 +510,9 @@ public class WebUtilities {
                 WebTarget target = client.target(baseURI + "game/start/" + networkGameID);
                 Response response = target.request().post(Entity.text(json));
 
+                if(response.getStatus() == 406) return false;
+                return true;
+
             } catch (Exception e) {
                 e.printStackTrace();
                 e.getMessage();
@@ -518,7 +521,7 @@ public class WebUtilities {
         } else {
             gui.showErrorDialog("Start Game Error", "You are not currently logged in. You must login first");
         }//else
-
+        return false;
     }//startGame
 
     /**

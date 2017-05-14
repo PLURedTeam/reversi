@@ -114,10 +114,15 @@ public class GameManager {
      * Sets the status of the game to "PLAYING"
      * @param id the id of the game
      */
-    public void startGame(int id) {
+    public boolean startGame(int id) {
+
+        if(games.get(id).players.size() != games.get(id).getNumPlayers())
+            return false;
+
         games.get(id).status = GamePair.GameStatus.PLAYING;
         for(User u: games.get(id).players)
                 UserManager.INSTANCE.setStatus(u.getUsername(), "IN GAME");
+        return true;
     }//startGame
 
     /**

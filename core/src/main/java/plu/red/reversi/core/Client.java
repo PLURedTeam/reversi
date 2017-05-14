@@ -135,13 +135,19 @@ public class Client extends Controller {
         if(!(core instanceof Lobby))
             throw new IllegalStateException("Can only start a game from a Lobby");
 
+
         setCore(((Lobby)core).startGame());
 
         //check for networked
-        if(((Game)core).isNetworked())
-            WebUtilities.INSTANCE.startGame((Game)core);
+        if(((Game)core).isNetworked()) {
 
+            boolean started = WebUtilities.INSTANCE.startGame((Game) core);
 
+            if(!started)
+                gui.showErrorDialog("Start Game Error", "Not enough players to start game.");
+            return;
+
+        }
     }
 
     public void saveGame() throws IllegalStateException {
