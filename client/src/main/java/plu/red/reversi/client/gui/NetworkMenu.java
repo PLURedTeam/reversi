@@ -2,6 +2,8 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.tournament.TournamentPanel;
 import plu.red.reversi.core.Client;
+import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.User;
 
@@ -17,7 +19,7 @@ import java.util.ArrayList;
  * contains all items pertaining to the users interaction with the server
  * not including game play
  */
-public class NetworkMenu extends JMenu implements ActionListener {
+public class NetworkMenu extends JMenu implements ActionListener, INetworkListener {
 
     //Fields
     private MainWindow gui;
@@ -51,6 +53,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
         //Create the logout menu item
         logout = new JMenuItem("Logout");
         logout.addActionListener(this);
+        logout.setEnabled(false);
         this.add(logout);
 
         //Create the Create an account menu item
@@ -69,6 +72,7 @@ public class NetworkMenu extends JMenu implements ActionListener {
         seeRanking = new JMenuItem("See my ranking");
         seeRanking.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.SHIFT_MASK));
         seeRanking.addActionListener(this);
+        seeRanking.setEnabled(false);
         this.add(seeRanking);
 
         //Create the onlineUsers menu item
@@ -81,6 +85,8 @@ public class NetworkMenu extends JMenu implements ActionListener {
         viewTournament = new JMenuItem("View Tournament");
         viewTournament.addActionListener(this);
         this.add(viewTournament);
+
+        Coordinator.addListenerStatic(this);
 
     }//constructor
 
@@ -225,4 +231,19 @@ public class NetworkMenu extends JMenu implements ActionListener {
 
         }//else
     }//getOnlineUsers
+
+    /**
+     * Called when a use logs out from the server
+     *
+     * @param loggedIn if the user is loggedIn
+     */
+    @Override
+    public void onLogout(boolean loggedIn) {
+        SwingUtilities.invokeLater(() -> {
+            login.setEnabled(!loggedIn);
+            logout.setEnabled(loggedIn);
+            createUser.setEnabled(!loggedIn);
+            seeRanking.setEnabled(loggedIn);
+        });
+    }
 }//NetworkMenu

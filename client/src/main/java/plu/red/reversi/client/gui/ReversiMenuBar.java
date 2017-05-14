@@ -7,6 +7,7 @@ import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import javax.swing.*;
@@ -18,7 +19,7 @@ import java.awt.event.KeyEvent;
 /**
  * The main menu bar.
  */
-public class ReversiMenuBar extends JMenuBar implements ActionListener {
+public class ReversiMenuBar extends JMenuBar implements ActionListener, INetworkListener {
 
     /** The MainWindow */
     private MainWindow gui;
@@ -55,6 +56,8 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
 
         // Add the options menu
         this.add(new OptionsMenu(gui));
+
+        Coordinator.addListenerStatic(this);
     }
 
     private JMenu buildGameMenu() {
@@ -76,6 +79,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         newOnlineGameItem.getAccessibleContext().setAccessibleDescription(
                 "Start a new game against online players.");
         newOnlineGameItem.addActionListener(this);
+        newOnlineGameItem.setEnabled(false);
         menu.add(newOnlineGameItem);
 
         loadGameItem = new JMenuItem("Load Game");
@@ -193,5 +197,17 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener {
         if(e.getSource() == saveGameItem) {
             gui.saveGame();
         }
+    }
+
+    /**
+     * Called when a use logs out from the server
+     *
+     * @param loggedIn if the user is loggedIn
+     */
+    @Override
+    public void onLogout(boolean loggedIn) {
+        SwingUtilities.invokeLater(() -> {
+            newOnlineGameItem.setEnabled(loggedIn);
+        });
     }
 }
