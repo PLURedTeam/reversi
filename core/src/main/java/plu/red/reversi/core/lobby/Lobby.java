@@ -226,9 +226,7 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
      *
      * @return True if this Lobby is ready to start a game, False otherwise
      */
-    public boolean canStart() {
-        return logic.validPlayerCount(playerSlots.size());
-    }
+    public boolean canStart() { return logic.validPlayerCount(getClaimedCount()); }
 
     /**
      * Start a Game from this Lobby. If this Lobby is setting up a new Game, creates a new Game object and returns it.
@@ -248,10 +246,11 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
             }
 
             // Set the settings
-            settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
+            settings.set(SettingsLoader.GAME_PLAYER_COUNT, getClaimedCount());
             loadedGame.setSettings(settings);
 
             for(PlayerSlot slot : playerSlots) {
+                if(!slot.isClaimed()) continue;
                 Player p;
                 switch(slot.getType()) {
                     case NETWORK:
@@ -348,11 +347,23 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
     public String getName() { return name; }
 
     /**
-     * GameLogic Getter. Retreives the <code>logic</code> that is used by this Lobby and the Game it creates.
+     * GameLogic Getter. Retrieves the <code>logic</code> that is used by this Lobby and the Game it creates.
      *
      * @return GameLogic <code>logic</code>
      */
     public GameLogic getLogic() { return logic; }
+
+    /**
+     * Claimed Slot Count Getter. Retrieves the amount of PlayerSlots in this Lobby that are claimed/in use.
+     *
+     * @return Claimed Slot Count
+     */
+    public int getClaimedCount() {
+        int count = 0;
+        for(PlayerSlot slot : playerSlots)
+            if(slot.isClaimed()) count++;
+        return count;
+    }
 
     /**
      * Valid SlotType Getter. Retrieves an array of the valid PlayerSlot.SlotTypes that are allowed to be selected for
