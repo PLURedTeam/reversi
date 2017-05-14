@@ -154,6 +154,7 @@ public class Client extends Controller {
 
             if(game.isNetworked())
                 started = WebUtilities.INSTANCE.startGame(game);
+            else started = true;
             if(!started) {
                 gui.showErrorDialog("Start Game Error", "Couldn't start game on server.");
                 return;
