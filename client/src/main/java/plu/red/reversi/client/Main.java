@@ -48,6 +48,7 @@ public class Main {
         // Clear any cached login info
         settings.remove(SettingsLoader.GLOBAL_USER_NAME);
         settings.remove(SettingsLoader.GLOBAL_USER_PASS);
+        SettingsLoader.INSTANCE.saveClientSettings();
 
         // looper call (feel free to move/adjust)
         // but recall that looper is actually used to call the API because it is necessary by android

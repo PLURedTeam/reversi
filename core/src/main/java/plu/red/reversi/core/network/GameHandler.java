@@ -11,6 +11,7 @@ import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.DataMap;
 import plu.red.reversi.core.util.User;
 
@@ -88,6 +89,7 @@ public class GameHandler implements Runnable, INetworkListener {
 
                         game = new Game(Controller.getInstance(), Controller.getInstance().gui, map);
 
+                        Controller.getInstance().getChat().clear(ChatMessage.Channel.lobby(game.getName()));
                         Controller.getInstance().setCore(game);
 
                     } catch (JSONException e) {
