@@ -326,7 +326,7 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     public void windowClosing(WindowEvent e) {
 
         //Logout from the server
-        if(WebUtilities.INSTANCE.loggedIn() && e.getSource() == this)
+        if(e.getSource() == this)
             WebUtilities.INSTANCE.logout();
 
         // Ask about saving
