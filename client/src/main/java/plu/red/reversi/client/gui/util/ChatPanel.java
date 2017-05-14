@@ -1,6 +1,7 @@
 package plu.red.reversi.client.gui.util;
 
 
+import com.vdurmont.emoji.EmojiManager;
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.command.ChatCommand;
 import plu.red.reversi.core.listener.IChatListener;
@@ -25,6 +26,27 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
     public final JTextField chatEntryField;
     public final JButton chatEntryButton;
 
+    private final JPanel emojiPanel;
+
+    private final JButton emojiGrinning;
+    private final JButton emojiFrowning;
+    private final JButton emojiZipped;
+    private final JButton emojiAngry;
+    private final JButton emojiTongue;
+    private final JButton emojiEyeroll;
+    private final JButton emojiConfused;
+    private final JButton emojiInnocent;
+    private final JButton emojiHourglass;
+
+    private void setupEmojiButton(JButton button) {
+        button.addActionListener(this);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        //button.setContentAreaFilled(false);
+        button.setBackground(Utilities.multiplyColor(this.getBackground(), 0.9f));
+        emojiPanel.add(button);
+    }
+
     public ChatPanel(plu.red.reversi.core.util.ChatLog chat) {
 
         // Create the Tabbed Pane
@@ -42,10 +64,32 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
         if(!this.chatEntryButton.isEnabled())
             this.chatEntryButton.setToolTipText("Login to Chat");
 
+        emojiGrinning   = new JButton(EmojiManager.getForAlias(":grinning:").getUnicode());
+        emojiFrowning   = new JButton(EmojiManager.getForAlias(":frowning:").getUnicode());
+        emojiZipped     = new JButton(EmojiManager.getForAlias(":zipper_mouth:").getUnicode());
+        emojiAngry      = new JButton(EmojiManager.getForAlias(":angry:").getUnicode());
+        emojiTongue     = new JButton(EmojiManager.getForAlias(":stuck_out_tongue:").getUnicode());
+        emojiEyeroll    = new JButton(EmojiManager.getForAlias(":eye_roll:").getUnicode());
+        emojiConfused   = new JButton(EmojiManager.getForAlias(":confused:").getUnicode());
+        emojiInnocent   = new JButton(EmojiManager.getForAlias(":innocent:").getUnicode());
+        emojiHourglass  = new JButton(EmojiManager.getForAlias(":hourglass_flowing_sand:").getUnicode());
+
+        emojiPanel = new JPanel();
+        setupEmojiButton(emojiGrinning);
+        setupEmojiButton(emojiFrowning);
+        setupEmojiButton(emojiZipped);
+        setupEmojiButton(emojiAngry);
+        setupEmojiButton(emojiTongue);
+        setupEmojiButton(emojiEyeroll);
+        setupEmojiButton(emojiConfused);
+        setupEmojiButton(emojiInnocent);
+        setupEmojiButton(emojiHourglass);
+
         this.setLayout(new BorderLayout());
         this.add(tabPane, BorderLayout.NORTH);
         this.add(chatEntryField, BorderLayout.CENTER);
         this.add(chatEntryButton, BorderLayout.EAST);
+        this.add(emojiPanel, BorderLayout.SOUTH);
 
         setChat(chat);
     }
@@ -96,6 +140,25 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
                 }
             }
         }
+
+        if(e.getSource() == emojiGrinning)
+            chatEntryField.setText(chatEntryField.getText() + ":grinning:");
+        if(e.getSource() == emojiFrowning)
+            chatEntryField.setText(chatEntryField.getText() + ":frowning:");
+        if(e.getSource() == emojiZipped)
+            chatEntryField.setText(chatEntryField.getText() + ":zipper_mouth:");
+        if(e.getSource() == emojiAngry)
+            chatEntryField.setText(chatEntryField.getText() + ":angry:");
+        if(e.getSource() == emojiTongue)
+            chatEntryField.setText(chatEntryField.getText() + ":stuck_out_tongue:");
+        if(e.getSource() == emojiEyeroll)
+            chatEntryField.setText(chatEntryField.getText() + ":eye_roll:");
+        if(e.getSource() == emojiConfused)
+            chatEntryField.setText(chatEntryField.getText() + ":confused:");
+        if(e.getSource() == emojiInnocent)
+            chatEntryField.setText(chatEntryField.getText() + ":innocent:");
+        if(e.getSource() == emojiHourglass)
+            chatEntryField.setText(chatEntryField.getText() + ":hourglass_flowing_sand:");
     }
 
     @Override
