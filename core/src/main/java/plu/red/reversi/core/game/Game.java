@@ -243,7 +243,7 @@ public class Game extends Coordinator {
 
         // Ensure a History exists and setup the Board
         //History after these if conditions will be updated by GameLogic
-        if(history == null) {
+        if(history == null || history.getNumBoardCommands() < 1) {
             history = new History();
             gameLogic.initBoard();
 
