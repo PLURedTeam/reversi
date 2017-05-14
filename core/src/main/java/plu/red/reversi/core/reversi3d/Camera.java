@@ -57,16 +57,15 @@ public class Camera {
     }
 
     public Camera beginDrag(int ticks) {
-        dragStartTick = lastTick;
-        dragFinishTick = lastTick + ticks;
 
-        if(dragState != targetState) {
-            // previous drag is still in progress--set target state equal to current state to disable camera jump
-            cancelDrag();
+        if(dragState == targetState) {
+            dragStartTick = lastTick;
+
+            dragState = new CameraState(targetState);
+            currentState = new CameraState(targetState);
         }
 
-        dragState = new CameraState(targetState);
-        currentState = new CameraState(targetState);
+        dragFinishTick = dragStartTick + ticks;
 
         return this;
     }

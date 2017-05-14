@@ -37,6 +37,10 @@ import plu.red.reversi.core.graphics.VertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.reversi3d.Board3D;
 import plu.red.reversi.core.reversi3d.Camera;
+import plu.red.reversi.core.reversi3d.ControlMode;
+import plu.red.reversi.core.reversi3d.EndgameMode;
+import plu.red.reversi.core.reversi3d.FlatMode;
+import plu.red.reversi.core.reversi3d.FreeMode;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
 /**
@@ -82,8 +86,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
     private HighlightMode mHighlightMode;
 
-    private boolean mPresentationMode;
-    private boolean mAutoRotate;
+    private ControlMode mCurrentMode;
+    private FreeMode mFreeMode;
+    private FlatMode mFlatMode;
 
 
     public GameSurfaceView(Context context) {
@@ -114,8 +119,6 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         mScaleDetector = new ScaleGestureDetector(getContext(), this);
 
         mDetector.setOnDoubleTapListener(this);
-
-        mRenderer.setAutoRotate(true);
 
         mDpi = getResources().getDisplayMetrics().densityDpi;
 
@@ -218,7 +221,8 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.setCameraPos(distanceX + mRenderer.getCameraPos().x(), distanceY + mRenderer.getCameraPos().y());
+                if(mCurrentMode != null)
+                    mCurrentMode.move(distanceX, distanceY);
 
                 requestRender();
             }
@@ -255,7 +259,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
         // Flings use math in pixels (as opposed to math based on the viewport).
-        Vector2fc pos = mRenderer.getCameraPos();
+        Vector2fc pos = mCurrentMode.getPos();
         // Before flinging, aborts the current animation.
         mScroller.forceFinished(true);
         // Begins the animation
@@ -334,11 +338,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
 
-        float newZoom = mRenderer.getPlayZoom() * detector.getScaleFactor();
-
-        newZoom = Math.max(MIN_ZOOM * mDpi, Math.min(MAX_ZOOM * mDpi, newZoom));
-
-        mRenderer.setPlayZoom(newZoom);
+        if(mCurrentMode instanceof FlatMode) {
+            float newZoom = mRenderer.getPlayZoom() * detector.getScaleFactor();
+            newZoom = Math.max(MIN_ZOOM * mDpi, Math.min(MAX_ZOOM * mDpi, newZoom));
+            mRenderer.setPlayZoom(newZoom);
+        }
 
         return true;
     }
@@ -409,10 +413,18 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public void onAnimationsDone(Board3D board) {
 
-        // enable the ability to control again
-        setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
+        if(mGame.isGameOver()) {
+            if(mCurrentMode instanceof FreeMode)
+                mCurrentMode = new EndgameMode(mGame, mRenderer.mCamera, mRenderer.mBoard, mFreeMode);
+            else
+                mCurrentMode = new EndgameMode(mGame, mRenderer.mCamera, mRenderer.mBoard, mFreeMode);
+        }
+        else {
+            // enable the ability to control again
+            setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
 
-        doHighlights();
+            doHighlights();
+        }
     }
 
     @Override
@@ -510,18 +522,18 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         public void run() {
 
             if(mScroller.computeScrollOffset()) {
-                //mRenderer.getCamera().setPos(new Vector2f(mScroller.getCurrX(), mScroller.getCurrY()));
-                mRenderer.setCameraPos(mScroller.getCurrX(), mScroller.getCurrY());
+                if(mCurrentMode != null)
+                    mCurrentMode.move(
+                            mScroller.getCurrX() - mCurrentMode.getPos().x(),
+                            mScroller.getCurrY() - mCurrentMode.getPos().y());
                 requestRender();
             }
 
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
-
                     if(mRenderer.update()) {
                         requestRender();
-                        //System.out.println("Renderer has requested render");
                     }
                 }
             });
@@ -554,8 +566,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
                 public void run() {
                     mRenderer.mBoard = new Board3D(mRenderer.g3d, mRenderer.mPipeline, mGame);
                     mRenderer.mBoard.addListener(GameSurfaceView.this);
-
                     mRenderer.mCamera.setMoveBounds(new Vector2f(-mRenderer.mBoard.getBoardRadius()), new Vector2f(mRenderer.mBoard.getBoardRadius()));
+
+                    setPresentationMode(true);
 
                     doHighlights();
                 }
@@ -599,7 +612,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public boolean isInPresentationMode() {
-        return mPresentationMode;
+        return mCurrentMode instanceof FreeMode;
     }
 
     public interface GameSurfaceViewListener {
@@ -609,25 +622,27 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     }
 
     public void setPresentationMode(boolean present) {
-        mPresentationMode = present;
 
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                if(mRenderer.mCamera != null) {
+                if(mRenderer.mCamera != null && mRenderer.mBoard != null) {
+
+                    if(mFlatMode == null || mFreeMode == null) {
+                        mFreeMode = new FreeMode(mGame, mRenderer.getCamera(), mRenderer.mBoard, 2400);
+                        mFlatMode = new FlatMode(mGame, mRenderer.getCamera(), mRenderer.mBoard, mRenderer.mPlayZoom);
+                    }
+
                     if(present) {
-                        mRenderer.mCamera.beginDrag(60);
-                        mRenderer.mCamera.setPos(new Vector2f(0, 0));
-                        mRenderer.mCamera.setDir(new Vector2f(-0.00f * (float)Math.PI, 0.15f * (float)Math.PI));
-                        mRenderer.mCamera.setZoom(2400);
+                        mFreeMode.start();
+                        mFreeMode.setZoom(2400);
+                        mFreeMode.setAutoRotate(false);
+                        mCurrentMode = mFreeMode;
                     }
                     else {
-                        mAutoRotate = false;
-
-                        mRenderer.mCamera.beginDrag(60);
-                        mRenderer.mCamera.setPos(new Vector2f(0, 0));
-                        mRenderer.mCamera.setDir(new Vector2f(0.00f * (float)Math.PI, 0.5f * (float)Math.PI));
-                        mRenderer.mCamera.setZoom(mRenderer.mPlayZoom);
+                        mFlatMode.start();
+                        mFlatMode.setZoom(mRenderer.mPlayZoom);
+                        mCurrentMode = mFlatMode;
                     }
                 }
             }
@@ -787,12 +802,11 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
             if(mGame != null) {
                 mBoard = new Board3D(g3d, mPipeline, mGame);
-
                 mBoard.addListener(GameSurfaceView.this);
-
                 mBoard.setBoard(mBoardIterator.board);
-
                 mCamera.setMoveBounds(new Vector2f(-mBoard.getBoardRadius()), new Vector2f(mBoard.getBoardRadius()));
+
+                setPresentationMode(true);
 
                 doHighlights();
             }
@@ -829,7 +843,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
             mCamera.setViewport(new Vector2f(width, height));
 
-            setPresentationMode(mPresentationMode);
+            setPresentationMode(true);
 
             g3d.bindPipelineUniform("projectionMatrix", mPipeline, mCamera.getProjectionMatrix());
         }
@@ -861,42 +875,16 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
             }
         }
 
-        public void setCameraPos(float x, float y) {
-
-            if(!mPresentationMode) {
-                mCamera.setPos(new Vector2f(x, y));
-            }
-            else {
-
-                mCamera.setDir(new Vector2f(x, -y).mul(1.0f / 400));
-            }
-        }
-
-        public Vector2fc getCameraPos() {
-
-            if(mPresentationMode) {
-                Vector2f f = new Vector2f(mCamera.getDir()).mul(400);
-                f.y = -f.y;
-                return f;
-            }
-            else {
-                return mCamera.getPos();
-            }
-        }
-
-        public void setAutoRotate(boolean rotate) {
-            if(rotate) {
-                setPresentationMode(true);
-                mAutoRotate = true;
-            }
-            else mAutoRotate = false;
-        }
-
         public RectF getScrollBounds() {
 
-            if(mPresentationMode)
+            // TODO: this is a little bit of a hack right now. consider moving to controlmode
+            if(mCurrentMode instanceof FreeMode)
                 // return an obnoxiously large number since there is technically no limit
-                return new RectF(Integer.MIN_VALUE, -0.5f * (float) Math.PI * 400, Integer.MAX_VALUE, 0.5f * (float)Math.PI * 400);
+                return new RectF(
+                        Integer.MIN_VALUE,
+                        -0.5f * (float) Math.PI * 400,
+                        Integer.MAX_VALUE,
+                        0.5f * (float)Math.PI * 400);
 
             float r = mBoard.getBoardRadius() * mCamera.getZoom();
 
@@ -910,8 +898,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         public void setPlayZoom(float zoom) {
             mPlayZoom = zoom;
 
-            if(!mPresentationMode && mCamera != null)
-                mCamera.setZoom(mPlayZoom);
+            if(mCurrentMode instanceof FlatMode)
+                // have to reload the camera zoom
+                setPresentationMode(false);
         }
 
         public Camera getCamera() {
@@ -920,23 +909,15 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
         public boolean update() {
 
-            boolean result = false;
+            boolean updated = false;
 
             // it is possible for this function to be called before init. So make sure we are not processing before that.
-            if(mBoard != null) {
-                result = mBoard.update(++mTick);
-                result = mCamera.update(mTick) || result;
-
-                if(mAutoRotate) {
-
-                    // automatically rotate the camera's direction
-                    mCamera.setDir(new Vector2f(0.00175f, 0).add(mCamera.getDir()));
-
-                    return true;
-                }
+            if(mCurrentMode != null) {
+                mTick++;
+                updated = mCurrentMode.update(mTick);
             }
 
-            return result;
+            return updated;
         }
 
         public BoardIndex getTappedIndex(Vector2fc loc) {

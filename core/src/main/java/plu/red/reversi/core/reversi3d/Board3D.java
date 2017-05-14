@@ -422,9 +422,9 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
                     pieces[i].setFlippedColor(blackoutTo);
 
                 if(isChild(pieces[i]))
-                    pieces[i].animateFlip(!pieces[i].isFlipped(), delay);
+                    pieces[i].animateFlip(!pieces[i].isFlipped(), getLastTick() + delay);
                 else {
-                    pieces[i].animateEnter(!pieces[i].isFlipped(), delay);
+                    pieces[i].animateEnter(!pieces[i].isFlipped(), getLastTick() + delay);
                     addChild(pieces[i]);
                 }
             }

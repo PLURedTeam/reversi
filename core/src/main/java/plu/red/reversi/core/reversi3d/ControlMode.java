@@ -1,5 +1,7 @@
 package plu.red.reversi.core.reversi3d;
 
+import org.joml.Vector2fc;
+
 import plu.red.reversi.core.game.Game;
 
 /**
@@ -24,6 +26,11 @@ public abstract class ControlMode {
     }
 
     /**
+     * Called when this controller is becoming the currently active controller.
+     */
+    public abstract void start();
+
+    /**
      * Called by the implementor to indicate that inputs have been received that indicate that the camera or view should
      * be transformed in some way
      * @param dx the amount of horizontal distance to transform by
@@ -31,6 +38,12 @@ public abstract class ControlMode {
      * @return if the view needs to be redrawn
      */
     public abstract boolean move(float dx, float dy);
+
+    /**
+     * Get the current computable position of the camera. Useful if you need pos to calculate dx, for example.
+     * @return the current "position" of the camera, in pixels.
+     */
+    public abstract Vector2fc getPos();
 
     /**
      * Called by the implementor to indicate that a tick has passed and the view should render appropriately.

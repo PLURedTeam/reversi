@@ -20,13 +20,15 @@ public class ObjModel3D extends Model3D {
     private VertexBufferObject<Vector4fc> vertices;
     private VertexBufferObject<Vector3fc> normals;
 
-    public ObjModel3D(Graphics3D g3d, Pipeline pipeline, File file) throws FileNotFoundException, IOException {
+    public ObjModel3D(Graphics3D g3d, Pipeline pipeline, File file) throws IOException {
+        this(g3d, pipeline, new FileInputStream(file));
+    }
+
+    public ObjModel3D(Graphics3D g3d, Pipeline pipeline, InputStream stream) throws IOException {
         super(g3d, pipeline);
 
-        this.origFile = file;
-
         // go ahead and load the model
-        BufferedReader br = new BufferedReader(new FileReader(file));
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         String line;
         while ((line = br.readLine()) != null) {
             String[] parts = line.split(" ");
