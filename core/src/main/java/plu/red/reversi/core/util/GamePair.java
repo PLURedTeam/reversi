@@ -51,6 +51,11 @@ public class GamePair {
             gameID = obj.getInt("gameID");
             numPlayers = obj.getInt("numPlayers");
             gameName = obj.getString("gameName");
+            System.out.println(obj.get("gameType").getClass());
+            if(obj.getString("gameType").equals("REVERSI"))
+                gameType = GameType.REVERSI;
+            else
+                gameType = GameType.GO;
             status = GameStatus.LOBBY;
         } catch(Exception e) {
             // this should not happen.
@@ -64,6 +69,7 @@ public class GamePair {
         obj.put("gameID", gameID);
         obj.put("numPlayers", numPlayers);
         obj.put("gameName", gameName);
+        obj.put("gameType", gameType.ordinal());
 
         return obj;
     }
