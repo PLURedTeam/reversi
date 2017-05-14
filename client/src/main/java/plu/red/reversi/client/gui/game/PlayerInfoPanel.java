@@ -1,15 +1,15 @@
 package plu.red.reversi.client.gui.game;
 
-import plu.red.reversi.core.game.Board;
-import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
 import plu.red.reversi.core.command.SurrenderCommand;
+import plu.red.reversi.core.game.Board;
+import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogicCache;
+import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.ISettingsListener;
-import plu.red.reversi.core.game.player.Player;
 
 import javax.swing.*;
 import javax.swing.border.Border;

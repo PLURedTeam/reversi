@@ -84,7 +84,6 @@ public class GameHandler implements Runnable, INetworkListener, EventHandler {
             Coordinator core = Controller.getInstance().getCore();
             if(core instanceof Lobby)
                 ((Lobby)core).joinUser(u);
-
         } else if(event.equals("move")) {
 
             try {
@@ -110,6 +109,7 @@ public class GameHandler implements Runnable, INetworkListener, EventHandler {
 
                     game = new Game(Controller.getInstance(), Controller.getInstance().gui, map);
 
+                    Controller.getInstance().getChat().clear(ChatMessage.Channel.lobby(game.getName()));
                     Controller.getInstance().setCore(game);
 
                 } catch (JSONException e) {

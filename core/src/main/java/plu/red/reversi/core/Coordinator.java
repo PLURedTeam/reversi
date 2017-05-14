@@ -1,9 +1,13 @@
 package plu.red.reversi.core;
 
-import plu.red.reversi.core.command.*;
-import plu.red.reversi.core.listener.*;
-import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.command.ChatCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.listener.IChatListener;
+import plu.red.reversi.core.listener.ICommandListener;
+import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.listener.INetworkListener;
 import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.ChatMessage;
 
 import java.util.HashSet;
 
@@ -153,16 +157,28 @@ public abstract class Coordinator {
         }
 
         if(cmd.source == Command.Source.CLIENT && WebUtilities.INSTANCE.loggedIn()) {
-            if(cmd instanceof ChatCommand)
-                WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
-            else
-                WebUtilities.INSTANCE.sendMove(cmd);
+            if(cmd instanceof ChatCommand) {
+                // android requires that network I/O occurs on a new thread.
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        WebUtilities.INSTANCE.sendChat(((ChatCommand)cmd).message);
+                    }
+                }).start();
+            }
+            else {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        WebUtilities.INSTANCE.sendMove(cmd);
+                    }
+                });
+            }
         }
 
         // Perform the Command's action/s
         boolean successful = parseCommand(cmd);
-        if(successful && cmd.source == Command.Source.CLIENT) {
-
+        if(successful) {
             // Notify listeners that a Command has been accepted
             notifyCommandListeners(cmd);
         }

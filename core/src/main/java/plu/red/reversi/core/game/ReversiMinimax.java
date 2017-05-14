@@ -2,10 +2,10 @@ package plu.red.reversi.core.game;
 
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.MoveCommand;
-import plu.red.reversi.core.game.logic.GameLogicCache;
-import plu.red.reversi.core.util.Looper;
 import plu.red.reversi.core.game.logic.GameLogic;
+import plu.red.reversi.core.game.logic.GameLogicCache;
 import plu.red.reversi.core.game.logic.ReversiLogic;
+import plu.red.reversi.core.util.Looper;
 
 import java.util.Set;
 

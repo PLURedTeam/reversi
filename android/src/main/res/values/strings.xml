@@ -84,4 +84,8 @@
     </string>
     <string name="login_successful">Login Successful</string>
     <string name="login_trying">Trying Login...</string>
+    <string name="dialog_join_game_title">Join Network Game</string>
+    <string name="dialog_join_game_message">Are you sure you want to join this game?</string>
+    <string name="dialog_wait_start">Waiting for game to start...</string>
+    <string name="error_join_game">Failed to join game!</string>
 </resources>

@@ -1,20 +1,25 @@
 package plu.red.reversi.core.lobby;
 
-import plu.red.reversi.core.*;
+import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.IMainGUI;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.Command;
-import plu.red.reversi.core.command.JoinCommand;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogic;
 import plu.red.reversi.core.game.logic.GoLogic;
 import plu.red.reversi.core.game.logic.ReversiLogic;
-import plu.red.reversi.core.game.player.NetworkPlayer;
-import plu.red.reversi.core.listener.INetworkListener;
-import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
+import plu.red.reversi.core.game.player.NetworkPlayer;
 import plu.red.reversi.core.game.player.Player;
+import plu.red.reversi.core.listener.INetworkListener;
+import plu.red.reversi.core.listener.ISettingsListener;
 import plu.red.reversi.core.network.WebUtilities;
-import plu.red.reversi.core.util.*;
+import plu.red.reversi.core.util.ChatMessage;
+import plu.red.reversi.core.util.Color;
+import plu.red.reversi.core.util.DataMap;
+import plu.red.reversi.core.util.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -226,9 +231,7 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
      *
      * @return True if this Lobby is ready to start a game, False otherwise
      */
-    public boolean canStart() {
-        return logic.validPlayerCount(playerSlots.size());
-    }
+    public boolean canStart() { return logic.validPlayerCount(getClaimedCount()); }
 
     /**
      * Start a Game from this Lobby. If this Lobby is setting up a new Game, creates a new Game object and returns it.
@@ -248,10 +251,11 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
             }
 
             // Set the settings
-            settings.set(SettingsLoader.GAME_PLAYER_COUNT, playerSlots.size());
+            settings.set(SettingsLoader.GAME_PLAYER_COUNT, getClaimedCount());
             loadedGame.setSettings(settings);
 
             for(PlayerSlot slot : playerSlots) {
+                if(!slot.isClaimed()) continue;
                 Player p;
                 switch(slot.getType()) {
                     case NETWORK:
@@ -348,11 +352,23 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
     public String getName() { return name; }
 
     /**
-     * GameLogic Getter. Retreives the <code>logic</code> that is used by this Lobby and the Game it creates.
+     * GameLogic Getter. Retrieves the <code>logic</code> that is used by this Lobby and the Game it creates.
      *
      * @return GameLogic <code>logic</code>
      */
     public GameLogic getLogic() { return logic; }
+
+    /**
+     * Claimed Slot Count Getter. Retrieves the amount of PlayerSlots in this Lobby that are claimed/in use.
+     *
+     * @return Claimed Slot Count
+     */
+    public int getClaimedCount() {
+        int count = 0;
+        for(PlayerSlot slot : playerSlots)
+            if(slot.isClaimed()) count++;
+        return count;
+    }
 
     /**
      * Valid SlotType Getter. Retrieves an array of the valid PlayerSlot.SlotTypes that are allowed to be selected for

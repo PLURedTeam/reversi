@@ -1,18 +1,8 @@
 package plu.red.reversi.core.graphics;
 
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
-
-import java.nio.channels.Pipe;
 import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-
-/**
- * Created by daniel on 3/19/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
 
 public class Pipeline extends Handle {
     private HashMap<Shader.ShaderType, Shader> shaders;

@@ -31,10 +31,10 @@ public class GameManager {
      * @param numPlayers the number of players the game can support
      * @return the id of the game created
      */
-    public int createGame(int numPlayers, String name) {
+    public int createGame(int numPlayers, String name, GamePair.GameType g) {
         Integer gameID = gameCounter++; //Get next game id
         System.out.println("[GAME MANAGER] Creating New Game: " + gameID);
-        games.put(gameID,new GamePair(gameID,numPlayers, name));
+        games.put(gameID,new GamePair(gameID,numPlayers, name,g));
         return gameID;
     }//createGame
 
@@ -50,7 +50,7 @@ public class GameManager {
         if(games.get(id).players.size() >= games.get(id).numPlayers) return false;
         System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + " to Game: " + id);
         games.get(id).players.add(user);
-        UserManager.INSTANCE.setStatus(user.getUsername(), "WAITING FOR GAME TO START");
+        UserManager.INSTANCE.setStatus(user.getUsername(), "WAITING");
         return true;
     }//addPlayer
 
@@ -68,8 +68,10 @@ public class GameManager {
                 broadcastUserChange(u, id);
                 UserManager.INSTANCE.setStatus(u.getUsername(), "IN LOBBY");
 
-                if(games.get(id).players.isEmpty())
+                if(games.get(id).players.isEmpty()) {
                     games.remove(id);
+                    broadcast.remove(id); //remove the broadcaster
+                }
 
                 return true;
             }//if
@@ -112,10 +114,15 @@ public class GameManager {
      * Sets the status of the game to "PLAYING"
      * @param id the id of the game
      */
-    public void startGame(int id) {
+    public boolean startGame(int id) {
+
+        if(games.get(id).players.size() != games.get(id).getNumPlayers())
+            return false;
+
         games.get(id).status = GamePair.GameStatus.PLAYING;
         for(User u: games.get(id).players)
                 UserManager.INSTANCE.setStatus(u.getUsername(), "IN GAME");
+        return true;
     }//startGame
 
     /**

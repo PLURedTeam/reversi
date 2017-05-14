@@ -1,15 +1,14 @@
 package plu.red.reversi.server.endpoints;
 
-import plu.red.reversi.server.db.DBUtilities;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.SessionManager;
 import plu.red.reversi.server.Managers.UserManager;
+import plu.red.reversi.server.db.DBUtilities;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /**
@@ -37,8 +36,8 @@ public class BaseEndpoint {
     public Response login(User user) {
         if(user == null) throw new WebApplicationException(403);
 
-        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
-            throw new WebApplicationException(409);
+//        if(UserManager.INSTANCE.loggedIn(user.getUsername()))
+//            throw new WebApplicationException(409);
 
         if(DBUtilities.INSTANCE.authenticateUser(user.getUsername(), user.getPassword())) {
             user.setPassword("");
@@ -46,7 +45,7 @@ public class BaseEndpoint {
             throw new WebApplicationException(403);
         }//else
 
-        user.setStatus("In Lobby");
+        user.setStatus("IN LOBBY");
         UserManager.INSTANCE.addUser(user);
         user.setSessionID(SessionManager.INSTANCE.addSession());
 

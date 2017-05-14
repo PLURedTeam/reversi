@@ -6,12 +6,14 @@ import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.Board;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
-import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.IBoardUpdateListener.BoardUpdate;
 
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * GameLogic is responsible for handling a set of games rules. Each specific game will be

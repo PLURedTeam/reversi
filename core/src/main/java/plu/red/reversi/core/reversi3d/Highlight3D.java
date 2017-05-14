@@ -8,11 +8,6 @@ import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
 
 /**
- * Created by daniel on 3/28/17.
- * Copyright 13013 Inc. All Rights Reserved.
- */
-
-/**
  * Highlights a square region of space... extending ridiculously high upward.
  */
 public class Highlight3D extends ColorModel3D {

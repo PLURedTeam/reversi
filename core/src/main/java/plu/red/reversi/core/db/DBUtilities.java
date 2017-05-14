@@ -1,23 +1,28 @@
 package plu.red.reversi.core.db;
 
 //import statements
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import plu.red.reversi.core.command.BoardCommand;
+import plu.red.reversi.core.command.Command;
+import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.command.SetCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.History;
-import plu.red.reversi.core.command.*;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.util.Color;
 
-//import java.awt.*;
 import java.sql.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+
+//import java.awt.*;
 
 /**
  * Created by Andrew on 3/9/2017.
