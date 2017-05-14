@@ -1,5 +1,6 @@
 package plu.red.reversi.core.util;
 
+import com.vdurmont.emoji.EmojiParser;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -73,7 +74,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.channel = channel;
         this.username = username;
         this.usercolor = Color.BLACK;
-        this.message = message;
+        this.message = EmojiParser.parseToUnicode(message);
         this.timestamp = ZonedDateTime.now();
     }
 
@@ -89,7 +90,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.channel = channel;
         this.username = username;
         this.usercolor = usercolor;
-        this.message = message;
+        this.message = EmojiParser.parseToUnicode(message);
         this.timestamp = ZonedDateTime.now();
     }
 
@@ -106,7 +107,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.channel = channel;
         this.username = username;
         this.usercolor = usercolor;
-        this.message = message;
+        this.message = EmojiParser.parseToUnicode(message);
         this.timestamp = timestamp;
     }
 
