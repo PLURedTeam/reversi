@@ -61,7 +61,7 @@ public class FreeMode extends ControlMode {
         boolean updated = false;
 
         if(autoRotate) {
-            getCamera().setDir(new Vector2f(0.00175f, 0).add(getCamera().getDir()));
+            getCamera().setDir(new Vector2f(0.0000005f * zoom, 0).add(getCamera().getDir()));
             updated = true;
         }
 

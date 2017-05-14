@@ -10,6 +10,8 @@ import plu.red.reversi.core.SettingsLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Glory to the Red Team.
@@ -55,6 +57,8 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
         boardAndEdges.setBorder(BorderFactory.createMatteBorder(0,0,BoardEdges.EDGE_HEIGHT,
                 BoardEdges.EDGE_WIDTH,BoardEdges.BACKGROUND_COLOR));
 
+        //boardAndEdges.add(new )
+
         preserveAspectPanel.add(boardAndEdges);
 
         boardPanel.add(preserveAspectPanel, BorderLayout.CENTER);
@@ -69,7 +73,33 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
         rightPanel.add(playerInfoPanel, BorderLayout.NORTH);
-        rightPanel.add(historyPanel, BorderLayout.CENTER);
+
+        JPanel rightPanelSub = new JPanel();
+        rightPanelSub.setLayout(new BorderLayout());
+
+        rightPanel.add(rightPanelSub, BorderLayout.CENTER);
+
+        rightPanelSub.add(historyPanel, BorderLayout.CENTER);
+
+        JButton playForwardButton = new JButton("Play to Last");
+        playForwardButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                boardView.setAutoFollow(true);
+            }
+        });
+
+        rightPanelSub.add(playForwardButton, BorderLayout.SOUTH);
+
+        JButton switchModeButton = new JButton("Switch Camera");
+        switchModeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                boardView.setPresentationMode(!boardView.isPresentationMode());
+            }
+        });
+
+        rightPanel.add(switchModeButton, BorderLayout.SOUTH);
 
         this.add(rightPanel, BorderLayout.EAST);
 

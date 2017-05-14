@@ -1,9 +1,6 @@
 package plu.red.reversi.client.gui.game;
 
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 import org.joml.Vector2f;
@@ -28,9 +25,7 @@ import plu.red.reversi.core.graphics.SimpleGLVertexShader;
 import plu.red.reversi.core.listener.IBoardUpdateListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IGameOverListener;
-import plu.red.reversi.core.reversi3d.Board3D;
-import plu.red.reversi.core.reversi3d.Camera;
-import plu.red.reversi.core.reversi3d.HighlightMode;
+import plu.red.reversi.core.reversi3d.*;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -64,6 +59,11 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     private BoardViewStateListener listener;
     private BoardIterator boardIterator;
     private boolean autoFollow;
+
+    private FreeMode freeCameraMode;
+    private FlatMode flatCameraMode;
+
+    private ControlMode currentMode;
 
     private static GLCapabilities getCapabilities() {
 
@@ -232,10 +232,16 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
     @Override
     public void onAnimationsDone(Board3D board) {
-        if(game.getCurrentPlayer() instanceof HumanPlayer)
-            canPlay = true;
 
-        updateHighlights();
+        if(game.isGameOver()) {
+            currentMode = new EndgameMode(game, camera, board, freeCameraMode);
+        }
+        else {
+            if(game.getCurrentPlayer() instanceof HumanPlayer)
+                canPlay = true;
+
+            updateHighlights();
+        }
     }
 
     @Override
@@ -243,6 +249,61 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         // keep our board iterator synced
         boardIterator.next();
         listener.onBoardStateChanged(this);
+    }
+
+    public boolean isPresentationMode() {
+        return currentMode == freeCameraMode;
+    }
+
+    public void setPresentationMode(boolean present) {
+        if(present) {
+            currentMode = freeCameraMode;
+        }
+        else {
+            currentMode = flatCameraMode;
+        }
+
+        currentMode.start();
+    }
+
+    public void setAutoFollow(boolean autoFollow) {
+        this.autoFollow = autoFollow;
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(autoFollow) {
+                    board.clearAnimations();
+
+                    // queue up anims til the end
+                    BoardIterator iter = new BoardIterator(boardIterator);
+
+                    for(BoardCommand cmd : game.getHistory().getMoveCommandsAfter(boardIterator.getPos() + 1)) {
+                        if(cmd instanceof MoveCommand) {
+                            game.getGameLogic().play(
+                                    iter.cache,
+                                    iter.board,
+                                    (MoveCommand) cmd,
+                                    true, false
+                            );
+                        }
+                        else {
+                            BoardUpdate update = new BoardUpdate();
+                            update.player = cmd.playerID;
+                            update.added.add(cmd.position);
+
+                            board.animBoardUpdate(update);
+
+                            iter.next();
+                        }
+                    }
+                }
+                else {
+                    board.clearAnimations();
+                    updateHighlights();
+                }
+            }
+        });
     }
 
     private class EventHandler implements GLEventListener {
@@ -254,6 +315,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             //System.out.println("Init claled: " + drawable);
 
             g3d = new SwingGraphics3D(drawable.getGL().getGL3());
+            g3d.setClearColor(new Vector3f(0.2f));
 
             PipelineDefinition def = new PipelineDefinition();
 
@@ -274,8 +336,15 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
             camera = new Camera();
 
-            camera.setPos(new Vector2f(0,0));
-            camera.setDir(new Vector2f(0, 0.5f * (float)Math.PI));
+            //camera.setPos(new Vector2f(0,0));
+            //camera.setDir(new Vector2f(0, 0.5f * (float)Math.PI));
+            freeCameraMode = new FreeMode(game, camera, board, 100);
+            flatCameraMode = new FlatMode(game, camera, board, 400);
+
+            freeCameraMode.setAutoRotate(true);
+
+            currentMode = freeCameraMode;
+            currentMode.start();
 
             // TODO: This is a little funky... but its the best way to deal with making sure the correct move is displayed
             setMoveIndex(game.getHistory().getNumBoardCommands() - 1);
@@ -301,8 +370,9 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
             // TODO: Rework the tick system
             int tick = (int)(System.currentTimeMillis() - startTime) / 17;
 
-            board.update(tick);
-            camera.update(tick);
+            currentMode.update(tick);
+
+            g3d.clearBuffers();
 
             // regardless of if anything actually changed, we render on the computer because its a computer
             g3d.bindPipelineUniform("viewMatrix", pipeline, camera.getViewMatrix());
@@ -317,7 +387,16 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
             camera.setViewport(new Vector2f(width, height));
 
-            camera.setZoom(Math.min(width, height) / board.getBoardRadius() / 2);
+            float baseZoom = Math.min(width, height) / board.getBoardRadius() / 2;
+
+            if(currentMode == flatCameraMode) {
+                freeCameraMode.setZoom(baseZoom / 2);
+                flatCameraMode.setZoom(baseZoom);
+            }
+            else {
+                flatCameraMode.setZoom(baseZoom);
+                freeCameraMode.setZoom(baseZoom / 2);
+            }
         }
     }
 
