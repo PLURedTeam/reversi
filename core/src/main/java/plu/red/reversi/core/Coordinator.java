@@ -33,7 +33,9 @@ public abstract class Coordinator {
      * @param listener Object that implements an extension of IListener
      */
     public void addListener(IListener listener) {
-        listenerSet.add(listener);
+        synchronized(listenerSet) {
+            listenerSet.add(listener);
+        }
     }
 
     /**
@@ -44,7 +46,9 @@ public abstract class Coordinator {
      * @param listener Object that implements an extension of IListener
      */
     public static void addListenerStatic(IListener listener) {
-        listenerSetStatic.add(listener);
+        synchronized(listenerSetStatic) {
+            listenerSetStatic.add(listener);
+        }
     }
 
     /**
@@ -55,7 +59,9 @@ public abstract class Coordinator {
      * @param listener Object that implements an extension of IListener
      */
     public void removeListener(IListener listener) {
-        listenerSet.remove(listener);
+        synchronized(listenerSet) {
+            listenerSet.remove(listener);
+        }
     }
 
     /**
@@ -66,7 +72,9 @@ public abstract class Coordinator {
      * @param listener Object that implements an extension of Ilistener
      */
     public static void removeListenerStatic(IListener listener) {
-        listenerSetStatic.remove(listener);
+        synchronized(listenerSetStatic) {
+            listenerSetStatic.remove(listener);
+        }
     }
 
     /**
@@ -76,10 +84,14 @@ public abstract class Coordinator {
      * @param cmd Command object that was accepted
      */
     protected final void notifyCommandListeners(Command cmd) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof ICommandListener) ((ICommandListener)listener).commandApplied(cmd);
-        for(IListener listener : listenerSetStatic)
-            if(listener instanceof ICommandListener) ((ICommandListener)listener).commandApplied(cmd);
+        synchronized(listenerSet) {
+            for (IListener listener : listenerSet)
+                if (listener instanceof ICommandListener) ((ICommandListener) listener).commandApplied(cmd);
+        }
+        synchronized(listenerSetStatic) {
+            for (IListener listener : listenerSetStatic)
+                if (listener instanceof ICommandListener) ((ICommandListener) listener).commandApplied(cmd);
+        }
     }
 
     /**
@@ -89,10 +101,14 @@ public abstract class Coordinator {
      * @param loggedIn If the user is logged in to the server
      */
     public final void notifyLoggedInListeners(boolean loggedIn) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
-        for(IListener listener : listenerSetStatic)
-            if(listener instanceof INetworkListener) ((INetworkListener)listener).onLogout(loggedIn);
+        synchronized(listenerSet) {
+            for (IListener listener : listenerSet)
+                if (listener instanceof INetworkListener) ((INetworkListener) listener).onLogout(loggedIn);
+        }
+        synchronized(listenerSetStatic) {
+            for (IListener listener : listenerSetStatic)
+                if (listener instanceof INetworkListener) ((INetworkListener) listener).onLogout(loggedIn);
+        }
     }//notifyChatListeners
 
     /* Notifies that a ChatMessage has been received from the server. Iterates through and tells every IChatListener
@@ -101,10 +117,14 @@ public abstract class Coordinator {
      * @param msg ChatMessage object that was received
      */
     public final void notifyChatListeners(ChatMessage msg) {
-        for(IListener listener : listenerSet)
-            if(listener instanceof IChatListener) ((IChatListener)listener).onChat(msg);
-        for(IListener listener : listenerSetStatic)
-            if(listener instanceof IChatListener) ((IChatListener)listener).onChat(msg);
+        synchronized(listenerSet) {
+            for (IListener listener : listenerSet)
+                if (listener instanceof IChatListener) ((IChatListener) listener).onChat(msg);
+        }
+        synchronized(listenerSetStatic) {
+            for (IListener listener : listenerSetStatic)
+                if (listener instanceof IChatListener) ((IChatListener) listener).onChat(msg);
+        }
     }
 
 
