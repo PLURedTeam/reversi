@@ -1,6 +1,8 @@
 package plu.red.reversi.core.reversi3d;
 
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
+
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.Player;
 
@@ -25,10 +27,10 @@ public class EndgameMode extends ControlMode {
         this.board = board;
 
         try {
-            URL url = ClassLoader.getSystemResource("models/gameover.obj");
-            File f = new File(url.toURI());
-
-            this.obj = new ObjModel3D(board.getGraphics3D(), board.getPipeline(), f);
+            this.obj = new ObjModel3D(
+                    board.getGraphics3D(),
+                    board.getPipeline(),
+                    ClassLoader.getSystemResourceAsStream("/models/gameover.obj"));
         }
         catch (Exception e) {
             // technically this should not happen
@@ -36,16 +38,32 @@ public class EndgameMode extends ControlMode {
         }
 
         this.freeMode = freeMode;
+        start();
+    }
+
+    @Override
+    public void start() {
         freeMode.setAutoRotate(true);
+        freeMode.start();
 
         // nice savory drag
-        camera.beginDrag(180);
+        //getCamera().beginDrag(180);
     }
 
     @Override
     public boolean move(float dx, float dy) {
         // endgame does not respond to motion events
         return false;
+    }
+
+    /**
+     * Get the current computable position of the camera. Useful if you need pos to calculate dx, for example.
+     *
+     * @return the current "position" of the camera, in pixels.
+     */
+    @Override
+    public Vector2fc getPos() {
+        return freeMode.getPos();
     }
 
     @Override
@@ -69,10 +87,6 @@ public class EndgameMode extends ControlMode {
             board.animBlackout(winners.size() > 1 ? null : winners.iterator().next().getColor());
         }
 
-
-
-        board.update(tick);
-
-        return true;
+        return freeMode.update(tick);
     }
 }

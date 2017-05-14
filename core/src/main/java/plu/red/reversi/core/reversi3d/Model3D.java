@@ -12,6 +12,7 @@ import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.graphics.VertexBufferObject;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,8 +141,13 @@ public abstract class Model3D {
         for(String vbo : vbos.keySet()) {
             if(vbos.get(vbo) == null) {
                 VertexBufferObject extra = getExtra(vbo);
-                g3d.bindPipelineVBO(vbo, pipeline, extra);
-                size = Math.max(size, extra.size());
+                try {
+                    g3d.bindPipelineVBO(vbo, pipeline, extra);
+                    size = Math.max(size, extra.size());
+                } catch(InvalidParameterException e) {
+                    // TODO: for right now ignore
+                    System.err.println("WARNING: Buffer was not uploaded to graphics card before draw");
+                }
             }
         }
 
