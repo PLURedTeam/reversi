@@ -48,12 +48,13 @@ public class DBConnection {
     public String openDB() {
         try {
 
-            String url = "jdbc:mysql://mysql.apxpro.com:3306/cs390?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-            String username = "teamred";
-            String password = "390rocks";
+            String url = "jdbc:mysql://mal.cs.plu.edu:3306/390_2017_red?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+            String username = "390red";
+            String password = "changeme";
 
-                //Creates the database file and connects to it
-                conn = DriverManager.getConnection(url,username,password);
+            //Creates the database file and connects to it
+            conn = DriverManager.getConnection(url,username,password);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }//catch
