@@ -63,6 +63,8 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
     private FreeMode freeCameraMode;
     private FlatMode flatCameraMode;
 
+    private int width, height; // the most recent width/height returned by reshape, hack for retina displays
+
     private ControlMode currentMode;
 
     private static GLCapabilities getCapabilities() {
@@ -176,7 +178,7 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
         // must be on the latest move to issue command on board
         if(autoFollow) {
             BoardIndex index = board.getIndexAtCoord(
-                    camera.pixelToPosition(new Vector2f(mouseEvent.getX(), mouseEvent.getY()))
+                    camera.pixelToPosition(new Vector2f(((float)mouseEvent.getX() / getWidth()) * width, ((float)mouseEvent.getY() / getHeight()) * height))
             );
 
             game.getCurrentPlayer().boardClicked(index);
@@ -397,6 +399,9 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
                 flatCameraMode.setZoom(baseZoom);
                 freeCameraMode.setZoom(baseZoom / 2);
             }
+
+            BoardView.this.width = width;
+            BoardView.this.height = height;
         }
     }
 
