@@ -19,6 +19,21 @@ import java.util.ArrayList;
 
 public class ChatPanel extends JPanel implements KeyListener, ActionListener, IChatListener, INetworkListener {
 
+    private class TabLabel extends JLabel {
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(150, 30);
+        }
+        @Override
+        public Dimension getPreferredSize() {
+            Dimension dim = super.getPreferredSize();
+            return new Dimension(Math.min(150, dim.width), dim.height);
+        }
+        public TabLabel(String text) {
+            super(text);
+        }
+    }
+
     //public final JList<ChatMessage> chatHistoryList;
     public final JTabbedPane tabPane;
     protected ArrayList<JList<ChatMessage>> tabList;
@@ -106,6 +121,12 @@ public class ChatPanel extends JPanel implements KeyListener, ActionListener, IC
                     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
             tabList.add(list);
+        }
+        for(int i = 0; i < tabPane.getTabCount(); i++) {
+            JList<ChatMessage> list = tabList.get(i);
+            JLabel tabLabel = new TabLabel(((ChatLog.ChannelLog)list.getModel()).channel);
+            tabPane.setTabComponentAt(i, tabLabel);
+            list.ensureIndexIsVisible(list.getModel().getSize()-1);
         }
         this.revalidate();
         this.repaint();
