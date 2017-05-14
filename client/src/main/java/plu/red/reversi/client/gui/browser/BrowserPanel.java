@@ -4,6 +4,7 @@ package plu.red.reversi.client.gui.browser;
 import plu.red.reversi.client.gui.CorePanel;
 import plu.red.reversi.client.gui.MainWindow;
 import plu.red.reversi.client.gui.util.ChatPanel;
+import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.ChatMessage;
@@ -29,6 +30,7 @@ public class BrowserPanel extends CorePanel implements ActionListener {
     private ChatPanel panelChat;
 
     private JButton refreshButton;
+    private JButton leaveButton;
 
     private BrowserPanel.BrowserCellRenderer cellRenderer = null;
 
@@ -65,7 +67,12 @@ public class BrowserPanel extends CorePanel implements ActionListener {
         if(bowser.isConnected()) {
             if(connected) {
                 JLabel label = new JLabel("Connected and Waiting for Game to Start");
-                this.add(label, BorderLayout.CENTER);
+                JPanel panel = new JPanel();
+                panel.add(label);
+                leaveButton = new JButton("Leave Game");
+                leaveButton.addActionListener(this);
+                panel.add(leaveButton);
+                this.add(panel, BorderLayout.CENTER);
             } else {
                 JList<GamePair> list = new JList<>(bowser);
                 //list.setSelectionModel(new BrowserPanel.BrowserListSelectionModel());
@@ -118,6 +125,12 @@ public class BrowserPanel extends CorePanel implements ActionListener {
         if(e.getSource() == refreshButton) {
             bowser.refresh();
         }
+
+        if(e.getSource() == leaveButton) {
+            WebUtilities.INSTANCE.leaveNetworkGame();
+            Client.getInstance().loadNetworkBrowser();
+        }
+
     }
 
     /**

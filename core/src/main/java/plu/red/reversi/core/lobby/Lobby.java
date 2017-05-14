@@ -147,7 +147,7 @@ public class Lobby extends Coordinator implements ISettingsListener, INetworkLis
         gui.updateGUIMinor();
     }
 
-    public void removeUser(User user) {
+    public synchronized void removeUser(User user) {
         for(PlayerSlot slot : playerSlots) {
             if(slot.getName().equals(user.getUsername())) {
                 slot.setClaimed(false);

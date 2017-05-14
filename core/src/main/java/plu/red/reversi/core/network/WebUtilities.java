@@ -98,6 +98,7 @@ public class WebUtilities {
                 //Create User
                 user.setUsername(username);
                 user.setPassword(sb.toString());
+                user.setHost(false);
             } catch(Exception e) {
                 e.printStackTrace();
             }//catch
@@ -287,6 +288,9 @@ public class WebUtilities {
             if(response.getStatus() == 406) {
                 gui.showErrorDialog("Delete User Error", "That username and/or password was incorrect.");
             }//if
+            if(response.getStatus() == 403) {
+                gui.showErrorDialog("Delete User Error", "That username is currently logged in. Cannot delete account.");
+            }//if
             if(response.getStatus() == 500) {
                 gui.showErrorDialog("Server Error", "A server error occurred. Please try again later.");
             }
@@ -310,11 +314,16 @@ public class WebUtilities {
             WebTarget target = client.target(baseURI + "online-users");
             Response response = target.request(MediaType.APPLICATION_JSON).get();
 
-            ArrayList<User> users = response.readEntity(new GenericType<ArrayList<User>>() {
-            });
+            ArrayList<User> users = null;
+
+            if(response.getStatus() == 404)
+                return users;
+
+            users = response.readEntity(new GenericType<ArrayList<User>>() {});
 
             return users;
         } catch (Exception e) {
+            e.printStackTrace();
             gui.showErrorDialog("Get Online Users Error", "The server is currently unreachable. Please try again later.");
             return null;
         }//catch
@@ -445,6 +454,21 @@ public class WebUtilities {
         }//else
     }//joinGame
 
+
+    /**
+     * Calls the server to leave the network game
+     */
+    public void leaveNetworkGame() {
+        if(networkGameID == -1) return;
+
+        //Create target and call server
+        WebTarget target = client.target(baseURI + "game/leave/" + networkGameID);
+        Response response = target.request().post(Entity.json(user));
+        networkGameID = -1;
+    }//leaveNetworkGame
+
+
+
     /**
      * Sends the game to the server in order to start it on the networked players application
      * @param g the game to start
@@ -528,5 +552,10 @@ public class WebUtilities {
     public boolean isHost() {
         return gameHost;
     }//isHost
+
+    public boolean inNetworkGame() {
+        if(networkGameID == -1) return false;
+        return true;
+    }
 
 }//webUtilities

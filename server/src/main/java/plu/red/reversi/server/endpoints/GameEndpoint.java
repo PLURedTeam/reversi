@@ -90,6 +90,7 @@ public class GameEndpoint {
         SseBroadcaster broadcaster = new SseBroadcaster();
         games.put(gameID, broadcaster);
 
+        user.setHost(true);
         GameManager.INSTANCE.addPlayer(gameID,user);
         return Response.ok(gameID).build();
     }//createGame
@@ -107,6 +108,7 @@ public class GameEndpoint {
         if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
             throw new WebApplicationException(403);
 
+        user.setHost(false);
         boolean joined = GameManager.INSTANCE.addPlayer(gameID, user);
 
         if(!GameManager.INSTANCE.gameExists(gameID))
@@ -123,6 +125,30 @@ public class GameEndpoint {
 
         return Response.ok(gameID).build();
     }//joinGame
+
+
+    /**
+     * Adds the user to a game that is waiting on players
+     * @param gameID the gameID of the game to add the user to
+     * @param user The user to add to the network game
+     * @return true if user added to game, false otherwise
+     */
+    @Path("leave/{id}")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response leaveGame(@PathParam("id") int gameID, User user) {
+        if(!UserManager.INSTANCE.loggedIn(user.getUsername()))
+            throw new WebApplicationException(403);
+
+        boolean removed = GameManager.INSTANCE.removePlayer(gameID, user);
+
+        if(!GameManager.INSTANCE.gameExists(gameID))
+            throw new WebApplicationException(404);
+
+        return Response.ok(gameID).build();
+    }//joinGame
+
+
 
 
     /**
