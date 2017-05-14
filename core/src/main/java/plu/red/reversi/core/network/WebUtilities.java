@@ -635,6 +635,8 @@ public class WebUtilities {
      * @param c the command to be sent to the server
      */
     public void sendMove(Command c) {
+        System.out.println("Send move did not get called");
+
         IMainGUI gui = Controller.getInstance().gui;
         if(loggedIn) { //Check to see if currently logged in
 
@@ -653,7 +655,11 @@ public class WebUtilities {
                         .post(body)
                         .build();
 
-                okh.newCall(req).execute().close();
+                okhttp3.Response res = okh.newCall(req).execute();
+
+                System.out.println("Response code for send move: " + res.code());
+
+                res.close();
 
             } catch (Exception e) {
                 e.printStackTrace();

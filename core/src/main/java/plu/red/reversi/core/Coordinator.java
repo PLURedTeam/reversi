@@ -152,7 +152,7 @@ public abstract class Coordinator {
                     public void run() {
                         WebUtilities.INSTANCE.sendMove(cmd);
                     }
-                });
+                }).start();
             }
         }
 
