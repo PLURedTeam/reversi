@@ -46,7 +46,7 @@ public class BaseEndpoint {
             throw new WebApplicationException(403);
         }//else
 
-        user.setStatus("In Lobby");
+        user.setStatus("IN LOBBY");
         UserManager.INSTANCE.addUser(user);
         user.setSessionID(SessionManager.INSTANCE.addSession());
 

@@ -50,7 +50,7 @@ public class GameManager {
         if(games.get(id).players.size() >= games.get(id).numPlayers) return false;
         System.out.println("[GAME MANAGER] Adding User: " + user.getUsername() + " to Game: " + id);
         games.get(id).players.add(user);
-        UserManager.INSTANCE.setStatus(user.getUsername(), "WAITING FOR GAME TO START");
+        UserManager.INSTANCE.setStatus(user.getUsername(), "WAITING");
         return true;
     }//addPlayer
 

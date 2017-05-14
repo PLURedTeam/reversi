@@ -143,13 +143,17 @@ public class BrowserPanel extends CorePanel implements ActionListener {
 
             GamePair game = list.getModel().getElementAt(index);
             int gameID = game.getGameID();
-            if(WebUtilities.INSTANCE.joinGame(gameID)) {
-                connected = true;
-                connectedPair = game;
-                Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
-                updateGUI();
-            }
 
+            if(game.getStatus().equals(GamePair.GameStatus.LOBBY)) {
+
+                if (WebUtilities.INSTANCE.joinGame(gameID)) {
+                    connected = true;
+                    connectedPair = game;
+                    Controller.getInstance().getChat().create(ChatMessage.Channel.lobby(game.getGameName()));
+                    updateGUI();
+                }
+            }
+            
     }//buttonClicked
 
     public void disconnect() {
