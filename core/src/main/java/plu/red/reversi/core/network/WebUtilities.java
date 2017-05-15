@@ -218,7 +218,6 @@ public class WebUtilities {
 
         okhttp3.Response res = okh.newCall(req).execute();
 
-        if(res.code() != 200) return false; //an error occured
         loggedIn = false;
         user.setUsername(null);
         user.setPassword(null);

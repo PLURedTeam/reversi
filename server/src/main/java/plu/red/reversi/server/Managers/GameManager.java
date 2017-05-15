@@ -71,6 +71,9 @@ public class GameManager {
                 if(games.get(id).players.isEmpty()) {
                     games.remove(id);
                     broadcast.remove(id); //remove the broadcaster
+
+                    System.out.println("[GAME MANAGER] Removing Game: " + id);
+
                 }
 
                 return true;
@@ -146,9 +149,6 @@ public class GameManager {
 
                             //if the game is in lobby
                             if(j == 0) {
-
-                                //if(games.get(i).getStatus() == GamePair.GameStatus.LOBBY || games.get(i).getStatus() == GamePair.GameStatus.PLAYING)
-
 
                                 games.remove(i); //remove the game
                                 broadcast.remove(i); //remove the broadcaster

@@ -1,6 +1,7 @@
 package plu.red.reversi.server.Managers;
 
 import plu.red.reversi.core.listener.IListener;
+import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.listener.ISessionListener;
 
 import java.util.HashSet;
@@ -44,7 +45,8 @@ public class SessionManager implements Runnable, IListener {
     public void removeSession(int sessionID) {
         System.out.println("[SESSION MANAGER] REMOVING SESSION: " + sessionID);
         sessions.remove(sessionID);
-        UserManager.INSTANCE.timedOut(sessionID);
+        User u = UserManager.INSTANCE.getUser(sessionID);
+        UserManager.INSTANCE.removeUser(u);
     }//sessionID
 
     /**
@@ -82,7 +84,6 @@ public class SessionManager implements Runnable, IListener {
         while(true) {
             for(Integer sessionID: sessions.keySet()) {
                 if(sessions.get(sessionID) < System.currentTimeMillis() - 65000) {
-                    UserManager.INSTANCE.timedOut(sessionID);
                     GameManager.INSTANCE.endSession(sessionID);
                     System.out.println("[SESSION MANAGER] SESSION TIMED OUT: " + sessionID);
                     removeSession(sessionID);
