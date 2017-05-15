@@ -43,11 +43,19 @@ public class SessionHandler implements Runnable, INetworkListener {
         while(loggedIn) {
             try {
 
+                    RequestBody body = RequestBody.create(
+                            okhttp3.MediaType.parse("application/json"),
+                            ""
+                    );
+
                 Request req = new Request.Builder()
                         .url(baseURI + "keep-session-alive/" + user.getSessionID())
+                        .post(body)
                         .build();
 
-                okh.newCall(req).execute().close();
+                okhttp3.Response res = okh.newCall(req).execute();
+                System.out.println("[SESSION HANDLER]: POLLING FOR SESSION, RESPONSE: " + res.code());
+                res.close();
 
                 Thread.sleep(30000);
             }

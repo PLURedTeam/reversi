@@ -32,7 +32,6 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
     private GameListener mListener;
     private GameService.LocalBinder mServiceConnection;
     private MultiplayerGamesAdapter mSlideAdapter;
-    private GetGamesTask mGetTask;
 
     public MultiplayerFragment() {
         // Required empty public constructor
@@ -41,9 +40,6 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mGetTask = new GetGamesTask();
-        mSlideAdapter = new MultiplayerGamesAdapter(getContext());
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_multiplayer, container, false);
@@ -58,6 +54,11 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
             tryLogin();
             getContext().bindService(new Intent(getContext(), GameService.class), this, 0);
 
+            if(mSlideAdapter == null) {
+                mSlideAdapter = new MultiplayerGamesAdapter(getContext());
+            }
+
+            System.out.println("Setting slide adapter: " + mSlideAdapter);
             mListener.getSlideList().setAdapter(mSlideAdapter);
             mListener.getSlideList().setOnItemClickListener(this);
         } else {
@@ -115,7 +116,7 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
     public void refresh() {
         System.out.println("Refreshing network...");
 
-        mGetTask.execute();
+        new GetGamesTask().execute();
     }
 
     @Override
@@ -147,16 +148,27 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if(!WebUtilities.INSTANCE.joinGame(mSlideAdapter.getItem(position).gameID)) {
+                        GamePair p = mSlideAdapter.getItem(position);
+                        System.out.println("game pair: " + p);
+
+                        if(p == null) {
                             Toast.makeText(getContext(), R.string.error_join_game, Toast.LENGTH_LONG).show();
                             return;
                         }
 
-                        final ProgressDialog d = new ProgressDialog(getContext());
-                        d.setMessage(getString(R.string.dialog_wait_start));
-                        d.show();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // TODO: Improve, this is lazy
+                                WebUtilities.INSTANCE.joinGame(p.gameID);
+                            }
+                        }).start();
+
+                        // make sure we unset the game so we can see the new one come in
+                        mServiceConnection.setGame(null);
 
                         // move to game screen when game is started
+                        new WaitForGameTask().execute();
                     }
                 })
                 .setNegativeButton(android.R.string.no, null)
@@ -181,13 +193,70 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
          */
         @Override
         protected ArrayList<GamePair> doInBackground(Void... voids) {
+            System.out.println("Getting online games");
             return WebUtilities.INSTANCE.getOnlineGames();
         }
 
         @Override
         protected void onPostExecute(ArrayList<GamePair> games) {
+            System.out.println("Received " + games.size() + " games!");
             mSlideAdapter.clear();
             mSlideAdapter.addAll(games);
+            System.out.println("Added results in: " + mSlideAdapter.getCount());
+            mSlideAdapter.notifyDataSetInvalidated();
+        }
+    }
+
+    private class WaitForGameTask extends AsyncTask<Void, Void, Boolean> {
+
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param voids The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            final ProgressDialog d = new ProgressDialog(getContext());
+            d.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+
+                }
+            });
+            d.setMessage(getString(R.string.dialog_wait_start));
+            d.show();
+
+            try {
+                System.out.println("Waiting for the game to be ready...");
+                while(mServiceConnection.getGame() == null) {
+                    if(!d.isShowing())
+                        // we were cancelled
+                        return false;
+                    Thread.sleep(100);
+                }
+            } catch(InterruptedException e) {
+                d.dismiss();
+                return false;
+            }
+
+            d.dismiss();
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if(result)
+                mListener.onNewGame(mServiceConnection.getGame());
         }
     }
 }
