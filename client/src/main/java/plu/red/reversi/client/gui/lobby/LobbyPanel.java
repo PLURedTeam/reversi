@@ -153,7 +153,7 @@ public class LobbyPanel extends CorePanel implements ActionListener, ChangeListe
         }
 
         if(e.getSource() == leaveNetworkGame) {
-            gui.leaveNetworkGame();
+            gui.leaveGame();
         }
     }
 

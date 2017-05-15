@@ -45,6 +45,8 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
 
     private BorderLayout layout = new BorderLayout();
 
+    private ReversiMenuBar menuBar;
+
     /**
      * Constructs a new main window for the game.
      */
@@ -58,7 +60,8 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
         this.setLayout(layout);
 
         // Add the menu bar
-        this.setJMenuBar(new ReversiMenuBar(this));
+        menuBar = new ReversiMenuBar(this);
+        this.setJMenuBar(menuBar);
 
         this.statusBar = new StatusBar();
         this.add(statusBar, BorderLayout.SOUTH);
@@ -90,6 +93,9 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
 
         // Add the new center panel
         this.add(corePanel, BorderLayout.CENTER);
+
+        // Update the enabled menu bar options
+        this.menuBar.updateEnables();
 
         // Refresh and repaint
         this.revalidate();
@@ -270,9 +276,11 @@ public class MainWindow extends JFrame implements WindowListener, IMainGUI {
     }//createNetworkGame
 
 
-    public void leaveNetworkGame() {
-       WebUtilities.INSTANCE.leaveNetworkGame();
-       Client.getInstance().loadNetworkBrowser();
+    public void leaveGame() {
+        Coordinator core = master.getCore();
+        if( (core instanceof Game && ((Game)core).isNetworked()) || (core instanceof Lobby && ((Lobby)core).isNetworked()) )
+            WebUtilities.INSTANCE.leaveNetworkGame();
+        Client.getInstance().loadNetworkBrowser();
     }//
 
 
