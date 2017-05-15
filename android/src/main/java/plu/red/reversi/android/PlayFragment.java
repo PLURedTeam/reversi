@@ -113,6 +113,9 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         if (context instanceof GameListener) {
             mListener = (GameListener) context;
 
+            if(mGameView != null)
+                mGameView.setListener(this);
+
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement GameListener");
@@ -196,10 +199,17 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                                     players[i].getID()
                             )
                     ));
+
+            if(mGame.getCurrentPlayer() == players[i])
+                mGameScorePanel.findViewWithTag(players[i]).setBackgroundColor(Color.argb(64, 255, 255, 0));
+            else
+                mGameScorePanel.findViewWithTag(players[i]).setBackgroundColor(Color.TRANSPARENT);
         }
     }
 
     private void updateActionPanel() {
+
+        System.out.println("update action panel");
 
         mConfirmButton.setVisibility(View.GONE);
         mPlayForwardButton.setVisibility(View.GONE);
@@ -214,7 +224,8 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
                 mPlayPrevButton.setVisibility(View.VISIBLE);
 
         }
-        else if(mGameView.getCurrentSelected() != null && mGameView.getCurrentMoveIndex() == mGame.getHistory().getNumBoardCommands() - 1) {
+
+        if(mGameView.getCurrentSelected() != null && mGameView.getCurrentMoveIndex() == mGame.getHistory().getNumBoardCommands() - 1) {
             mConfirmButton.setVisibility(View.VISIBLE);
         }
     }
@@ -259,6 +270,7 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         }
         else if(v == mConfirmButton) {
             // move confirmed
+            System.out.println("Setting board clicked for current player");
             mGame.getCurrentPlayer().boardClicked(mGameView.getCurrentSelected());
 
             mGameView.clearCurrentSelected();
@@ -334,12 +346,10 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         mGame = mServiceConnection.getGame();
 
         mGameView.setGame(mGame);
-
         mGameView.setCurrentMove(mServiceConnection.getMoveIndex());
-
         SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-
         mGameView.setAutoFollow(prefs.getBoolean(PREF_AUTO_FOLLOW, true));
+        mGameView.setPlayerEnabled(mGame.getCurrentPlayer() instanceof HumanPlayer);
 
         prepareScorePanel();
         updateActionPanel();

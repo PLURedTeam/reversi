@@ -11,7 +11,9 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.util.GamePair;
@@ -32,6 +36,7 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
     private GameListener mListener;
     private GameService.LocalBinder mServiceConnection;
     private MultiplayerGamesAdapter mSlideAdapter;
+    private Timer mTimer;
 
     public MultiplayerFragment() {
         // Required empty public constructor
@@ -57,6 +62,14 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
             if(mSlideAdapter == null) {
                 mSlideAdapter = new MultiplayerGamesAdapter(getContext());
             }
+
+            mTimer = new Timer();
+            mTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    refresh();
+                }
+            }, 0, 1000);
 
             System.out.println("Setting slide adapter: " + mSlideAdapter);
             mListener.getSlideList().setAdapter(mSlideAdapter);
@@ -104,6 +117,8 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
     public void onDetach() {
         super.onDetach();
         mListener = null;
+
+        mTimer.purge();
 
         getContext().unbindService(this);
     }
@@ -168,6 +183,7 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
                         mServiceConnection.setGame(null);
 
                         // move to game screen when game is started
+                        // somehow this can sometimes be on a non-looper thread
                         new WaitForGameTask().execute();
                     }
                 })
@@ -209,6 +225,16 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
 
     private class WaitForGameTask extends AsyncTask<Void, Void, Boolean> {
 
+        private ProgressDialog mDialog;
+
+        @Override
+        protected void onPreExecute() {
+
+            mDialog = new ProgressDialog(getContext());
+            mDialog.setMessage(getString(R.string.dialog_wait_start));
+            mDialog.show();
+        }
+
         /**
          * Override this method to perform a computation on a background thread. The
          * specified parameters are the parameters passed to {@link #execute}
@@ -226,30 +252,20 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
         @Override
         protected Boolean doInBackground(Void... voids) {
 
-            final ProgressDialog d = new ProgressDialog(getContext());
-            d.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-
-                }
-            });
-            d.setMessage(getString(R.string.dialog_wait_start));
-            d.show();
-
             try {
                 System.out.println("Waiting for the game to be ready...");
                 while(mServiceConnection.getGame() == null) {
-                    if(!d.isShowing())
+                    if(!mDialog.isShowing())
                         // we were cancelled
                         return false;
                     Thread.sleep(100);
                 }
             } catch(InterruptedException e) {
-                d.dismiss();
+                mDialog.dismiss();
                 return false;
             }
 
-            d.dismiss();
+            mDialog.dismiss();
             return true;
         }
 

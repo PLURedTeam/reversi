@@ -242,7 +242,7 @@ public class GameActivity extends AppCompatActivity
     @Override
     public void onNewGame(Game game) {
         if(mServiceConnection != null) {
-            if(mServiceConnection.shouldWarnGameReplace()) {
+            /*if(mServiceConnection.shouldWarnGameReplace()) {
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.dialog_replace_title)
                         .setMessage(R.string.dialog_replace_message)
@@ -257,7 +257,8 @@ public class GameActivity extends AppCompatActivity
             }
             else {
                 newGame(game);
-            }
+            }*/
+            newGame(game);
         }
         else {
             // TODO: Not sure how to handle this issue; should only happen if the service connection dies really
