@@ -62,6 +62,9 @@ public class CreateGameTask extends AsyncTask<Void, Void, Game> {
     @Override
     protected Game doInBackground(Void... params) {
 
+        // just in case
+        // TODO: if we need to do a network game leave, we should ask
+        WebUtilities.INSTANCE.leaveNetworkGame();
 
         if(!WebUtilities.INSTANCE.createGame(2, mGameName, GamePair.GameType.REVERSI)) {
             System.out.println("Failed to create game!");
