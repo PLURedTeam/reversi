@@ -88,4 +88,10 @@
     <string name="dialog_join_game_message">Are you sure you want to join this game?</string>
     <string name="dialog_wait_start">Waiting for game to start...</string>
     <string name="error_join_game">Failed to join game!</string>
+    <string name="menu_create_net_game">Create Network Game</string>
+    <string name="dialog_new_net_title">Start Network Game</string>
+    <string name="dialog_new_net_message">Please type a name for your new game:</string>
+    <string name="dialog_new_net_progress">Waiting for opponent...</string>
+    <string name="error_create_net_error">There was an error creating the network game. Please try again later</string>
+    <string name="dialog_create_game">Create</string>
 </resources>

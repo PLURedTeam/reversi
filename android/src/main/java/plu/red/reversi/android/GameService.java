@@ -25,6 +25,8 @@ import java.util.Set;
 
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Controller;
+import plu.red.reversi.core.Coordinator;
+import plu.red.reversi.core.IMainGUI;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
@@ -40,6 +42,7 @@ import plu.red.reversi.core.listener.IChatListener;
 import plu.red.reversi.core.listener.ICommandListener;
 import plu.red.reversi.core.listener.IListener;
 import plu.red.reversi.core.network.WebUtilities;
+import plu.red.reversi.core.util.ChatLog;
 import plu.red.reversi.core.util.ChatMessage;
 import plu.red.reversi.core.util.Color;
 import plu.red.reversi.core.util.DataMap;
@@ -68,7 +71,7 @@ public class GameService extends Service implements ICommandListener, IChatListe
 
         super.onCreate();
 
-        Controller.init(new Client(null, null, null, null));
+        Controller.init(new GameServiceController());
 
         Log.d(TAG, "Game service is alive");
 
@@ -250,14 +253,16 @@ public class GameService extends Service implements ICommandListener, IChatListe
 
             mGame = game;
 
-            mGame.addListener(GameService.this);
+            if(mGame != null) {
+                mGame.addListener(GameService.this);
 
-            if(mGame.isGameOver()) {
-                // start with the beginning by default
-                mMoveIndex = 0;
+                if(mGame.isGameOver()) {
+                    // start with the beginning by default
+                    mMoveIndex = 0;
+                }
+                else
+                    mMoveIndex = mGame.getHistory().getNumBoardCommands() - 1;
             }
-            else
-                mMoveIndex = mGame.getHistory().getNumBoardCommands() - 1;
 
             return mGame;
         }
@@ -294,6 +299,27 @@ public class GameService extends Service implements ICommandListener, IChatListe
 
         public ChatMessage getChannelMessage(String channel, int msg) {
             return mChatMessages.get(channel).get(msg);
+        }
+    }
+
+    /**
+     * The only purpose of this class is to catch the few things that need to be caught from emissions
+     * within the core lib.
+     */
+    public class GameServiceController extends Client {
+        protected GameServiceController() {
+            super(null, null, null, null);
+        }
+
+        @Override
+        public void setCore(Coordinator core) {
+            if(core instanceof Game)
+                mBinder.setGame((Game)core);
+        }
+
+        @Override
+        public Coordinator getCore() {
+            return mGame;
         }
     }
 

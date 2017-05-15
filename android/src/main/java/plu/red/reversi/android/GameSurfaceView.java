@@ -26,7 +26,7 @@ import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.BoardIterator;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.GameLogicCache;
-import plu.red.reversi.core.game.player.NullPlayer;
+import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.graphics.Graphics3D;
 import plu.red.reversi.core.graphics.Pipeline;
 import plu.red.reversi.core.graphics.PipelineDefinition;
@@ -416,7 +416,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         }
         else {
             // enable the ability to control again
-            setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
+            setPlayerEnabled(mGame.getCurrentPlayer() instanceof HumanPlayer);
 
             doHighlights();
         }
@@ -542,7 +542,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
 
         mGame.getGameLogic().addBoardUpdateListener(this);
 
-        if(mGame.getCurrentPlayer() instanceof NullPlayer)
+        if(mGame.getCurrentPlayer() instanceof HumanPlayer)
             setPlayerEnabled(true);
 
         queueEvent(new Runnable() {

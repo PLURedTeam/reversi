@@ -531,6 +531,8 @@ public class WebUtilities {
 
                 okhttp3.Response res = okh.newCall(req).execute();
 
+                System.out.println("Got response for join: " + res.code());
+
                 //If invalid credentials, return false
                 if (res.code() == 403) {
                     gui.showErrorDialog("Join Game Error", "You must login to join a game.");
@@ -551,10 +553,12 @@ public class WebUtilities {
 
                 return true;
             } catch (Exception e) {
+                System.out.println("Exception was caught: " + e.getMessage());
                 gui.showErrorDialog("Join Game Error", "The server is currently unreachable. Please try again later.");
                 return false;
             }//catch
         } else {
+            System.out.println("Not logged in.");
             gui.showErrorDialog("Join Game Error", "You are not currently logged in. You must login first");
             return false;
         }//else
@@ -718,6 +722,14 @@ public class WebUtilities {
     public boolean inNetworkGame() {
         if(networkGameID == -1) return false;
         return true;
+    }
+
+    /**
+     * Returns the game ID of the curerntly active game
+     * @return -1 if there is not currently an active network game, a nonnegative integer otherwise.
+     */
+    public int getNetworkGameID() {
+        return networkGameID;
     }
 
 }//webUtilities
