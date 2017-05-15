@@ -38,6 +38,7 @@ import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.game.BoardIndex;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.command.MoveCommand;
+import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.reversi3d.HighlightMode;
@@ -258,17 +259,14 @@ public class PlayFragment extends Fragment implements ServiceConnection, View.On
         }
         else if(v == mConfirmButton) {
             // move confirmed
-            mGame.acceptCommand(new MoveCommand(
-                    mGame.getCurrentPlayer().getID(),
-                    mGameView.getCurrentSelected()
-            ));
+            mGame.getCurrentPlayer().boardClicked(mGameView.getCurrentSelected());
 
             mGameView.clearCurrentSelected();
 
             updateActionPanel();
 
             // prevent the user from moving until all the animations are done
-            mGameView.setPlayerEnabled(mGame.getCurrentPlayer() instanceof NullPlayer);
+            mGameView.setPlayerEnabled(mGame.getCurrentPlayer() instanceof HumanPlayer);
         }
         else if(v == mPlayForwardButton) {
             mGameView.setAutoFollow(true);

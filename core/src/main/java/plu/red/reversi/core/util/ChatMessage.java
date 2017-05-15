@@ -4,9 +4,14 @@ import com.vdurmont.emoji.EmojiParser;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /**
  * Glory to the Red Team.
@@ -40,8 +45,10 @@ public class ChatMessage implements Comparable<ChatMessage> {
 
     }
 
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+
     public final String message;
-    public final ZonedDateTime timestamp;
+    public final Date timestamp;
 
     public final String channel;
 
@@ -59,7 +66,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.channel = Channel.GLOBAL;
         this.usercolor = Color.BLACK;
         this.username = "";
-        this.timestamp = ZonedDateTime.now();
+        this.timestamp = new Date();
     }
 
     /**
@@ -75,7 +82,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.username = username;
         this.usercolor = Color.BLACK;
         this.message = EmojiParser.parseToUnicode(message);
-        this.timestamp = ZonedDateTime.now();
+        this.timestamp = new Date();
     }
 
     /**
@@ -91,7 +98,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         this.username = username;
         this.usercolor = usercolor;
         this.message = EmojiParser.parseToUnicode(message);
-        this.timestamp = ZonedDateTime.now();
+        this.timestamp = new Date();
     }
 
     /**
@@ -103,12 +110,12 @@ public class ChatMessage implements Comparable<ChatMessage> {
      * @param usercolor Color to use for the displayed username
      * @param message Contents of the ChatMessage
      */
-    public ChatMessage(String channel, ZonedDateTime timestamp, String username, Color usercolor, String message) {
+    public ChatMessage(String channel, Date timestamp, String username, Color usercolor, String message) {
         this.channel = channel;
         this.username = username;
         this.usercolor = usercolor;
         this.message = EmojiParser.parseToUnicode(message);
-        this.timestamp = timestamp;
+        this.timestamp = new Date();
     }
 
     /**
@@ -117,12 +124,12 @@ public class ChatMessage implements Comparable<ChatMessage> {
      * @return String version of <code>timestamp</code>
      */
     public String getTimeString() {
-        return timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        return dateFormat.format(timestamp);
     }
 
     @Override
     public String toString() {
-        return "[" + timestamp.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] " + username + ": " + message;
+        return "[" + dateFormat.format(timestamp) + "] " + username + ": " + message;
     }
 
     /**
@@ -163,17 +170,9 @@ public class ChatMessage implements Comparable<ChatMessage> {
         json.put("usercolor", usercolor.composite);
         json.put("message", message);
 
-        // Serialize timestamp
-        JSONObject time = new JSONObject();
-        time.put("year", timestamp.getYear());
-        time.put("month", timestamp.getMonthValue());
-        time.put("day", timestamp.getDayOfMonth());
-        time.put("hour", timestamp.getHour());
-        time.put("minute", timestamp.getMinute());
-        time.put("second", timestamp.getSecond());
-        time.put("nano", timestamp.getNano());
-        time.put("zone", timestamp.getZone().getId());
-        json.put("timestamp", time);
+        Calendar cal = new GregorianCalendar();
+
+        json.put("timestamp", timestamp.getTime());
 
         return json;
     }
@@ -192,19 +191,7 @@ public class ChatMessage implements Comparable<ChatMessage> {
         String username = json.getString("username");
         Color usercolor = new Color(json.getInt("usercolor"));
         String message = json.getString("message");
-
-        // De-Serialize timestamp
-        JSONObject tObj = json.getJSONObject("timestamp");
-        ZonedDateTime timestamp = ZonedDateTime.of(
-                tObj.getInt("year"),
-                tObj.getInt("month"),
-                tObj.getInt("day"),
-                tObj.getInt("hour"),
-                tObj.getInt("minute"),
-                tObj.getInt("second"),
-                tObj.getInt("nano"),
-                ZoneId.of(tObj.getString("zone"))
-        );
+        Date timestamp = new Date(json.getInt("timestamp"));
 
         return new ChatMessage(channel, timestamp, username, usercolor, message);
     }

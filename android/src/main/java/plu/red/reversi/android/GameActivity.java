@@ -22,11 +22,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
 public class GameActivity extends AppCompatActivity
@@ -168,6 +170,9 @@ public class GameActivity extends AppCompatActivity
         if(currentFragment == mPlayFragment) {
             getMenuInflater().inflate(R.menu.fragment_play_menu, menu);
         }
+        else if(currentFragment == mMultiplayerFragment) {
+            getMenuInflater().inflate(R.menu.fragment_multiplayer_menu, menu);
+        }
 
         return true;
     }
@@ -190,12 +195,33 @@ public class GameActivity extends AppCompatActivity
                         HighlightMode.HIGHLIGHT_BEST_MOVE);
 
                 return true;
-            case R.id.menu_show_history:
+            case R.id.menu_show_sub:
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
                 drawer.openDrawer(GravityCompat.END);
 
                 return true;
+
+            case R.id.menu_create_net_game:
+
+                final EditText et = new EditText(this);
+
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_new_net_title)
+                        .setMessage(R.string.dialog_new_net_message)
+                        .setView(et)
+                        .setPositiveButton(R.string.dialog_create_game, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                new CreateGameTask(
+                                        GameActivity.this,
+                                        GameActivity.this,
+                                        et.getText().toString()).execute();
+                            }
+                        })
+                        .setNeutralButton(android.R.string.cancel, null)
+                        .show();
+
             default:
                 return super.onOptionsItemSelected(item);
         }

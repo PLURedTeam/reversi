@@ -279,7 +279,8 @@ public class Game extends Coordinator {
         }
 
         // Create Game Chat
-        if(networked) master.getChat().create(ChatMessage.Channel.game(name));
+        if(networked && master != null && master.getChat() != null)
+            master.getChat().create(ChatMessage.Channel.game(name));
 
         gameInitialized = true;
 

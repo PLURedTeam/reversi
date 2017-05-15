@@ -16,7 +16,6 @@ import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.BotPlayer;
 import plu.red.reversi.core.game.player.HumanPlayer;
-import plu.red.reversi.core.game.player.NullPlayer;
 import plu.red.reversi.core.util.Color;
 
 /**
@@ -103,48 +102,48 @@ public class SingleplayerFragment extends Fragment implements View.OnClickListen
         switch(v.getId()) {
             case R.id.button_sp_human_vs_human:
 
-                new NullPlayer(game, p2c).setName("Player 1");
-                new NullPlayer(game, p1c).setName("Player 2");
+                new HumanPlayer(game, p2c).setName("Player 1");
+                new HumanPlayer(game, p1c).setName("Player 2");
 
                 break;
 
             case R.id.button_sp_first_easy_ai:
 
                 new BotPlayer(game, p2c, 2).setName("Easy Bot");
-                new NullPlayer(game, p1c).setName("Player");
+                new HumanPlayer(game, p1c).setName("Player");
 
                 break;
             case R.id.button_sp_first_medium_ai:
 
                 new BotPlayer(game, p2c, 4).setName("Medium Bot");
-                new NullPlayer(game, p1c).setName("Player");
+                new HumanPlayer(game, p1c).setName("Player");
 
                 break;
 
             case R.id.button_sp_first_hard_ai:
 
                 new BotPlayer(game, p2c, 6).setName("Hard Bot");
-                new NullPlayer(game, p1c).setName("Player");
+                new HumanPlayer(game, p1c).setName("Player");
 
                 break;
 
             case R.id.button_sp_second_easy_ai:
 
-                new NullPlayer(game, p2c).setName("Player");
+                new HumanPlayer(game, p2c).setName("Player");
                 new BotPlayer(game, p1c, 2).setName("Easy Bot");
 
                 break;
 
             case R.id.button_sp_second_medium_ai:
 
-                new NullPlayer(game, p2c).setName("Player");
+                new HumanPlayer(game, p2c).setName("Player");
                 new BotPlayer(game, p1c, 4).setName("Medium Bot");
 
                 break;
 
             case R.id.button_sp_second_hard_ai:
 
-                new NullPlayer(game, p2c).setName("Player");
+                new HumanPlayer(game, p2c).setName("Player");
                 new BotPlayer(game, p1c, 6).setName("Hard Bot");
 
                 break;
