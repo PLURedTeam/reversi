@@ -72,8 +72,10 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
             }, 0, 1000);
 
             System.out.println("Setting slide adapter: " + mSlideAdapter);
-            mListener.getSlideList().setAdapter(mSlideAdapter);
-            mListener.getSlideList().setOnItemClickListener(this);
+            if(mListener.getSlideList() != null) {
+                mListener.getSlideList().setAdapter(mSlideAdapter);
+                mListener.getSlideList().setOnItemClickListener(this);
+            }
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");

@@ -429,7 +429,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     public void onAnimationStepDone(Board3D board) {
 
         synchronized (mBoardIterator) {
-            mBoardIterator.next();
+            // should not need this condition but...
+            if(mBoardIterator.getPos() < mGame.getHistory().getNumBoardCommands() - 1)
+                mBoardIterator.next();
         }
 
         if(mListener != null)

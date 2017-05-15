@@ -20,7 +20,7 @@ public class Highlight3D extends ColorModel3D {
         super(g3d, pipeline, 0.1f);
 
         alphaBlended = true;
-        height = 0.02f;
+        height = 0.0013f;
 
         this.color = new Vector3f(1.0f, 1.0f, 0.0f);
     }
