@@ -28,7 +28,7 @@ public class SettingsLoader {
     //  Listeners
     // ***********
 
-    protected HashSet<ISettingsListener> listenerSetSettings = new HashSet<>();
+    protected final HashSet<ISettingsListener> listenerSetSettings = new HashSet<>();
 
     /**
      * Registers an ISettingsListener that will have signals sent to it when Settngs are changed.
@@ -36,7 +36,9 @@ public class SettingsLoader {
      * @param listener ISettingsListener to register
      */
     public void addSettingsListener(ISettingsListener listener) {
-        listenerSetSettings.add(listener);
+        synchronized(listenerSetSettings) {
+            listenerSetSettings.add(listener);
+        }
     }
 
     /**
@@ -46,7 +48,9 @@ public class SettingsLoader {
      * @param listener ISettingsListener to unregister
      */
     public void removeSettingsListener(ISettingsListener listener) {
-        listenerSetSettings.remove(listener);
+        synchronized(listenerSetSettings) {
+            listenerSetSettings.remove(listener);
+        }
     }
 
 
@@ -114,7 +118,9 @@ public class SettingsLoader {
 
     public void setClientSettings(DataMap settings) {
         this.clientSettings = settings;
-        for(ISettingsListener listener : listenerSetSettings) listener.onClientSettingsChanged();
+        synchronized(listenerSetSettings) {
+            for (ISettingsListener listener : listenerSetSettings) listener.onClientSettingsChanged();
+        }
     }
 
     public void loadClientSettings() {

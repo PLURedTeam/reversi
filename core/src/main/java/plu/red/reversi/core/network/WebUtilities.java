@@ -737,17 +737,18 @@ public class WebUtilities {
     }
 
 
-    public void sendScore(int score) {
+    public void sendScore(String name,int score) {
 
-        if(gameHost) {
+        if(!user.getUsername().equals(name)) return;
+
             //Create target and call server
             RequestBody body = RequestBody.create(
                     okhttp3.MediaType.parse("text/plain"),
-                    score + ""
+                    name
             );
 
             Request req = new Request.Builder()
-                    .url(baseURI + "game/" + networkGameID)
+                    .url(baseURI + "game/score/" + networkGameID + "/" + score)
                     .post(body)
                     .build();
 
@@ -756,10 +757,6 @@ public class WebUtilities {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-        }//if
-
 
     }//sendScore
 
