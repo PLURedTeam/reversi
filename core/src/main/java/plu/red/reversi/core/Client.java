@@ -99,7 +99,7 @@ public class Client extends Controller {
 
         switch((GameLogic.Type)type) {
             case REVERSI:   gameType = GamePair.GameType.REVERSI;     break;
-            case GO:        gameType = GamePair.GameType.REVERSI;          break;
+            case GO:        gameType = GamePair.GameType.GO;          break;
             default:        throw new IllegalArgumentException("Unknown GameLogic Type Selected");
         }
 
