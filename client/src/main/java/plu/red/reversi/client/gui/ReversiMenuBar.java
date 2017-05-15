@@ -2,12 +2,16 @@ package plu.red.reversi.client.gui;
 
 import plu.red.reversi.client.gui.game.BoardView;
 import plu.red.reversi.client.gui.game.GamePanel;
+import plu.red.reversi.core.Browser;
+import plu.red.reversi.core.Client;
 import plu.red.reversi.core.Coordinator;
 import plu.red.reversi.core.command.SurrenderCommand;
 import plu.red.reversi.core.game.Game;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.Player;
 import plu.red.reversi.core.listener.INetworkListener;
+import plu.red.reversi.core.lobby.Lobby;
+import plu.red.reversi.core.network.WebUtilities;
 import plu.red.reversi.core.reversi3d.HighlightMode;
 
 import javax.swing.*;
@@ -26,12 +30,25 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
     private JMenuItem saveGameItem;
     private JMenuItem quitMenuItem;
     private JMenuItem surrenderMenuItem;
+    private JMenuItem leaveGameItem;
     private JMenuItem newOnlineGameItem;
 
     private JMenuItem highlightMenuItem;
     private JMenuItem bestMoveMenuItem;
 
     private boolean highlighted = false;
+
+    public void updateEnables() {
+        Coordinator core = gui.getController().getCore();
+        newGameItem.setEnabled(core instanceof Browser || (core instanceof Lobby && !((Lobby)core).isNetworked()));
+        loadGameItem.setEnabled(core instanceof Browser || (core instanceof Lobby && !((Lobby)core).isNetworked()));
+        saveGameItem.setEnabled(core instanceof Game);
+        surrenderMenuItem.setEnabled(core instanceof Game && !((Game)core).isGameOver());
+        leaveGameItem.setEnabled(core instanceof Lobby || core instanceof Game);
+        newOnlineGameItem.setEnabled(WebUtilities.INSTANCE.loggedIn() && core instanceof Browser);
+        highlightMenuItem.setEnabled(core instanceof Game);
+        bestMoveMenuItem.setEnabled(core instanceof Game);
+    }
 
     /**
      * Constructs the menu bar
@@ -113,8 +130,6 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
         bestMoveMenuItem.addActionListener(this);
         menu.add(bestMoveMenuItem);
 
-        menu.addSeparator();
-
         surrenderMenuItem = new JMenuItem("Surrender");
         surrenderMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, InputEvent.ALT_MASK));
@@ -122,6 +137,14 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
                 "Surrender the current game.");
         surrenderMenuItem.addActionListener(this);
         menu.add(surrenderMenuItem);
+
+        leaveGameItem = new JMenuItem("Leave Game");
+        leaveGameItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_L, InputEvent.ALT_MASK));
+        leaveGameItem.getAccessibleContext().setAccessibleDescription(
+                "Leave the current game.");
+        leaveGameItem.addActionListener(this);
+        menu.add(leaveGameItem);
 
         menu.addSeparator();
 
@@ -175,6 +198,11 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
             }
         }
 
+        if(e.getSource() == leaveGameItem) {
+            if(core instanceof Game || core instanceof Lobby)
+                gui.leaveGame();
+        }
+
         if(e.getSource() == quitMenuItem) {
             gui.dispatchEvent(new WindowEvent(gui, WindowEvent.WINDOW_CLOSING));
         }
@@ -204,7 +232,7 @@ public class ReversiMenuBar extends JMenuBar implements ActionListener, INetwork
     @Override
     public void onLogout(boolean loggedIn) {
         SwingUtilities.invokeLater(() -> {
-            newOnlineGameItem.setEnabled(loggedIn);
+            newOnlineGameItem.setEnabled(loggedIn && gui.getController().getCore() instanceof Browser);
         });
     }
 }

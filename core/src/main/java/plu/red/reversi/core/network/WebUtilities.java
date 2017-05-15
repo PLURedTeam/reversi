@@ -397,6 +397,10 @@ public class WebUtilities {
                 users.add(new User((JSONObject)arr.get(i)));
             }
 
+
+            if(users.isEmpty())
+                gui.showInformationDialog("Online Users", "There are currently 0 users online.");
+
             return users;
         } catch (Exception e) {
             e.printStackTrace();
