@@ -8,6 +8,7 @@ import plu.red.reversi.core.util.GamePair;
 import plu.red.reversi.core.util.User;
 import plu.red.reversi.server.Managers.GameManager;
 import plu.red.reversi.server.Managers.UserManager;
+import plu.red.reversi.server.db.DBUtilities;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -182,10 +183,10 @@ public class GameEndpoint {
      * the users statistics in the database.
      * @param score The score of the player for the game
      */
-    @Path("score/{score}")
+    @Path("score/{gameID}/{score}")
     @POST
-    public void gameScore(@PathParam("score") int score) {
-
+    public void gameScore(@PathParam("score") int score, String name) {
+        DBUtilities.INSTANCE.updateScore(name, score);
     }//gameScore
 
 

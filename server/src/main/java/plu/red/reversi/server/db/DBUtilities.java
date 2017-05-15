@@ -160,6 +160,38 @@ public class DBUtilities {
             return false;
     }//authenticateUser
 
+
+    public void updateScore(String name, int score) {
+        initDB();
+
+        int result = 0;
+        String query = "Select games from USER where username=?";
+        String query1 = "Update USER set games=?, score=? where username='?'";
+
+        try {
+            //Check if credentials are correct
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.clearParameters();
+            pstmt.setString(1,name);
+            ResultSet rs = pstmt.executeQuery();
+
+            int games = 0;
+
+            while(rs.next())
+                games = rs.getInt(1);
+
+            pstmt.clearParameters();
+            pstmt.setInt(1,games++);
+            pstmt.setInt(2,score);
+            pstmt.setString(3,name);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }//catch
+    }//updateScore
+
+
     /**
      * Calls the DBConnection class to close the database
      * This will only be used when the program closes
