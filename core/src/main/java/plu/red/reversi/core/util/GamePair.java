@@ -1,5 +1,6 @@
 package plu.red.reversi.core.util;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import java.util.ArrayList;
@@ -57,6 +58,13 @@ public class GamePair {
             else
                 gameType = GameType.GO;
             status = GameStatus.LOBBY;
+
+            players = new ArrayList<>();
+            JSONArray arr = obj.getJSONArray("players");
+
+            for(int i = 0;i < arr.length();i++)
+                players.add(new User(arr.getJSONObject(i)));
+
         } catch(Exception e) {
             // this should not happen.
             e.printStackTrace();

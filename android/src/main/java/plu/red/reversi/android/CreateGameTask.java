@@ -9,7 +9,9 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.game.logic.ReversiLogic;
 import plu.red.reversi.core.game.player.HumanPlayer;
 import plu.red.reversi.core.game.player.NetworkPlayer;
 import plu.red.reversi.core.network.WebUtilities;
@@ -79,8 +81,9 @@ public class CreateGameTask extends AsyncTask<Void, Void, Game> {
                 boolean good = false;
 
                 for(GamePair game : games) {
-                    if(game.gameID == WebUtilities.INSTANCE.getNetworkGameID())
+                    if(game.gameID != WebUtilities.INSTANCE.getNetworkGameID())
                         continue;
+                    System.out.println("Found game! " + game.gameID);
                     if(game.players.size() == game.numPlayers)
                         p2name = game.players.get(1).getUsername();
 
@@ -104,6 +107,9 @@ public class CreateGameTask extends AsyncTask<Void, Void, Game> {
         }
 
         Game game = new Game(null, null, true, mGameName);
+
+        game.setLogic(new ReversiLogic(game));
+        game.setSettings(SettingsLoader.INSTANCE.createGameSettings());
 
         // create the game
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
