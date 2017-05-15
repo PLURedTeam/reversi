@@ -182,9 +182,9 @@ public class GameEndpoint {
      * the users statistics in the database.
      * @param score The score of the player for the game
      */
-    @Path("score")
+    @Path("score/{score}")
     @POST
-    public void gameScore(int score) {
+    public void gameScore(@PathParam("score") int score) {
 
     }//gameScore
 

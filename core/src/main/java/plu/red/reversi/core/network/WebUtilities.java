@@ -592,6 +592,7 @@ public class WebUtilities {
 
 
         networkGameID = -1;
+        gameHost = false;
     }//leaveNetworkGame
 
 
@@ -734,5 +735,39 @@ public class WebUtilities {
     public int getNetworkGameID() {
         return networkGameID;
     }
+
+
+    public void sendScore(int score) {
+
+        if(gameHost) {
+            //Create target and call server
+            RequestBody body = RequestBody.create(
+                    okhttp3.MediaType.parse("text/plain"),
+                    score + ""
+            );
+
+            Request req = new Request.Builder()
+                    .url(baseURI + "game/" + networkGameID)
+                    .post(body)
+                    .build();
+
+            try {
+                okh.newCall(req).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }//if
+
+
+    }//sendScore
+
+
+
+
+
+
+
 
 }//webUtilities
