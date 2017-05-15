@@ -266,13 +266,20 @@ public class Game extends Coordinator {
 
         // Ensure a History exists and setup the Board
         //History after these if conditions will be updated by GameLogic
-        if(history == null || history.getNumBoardCommands() < 1) {
+        if(history == null) {
             history = new History();
             gameLogic.initBoard();
 
             // Get first player
+            if(history.getNumBoardCommands() < 1)
+                currentPlayer = getNextPlayerID(-1, players.keySet());
+            else {
+                LinkedList<BoardCommand> cmds = history.getMoveCommandsUntil(history.getNumBoardCommands());
+                currentPlayer = getNextPlayerID(cmds.getLast().playerID);
+            }
+        } else if(history.getNumBoardCommands() < 1)
             currentPlayer = getNextPlayerID(-1, players.keySet());
-        } else {
+        else {
             LinkedList<BoardCommand> cmds = history.getMoveCommandsUntil(history.getNumBoardCommands());
             gameLogic.initBoard(cmds);
             currentPlayer = getNextPlayerID(cmds.getLast().playerID);
