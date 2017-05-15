@@ -52,7 +52,6 @@ public class GamePair {
             gameID = obj.getInt("gameID");
             numPlayers = obj.getInt("numPlayers");
             gameName = obj.getString("gameName");
-            System.out.println(obj.get("gameType").getClass());
             if(obj.getString("gameType").equals("REVERSI"))
                 gameType = GameType.REVERSI;
             else

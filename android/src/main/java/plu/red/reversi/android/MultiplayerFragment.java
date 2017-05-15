@@ -118,6 +118,7 @@ public class MultiplayerFragment extends Fragment implements ServiceConnection, 
         super.onDetach();
         mListener = null;
 
+        mTimer.cancel();
         mTimer.purge();
 
         getContext().unbindService(this);

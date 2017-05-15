@@ -253,6 +253,9 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
+        if(mCurrentMode == null)
+            return false;
+
         // Flings use math in pixels (as opposed to math based on the viewport).
         Vector2fc pos = mCurrentMode.getPos();
         // Before flinging, aborts the current animation.
@@ -621,6 +624,7 @@ public class GameSurfaceView extends GLSurfaceView implements GestureDetector.On
         queueEvent(new Runnable() {
             @Override
             public void run() {
+                System.out.println("Set current mode: " + present);
                 if(mRenderer.mCamera != null && mRenderer.mBoard != null) {
 
                     if(mFlatMode == null || mFreeMode == null) {

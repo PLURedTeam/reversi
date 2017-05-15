@@ -74,8 +74,11 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
 
         Player[] players = game.getAllPlayers();
 
-        //Piece3D piece = new Piece3D(g3d, pipeline, players[0].getColor(), players[1].getColor());
-        //Highlight3D highlight = new Highlight3D(g3d, pipeline);
+        Piece3D piece = new Piece3D(g3d, pipeline, players[0].getColor(), players[1].getColor());
+        piece.recalculate(null);
+        Highlight3D highlight = new Highlight3D(g3d, pipeline);
+        highlight.recalculate(null);
+        highlight.setHeight(0.02f);
 
         // this first piece is unused, only used to make clones for all the others.
         // it will be discarded after.
@@ -90,26 +93,21 @@ public class Board3D extends ColorModel3D implements Piece3D.Piece3DListener {
         for(int i = 0;i < Math.pow(size, 2);i++) {
             int r = i / size;
             int c = i % size;
-            Piece3D p = new Piece3D(g3d, pipeline, new Color(), new Color());
+            Piece3D p = (Piece3D)piece.clone();
 
             Vector3f pos = new Vector3f(PIECE_SIZE * c + PIECE_SIZE / 2, PIECE_SIZE * r + PIECE_SIZE / 2, Piece3D.VERTICAL_RADIUS).add(origin);
 
             p.setPos(pos);
 
-            // pregenerate this because lazy vbo uploads can be slow
-            p.recalculate(null);
             pieces[i] = p;
 
-            Highlight3D h = new Highlight3D(g3d, pipeline);
-
-            h.setHeight(0.002f);
+            Highlight3D h = (Highlight3D)highlight.clone();
 
             h.highlightOn(
                     new Vector2f(PIECE_SIZE * c + PIECE_BORDER_SIZE, PIECE_SIZE * r + PIECE_BORDER_SIZE).add(new Vector2f(origin.x(), origin.y())),
                     new Vector2f(PIECE_SIZE * (c + 1) - PIECE_BORDER_SIZE, PIECE_SIZE * (r + 1) - PIECE_BORDER_SIZE).add(new Vector2f(origin.x(), origin.y()))
             );
 
-            h.recalculate(null);
             highlights[i] = h;
         }
 

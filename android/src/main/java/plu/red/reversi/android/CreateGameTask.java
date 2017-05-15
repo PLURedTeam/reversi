@@ -135,7 +135,7 @@ public class CreateGameTask extends AsyncTask<Void, Void, Game> {
 
     @Override
     protected void onPostExecute(Game game) {
-        mDialog.hide();
+        mDialog.dismiss();
 
         if(game != null) {
             mListener.onNewGame(game);

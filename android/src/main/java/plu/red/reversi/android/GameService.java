@@ -126,6 +126,7 @@ public class GameService extends Service implements ICommandListener, IChatListe
             @Override
             public void run() {
                 if(WebUtilities.INSTANCE.loggedIn()) {
+                    WebUtilities.INSTANCE.leaveNetworkGame();
                     WebUtilities.INSTANCE.logout();
                 }
             }

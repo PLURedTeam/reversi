@@ -34,7 +34,7 @@ public abstract class ColorModel3D extends SurfaceModel3D {
 
         ColorModel3D n = (ColorModel3D)super.clone();
 
-        n.albedos = albedos;
+        //n.albedos = albedos;
 
         return n;
     }
@@ -45,6 +45,17 @@ public abstract class ColorModel3D extends SurfaceModel3D {
             return albedos;
 
         return super.getExtra(name);
+    }
+
+    @Override
+    public boolean update(int tick) {
+        boolean updated = false;
+        if(albedos.isEmpty()) {
+            recalculate("vAlbedo");
+            updated = true;
+        }
+
+        return super.update(tick) || updated;
     }
 
     abstract Vector4f[] getFaceColor(int sectionIndex, int faceIndex);

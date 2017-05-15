@@ -48,7 +48,7 @@ public abstract class SurfaceModel3D extends Model3D {
     @Override
     public boolean update(int tick) {
         boolean updated = false;
-        if(vertices.size() == 0 || normals.size() == 0) {
+        if(vertices.isEmpty() || normals.isEmpty()) {
             recalculate(null);
             updated = true;
         }
@@ -66,6 +66,8 @@ public abstract class SurfaceModel3D extends Model3D {
     public void recalculate(String vbo) {
 
         if(vbo == null) {
+
+            System.out.println("Recalculate");
 
             for(String v : getPipeline().getExtras().keySet()) {
                 recalculate(v);
