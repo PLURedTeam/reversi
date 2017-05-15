@@ -29,7 +29,6 @@ public class NetworkMenu extends JMenu implements ActionListener, INetworkListen
     private JMenuItem seeRanking;
     private JMenuItem onlineUsers;
     private JMenuItem logout;
-    private JMenuItem viewTournament;
 
     /**
      * Initialize the network menu
@@ -41,12 +40,10 @@ public class NetworkMenu extends JMenu implements ActionListener, INetworkListen
         //Create the menu
         this.gui = gui;
         this.setText("Network");
-        this.setMnemonic(KeyEvent.VK_N);
         this.getAccessibleContext().setAccessibleDescription("Network Items");
 
         //Create ranking menu item
         login = new JMenuItem("Login to server");
-        login.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.SHIFT_MASK));
         login.addActionListener(this);
         this.add(login);
 
@@ -58,33 +55,24 @@ public class NetworkMenu extends JMenu implements ActionListener, INetworkListen
 
         //Create the Create an account menu item
         createUser = new JMenuItem("Create an online account");
-        createUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_MASK));
         createUser.addActionListener(this);
         this.add(createUser);
 
         //Create the delete account menu item
         deleteUser = new JMenuItem("Delete my online account");
-        deleteUser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_MASK));
         deleteUser.addActionListener(this);
         this.add(deleteUser);
 
         //Create the seeRanking menu item
         seeRanking = new JMenuItem("See my ranking");
-        seeRanking.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.SHIFT_MASK));
         seeRanking.addActionListener(this);
         seeRanking.setEnabled(false);
         this.add(seeRanking);
 
         //Create the onlineUsers menu item
         onlineUsers = new JMenuItem("See online Users");
-        onlineUsers.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.SHIFT_MASK));
         onlineUsers.addActionListener(this);
         this.add(onlineUsers);
-
-        //Create the onlineUsers menu item
-        viewTournament = new JMenuItem("View Tournament");
-        viewTournament.addActionListener(this);
-        this.add(viewTournament);
 
         Coordinator.addListenerStatic(this);
 
@@ -109,8 +97,6 @@ public class NetworkMenu extends JMenu implements ActionListener, INetworkListen
             getOnlineUsers();
         } else if (e.getSource() == logout) {
             logout();
-        } else if(e.getSource() == viewTournament) {
-            viewTournament();
         }//if
     }//actionPerformed
 
@@ -224,12 +210,7 @@ public class NetworkMenu extends JMenu implements ActionListener, INetworkListen
             JTable table = new JTable(rows, cols);
             table.setEnabled(false);
             JOptionPane.showMessageDialog(gui, new JScrollPane(table), "Online Users", 1);
-        } else {
-            JOptionPane.showMessageDialog(gui,
-                    "There are currently 0 users online",
-                    "", 1);
-
-        }//else
+        }//if
     }//getOnlineUsers
 
     /**

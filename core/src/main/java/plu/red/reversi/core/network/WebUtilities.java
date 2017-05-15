@@ -46,8 +46,8 @@ public class WebUtilities {
     public static WebUtilities INSTANCE = new WebUtilities(); //Create Singleton
 
     private OkHttpClient okh;
-    private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
-    //private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
+    //private String baseURI = "http://mal.cs.plu.edu:8080/red/reversi/";
+    private String baseURI = "http://localhost:8080/reversi/"; //Local Server URI
 
     private int sessionID;
     private User user = new User();
@@ -396,6 +396,10 @@ public class WebUtilities {
             for(int i = 0;i < arr.length();i++) {
                 users.add(new User((JSONObject)arr.get(i)));
             }
+
+
+            if(users.isEmpty())
+                gui.showInformationDialog("Online Users", "There are currently 0 users online.");
 
             return users;
         } catch (Exception e) {
