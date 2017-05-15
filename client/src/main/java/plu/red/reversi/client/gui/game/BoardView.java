@@ -10,6 +10,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import plu.red.reversi.client.gui.SwingGraphics3D;
+import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.command.BoardCommand;
 import plu.red.reversi.core.command.Command;
 import plu.red.reversi.core.command.MoveCommand;
@@ -348,7 +349,10 @@ public class BoardView extends GLJPanel implements MouseListener, IBoardUpdateLi
 
             freeCameraMode.setAutoRotate(true);
 
-            currentMode = freeCameraMode;
+            if(SettingsLoader.INSTANCE.getClientSettings().get(SettingsLoader.GLOBAL_USE_3D_VIEW, true))
+                currentMode = freeCameraMode;
+            else
+                currentMode = flatCameraMode;
             currentMode.start();
 
             // TODO: This is a little funky... but its the best way to deal with making sure the correct move is displayed

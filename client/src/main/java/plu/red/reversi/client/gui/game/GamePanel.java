@@ -7,6 +7,8 @@ import plu.red.reversi.client.gui.util.PreserveAspectRatioLayout;
 import plu.red.reversi.core.Client;
 import plu.red.reversi.core.SettingsLoader;
 import plu.red.reversi.core.game.Game;
+import plu.red.reversi.core.listener.ISettingsListener;
+import plu.red.reversi.core.util.DataMap;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +21,7 @@ import java.awt.event.ActionListener;
  * GamePanel that controls the GUI side of a Game. Acts as a sub-controller for the MainWindow, and controls all
  * in-game related GUI components.
  */
-public class GamePanel extends CorePanel implements BoardView.BoardViewStateListener, GameHistoryPanel.HistoryPanelListener {
+public class GamePanel extends CorePanel implements BoardView.BoardViewStateListener, GameHistoryPanel.HistoryPanelListener, ISettingsListener {
 
     protected final Game game;
     public Game getGame() { return game; }
@@ -95,7 +97,12 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
         switchModeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                boardView.setPresentationMode(!boardView.isPresentationMode());
+                DataMap settings = SettingsLoader.INSTANCE.getClientSettings();
+                boolean mode = boardView.isPresentationMode();
+                settings.set(SettingsLoader.GLOBAL_USE_3D_VIEW, !mode);
+                boardView.setPresentationMode(!mode);
+                SettingsLoader.INSTANCE.setClientSettings(settings);
+                SettingsLoader.INSTANCE.saveClientSettings();
             }
         });
 
@@ -107,6 +114,8 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
 
         boardView.setBoardViewListener(this);
         historyPanel.setListener(this);
+
+        SettingsLoader.INSTANCE.addSettingsListener(this);
 
         this.revalidate();
     }
@@ -130,6 +139,7 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
     public void cleanup() {
         // Unregister PlayerInfoPanel ISettingsListener to avoid reference leaks
         SettingsLoader.INSTANCE.removeSettingsListener(playerInfoPanel);
+        SettingsLoader.INSTANCE.removeSettingsListener(this);
         game.cleanup();
     }
 
@@ -143,5 +153,10 @@ public class GamePanel extends CorePanel implements BoardView.BoardViewStateList
     @Override
     public void onHistoryPanelSelected() {
         boardView.setMoveIndex(historyPanel.getSelectedIndex());
+    }
+
+    @Override
+    public void onClientSettingsChanged() {
+        boardView.setPresentationMode(SettingsLoader.INSTANCE.getClientSettings().get(SettingsLoader.GLOBAL_USE_3D_VIEW, Boolean.class));
     }
 }
